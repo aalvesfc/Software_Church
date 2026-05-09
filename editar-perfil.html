@@ -1,0 +1,1467 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hug App — Editar Perfil</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary:         #008f8c;
+      --primary-light:   #00d17a;
+      --primary-focus:   #008f8c;
+      --primary-dark:    #005451;
+      --accent-yellow:   #f5a623;
+      --accent-green:    #00d17a;
+      --muted-teal:      #99bfc2;
+      --ink:             #1d1d1f;
+      --ink-muted:       #6e6e73;
+      --ink-subtle:      #aeaeb2;
+      --canvas:          #ffffff;
+      --canvas-page:     #f0f7f7;
+      --canvas-input:    #f2f2f7;
+      --hairline:        #e0e0e0;
+      --on-dark:         #ffffff;
+      --on-dark-muted:   rgba(255,255,255,0.65);
+      --sidebar-w:       220px;
+      --topbar-h:        64px;
+      --radius-sm:       8px;
+      --radius-md:       12px;
+      --radius-lg:       18px;
+      --radius-pill:     9999px;
+    }
+
+    body {
+      min-height: 100vh;
+      background: var(--canvas-page);
+      font-family: "SF Pro Text", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      -webkit-font-smoothing: antialiased;
+      display: flex;
+    }
+
+    /* ─────────────────── SIDEBAR ─────────────────── */
+    .sidebar {
+      width: var(--sidebar-w);
+      min-height: 100vh;
+      background: linear-gradient(180deg, #005451 0%, #005451 55%, #008f8c 100%);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      z-index: 100;
+      overflow: hidden;
+      transition: width 0.22s cubic-bezier(.4,0,.2,1);
+    }
+
+    .sidebar-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 24px 20px 28px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      transition: padding 0.22s, gap 0.22s;
+    }
+
+    .logo-mark {
+      width: 42px; height: 42px;
+      background: linear-gradient(135deg, #00d17a, #008f8c);
+      border-radius: 11px;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: rgba(0,0,0,0.22) 0 3px 12px;
+      flex-shrink: 0;
+    }
+    .logo-mark svg { width: 22px; height: 22px; color: #fff; }
+
+    .logo-text {
+      font-family: "SF Pro Display", system-ui, -apple-system, sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--on-dark);
+      letter-spacing: 0.6px;
+      line-height: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      opacity: 1;
+      transition: opacity 0.15s, width 0.22s;
+    }
+    .logo-text span { color: var(--primary-light); }
+
+    .sidebar-nav {
+      flex: 1;
+      padding: 14px 0;
+      overflow-y: auto;
+      scrollbar-width: none;
+    }
+    .sidebar-nav::-webkit-scrollbar { display: none; }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 11px 20px;
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--on-dark-muted);
+      text-decoration: none;
+      letter-spacing: -0.224px;
+      border-radius: 0;
+      transition: background 0.12s ease, color 0.12s ease, padding 0.22s;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .nav-item:hover { color: var(--on-dark); background: rgba(255,255,255,0.07); }
+    .nav-item.active {
+      color: var(--on-dark);
+      background: rgba(255,255,255,0.13);
+      font-weight: 600;
+    }
+    .nav-item svg { width: 18px; height: 18px; flex-shrink: 0; opacity: 0.85; }
+    .nav-item.active svg { opacity: 1; }
+    .nav-item span { overflow: hidden; opacity: 1; transition: opacity 0.15s; }
+
+    /* ── Estado colapsado ── */
+    body.sidebar-collapsed .sidebar { width: 64px; }
+    body.sidebar-collapsed .sidebar-logo { padding: 24px 11px 28px; gap: 0; justify-content: center; }
+    body.sidebar-collapsed .logo-text { opacity: 0; width: 0; }
+    body.sidebar-collapsed .nav-item { padding: 11px 0; justify-content: center; gap: 0; }
+    body.sidebar-collapsed .nav-item span { opacity: 0; width: 0; }
+    body.sidebar-collapsed .main { margin-left: 64px; }
+    body.sidebar-collapsed #collapseBtn svg { transform: rotate(180deg); }
+
+    /* ─────────────────── MAIN AREA ─────────────────── */
+    .main {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      transition: margin-left 0.22s cubic-bezier(.4,0,.2,1);
+    }
+
+    /* ─────────────────── TOPBAR ─────────────────── */
+    .topbar {
+      height: var(--topbar-h);
+      background: var(--canvas);
+      border-bottom: 1px solid var(--hairline);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0 24px;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .search-wrap {
+      flex: 1;
+      max-width: 420px;
+      position: relative;
+    }
+    .search-wrap svg {
+      position: absolute;
+      left: 12px; top: 50%;
+      transform: translateY(-50%);
+      width: 15px; height: 15px;
+      color: var(--ink-subtle);
+    }
+    .search-wrap input {
+      width: 100%;
+      height: 40px;
+      background: var(--canvas-input);
+      border: 1px solid transparent;
+      border-radius: var(--radius-pill);
+      padding: 0 16px 0 40px;
+      font-size: 14px;
+      font-family: inherit;
+      color: var(--ink);
+      outline: none;
+      letter-spacing: -0.224px;
+      transition: border-color 0.15s;
+    }
+    .search-wrap input::placeholder { color: var(--ink-subtle); }
+    .search-wrap input:focus { border-color: var(--primary-focus); background: var(--canvas); }
+
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-left: auto;
+    }
+
+    .icon-btn {
+      width: 40px; height: 40px;
+      border-radius: var(--radius-pill);
+      border: none;
+      background: none;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--ink-muted);
+      transition: background 0.12s, color 0.12s;
+    }
+    .icon-btn:hover { background: var(--canvas-input); color: var(--ink); }
+    .icon-btn svg { width: 20px; height: 20px; }
+
+    .avatar-sm {
+      width: 40px; height: 40px;
+      border-radius: var(--radius-pill);
+      background: #e8612a;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+      font-weight: 600;
+      color: #fff;
+      cursor: pointer;
+      margin-left: 4px;
+      letter-spacing: -0.12px;
+    }
+
+    /* ─────────────────── AVATAR DROPDOWN ─────────────────── */
+    .avatar-menu-wrap {
+      position: relative;
+    }
+
+    .avatar-dropdown {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      width: 220px;
+      background: var(--canvas);
+      border: 1px solid var(--hairline);
+      border-radius: var(--radius-md);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.10), 0 2px 6px rgba(0,0,0,0.06);
+      padding: 6px;
+      z-index: 200;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(-6px);
+      transition: opacity 0.15s, transform 0.15s;
+    }
+    .avatar-dropdown.open {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0);
+    }
+
+    .dropdown-header {
+      padding: 10px 12px 12px;
+      border-bottom: 1px solid var(--hairline);
+      margin-bottom: 6px;
+    }
+    .dropdown-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--ink);
+      letter-spacing: -0.224px;
+    }
+    .dropdown-email {
+      font-size: 12px;
+      color: var(--ink-subtle);
+      letter-spacing: -0.12px;
+      margin-top: 2px;
+    }
+
+    .dropdown-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 12px;
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--ink);
+      letter-spacing: -0.224px;
+      border-radius: var(--radius-sm);
+      text-decoration: none;
+      cursor: pointer;
+      transition: background 0.12s;
+    }
+    .dropdown-item:hover { background: var(--canvas-page); }
+    .dropdown-item svg { width: 16px; height: 16px; color: var(--ink-muted); flex-shrink: 0; }
+    .dropdown-item.danger { color: #ff3b30; }
+    .dropdown-item.danger svg { color: #ff3b30; }
+    .dropdown-item.danger:hover { background: rgba(255,59,48,0.06); }
+
+    .dropdown-divider {
+      height: 1px;
+      background: var(--hairline);
+      margin: 6px 0;
+    }
+
+    /* ─────────────────── CONTENT ─────────────────── */
+    .content {
+      flex: 1;
+      padding: 32px;
+      max-width: 860px;
+      width: 100%;
+    }
+
+    /* ─────────────────── BREADCRUMB ─────────────────── */
+    .breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      color: var(--ink-subtle);
+      letter-spacing: -0.12px;
+      margin-bottom: 24px;
+    }
+    .breadcrumb a {
+      color: var(--primary);
+      text-decoration: none;
+      transition: opacity 0.15s;
+    }
+    .breadcrumb a:hover { opacity: 0.72; }
+    .breadcrumb svg { width: 12px; height: 12px; }
+
+    /* ─────────────────── PAGE HEADER ─────────────────── */
+    .page-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 28px;
+    }
+    .page-title {
+      font-family: "SF Pro Display", system-ui, -apple-system, sans-serif;
+      font-size: 28px;
+      font-weight: 600;
+      color: var(--ink);
+      letter-spacing: -0.374px;
+    }
+    .page-subtitle {
+      font-size: 14px;
+      color: var(--ink-muted);
+      letter-spacing: -0.224px;
+      margin-top: 4px;
+    }
+    .header-actions {
+      display: flex;
+      gap: 10px;
+    }
+    .btn-secondary {
+      height: 40px;
+      padding: 0 20px;
+      border: 1.5px solid var(--hairline);
+      border-radius: var(--radius-pill);
+      background: var(--canvas);
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--ink-muted);
+      letter-spacing: -0.224px;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .btn-secondary:hover { border-color: var(--ink-muted); color: var(--ink); }
+    .btn-primary {
+      height: 40px;
+      padding: 0 22px;
+      border: none;
+      border-radius: var(--radius-pill);
+      background: linear-gradient(135deg, #008f8c, #00d17a);
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      color: #fff;
+      letter-spacing: -0.224px;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+    .btn-primary:hover { opacity: 0.88; }
+
+    /* ─────────────────── TOAST ─────────────────── */
+    .toast {
+      position: fixed;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%) translateY(16px);
+      background: var(--ink);
+      color: #fff;
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: -0.224px;
+      padding: 12px 20px;
+      border-radius: var(--radius-pill);
+      box-shadow: 0 6px 24px rgba(0,0,0,0.18);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s, transform 0.2s;
+      z-index: 999;
+      white-space: nowrap;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+    .toast.success { background: var(--primary-dark); }
+    .toast.error   { background: #c0392b; }
+    .toast svg { width: 16px; height: 16px; flex-shrink: 0; }
+
+    /* ─────────────────── PROFILE CARD ─────────────────── */
+    .profile-card {
+      background: var(--canvas);
+      border: 1px solid var(--hairline);
+      border-radius: var(--radius-lg);
+      padding: 28px 32px;
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      margin-bottom: 20px;
+    }
+
+    .avatar-wrap {
+      position: relative;
+      flex-shrink: 0;
+    }
+    .avatar-lg {
+      width: 88px; height: 88px;
+      border-radius: var(--radius-pill);
+      background: #e8612a;
+      display: flex; align-items: center; justify-content: center;
+      font-family: "SF Pro Display", system-ui, -apple-system, sans-serif;
+      font-size: 34px;
+      font-weight: 600;
+      color: #fff;
+      letter-spacing: -0.374px;
+    }
+    .avatar-edit-btn {
+      position: absolute;
+      bottom: 0; right: 0;
+      width: 28px; height: 28px;
+      border-radius: var(--radius-pill);
+      background: var(--primary);
+      border: 2px solid var(--canvas);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .avatar-edit-btn:hover { background: var(--primary-dark); }
+    .avatar-edit-btn svg { width: 13px; height: 13px; color: #fff; }
+
+    .profile-info { flex: 1; }
+    .profile-name {
+      font-family: "SF Pro Display", system-ui, -apple-system, sans-serif;
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--ink);
+      letter-spacing: -0.374px;
+    }
+    .profile-role {
+      font-size: 14px;
+      color: var(--ink-muted);
+      letter-spacing: -0.224px;
+      margin-top: 4px;
+    }
+    .profile-badges {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    .badge-ministry {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--primary);
+      background: rgba(0,143,140,0.10);
+      border-radius: var(--radius-pill);
+      padding: 4px 10px;
+      letter-spacing: -0.12px;
+    }
+    .badge-role {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--ink-muted);
+      background: var(--canvas-input);
+      border-radius: var(--radius-pill);
+      padding: 4px 10px;
+      letter-spacing: -0.12px;
+    }
+
+    .profile-stats {
+      display: flex;
+      gap: 32px;
+      flex-shrink: 0;
+    }
+    .profile-stat {
+      text-align: center;
+    }
+    .profile-stat-value {
+      font-family: "SF Pro Display", system-ui, -apple-system, sans-serif;
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--ink);
+      letter-spacing: -0.374px;
+    }
+    .profile-stat-label {
+      font-size: 12px;
+      color: var(--ink-muted);
+      letter-spacing: -0.12px;
+      margin-top: 3px;
+    }
+
+    /* ─────────────────── FORM SECTIONS ─────────────────── */
+    .form-section {
+      background: var(--canvas);
+      border: 1px solid var(--hairline);
+      border-radius: var(--radius-lg);
+      padding: 28px 32px;
+      margin-bottom: 20px;
+    }
+
+    .form-section-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 24px;
+      padding-bottom: 18px;
+      border-bottom: 1px solid var(--hairline);
+    }
+    .form-section-icon {
+      width: 36px; height: 36px;
+      border-radius: var(--radius-sm);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .form-section-icon.teal { background: rgba(0,143,140,0.10); color: var(--primary); }
+    .form-section-icon.dark { background: #1d1d1f; color: #fff; }
+    .form-section-icon.yellow { background: rgba(245,166,35,0.10); color: var(--accent-yellow); }
+    .form-section-icon.green { background: rgba(0,209,122,0.10); color: var(--accent-green); }
+    .form-section-icon svg { width: 18px; height: 18px; }
+
+    .form-section-title {
+      font-family: "SF Pro Display", system-ui, -apple-system, sans-serif;
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--ink);
+      letter-spacing: -0.224px;
+    }
+    .form-section-desc {
+      font-size: 13px;
+      color: var(--ink-muted);
+      letter-spacing: -0.12px;
+      margin-top: 1px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    .form-grid.single { grid-template-columns: 1fr; }
+    .form-grid.triple { grid-template-columns: 1fr 1fr 1fr; }
+    .col-span-2 { grid-column: span 2; }
+
+    .form-field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .form-label {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--ink);
+      letter-spacing: -0.12px;
+    }
+    .form-label span {
+      color: var(--ink-subtle);
+      font-weight: 400;
+    }
+    .form-input {
+      height: 44px;
+      background: var(--canvas-input);
+      border: 1px solid transparent;
+      border-radius: var(--radius-sm);
+      padding: 0 14px;
+      font-size: 14px;
+      font-family: inherit;
+      color: var(--ink);
+      outline: none;
+      letter-spacing: -0.224px;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .form-input::placeholder { color: var(--ink-subtle); }
+    .form-input:focus { border-color: var(--primary-focus); background: var(--canvas); }
+    .form-input:disabled {
+      color: var(--ink-subtle);
+      cursor: not-allowed;
+    }
+
+    .form-select {
+      height: 44px;
+      background: var(--canvas-input);
+      border: 1px solid transparent;
+      border-radius: var(--radius-sm);
+      padding: 0 14px;
+      font-size: 14px;
+      font-family: inherit;
+      color: var(--ink);
+      outline: none;
+      letter-spacing: -0.224px;
+      transition: border-color 0.15s, background 0.15s;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23aeaeb2' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      background-size: 16px;
+      padding-right: 36px;
+      cursor: pointer;
+    }
+    .form-select:focus { border-color: var(--primary-focus); background-color: var(--canvas); }
+
+    .form-hint {
+      font-size: 12px;
+      color: var(--ink-subtle);
+      letter-spacing: -0.12px;
+    }
+
+    .input-with-icon {
+      position: relative;
+    }
+    .input-with-icon svg {
+      position: absolute;
+      left: 12px; top: 50%;
+      transform: translateY(-50%);
+      width: 16px; height: 16px;
+      color: var(--ink-subtle);
+      pointer-events: none;
+    }
+    .input-with-icon .form-input { padding-left: 40px; }
+
+    .input-with-action {
+      position: relative;
+    }
+    .input-action-btn {
+      position: absolute;
+      right: 10px; top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--ink-subtle);
+      padding: 4px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      transition: color 0.12s;
+    }
+    .input-action-btn:hover { color: var(--ink); }
+    .input-action-btn svg { width: 16px; height: 16px; }
+
+    /* ─────────────────── PASSWORD STRENGTH ─────────────────── */
+    .password-strength {
+      display: flex;
+      gap: 4px;
+      margin-top: 6px;
+    }
+    .strength-bar {
+      flex: 1;
+      height: 3px;
+      border-radius: 2px;
+      background: var(--hairline);
+    }
+    .strength-bar.filled.weak { background: #ff3b30; }
+    .strength-bar.filled.medium { background: var(--accent-yellow); }
+    .strength-bar.filled.strong { background: var(--accent-green); }
+    .strength-label {
+      font-size: 11px;
+      color: var(--ink-subtle);
+      letter-spacing: -0.12px;
+      margin-top: 4px;
+    }
+
+    /* ─────────────────── TOGGLE / SWITCH ─────────────────── */
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--hairline);
+    }
+    .toggle-row:last-child { border-bottom: none; padding-bottom: 0; }
+    .toggle-row:first-child { padding-top: 0; }
+    .toggle-info {}
+    .toggle-label {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--ink);
+      letter-spacing: -0.224px;
+    }
+    .toggle-desc {
+      font-size: 12px;
+      color: var(--ink-muted);
+      letter-spacing: -0.12px;
+      margin-top: 2px;
+    }
+
+    .switch {
+      position: relative;
+      width: 44px; height: 26px;
+      flex-shrink: 0;
+    }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .switch-track {
+      position: absolute;
+      inset: 0;
+      border-radius: var(--radius-pill);
+      background: var(--hairline);
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .switch input:checked + .switch-track { background: var(--primary); }
+    .switch-track::after {
+      content: "";
+      position: absolute;
+      width: 20px; height: 20px;
+      border-radius: var(--radius-pill);
+      background: #fff;
+      top: 3px; left: 3px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.18);
+      transition: transform 0.2s;
+    }
+    .switch input:checked + .switch-track::after { transform: translateX(18px); }
+
+    /* ─────────────────── DANGER ZONE ─────────────────── */
+    .danger-zone {
+      background: var(--canvas);
+      border: 1px solid rgba(255,59,48,0.25);
+      border-radius: var(--radius-lg);
+      padding: 28px 32px;
+      margin-bottom: 20px;
+    }
+    .danger-section-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+      padding-bottom: 18px;
+      border-bottom: 1px solid rgba(255,59,48,0.12);
+    }
+    .danger-icon {
+      width: 36px; height: 36px;
+      border-radius: var(--radius-sm);
+      background: rgba(255,59,48,0.10);
+      color: #ff3b30;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .danger-icon svg { width: 18px; height: 18px; }
+    .danger-title {
+      font-family: "SF Pro Display", system-ui, -apple-system, sans-serif;
+      font-size: 16px;
+      font-weight: 600;
+      color: #ff3b30;
+      letter-spacing: -0.224px;
+    }
+    .danger-desc {
+      font-size: 13px;
+      color: var(--ink-muted);
+      letter-spacing: -0.12px;
+      margin-top: 1px;
+    }
+    .danger-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+    }
+    .danger-row-info .danger-row-label {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--ink);
+      letter-spacing: -0.224px;
+    }
+    .danger-row-info .danger-row-sub {
+      font-size: 12px;
+      color: var(--ink-muted);
+      margin-top: 2px;
+    }
+    .btn-danger {
+      height: 38px;
+      padding: 0 18px;
+      border: 1.5px solid rgba(255,59,48,0.4);
+      border-radius: var(--radius-pill);
+      background: none;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 500;
+      color: #ff3b30;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.15s, border-color 0.15s;
+      flex-shrink: 0;
+    }
+    .btn-danger:hover { background: rgba(255,59,48,0.06); border-color: #ff3b30; }
+
+    /* ─────────────────── BOTTOM ACTIONS ─────────────────── */
+    .bottom-actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+      padding: 24px 0 8px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── Sidebar ── -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+        </svg>
+      </div>
+      <div class="logo-text">ZION<span>APP</span></div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a class="nav-item" href="/dashboard">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        <span>Dashboard</span>
+      </a>
+      <a class="nav-item" href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        <span>Ministérios</span>
+      </a>
+      <a class="nav-item" href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <span>Departamentos</span>
+      </a>
+      <a class="nav-item" href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        <span>Templates</span>
+      </a>
+      <a class="nav-item" href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <span>Eventos</span>
+      </a>
+      <a class="nav-item" href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        <span>Escalação</span>
+      </a>
+      <a class="nav-item" href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+        <span>Músicas</span>
+      </a>
+      <a class="nav-item" href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span>Voluntários</span>
+      </a>
+      <a class="nav-item" href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <span>Líderes</span>
+      </a>
+      <a class="nav-item" href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <span>Triagem</span>
+      </a>
+      <a class="nav-item" href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        <span>Presença</span>
+      </a>
+      <a class="nav-item" href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        <span>Gamificação</span>
+      </a>
+      <a class="nav-item" href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        <span>Relatórios</span>
+      </a>
+      <a class="nav-item active" href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+        <span>Configurações</span>
+      </a>
+    </nav>
+  </aside>
+
+  <!-- ── Main ── -->
+  <div class="main">
+
+    <!-- Topbar -->
+    <header class="topbar">
+      <div class="search-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" placeholder="Buscar eventos, voluntários..." />
+      </div>
+
+      <div class="topbar-actions">
+        <button class="icon-btn" title="Notificações">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        </button>
+        <button class="icon-btn" title="Configurações">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+        </button>
+        <button class="icon-btn" id="collapseBtn" title="Recolher menu">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="transition:transform 0.22s"><polyline points="11 17 6 12 11 7"/><polyline points="18 17 13 12 18 7"/></svg>
+        </button>
+        <div class="avatar-menu-wrap">
+          <div class="avatar-sm" id="avatarSm">A</div>
+          <div class="avatar-dropdown" id="avatarDropdown">
+            <div class="dropdown-header">
+              <div class="dropdown-name" id="dropdownName">—</div>
+              <div class="dropdown-email" id="dropdownEmail">—</div>
+            </div>
+            <a class="dropdown-item" href="/editar-perfil">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              Editar Perfil
+            </a>
+            <a class="dropdown-item" href="#">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+              Configurações
+            </a>
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item danger" href="#" onclick="fazerLogout(event)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+              Sair
+            </a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Content -->
+    <main class="content">
+
+      <!-- Breadcrumb -->
+      <div class="breadcrumb">
+        <a href="dashboard.html">Dashboard</a>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        <span>Editar Perfil</span>
+      </div>
+
+      <!-- Page Header -->
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Editar Perfil</h1>
+          <p class="page-subtitle">Gerencie suas informações pessoais e preferências de conta</p>
+        </div>
+        <div class="header-actions">
+          <button class="btn-secondary" onclick="history.back()">Cancelar</button>
+          <button class="btn-primary" id="btnSalvar" onclick="salvarPerfil()">Salvar Alterações</button>
+        </div>
+      </div>
+
+      <!-- Profile Overview Card -->
+      <div class="profile-card">
+        <div class="avatar-wrap">
+          <div class="avatar-lg" id="avatarLg">A</div>
+          <button class="avatar-edit-btn" title="Alterar foto">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          </button>
+        </div>
+        <div class="profile-info">
+          <div class="profile-name" id="profileName">—</div>
+          <div class="profile-role" id="profileRole">—</div>
+          <div class="profile-badges">
+            <span class="badge-ministry" id="profileChurch">—</span>
+            <span class="badge-role" id="profileRoleTag">—</span>
+          </div>
+        </div>
+        <div class="profile-stats">
+          <div class="profile-stat">
+            <div class="profile-stat-value">24</div>
+            <div class="profile-stat-label">Eventos</div>
+          </div>
+          <div class="profile-stat">
+            <div class="profile-stat-value">5 pts</div>
+            <div class="profile-stat-label">Pontos</div>
+          </div>
+          <div class="profile-stat">
+            <div class="profile-stat-value">#1</div>
+            <div class="profile-stat-label">Ranking</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Informações Pessoais -->
+      <div class="form-section">
+        <div class="form-section-header">
+          <div class="form-section-icon teal">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </div>
+          <div>
+            <div class="form-section-title">Informações Pessoais</div>
+            <div class="form-section-desc">Seus dados básicos de identificação</div>
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-field">
+            <label class="form-label">Nome completo <span>(obrigatório)</span></label>
+            <input class="form-input" type="text" id="inputFullName" value="" placeholder="Seu nome completo" />
+          </div>
+          <div class="form-field">
+            <label class="form-label">Como quer ser chamado <span>(obrigatório)</span></label>
+            <input class="form-input" type="text" id="inputNickname" value="" placeholder="Apelido ou primeiro nome" />
+          </div>
+          <div class="form-field">
+            <label class="form-label">E-mail <span>(obrigatório)</span></label>
+            <div class="input-with-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+              <input class="form-input" type="email" id="inputEmail" value="" placeholder="seu@email.com" disabled />
+            </div>
+            <span class="form-hint">O e-mail não pode ser alterado por aqui</span>
+          </div>
+          <div class="form-field">
+            <label class="form-label">Telefone</label>
+            <div class="input-with-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.56 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              <input class="form-input" type="tel" id="inputPhone" value="" placeholder="(11) 99999-9999" />
+            </div>
+          </div>
+          <div class="form-field">
+            <label class="form-label">Data de Nascimento</label>
+            <input class="form-input" type="date" id="inputBirthDate" />
+          </div>
+          <div class="form-field">
+            <label class="form-label">Gênero</label>
+            <select class="form-select" id="inputGenero">
+              <option value="">Carregando...</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label class="form-label">Estado Civil</label>
+            <select class="form-select" id="inputEstadoCivil">
+              <option value="">Carregando...</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ministério & Função -->
+      <div class="form-section">
+        <div class="form-section-header">
+          <div class="form-section-icon green">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          </div>
+          <div>
+            <div class="form-section-title">Ministério & Função</div>
+            <div class="form-section-desc">Informações sobre sua participação na igreja</div>
+          </div>
+        </div>
+
+        <div class="form-grid triple">
+          <div class="form-field">
+            <label class="form-label">Ministério</label>
+            <select class="form-select">
+              <option value="louvor" selected>Ministério de Louvor</option>
+              <option value="infantil">Ministério Infantil</option>
+              <option value="jovens">Ministério de Jovens</option>
+              <option value="intercessao">Ministério de Intercessão</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label class="form-label">Departamento</label>
+            <select class="form-select">
+              <option value="">Selecione...</option>
+              <option value="som">Som</option>
+              <option value="midia">Mídia</option>
+              <option value="recepcao">Recepção</option>
+              <option value="louvor">Louvor</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label class="form-label">Função</label>
+            <select class="form-select">
+              <option value="admin" selected>Administrador</option>
+              <option value="lider">Líder</option>
+              <option value="voluntario">Voluntário</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label class="form-label">Data de Ingresso</label>
+            <input class="form-input" type="date" disabled style="color:var(--ink-subtle)" value="2024-01-15" />
+            <span class="form-hint">Gerenciado pelo administrador</span>
+          </div>
+          <div class="form-field">
+            <label class="form-label">Habilidades / Instrumentos</label>
+            <input class="form-input" type="text" placeholder="ex: Violão, Bateria, Voz..." />
+          </div>
+          <div class="form-field">
+            <label class="form-label">Disponibilidade</label>
+            <select class="form-select">
+              <option value="sempre">Sempre disponível</option>
+              <option value="fins">Fins de semana</option>
+              <option value="semana">Durante a semana</option>
+              <option value="sob">Sob consulta</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Segurança -->
+      <div class="form-section">
+        <div class="form-section-header">
+          <div class="form-section-icon dark">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          </div>
+          <div>
+            <div class="form-section-title">Senha & Segurança</div>
+            <div class="form-section-desc">Altere sua senha e configure opções de acesso</div>
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-field col-span-2">
+            <label class="form-label">Senha Atual</label>
+            <div class="input-with-action">
+              <input class="form-input" type="password" placeholder="••••••••" id="currentPwd" style="padding-right:44px;" />
+              <button class="input-action-btn" onclick="togglePwd('currentPwd', this)" type="button">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+            </div>
+          </div>
+          <div class="form-field">
+            <label class="form-label">Nova Senha</label>
+            <div class="input-with-action">
+              <input class="form-input" type="password" placeholder="Mínimo 8 caracteres" id="newPwd" style="padding-right:44px;" oninput="checkStrength(this.value)" />
+              <button class="input-action-btn" onclick="togglePwd('newPwd', this)" type="button">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+            </div>
+            <div class="password-strength" id="strengthBars">
+              <div class="strength-bar" id="bar1"></div>
+              <div class="strength-bar" id="bar2"></div>
+              <div class="strength-bar" id="bar3"></div>
+              <div class="strength-bar" id="bar4"></div>
+            </div>
+            <div class="strength-label" id="strengthLabel">Digite sua nova senha</div>
+          </div>
+          <div class="form-field">
+            <label class="form-label">Confirmar Nova Senha</label>
+            <div class="input-with-action">
+              <input class="form-input" type="password" placeholder="Repita a nova senha" id="confirmPwd" style="padding-right:44px;" />
+              <button class="input-action-btn" onclick="togglePwd('confirmPwd', this)" type="button">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Notificações -->
+      <div class="form-section">
+        <div class="form-section-header">
+          <div class="form-section-icon yellow">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          </div>
+          <div>
+            <div class="form-section-title">Notificações</div>
+            <div class="form-section-desc">Controle quais avisos você deseja receber</div>
+          </div>
+        </div>
+
+        <div class="toggle-row">
+          <div class="toggle-info">
+            <div class="toggle-label">Novos eventos agendados</div>
+            <div class="toggle-desc">Receba um aviso quando um novo evento for criado</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" checked />
+            <span class="switch-track"></span>
+          </label>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-info">
+            <div class="toggle-label">Escalas e confirmações</div>
+            <div class="toggle-desc">Seja notificado quando for escalado para um evento</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" checked />
+            <span class="switch-track"></span>
+          </label>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-info">
+            <div class="toggle-label">Lembretes de eventos</div>
+            <div class="toggle-desc">Receba lembretes 24h antes de cada evento</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" />
+            <span class="switch-track"></span>
+          </label>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-info">
+            <div class="toggle-label">Atualizações de ranking</div>
+            <div class="toggle-desc">Seja notificado quando sua posição no ranking mudar</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" />
+            <span class="switch-track"></span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Zona de Perigo -->
+      <div class="danger-zone">
+        <div class="danger-section-header">
+          <div class="danger-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          </div>
+          <div>
+            <div class="danger-title">Zona de Perigo</div>
+            <div class="danger-desc">Ações irreversíveis relacionadas à sua conta</div>
+          </div>
+        </div>
+        <div class="danger-row">
+          <div class="danger-row-info">
+            <div class="danger-row-label">Encerrar sessão em todos os dispositivos</div>
+            <div class="danger-row-sub">Você será desconectado de todos os outros dispositivos ativos</div>
+          </div>
+          <button class="btn-danger">Encerrar Sessões</button>
+        </div>
+      </div>
+
+      <!-- Bottom Actions -->
+      <div class="bottom-actions">
+        <button class="btn-secondary" onclick="history.back()">Cancelar</button>
+        <button class="btn-primary">Salvar Alterações</button>
+      </div>
+
+    </main>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // ── Logout ──
+    async function fazerLogout(e) {
+      e.preventDefault();
+      const token = localStorage.getItem('access_token');
+      try {
+        await fetch('/api/auth/logout', {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}` }
+        });
+      } catch (_) {}
+      localStorage.clear();
+      window.location.href = '/';
+    }
+
+    // ── Menu dropdown do avatar ──
+    const avatarBtn = document.getElementById('avatarSm');
+    const avatarDropdown = document.getElementById('avatarDropdown');
+    avatarBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      avatarDropdown.classList.toggle('open');
+    });
+    document.addEventListener('click', () => {
+      avatarDropdown.classList.remove('open');
+    });
+
+    // ── Colapsar sidebar (persiste entre páginas) ──
+    if (localStorage.getItem('sidebar-collapsed') === '1') {
+      document.body.classList.add('sidebar-collapsed');
+    }
+    document.getElementById('collapseBtn').addEventListener('click', () => {
+      document.body.classList.toggle('sidebar-collapsed');
+      localStorage.setItem('sidebar-collapsed', document.body.classList.contains('sidebar-collapsed') ? '1' : '0');
+    });
+
+    // ── Utilitários ──
+    function getInitial(nome) {
+      const clean = (nome || '').replace(/^(Sr\.|Sra\.)\s*/, '');
+      return clean[0]?.toUpperCase() || '?';
+    }
+
+    function getRoleLabel(role) {
+      const map = { admin: 'Administrador', lider: 'Líder', voluntario: 'Voluntário' };
+      return map[role] || role || '—';
+    }
+
+    function preencherPagina(usuario, igreja) {
+      const initial   = getInitial(usuario.nome);
+      const roleLabel = getRoleLabel(usuario.role);
+
+      document.getElementById('avatarSm').textContent       = initial;
+      document.getElementById('avatarLg').textContent       = initial;
+      document.getElementById('dropdownName').textContent   = usuario.nome;
+      document.getElementById('dropdownEmail').textContent  = usuario.email || '';
+      document.getElementById('profileName').textContent    = usuario.nome;
+      document.getElementById('profileRole').textContent    = `${roleLabel} · ${(igreja && igreja.nome) || 'ZionApp'}`;
+      document.getElementById('profileChurch').textContent  = (igreja && igreja.nome) || '—';
+      document.getElementById('profileRoleTag').textContent = roleLabel;
+
+      document.getElementById('inputFullName').value = usuario.full_name || '';
+      document.getElementById('inputNickname').value = usuario.nickname  || '';
+      document.getElementById('inputEmail').value    = usuario.email     || '';
+      document.getElementById('inputPhone').value    = usuario.phone     || '';
+
+      if (usuario.genero_id !== undefined) {
+        document.getElementById('inputGenero').value = usuario.genero_id || '';
+      }
+      if (usuario.status_civil_id !== undefined) {
+        document.getElementById('inputEstadoCivil').value = usuario.status_civil_id || '';
+      }
+      if (usuario.birth_date !== undefined) {
+        document.getElementById('inputBirthDate').value = usuario.birth_date || '';
+      }
+    }
+
+    function popularSelect(selId, itens, valorAtual) {
+      const sel = document.getElementById(selId);
+      sel.innerHTML = '<option value="">Não informado</option>';
+      itens.forEach(item => {
+        const opt = document.createElement('option');
+        opt.value       = item.id;
+        opt.textContent = item.name;
+        sel.appendChild(opt);
+      });
+      sel.value = valorAtual || '';
+    }
+
+    // ── Carrega tudo da API em paralelo ──
+    async function carregarPerfil() {
+      const token = localStorage.getItem('access_token');
+      if (!token) { window.location.href = '/'; return; }
+
+      try {
+        const [reMe, reGeneros, reEstados] = await Promise.all([
+          fetch('/api/auth/me',             { headers: { Authorization: `Bearer ${token}` } }),
+          fetch('/api/user/generos',        { headers: { Authorization: `Bearer ${token}` } }),
+          fetch('/api/user/estados-civis',  { headers: { Authorization: `Bearer ${token}` } })
+        ]);
+
+        // Só redireciona para login se o token estiver expirado/inválido (401)
+        if (reMe.status === 401) { localStorage.clear(); window.location.href = '/'; return; }
+
+        const generos = reGeneros.ok ? await reGeneros.json() : [];
+        const estados = reEstados.ok ? await reEstados.json() : [];
+
+        popularSelect('inputGenero',      generos, null);
+        popularSelect('inputEstadoCivil', estados, null);
+
+        if (reMe.ok) {
+          const dados = await reMe.json();
+          popularSelect('inputGenero',      generos, dados.usuario.genero_id);
+          popularSelect('inputEstadoCivil', estados, dados.usuario.status_civil_id);
+          localStorage.setItem('usuario', JSON.stringify(dados.usuario));
+          if (dados.igreja) localStorage.setItem('igreja', JSON.stringify(dados.igreja));
+          preencherPagina(dados.usuario, dados.igreja);
+        } else {
+          const u = JSON.parse(localStorage.getItem('usuario') || '{}');
+          const i = JSON.parse(localStorage.getItem('igreja')  || '{}');
+          if (u.nome) preencherPagina(u, i);
+        }
+
+      } catch (_) {
+        const u = JSON.parse(localStorage.getItem('usuario') || '{}');
+        const i = JSON.parse(localStorage.getItem('igreja')  || '{}');
+        if (u.nome) preencherPagina(u, i);
+      }
+    }
+    carregarPerfil().then(() => ativarAutoSave());
+
+    // ── Toast ──
+    let toastTimer = null;
+    function mostrarToast(msg, tipo = 'success') {
+      const t = document.getElementById('toast');
+      const icon = tipo === 'success'
+        ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>'
+        : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+      t.innerHTML = icon + msg;
+      t.className = `toast ${tipo} show`;
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => { t.classList.remove('show'); }, 3000);
+    }
+
+    // ── Salvar perfil ──
+    let salvando = false;
+    async function salvarPerfil() {
+      if (salvando) return;
+
+      const full_name       = document.getElementById('inputFullName').value.trim();
+      const nickname        = document.getElementById('inputNickname').value.trim();
+      const phone           = document.getElementById('inputPhone').value.trim();
+      const genero_id       = document.getElementById('inputGenero').value || null;
+      const status_civil_id = document.getElementById('inputEstadoCivil').value || null;
+      const birth_date      = document.getElementById('inputBirthDate').value || null;
+
+      if (!nickname) {
+        mostrarToast('O campo "Como quer ser chamado" é obrigatório.', 'error');
+        document.getElementById('inputNickname').focus();
+        return;
+      }
+
+      salvando = true;
+      const btns = document.querySelectorAll('#btnSalvar');
+      btns.forEach(b => { b.disabled = true; b.textContent = 'Salvando…'; });
+
+      try {
+        const token = localStorage.getItem('access_token');
+        const res = await fetch('/api/user/profile', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ full_name, nickname, phone, genero_id, status_civil_id, birth_date })
+        });
+        const dados = await res.json();
+
+        if (!res.ok) {
+          mostrarToast(dados.error || 'Erro ao salvar perfil.', 'error');
+          return;
+        }
+
+        localStorage.setItem('usuario', JSON.stringify(dados.usuario));
+        preencherPagina(dados.usuario, JSON.parse(localStorage.getItem('igreja') || '{}'));
+        mostrarToast('Alterações salvas com sucesso!');
+
+      } catch (_) {
+        mostrarToast('Não foi possível conectar ao servidor.', 'error');
+      } finally {
+        salvando = false;
+        btns.forEach(b => { b.disabled = false; b.textContent = 'Salvar Alterações'; });
+      }
+    }
+
+    // ── Auto-save ao alterar qualquer campo ──
+    function ativarAutoSave() {
+      const campos = ['inputFullName', 'inputNickname', 'inputPhone', 'inputBirthDate'];
+      const selects = ['inputGenero', 'inputEstadoCivil'];
+
+      campos.forEach(id => {
+        document.getElementById(id)?.addEventListener('change', () => salvarPerfil());
+      });
+      selects.forEach(id => {
+        document.getElementById(id)?.addEventListener('change', () => salvarPerfil());
+      });
+    }
+
+    function togglePwd(id, btn) {
+      const input = document.getElementById(id);
+      const isHidden = input.type === 'password';
+      input.type = isHidden ? 'text' : 'password';
+      btn.style.color = isHidden ? 'var(--primary)' : '';
+    }
+
+    function checkStrength(val) {
+      const bars = [
+        document.getElementById('bar1'),
+        document.getElementById('bar2'),
+        document.getElementById('bar3'),
+        document.getElementById('bar4'),
+      ];
+      const label = document.getElementById('strengthLabel');
+
+      bars.forEach(b => { b.className = 'strength-bar'; });
+
+      if (!val) { label.textContent = 'Digite sua nova senha'; return; }
+
+      let score = 0;
+      if (val.length >= 8) score++;
+      if (/[A-Z]/.test(val)) score++;
+      if (/[0-9]/.test(val)) score++;
+      if (/[^A-Za-z0-9]/.test(val)) score++;
+
+      const cls = score <= 1 ? 'weak' : score <= 2 ? 'medium' : 'strong';
+      const labels = ['', 'Fraca', 'Fraca', 'Média', 'Forte'];
+      for (let i = 0; i < score; i++) bars[i].className = `strength-bar filled ${cls}`;
+      label.textContent = `Senha ${labels[score]}`;
+      label.style.color = cls === 'weak' ? '#ff3b30' : cls === 'medium' ? 'var(--accent-yellow)' : 'var(--accent-green)';
+    }
+  </script>
+
+</body>
+</html>
