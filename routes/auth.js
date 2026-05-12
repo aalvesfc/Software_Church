@@ -141,6 +141,24 @@ router.get('/me', authMiddleware, async (req, res) => {
   })
 })
 
+// POST /api/auth/refresh — renova access_token usando refresh_token
+router.post('/refresh', async (req, res) => {
+  const { refresh_token } = req.body
+  if (!refresh_token) return res.status(400).json({ error: 'refresh_token obrigatório' })
+
+  const { data, error } = await supabaseAuth.auth.refreshSession({ refresh_token })
+
+  if (error || !data.session) {
+    return res.status(401).json({ error: 'Sessão expirada. Faça login novamente.' })
+  }
+
+  res.json({
+    access_token:  data.session.access_token,
+    refresh_token: data.session.refresh_token,
+    expires_at:    data.session.expires_at,
+  })
+})
+
 // POST /api/auth/logout
 router.post('/logout', authMiddleware, async (req, res) => {
   const token = req.headers.authorization?.split(' ')[1]

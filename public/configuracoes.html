@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
@@ -9,15 +9,15 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --primary:         #008f8c;
-      --primary-light:   #00d17a;
-      --primary-focus:   #008f8c;
-      --primary-dark:    #005451;
+      --primary:         #235347;
+      --primary-light:   #8eb69b;
+      --primary-focus:   #235347;
+      --primary-dark:    #0b2b26;
       --ink:             #1d1d1f;
       --ink-muted:       #6e6e73;
       --ink-subtle:      #aeaeb2;
       --canvas:          #ffffff;
-      --canvas-page:     #f0f7f7;
+      --canvas-page:     #f0f6f2;
       --canvas-input:    #f2f2f7;
       --hairline:        #e0e0e0;
       --on-dark:         #ffffff;
@@ -42,7 +42,7 @@
     .sidebar {
       width: var(--sidebar-w);
       min-height: 100vh;
-      background: linear-gradient(180deg, #005451 0%, #005451 55%, #008f8c 100%);
+      background: linear-gradient(180deg, #051f20 0%, #0b2b26 55%, #163832 100%);
       display: flex;
       flex-direction: column;
       flex-shrink: 0;
@@ -64,7 +64,7 @@
 
     .logo-mark {
       width: 42px; height: 42px;
-      background: linear-gradient(135deg, #00d17a, #008f8c);
+      background: linear-gradient(135deg, #8eb69b, #235347);
       border-radius: 11px;
       display: flex; align-items: center; justify-content: center;
       box-shadow: rgba(0,0,0,0.22) 0 3px 12px;
@@ -276,7 +276,7 @@
 
     /* ─────────────────── HERO BANNER ─────────────────── */
     .hero {
-      background: linear-gradient(135deg, #005451 0%, #008f8c 55%, #00d17a 100%);
+      background: linear-gradient(135deg, #051f20 0%, #163832 55%, #235347 100%);
       border-radius: var(--radius-lg);
       padding: 28px 36px;
       position: relative;
@@ -353,7 +353,7 @@
     }
     .setting-card:hover {
       border-color: var(--primary);
-      box-shadow: 0 4px 16px rgba(0,143,140,0.08);
+      box-shadow: 0 4px 16px rgba(35,83,71,0.08);
     }
 
     .setting-icon {
@@ -393,7 +393,7 @@
     }
     .accordion-card.open {
       border-color: var(--primary);
-      box-shadow: 0 4px 16px rgba(0,143,140,0.08);
+      box-shadow: 0 4px 16px rgba(35,83,71,0.08);
     }
     .accordion-header {
       display: flex;
@@ -496,6 +496,49 @@
     .btn-save:hover { background: var(--primary-dark); }
     .btn-save:active { transform: scale(0.97); }
 
+    /* ── Ghost / outline button ── */
+    .btn-ghost {
+      height: 38px;
+      padding: 0 18px;
+      background: transparent;
+      border: 1.5px solid var(--primary);
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--primary);
+      font-family: inherit;
+      cursor: pointer;
+      transition: background 0.12s;
+    }
+    .btn-ghost:hover { background: rgba(35,83,71,0.06); }
+
+    /* ── Admin accordion ── */
+    .admin-toolbar {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 18px;
+    }
+    .admin-list-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      color: var(--primary);
+      margin-bottom: 4px;
+    }
+    .info-banner {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      background: #e8f4fd;
+      border-radius: var(--radius-sm);
+      padding: 14px 16px;
+      margin-top: 18px;
+    }
+    .info-banner svg { flex-shrink: 0; color: #2196f3; margin-top: 1px; }
+    .info-banner p { margin: 0; font-size: 13.5px; color: #1a5276; line-height: 1.5; }
+
     /* ── Link de Cadastro (card especial) ── */
     .setting-card.card-link-block {
       flex-direction: column;
@@ -551,6 +594,201 @@
     }
     .btn-copy:hover { background: #e5e5ea; border-color: #c7c7cc; }
     .btn-copy.copied { color: var(--primary); border-color: var(--primary); }
+
+    /* ── Toggle row com input numérico ── */
+    .toggle-row-input {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      padding: 16px 0;
+      border-bottom: 1px solid var(--hairline);
+    }
+    .toggle-row-input:last-child { border-bottom: none; }
+    .input-unit-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+    .input-number {
+      width: 72px;
+      height: 36px;
+      background: var(--canvas-input);
+      border: 1px solid var(--hairline);
+      border-radius: var(--radius-sm);
+      padding: 0 10px;
+      font-size: 14px;
+      font-family: inherit;
+      color: var(--ink);
+      text-align: center;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .input-number:focus { border-color: var(--primary); background: var(--canvas); }
+    .input-unit {
+      font-size: 13px;
+      color: var(--ink-muted);
+      letter-spacing: -0.12px;
+      white-space: nowrap;
+    }
+
+    /* ── Seção locais ── */
+    .locais-section { margin-top: 20px; }
+    .locais-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .locais-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--primary);
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+    }
+    .btn-novo-local {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      height: 34px;
+      padding: 0 16px;
+      background: var(--primary);
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 600;
+      color: #fff;
+      font-family: inherit;
+      cursor: pointer;
+      letter-spacing: -0.12px;
+      transition: background 0.12s, transform 0.1s;
+    }
+    .btn-novo-local:hover { background: var(--primary-dark); }
+    .btn-novo-local:active { transform: scale(0.97); }
+    .btn-novo-local svg { width: 14px; height: 14px; }
+
+    .locais-empty {
+      background: var(--canvas-input);
+      border-radius: var(--radius-md);
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+    .locais-empty svg { width: 28px; height: 28px; color: var(--ink-subtle); }
+    .locais-empty span { font-size: 13px; color: var(--ink-subtle); letter-spacing: -0.12px; }
+
+    /* ── Toggles ── */
+    .toggle-list { display: flex; flex-direction: column; margin-top: 8px; }
+
+    .toggle-list.blocked .toggle-row:not(:first-child),
+    .toggle-list.blocked .toggle-row-input {
+      opacity: 0.38;
+      pointer-events: none;
+      user-select: none;
+    }
+    .toggle-list.blocked ~ .pontuacao-section {
+      opacity: 0.38;
+      pointer-events: none;
+      user-select: none;
+    }
+
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      padding: 16px 0;
+      border-bottom: 1px solid var(--hairline);
+    }
+    .toggle-row:last-child { border-bottom: none; }
+
+    .toggle-info { flex: 1; min-width: 0; }
+    .toggle-label {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--ink);
+      letter-spacing: -0.224px;
+    }
+    .toggle-desc {
+      font-size: 12px;
+      color: var(--ink-muted);
+      letter-spacing: -0.12px;
+      margin-top: 2px;
+    }
+
+    .toggle-switch {
+      position: relative;
+      width: 44px;
+      height: 26px;
+      flex-shrink: 0;
+    }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .toggle-track {
+      position: absolute;
+      inset: 0;
+      background: #d1d1d6;
+      border-radius: 9999px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .toggle-track::after {
+      content: "";
+      position: absolute;
+      width: 20px; height: 20px;
+      background: #fff;
+      border-radius: 50%;
+      top: 3px; left: 3px;
+      transition: transform 0.2s;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.18);
+    }
+    .toggle-switch input:checked + .toggle-track { background: var(--primary); }
+    .toggle-switch input:checked + .toggle-track::after { transform: translateX(18px); }
+
+    /* ── Pontuação por ação ── */
+    .pontuacao-section { margin-top: 20px; }
+    .pontuacao-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--primary);
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    .pontuacao-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+    .pontuacao-card {
+      border-radius: var(--radius-md);
+      padding: 18px 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+    .pontuacao-card.green  { background: #f0faf5; }
+    .pontuacao-card.yellow { background: #fffbea; }
+    .pontuacao-card.red    { background: #fff5f5; }
+    .pontuacao-value {
+      font-family: "SF Pro Display", system-ui, -apple-system, sans-serif;
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      line-height: 1;
+    }
+    .pontuacao-card.green  .pontuacao-value { color: #00a878; }
+    .pontuacao-card.yellow .pontuacao-value { color: #d97706; }
+    .pontuacao-card.red    .pontuacao-value { color: #e53e3e; }
+    .pontuacao-name {
+      font-size: 13px;
+      color: var(--ink-muted);
+      letter-spacing: -0.12px;
+    }
 
     /* ─────────────────── RIGHT SIDEBAR ─────────────────── */
     .aside-right {
@@ -644,6 +882,7 @@
   </style>
 </head>
 <body>
+<script>if(localStorage.getItem('sidebar-collapsed')==='1')document.body.classList.add('sidebar-collapsed')</script>
 
   <!-- ── Sidebar ── -->
   <aside class="sidebar">
@@ -663,7 +902,7 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
         <span>Ministérios</span>
       </a>
-      <a class="nav-item" href="#">
+      <a class="nav-item" href="/departamentos">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
         <span>Departamentos</span>
       </a>
@@ -871,31 +1110,83 @@
             </div>
           </div>
 
-          <a class="setting-card" href="#" id="sec-permissoes">
-            <div class="setting-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <!-- Permissões e Acessos — acordeão -->
+          <div class="accordion-card" id="sec-permissoes">
+            <div class="accordion-header" id="permissoesHeader">
+              <div class="setting-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              </div>
+              <div class="setting-body">
+                <div class="setting-title">Permissões e Acessos</div>
+                <div class="setting-desc">Controle de acesso dos usuários</div>
+              </div>
+              <div class="setting-arrow">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+              </div>
             </div>
-            <div class="setting-body">
-              <div class="setting-title">Permissões e Acessos</div>
-              <div class="setting-desc">Controle de acesso dos usuários</div>
-            </div>
-            <div class="setting-arrow">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-            </div>
-          </a>
 
-          <a class="setting-card" href="#" id="sec-perguntas">
-            <div class="setting-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            <div class="accordion-body">
+              <div class="toggle-list">
+
+                <div class="toggle-row">
+                  <div class="toggle-info">
+                    <div class="toggle-label">Habilitar divisão por áreas</div>
+                    <div class="toggle-desc">Departamentos podem ter subdivisões</div>
+                  </div>
+                  <label class="toggle-switch">
+                    <input type="checkbox" />
+                    <span class="toggle-track"></span>
+                  </label>
+                </div>
+
+                <div class="toggle-row">
+                  <div class="toggle-info">
+                    <div class="toggle-label">Habilitar múltiplos departamentos</div>
+                    <div class="toggle-desc">Voluntário pode pertencer a mais de um departamento</div>
+                  </div>
+                  <label class="toggle-switch">
+                    <input type="checkbox" checked />
+                    <span class="toggle-track"></span>
+                  </label>
+                </div>
+
+                <div class="toggle-row">
+                  <div class="toggle-info">
+                    <div class="toggle-label">Habilitar processo de triagem</div>
+                    <div class="toggle-desc">Novos voluntários entram em fila de aprovação</div>
+                  </div>
+                  <label class="toggle-switch">
+                    <input type="checkbox" />
+                    <span class="toggle-track"></span>
+                  </label>
+                </div>
+
+                <div class="toggle-row">
+                  <div class="toggle-info">
+                    <div class="toggle-label">Habilitar seleção de função no formulário</div>
+                    <div class="toggle-desc">Mostra campo de função no cadastro</div>
+                  </div>
+                  <label class="toggle-switch">
+                    <input type="checkbox" checked />
+                    <span class="toggle-track"></span>
+                  </label>
+                </div>
+
+                <div class="toggle-row">
+                  <div class="toggle-info">
+                    <div class="toggle-label">Habilitar validação de funções</div>
+                    <div class="toggle-desc">Líder precisa aprovar função antes de escalar</div>
+                  </div>
+                  <label class="toggle-switch">
+                    <input type="checkbox" />
+                    <span class="toggle-track"></span>
+                  </label>
+                </div>
+
+              </div>
             </div>
-            <div class="setting-body">
-              <div class="setting-title">Perguntas do Voluntário</div>
-              <div class="setting-desc">Configure perguntas customizadas</div>
-            </div>
-            <div class="setting-arrow">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-            </div>
-          </a>
+          </div>
+
 
           <!-- Link de Cadastro Geral -->
           <div class="setting-card card-link-block" id="sec-link">
@@ -914,57 +1205,429 @@
             </div>
           </div>
 
-          <a class="setting-card" href="#" id="sec-checkin">
-            <div class="setting-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          <!-- Check-in e Check-out — acordeão -->
+          <div class="accordion-card" id="sec-checkin">
+            <div class="accordion-header" id="checkinHeader">
+              <div class="setting-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              </div>
+              <div class="setting-body">
+                <div class="setting-title">Check-in e Check-out</div>
+                <div class="setting-desc">Configurações de presença</div>
+              </div>
+              <div class="setting-arrow">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+              </div>
             </div>
-            <div class="setting-body">
-              <div class="setting-title">Check-in e Check-out</div>
-              <div class="setting-desc">Configurações de presença</div>
-            </div>
-            <div class="setting-arrow">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-            </div>
-          </a>
 
-          <a class="setting-card" href="#" id="sec-escalas">
-            <div class="setting-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-            </div>
-            <div class="setting-body">
-              <div class="setting-title">Escalas</div>
-              <div class="setting-desc">Regras de escalação</div>
-            </div>
-            <div class="setting-arrow">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-            </div>
-          </a>
+            <div class="accordion-body">
+              <div class="toggle-list" id="checkinToggleList">
 
-          <a class="setting-card" href="#" id="sec-gamificacao">
-            <div class="setting-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-            </div>
-            <div class="setting-body">
-              <div class="setting-title">Gamificação</div>
-              <div class="setting-desc">Sistema de pontos e badges</div>
-            </div>
-            <div class="setting-arrow">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-            </div>
-          </a>
+                <div class="toggle-row">
+                  <div class="toggle-info">
+                    <div class="toggle-label">Habilitar check-in com geolocalização</div>
+                    <div class="toggle-desc">GPS obrigatório para fazer check-in</div>
+                  </div>
+                  <label class="toggle-switch">
+                    <input type="checkbox" id="toggleGeolocalizacao" checked />
+                    <span class="toggle-track"></span>
+                  </label>
+                </div>
 
-          <a class="setting-card" href="#" id="sec-notificacoes">
-            <div class="setting-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                <div class="toggle-row-input">
+                  <div class="toggle-info">
+                    <div class="toggle-label">Raio permitido</div>
+                    <div class="toggle-desc">Distância máxima do local para check-in</div>
+                  </div>
+                  <div class="input-unit-wrap">
+                    <input class="input-number" type="number" value="500" min="0" />
+                    <span class="input-unit">metros</span>
+                  </div>
+                </div>
+
+                <div class="toggle-row">
+                  <div class="toggle-info">
+                    <div class="toggle-label">Exibir radar no mapa</div>
+                    <div class="toggle-desc">Mostra círculo do raio e posição do voluntário</div>
+                  </div>
+                  <label class="toggle-switch">
+                    <input type="checkbox" checked />
+                    <span class="toggle-track"></span>
+                  </label>
+                </div>
+
+                <div class="toggle-row">
+                  <div class="toggle-info">
+                    <div class="toggle-label">Habilitar QR Code</div>
+                    <div class="toggle-desc">Permite check-in via QR Code</div>
+                  </div>
+                  <label class="toggle-switch">
+                    <input type="checkbox" checked />
+                    <span class="toggle-track"></span>
+                  </label>
+                </div>
+
+                <div class="toggle-row">
+                  <div class="toggle-info">
+                    <div class="toggle-label">Exigir check-out manual</div>
+                    <div class="toggle-desc">Desativa check-out automático</div>
+                  </div>
+                  <label class="toggle-switch">
+                    <input type="checkbox" checked />
+                    <span class="toggle-track"></span>
+                  </label>
+                </div>
+
+                <div class="toggle-row-input">
+                  <div class="toggle-info">
+                    <div class="toggle-label">Antecedência para check-in</div>
+                    <div class="toggle-desc">Quanto tempo antes do evento pode fazer check-in</div>
+                  </div>
+                  <div class="input-unit-wrap">
+                    <input class="input-number" type="number" value="60" min="0" />
+                    <span class="input-unit">minutos</span>
+                  </div>
+                </div>
+
+                <div class="toggle-row-input">
+                  <div class="toggle-info">
+                    <div class="toggle-label">Tolerância de atraso</div>
+                    <div class="toggle-desc">Tempo extra após o início do evento</div>
+                  </div>
+                  <div class="input-unit-wrap">
+                    <input class="input-number" type="number" value="15" min="0" />
+                    <span class="input-unit">minutos</span>
+                  </div>
+                </div>
+
+                <div class="toggle-row">
+                  <div class="toggle-info">
+                    <div class="toggle-label">Habilitar modo offline</div>
+                    <div class="toggle-desc">Cache local com sincronização automática</div>
+                  </div>
+                  <label class="toggle-switch">
+                    <input type="checkbox" checked />
+                    <span class="toggle-track"></span>
+                  </label>
+                </div>
+
+                <div class="toggle-row">
+                  <div class="toggle-info">
+                    <div class="toggle-label">Habilitar painel ao vivo</div>
+                    <div class="toggle-desc">Atualização em tempo real das presenças</div>
+                  </div>
+                  <label class="toggle-switch">
+                    <input type="checkbox" checked />
+                    <span class="toggle-track"></span>
+                  </label>
+                </div>
+
+                <div class="toggle-row">
+                  <div class="toggle-info">
+                    <div class="toggle-label">Validar precisão do GPS</div>
+                    <div class="toggle-desc">Rejeita GPS com precisão baixa</div>
+                  </div>
+                  <label class="toggle-switch">
+                    <input type="checkbox" checked />
+                    <span class="toggle-track"></span>
+                  </label>
+                </div>
+
+              </div>
+
+              <!-- Locais para check-in -->
+              <div class="locais-section">
+                <div class="locais-header">
+                  <span class="locais-label">Locais para check-in</span>
+                  <button class="btn-novo-local">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    Novo Local
+                  </button>
+                </div>
+                <div class="locais-empty" id="locaisEmpty">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                  <span>Nenhum local cadastrado</span>
+                </div>
+              </div>
+
             </div>
-            <div class="setting-body">
-              <div class="setting-title">Notificações</div>
-              <div class="setting-desc">Alertas e comunicações</div>
+          </div>
+
+          <!-- Escalas — acordeão -->
+          <div class="accordion-card" id="sec-escalas">
+            <div class="accordion-header" id="escalasHeader">
+              <div class="setting-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              </div>
+              <div class="setting-body">
+                <div class="setting-title">Escalas</div>
+                <div class="setting-desc">Regras de escalação</div>
+              </div>
+              <div class="setting-arrow">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+              </div>
             </div>
-            <div class="setting-arrow">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+
+            <div class="accordion-body">
+              <div class="toggle-list">
+
+                <div class="toggle-row">
+                  <div class="toggle-info">
+                    <div class="toggle-label">Habilitar escala automática</div>
+                    <div class="toggle-desc">Sistema sugere voluntários automaticamente</div>
+                  </div>
+                  <label class="toggle-switch">
+                    <input type="checkbox" />
+                    <span class="toggle-track"></span>
+                  </label>
+                </div>
+
+                <div class="toggle-row">
+                  <div class="toggle-info">
+                    <div class="toggle-label">Limitar a uma escala por dia</div>
+                    <div class="toggle-desc">Bloqueia múltiplas escalas no mesmo dia</div>
+                  </div>
+                  <label class="toggle-switch">
+                    <input type="checkbox" />
+                    <span class="toggle-track"></span>
+                  </label>
+                </div>
+
+                <div class="toggle-row">
+                  <div class="toggle-info">
+                    <div class="toggle-label">Limitar a um evento por dia</div>
+                    <div class="toggle-desc">Voluntário só pode estar em 1 evento por dia</div>
+                  </div>
+                  <label class="toggle-switch">
+                    <input type="checkbox" checked />
+                    <span class="toggle-track"></span>
+                  </label>
+                </div>
+
+                <div class="toggle-row">
+                  <div class="toggle-info">
+                    <div class="toggle-label">Notificar sobre novas escalas</div>
+                    <div class="toggle-desc">Envia notificação quando escalado</div>
+                  </div>
+                  <label class="toggle-switch">
+                    <input type="checkbox" checked />
+                    <span class="toggle-track"></span>
+                  </label>
+                </div>
+
+                <div class="toggle-row">
+                  <div class="toggle-info">
+                    <div class="toggle-label">Permitir solicitação de troca</div>
+                    <div class="toggle-desc">Voluntários podem pedir trocas entre si</div>
+                  </div>
+                  <label class="toggle-switch">
+                    <input type="checkbox" checked />
+                    <span class="toggle-track"></span>
+                  </label>
+                </div>
+
+                <div class="toggle-row-input">
+                  <div class="toggle-info">
+                    <div class="toggle-label">Antecedência mínima para criar</div>
+                    <div class="toggle-desc">Dias antes do evento para criar escala</div>
+                  </div>
+                  <div class="input-unit-wrap">
+                    <input class="input-number" type="number" value="7" min="0" />
+                    <span class="input-unit">dias</span>
+                  </div>
+                </div>
+
+                <div class="toggle-row-input">
+                  <div class="toggle-info">
+                    <div class="toggle-label">Antecedência mínima para cancelar</div>
+                    <div class="toggle-desc">Horas antes do evento para cancelar</div>
+                  </div>
+                  <div class="input-unit-wrap">
+                    <input class="input-number" type="number" value="24" min="0" />
+                    <span class="input-unit">horas</span>
+                  </div>
+                </div>
+
+              </div>
             </div>
-          </a>
+          </div>
+
+          <!-- Gamificação — acordeão -->
+          <div class="accordion-card" id="sec-gamificacao">
+            <div class="accordion-header" id="gamificacaoHeader">
+              <div class="setting-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              </div>
+              <div class="setting-body">
+                <div class="setting-title">Gamificação</div>
+                <div class="setting-desc">Sistema de pontos e badges</div>
+              </div>
+              <div class="setting-arrow">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+              </div>
+            </div>
+
+            <div class="accordion-body">
+              <div class="toggle-list" id="gamificacaoToggleList">
+
+                <div class="toggle-row">
+                  <div class="toggle-info">
+                    <div class="toggle-label">Habilitar gamificação</div>
+                    <div class="toggle-desc">Ativa sistema de pontos, badges e níveis</div>
+                  </div>
+                  <label class="toggle-switch">
+                    <input type="checkbox" id="toggleGamificacao" checked />
+                    <span class="toggle-track"></span>
+                  </label>
+                </div>
+
+                <div class="toggle-row">
+                  <div class="toggle-info">
+                    <div class="toggle-label">Exibir ranking público</div>
+                    <div class="toggle-desc">Ranking visível para todos os voluntários</div>
+                  </div>
+                  <label class="toggle-switch">
+                    <input type="checkbox" checked />
+                    <span class="toggle-track"></span>
+                  </label>
+                </div>
+
+                <div class="toggle-row">
+                  <div class="toggle-info">
+                    <div class="toggle-label">Habilitar badges automáticos</div>
+                    <div class="toggle-desc">Sistema concede badges automaticamente</div>
+                  </div>
+                  <label class="toggle-switch">
+                    <input type="checkbox" checked />
+                    <span class="toggle-track"></span>
+                  </label>
+                </div>
+
+                <div class="toggle-row">
+                  <div class="toggle-info">
+                    <div class="toggle-label">Habilitar desafios mensais</div>
+                    <div class="toggle-desc">Admin pode criar desafios especiais</div>
+                  </div>
+                  <label class="toggle-switch">
+                    <input type="checkbox" />
+                    <span class="toggle-track"></span>
+                  </label>
+                </div>
+
+                <div class="toggle-row">
+                  <div class="toggle-info">
+                    <div class="toggle-label">Notificar ao conquistar badge</div>
+                    <div class="toggle-desc">Envia notificação quando ganhar badge</div>
+                  </div>
+                  <label class="toggle-switch">
+                    <input type="checkbox" checked />
+                    <span class="toggle-track"></span>
+                  </label>
+                </div>
+
+                <div class="toggle-row">
+                  <div class="toggle-info">
+                    <div class="toggle-label">Notificar ao subir de nível</div>
+                    <div class="toggle-desc">Envia notificação quando subir de nível</div>
+                  </div>
+                  <label class="toggle-switch">
+                    <input type="checkbox" checked />
+                    <span class="toggle-track"></span>
+                  </label>
+                </div>
+
+              </div>
+
+              <!-- Pontuação por ação -->
+              <div class="pontuacao-section">
+                <div class="pontuacao-label">Pontuação por ação</div>
+                <div class="pontuacao-grid">
+                  <div class="pontuacao-card green">
+                    <div class="pontuacao-value">+10</div>
+                    <div class="pontuacao-name">Check-in</div>
+                  </div>
+                  <div class="pontuacao-card yellow">
+                    <div class="pontuacao-value">-5</div>
+                    <div class="pontuacao-name">Atraso</div>
+                  </div>
+                  <div class="pontuacao-card red">
+                    <div class="pontuacao-value">-20</div>
+                    <div class="pontuacao-name">Falta</div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Notificações — acordeão -->
+          <div class="accordion-card" id="sec-notificacoes">
+            <div class="accordion-header" id="notificacoesHeader">
+              <div class="setting-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+              </div>
+              <div class="setting-body">
+                <div class="setting-title">Notificações</div>
+                <div class="setting-desc">Alertas e comunicações</div>
+              </div>
+              <div class="setting-arrow">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+              </div>
+            </div>
+
+            <div class="accordion-body">
+
+              <div class="form-section-label" style="margin-top:12px;">Notificações para voluntários</div>
+
+              <div class="toggle-list" style="margin-top:0;">
+
+                <div class="toggle-row">
+                  <div class="toggle-info">
+                    <div class="toggle-label">Nova escala criada</div>
+                    <div class="toggle-desc">Notificar quando for escalado em um evento</div>
+                  </div>
+                  <label class="toggle-switch">
+                    <input type="checkbox" checked />
+                    <span class="toggle-track"></span>
+                  </label>
+                </div>
+
+                <div class="toggle-row">
+                  <div class="toggle-info">
+                    <div class="toggle-label">Alteração na escala</div>
+                    <div class="toggle-desc">Notificar quando houver mudanças</div>
+                  </div>
+                  <label class="toggle-switch">
+                    <input type="checkbox" checked />
+                    <span class="toggle-track"></span>
+                  </label>
+                </div>
+
+                <div class="toggle-row">
+                  <div class="toggle-info">
+                    <div class="toggle-label">Lembrete de escala</div>
+                    <div class="toggle-desc">Lembrar antes do evento</div>
+                  </div>
+                  <label class="toggle-switch">
+                    <input type="checkbox" checked />
+                    <span class="toggle-track"></span>
+                  </label>
+                </div>
+
+                <div class="toggle-row">
+                  <div class="toggle-info">
+                    <div class="toggle-label">Lembrete de check-in</div>
+                    <div class="toggle-desc">Lembrar para fazer check-in</div>
+                  </div>
+                  <label class="toggle-switch">
+                    <input type="checkbox" checked />
+                    <span class="toggle-track"></span>
+                  </label>
+                </div>
+
+              </div>
+            </div>
+          </div>
 
           <a class="setting-card" href="#" id="sec-visual">
             <div class="setting-icon">
@@ -979,18 +1642,31 @@
             </div>
           </a>
 
-          <a class="setting-card" href="#" id="sec-admins">
-            <div class="setting-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <div class="accordion-card" id="sec-admins">
+            <div class="accordion-header" id="adminsHeader">
+              <div class="setting-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              </div>
+              <div class="setting-body">
+                <div class="setting-title">Administradores</div>
+                <div class="setting-desc">Gerenciar admins do sistema</div>
+              </div>
+              <div class="setting-arrow">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+              </div>
             </div>
-            <div class="setting-body">
-              <div class="setting-title">Administradores</div>
-              <div class="setting-desc">Gerenciar admins do sistema</div>
+            <div class="accordion-body">
+              <div class="admin-list-label">Administradores do Sistema</div>
+              <div class="admin-toolbar">
+                <button class="btn-ghost">Convidar Novo</button>
+                <button class="btn-save">+ Promover Usuário</button>
+              </div>
+              <div class="info-banner">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <p>O dono do sistema não pode ser removido. Para transferir a propriedade, entre em contato com o suporte.</p>
+              </div>
             </div>
-            <div class="setting-arrow">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-            </div>
-          </a>
+          </div>
 
           <a class="setting-card" href="#" id="sec-convites">
             <div class="setting-icon">
@@ -1013,17 +1689,13 @@
         <div class="aside-block">
           <div class="aside-title">Resumo</div>
           <nav class="aside-nav-list">
-            <a class="aside-nav-item" href="#sec-geral">
+            <a class="aside-nav-item" href="#sec-geral" id="resumoGeral">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
               Geral
             </a>
             <a class="aside-nav-item" href="#sec-permissoes">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
               Permissões e Acessos
-            </a>
-            <a class="aside-nav-item" href="#sec-perguntas">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-              Perguntas do Voluntário
             </a>
             <a class="aside-nav-item" href="#sec-checkin">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
@@ -1146,14 +1818,140 @@
       } catch (_) {}
     }
 
+    // ── Acordeões — apenas um aberto por vez ──
+    const allAccordions = document.querySelectorAll('.accordion-card');
+
+    function fecharTodos(exceto) {
+      allAccordions.forEach(a => { if (a !== exceto) a.classList.remove('open'); });
+    }
+
+    function abrirAcordeao(card, callback) {
+      const jaAberto = card.classList.contains('open');
+      fecharTodos(card);
+      if (jaAberto) {
+        card.classList.remove('open');
+      } else {
+        card.classList.add('open');
+        if (callback) callback();
+      }
+    }
+
+    // Geral
+    function abrirGeral() {
+      fecharTodos(geralCard);
+      geralCard.classList.add('open');
+      carregarIgreja();
+      geralCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
     geralHeader.addEventListener('click', () => {
-      geralCard.classList.toggle('open');
-      if (geralCard.classList.contains('open')) carregarIgreja();
+      abrirAcordeao(geralCard, carregarIgreja);
+    });
+
+    document.getElementById('resumoGeral').addEventListener('click', (e) => {
+      e.preventDefault();
+      abrirGeral();
     });
 
     document.getElementById('geralCancel').addEventListener('click', () => {
       geralCard.classList.remove('open');
     });
+
+    // Gamificação — bloquear se desligada
+    const toggleGamificacao   = document.getElementById('toggleGamificacao');
+    const gamificacaoList     = document.getElementById('gamificacaoToggleList');
+
+    function atualizarBloqueioGamificacao() {
+      gamificacaoList.classList.toggle('blocked', !toggleGamificacao.checked);
+    }
+    toggleGamificacao.addEventListener('change', atualizarBloqueioGamificacao);
+    atualizarBloqueioGamificacao();
+
+    // Check-in — bloquear opções se geolocalização desligada
+    const toggleGeo      = document.getElementById('toggleGeolocalizacao');
+    const checkinList    = document.getElementById('checkinToggleList');
+
+    function atualizarBloqueioCheckin() {
+      checkinList.classList.toggle('blocked', !toggleGeo.checked);
+    }
+    toggleGeo.addEventListener('change', atualizarBloqueioCheckin);
+    atualizarBloqueioCheckin();
+
+    // Check-in
+    const checkinCard = document.getElementById('sec-checkin');
+    document.getElementById('checkinHeader').addEventListener('click', () => {
+      abrirAcordeao(checkinCard);
+    });
+    const resumoCheckin = document.querySelector('a.aside-nav-item[href="#sec-checkin"]');
+    if (resumoCheckin) {
+      resumoCheckin.addEventListener('click', (e) => {
+        e.preventDefault();
+        fecharTodos(checkinCard);
+        checkinCard.classList.add('open');
+        checkinCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    }
+
+    // Escalas
+    const escalasCard = document.getElementById('sec-escalas');
+    document.getElementById('escalasHeader').addEventListener('click', () => {
+      abrirAcordeao(escalasCard);
+    });
+    const resumoEscalas = document.querySelector('a.aside-nav-item[href="#sec-escalas"]');
+    if (resumoEscalas) {
+      resumoEscalas.addEventListener('click', (e) => {
+        e.preventDefault();
+        fecharTodos(escalasCard);
+        escalasCard.classList.add('open');
+        escalasCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    }
+
+    // Notificações
+    const notificacoesCard = document.getElementById('sec-notificacoes');
+    document.getElementById('notificacoesHeader').addEventListener('click', () => {
+      abrirAcordeao(notificacoesCard);
+    });
+    const resumoNotificacoes = document.querySelector('a.aside-nav-item[href="#sec-notificacoes"]');
+    if (resumoNotificacoes) {
+      resumoNotificacoes.addEventListener('click', (e) => {
+        e.preventDefault();
+        fecharTodos(notificacoesCard);
+        notificacoesCard.classList.add('open');
+        notificacoesCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    }
+
+    // Gamificação
+    const gamificacaoCard = document.getElementById('sec-gamificacao');
+    document.getElementById('gamificacaoHeader').addEventListener('click', () => {
+      abrirAcordeao(gamificacaoCard);
+    });
+    const resumoGamificacao = document.querySelector('a.aside-nav-item[href="#sec-gamificacao"]');
+    if (resumoGamificacao) {
+      resumoGamificacao.addEventListener('click', (e) => {
+        e.preventDefault();
+        fecharTodos(gamificacaoCard);
+        gamificacaoCard.classList.add('open');
+        gamificacaoCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    }
+
+    // Permissões
+    const permissoesCard = document.getElementById('sec-permissoes');
+    document.getElementById('permissoesHeader').addEventListener('click', () => {
+      abrirAcordeao(permissoesCard);
+    });
+
+    const resumoPermissoes = document.querySelector('a.aside-nav-item[href="#sec-permissoes"]');
+    if (resumoPermissoes) {
+      resumoPermissoes.addEventListener('click', (e) => {
+        e.preventDefault();
+        fecharTodos(permissoesCard);
+        permissoesCard.classList.add('open');
+        permissoesCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    }
 
     // Máscara CNPJ
     document.getElementById('gCnpj').addEventListener('input', e => {
@@ -1187,6 +1985,21 @@
       btn.style.background = '#00a878';
       setTimeout(() => { btn.textContent = 'Salvar alterações'; btn.style.background = ''; }, 2000);
     });
+
+    // Administradores
+    const adminsCard = document.getElementById('sec-admins');
+    document.getElementById('adminsHeader').addEventListener('click', () => {
+      abrirAcordeao(adminsCard);
+    });
+    const resumoAdmins = document.querySelector('a.aside-nav-item[href="#sec-admins"]');
+    if (resumoAdmins) {
+      resumoAdmins.addEventListener('click', (e) => {
+        e.preventDefault();
+        fecharTodos(adminsCard);
+        adminsCard.classList.add('open');
+        adminsCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    }
 
     // Logout
     document.getElementById('logoutBtn').addEventListener('click', async e => {

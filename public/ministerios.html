@@ -1,0 +1,1872 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hug Software — Ministérios</title>
+  <link rel="icon" type="image/png" href="/IMG/logo.png">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary:         #235347;
+      --primary-light:   #8eb69b;
+      --primary-focus:   #235347;
+      --primary-dark:    #0b2b26;
+      --accent-green:    #8eb69b;
+      --ink:             #1d1d1f;
+      --ink-muted:       #6e6e73;
+      --ink-subtle:      #aeaeb2;
+      --canvas:          #ffffff;
+      --canvas-page:     #f0f6f2;
+      --canvas-input:    #f2f2f7;
+      --hairline:        #e0e0e0;
+      --on-dark:         #ffffff;
+      --on-dark-muted:   rgba(255,255,255,0.65);
+      --sidebar-w:       220px;
+      --topbar-h:        64px;
+      --radius-sm:       8px;
+      --radius-md:       12px;
+      --radius-lg:       18px;
+      --radius-pill:     9999px;
+    }
+
+    body {
+      min-height: 100vh;
+      background: var(--canvas-page);
+      font-family: "SF Pro Text", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      -webkit-font-smoothing: antialiased;
+      display: flex;
+    }
+
+    /* ─────────────────── SIDEBAR ─────────────────── */
+    .sidebar {
+      width: var(--sidebar-w);
+      min-height: 100vh;
+      background: linear-gradient(180deg, #051f20 0%, #0b2b26 55%, #163832 100%);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      z-index: 100;
+      overflow: hidden;
+      transition: width 0.22s cubic-bezier(.4,0,.2,1);
+    }
+
+    .sidebar-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 24px 20px 28px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      transition: padding 0.22s, gap 0.22s;
+    }
+
+    .logo-mark {
+      width: 42px; height: 42px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .logo-text {
+      font-family: "SF Pro Display", system-ui, -apple-system, sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--on-dark);
+      letter-spacing: 0.6px;
+      line-height: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      opacity: 1;
+      transition: opacity 0.15s, width 0.22s;
+    }
+    .logo-text span { color: var(--primary-light); }
+
+    .sidebar-nav {
+      flex: 1;
+      padding: 14px 0;
+      overflow-y: auto;
+      scrollbar-width: none;
+    }
+    .sidebar-nav::-webkit-scrollbar { display: none; }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 11px 20px;
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--on-dark-muted);
+      text-decoration: none;
+      letter-spacing: -0.224px;
+      transition: background 0.12s ease, color 0.12s ease, padding 0.22s, justify-content 0.22s;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .nav-item:hover { color: var(--on-dark); background: rgba(255,255,255,0.07); }
+    .nav-item.active {
+      color: var(--on-dark);
+      background: rgba(255,255,255,0.13);
+      font-weight: 600;
+    }
+    .nav-item svg { width: 18px; height: 18px; flex-shrink: 0; opacity: 0.85; }
+    .nav-item.active svg { opacity: 1; }
+    .nav-item span { overflow: hidden; opacity: 1; transition: opacity 0.15s; }
+
+    body.sidebar-collapsed .sidebar { width: 64px; }
+    body.sidebar-collapsed .sidebar-logo { padding: 24px 11px 28px; gap: 0; justify-content: center; }
+    body.sidebar-collapsed .logo-text { opacity: 0; width: 0; }
+    body.sidebar-collapsed .nav-item { padding: 11px 0; justify-content: center; gap: 0; }
+    body.sidebar-collapsed .nav-item span { opacity: 0; width: 0; }
+    body.sidebar-collapsed .main { margin-left: 64px; }
+    body.sidebar-collapsed #collapseBtn svg { transform: rotate(180deg); }
+
+    /* ─────────────────── MAIN AREA ─────────────────── */
+    .main {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      transition: margin-left 0.22s cubic-bezier(.4,0,.2,1);
+    }
+
+    /* ─────────────────── TOPBAR ─────────────────── */
+    .topbar {
+      height: var(--topbar-h);
+      background: var(--canvas);
+      border-bottom: 1px solid var(--hairline);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0 24px;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .search-wrap {
+      flex: 1;
+      max-width: 420px;
+      position: relative;
+    }
+    .search-wrap svg {
+      position: absolute;
+      left: 12px; top: 50%;
+      transform: translateY(-50%);
+      width: 15px; height: 15px;
+      color: var(--ink-subtle);
+    }
+    .search-wrap input {
+      width: 100%;
+      height: 40px;
+      background: var(--canvas-input);
+      border: 1px solid transparent;
+      border-radius: var(--radius-pill);
+      padding: 0 16px 0 40px;
+      font-size: 14px;
+      font-family: inherit;
+      color: var(--ink);
+      outline: none;
+      letter-spacing: -0.224px;
+      transition: border-color 0.15s;
+    }
+    .search-wrap input::placeholder { color: var(--ink-subtle); }
+    .search-wrap input:focus { border-color: var(--primary-focus); background: var(--canvas); }
+
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-left: auto;
+    }
+
+    .icon-btn {
+      width: 40px; height: 40px;
+      border-radius: var(--radius-pill);
+      border: none;
+      background: none;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--ink-muted);
+      transition: background 0.12s, color 0.12s;
+    }
+    .icon-btn:hover { background: var(--canvas-input); color: var(--ink); }
+    .icon-btn svg { width: 20px; height: 20px; }
+
+    .avatar {
+      width: 40px; height: 40px;
+      border-radius: var(--radius-pill);
+      background: #e8612a;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+      font-weight: 600;
+      color: #fff;
+      cursor: pointer;
+      margin-left: 4px;
+      letter-spacing: -0.12px;
+      user-select: none;
+    }
+
+    /* ─────────────────── AVATAR DROPDOWN ─────────────────── */
+    .avatar-menu-wrap { position: relative; }
+
+    .avatar-dropdown {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      width: 220px;
+      background: var(--canvas);
+      border: 1px solid var(--hairline);
+      border-radius: var(--radius-md);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.10), 0 2px 6px rgba(0,0,0,0.06);
+      padding: 6px;
+      z-index: 200;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(-6px);
+      transition: opacity 0.15s, transform 0.15s;
+    }
+    .avatar-dropdown.open { opacity: 1; pointer-events: auto; transform: translateY(0); }
+
+    .dropdown-header {
+      padding: 10px 12px 12px;
+      border-bottom: 1px solid var(--hairline);
+      margin-bottom: 6px;
+    }
+    .dropdown-name { font-size: 14px; font-weight: 600; color: var(--ink); letter-spacing: -0.224px; }
+    .dropdown-email { font-size: 12px; color: var(--ink-subtle); letter-spacing: -0.12px; margin-top: 2px; }
+
+    .dropdown-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 12px;
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--ink);
+      letter-spacing: -0.224px;
+      border-radius: var(--radius-sm);
+      text-decoration: none;
+      cursor: pointer;
+      transition: background 0.12s;
+    }
+    .dropdown-item:hover { background: var(--canvas-page); }
+    .dropdown-item svg { width: 16px; height: 16px; color: var(--ink-muted); flex-shrink: 0; }
+    .dropdown-item.danger { color: #ff3b30; }
+    .dropdown-item.danger svg { color: #ff3b30; }
+    .dropdown-item.danger:hover { background: rgba(255,59,48,0.06); }
+    .dropdown-divider { height: 1px; background: var(--hairline); margin: 6px 0; }
+
+    /* ─────────────────── CONTENT ─────────────────── */
+    .content {
+      padding: 32px;
+      min-width: 0;
+      flex: 1;
+    }
+
+    /* ─────────────────── HERO ─────────────────── */
+    .hero {
+      background: linear-gradient(135deg, #051f20 0%, #163832 55%, #235347 100%);
+      border-radius: var(--radius-lg);
+      padding: 36px 44px;
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 24px;
+    }
+    .hero::after {
+      content: "";
+      position: absolute;
+      width: 320px; height: 320px;
+      border-radius: 50%;
+      border: 56px solid rgba(255,255,255,0.07);
+      right: -60px; top: -90px;
+      pointer-events: none;
+    }
+    .hero::before {
+      content: "";
+      position: absolute;
+      width: 180px; height: 180px;
+      border-radius: 50%;
+      border: 32px solid rgba(255,255,255,0.05);
+      right: 140px; bottom: -60px;
+      pointer-events: none;
+    }
+
+    .hero-title {
+      font-family: "SF Pro Display", system-ui, -apple-system, sans-serif;
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--on-dark);
+      letter-spacing: -0.374px;
+      line-height: 1.14;
+      margin-bottom: 8px;
+    }
+    .hero-desc {
+      font-size: 15px;
+      font-weight: 400;
+      color: var(--on-dark-muted);
+      letter-spacing: -0.224px;
+      line-height: 1.5;
+      margin-bottom: 24px;
+    }
+    .hero-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      height: 42px;
+      padding: 0 22px;
+      background: var(--canvas);
+      border: none;
+      border-radius: var(--radius-pill);
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--primary-dark);
+      letter-spacing: -0.224px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.15s, transform 0.1s;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    }
+    .hero-btn:hover { background: #f0f6f2; }
+    .hero-btn:active { transform: scale(0.97); }
+    .hero-btn svg { width: 16px; height: 16px; }
+
+    /* ─────────────────── STATS ROW ─────────────────── */
+    .stats-row {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .stat-card {
+      background: var(--canvas);
+      border: 1px solid var(--hairline);
+      border-radius: var(--radius-md);
+      padding: 20px 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex: 1;
+      cursor: pointer;
+      transition: box-shadow 0.14s, border-color 0.14s, transform 0.1s;
+      user-select: none;
+    }
+    .stat-card:hover {
+      box-shadow: 0 4px 16px rgba(35,83,71,0.10);
+      border-color: rgba(35,83,71,0.25);
+    }
+    .stat-card:active { transform: scale(0.98); }
+    .stat-card.active-filter {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(35,83,71,0.10);
+    }
+    .stat-card.active-filter .stat-value { color: var(--primary); }
+
+    .stat-icon {
+      width: 52px; height: 52px;
+      border-radius: var(--radius-sm);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .stat-icon svg { width: 26px; height: 26px; }
+    .stat-icon.dark-teal  { background: #8eb69b; color: #fff; }
+    .stat-icon.mid-teal   { background: rgba(35,83,71,0.15); color: var(--primary); }
+    .stat-icon.light-green { background: rgba(142,182,155,0.14); color: #235347; }
+
+    .stat-value {
+      font-family: "SF Pro Display", system-ui, -apple-system, sans-serif;
+      font-size: 28px;
+      font-weight: 600;
+      color: var(--ink);
+      letter-spacing: -0.374px;
+      line-height: 1;
+    }
+    .stat-label {
+      font-size: 13px;
+      font-weight: 400;
+      color: var(--ink-muted);
+      letter-spacing: -0.224px;
+      margin-top: 4px;
+    }
+
+    /* ─────────────────── LIST SECTION ─────────────────── */
+    .list-card {
+      background: var(--canvas);
+      border: 1px solid var(--hairline);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+
+    .list-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--hairline);
+      gap: 16px;
+    }
+
+    .list-title {
+      font-family: "SF Pro Display", system-ui, -apple-system, sans-serif;
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--ink);
+      letter-spacing: -0.374px;
+    }
+
+    .list-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* Blocos / Tabela toggle */
+    .view-toggle {
+      display: flex;
+      background: var(--canvas-input);
+      border-radius: var(--radius-sm);
+      padding: 3px;
+      gap: 2px;
+    }
+    .view-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      height: 32px;
+      padding: 0 12px;
+      border: none;
+      background: none;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 400;
+      font-family: inherit;
+      color: var(--ink-muted);
+      cursor: pointer;
+      letter-spacing: -0.12px;
+      transition: background 0.12s, color 0.12s;
+      white-space: nowrap;
+    }
+    .view-btn svg { width: 14px; height: 14px; flex-shrink: 0; }
+    .view-btn.active {
+      background: var(--canvas);
+      color: var(--ink);
+      font-weight: 500;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+
+    /* Search inline */
+    .list-search {
+      position: relative;
+    }
+    .list-search svg {
+      position: absolute;
+      left: 10px; top: 50%;
+      transform: translateY(-50%);
+      width: 14px; height: 14px;
+      color: var(--ink-subtle);
+      pointer-events: none;
+    }
+    .list-search input {
+      height: 36px;
+      width: 180px;
+      background: var(--canvas-input);
+      border: 1px solid transparent;
+      border-radius: var(--radius-pill);
+      padding: 0 14px 0 32px;
+      font-size: 13px;
+      font-family: inherit;
+      color: var(--ink);
+      outline: none;
+      letter-spacing: -0.12px;
+      transition: border-color 0.15s, width 0.2s;
+    }
+    .list-search input::placeholder { color: var(--ink-subtle); }
+    .list-search input:focus {
+      border-color: var(--primary-focus);
+      background: var(--canvas);
+      width: 220px;
+    }
+
+    /* Empty state */
+    .list-empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 72px 24px;
+      gap: 12px;
+      color: var(--ink-subtle);
+    }
+    .list-empty svg { width: 40px; height: 40px; opacity: 0.35; }
+    .list-empty-text {
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--ink-subtle);
+      letter-spacing: -0.224px;
+    }
+
+    /* Grid view for ministries */
+    .ministry-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 16px;
+      padding: 24px;
+    }
+    .ministry-grid.hidden { display: none; }
+
+    /* Ministry card */
+    .ministry-card {
+      background: var(--canvas);
+      border: 1px solid var(--hairline);
+      border-radius: var(--radius-md);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      transition: box-shadow 0.14s;
+    }
+    .ministry-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+
+    .mc-clickable {
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+    }
+    .mc-clickable:hover .mc-top { background: #f5faf6; }
+
+    .mc-top {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 20px 20px 16px;
+    }
+    .mc-icon {
+      width: 52px; height: 52px;
+      border-radius: var(--radius-sm);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .mc-icon svg { width: 26px; height: 26px; }
+    .mc-info { flex: 1; min-width: 0; }
+    .mc-name {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--ink);
+      letter-spacing: -0.224px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .mc-desc {
+      font-size: 13px;
+      color: var(--ink-muted);
+      letter-spacing: -0.12px;
+      line-height: 1.4;
+      margin-top: 3px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .mc-stats {
+      display: flex;
+      border-top: 1px solid var(--hairline);
+      border-bottom: 1px solid var(--hairline);
+    }
+    .mc-stat {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 12px 8px;
+    }
+    .mc-stat + .mc-stat { border-left: 1px solid var(--hairline); }
+    .mc-stat-value {
+      font-family: "SF Pro Display", system-ui, -apple-system, sans-serif;
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--primary);
+      letter-spacing: -0.374px;
+      line-height: 1;
+    }
+    .mc-stat-label {
+      font-size: 11px;
+      color: var(--ink-subtle);
+      letter-spacing: 0.2px;
+      margin-top: 4px;
+    }
+
+    .mc-leader {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--hairline);
+    }
+    .mc-leader-avatar {
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      background: var(--primary);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px;
+      font-weight: 600;
+      color: #fff;
+      flex-shrink: 0;
+      letter-spacing: -0.12px;
+    }
+    .mc-leader-tag {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      color: var(--ink-subtle);
+    }
+    .mc-leader-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--ink);
+      letter-spacing: -0.12px;
+    }
+
+    /* Card arquivado */
+    .ministry-card.archived {
+      opacity: 0.65;
+    }
+    .archived-badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      height: 22px; padding: 0 10px;
+      background: rgba(0,0,0,0.06);
+      border-radius: var(--radius-pill);
+      font-size: 11px; font-weight: 600;
+      color: var(--ink-muted); letter-spacing: 0.2px;
+    }
+
+    /* Filtros da lista */
+    .filter-tabs {
+      display: flex;
+      background: var(--canvas-input);
+      border-radius: var(--radius-sm);
+      padding: 3px; gap: 2px;
+    }
+    .filter-tab {
+      height: 30px; padding: 0 14px;
+      border: none; background: none;
+      border-radius: 6px;
+      font-size: 13px; font-weight: 400;
+      font-family: inherit; color: var(--ink-muted);
+      cursor: pointer; letter-spacing: -0.12px;
+      transition: background 0.12s, color 0.12s;
+      white-space: nowrap;
+    }
+    .filter-tab.active {
+      background: var(--canvas);
+      color: var(--ink); font-weight: 500;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+
+    .mc-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 20px;
+    }
+    .btn-excluir {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      height: 34px;
+      padding: 0 14px;
+      background: transparent;
+      border: 1.5px solid #ffcdd2;
+      border-radius: var(--radius-pill);
+      font-size: 13px;
+      font-weight: 500;
+      color: #e53935;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background 0.12s, border-color 0.12s;
+    }
+    .btn-excluir:hover { background: #fff5f5; border-color: #e53935; }
+    .btn-excluir svg { width: 14px; height: 14px; }
+    .btn-arquivar {
+      display: flex; align-items: center; gap: 6px;
+      height: 34px; padding: 0 14px;
+      background: transparent;
+      border: 1.5px solid var(--hairline);
+      border-radius: var(--radius-pill);
+      font-size: 13px; font-weight: 500;
+      color: var(--ink-muted); font-family: inherit;
+      cursor: pointer; transition: background 0.12s, border-color 0.12s, color 0.12s;
+    }
+    .btn-arquivar:hover { background: var(--canvas-input); border-color: var(--ink-subtle); color: var(--ink); }
+    .btn-arquivar svg { width: 14px; height: 14px; }
+    .btn-desarquivar {
+      display: flex; align-items: center; gap: 6px;
+      height: 34px; padding: 0 14px;
+      background: rgba(35,83,71,0.08);
+      border: 1.5px solid rgba(35,83,71,0.20);
+      border-radius: var(--radius-pill);
+      font-size: 13px; font-weight: 500;
+      color: var(--primary); font-family: inherit;
+      cursor: pointer; transition: background 0.12s;
+    }
+    .btn-desarquivar:hover { background: rgba(35,83,71,0.14); }
+    .btn-desarquivar svg { width: 14px; height: 14px; }
+
+    /* Table view */
+    .ministry-table { width: 100%; border-collapse: collapse; }
+    .ministry-table th {
+      padding: 12px 24px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--ink-muted);
+      text-align: left;
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+      border-bottom: 1px solid var(--hairline);
+      background: var(--canvas-page);
+    }
+    .ministry-table td {
+      padding: 14px 24px;
+      font-size: 14px;
+      color: var(--ink);
+      letter-spacing: -0.224px;
+      border-bottom: 1px solid var(--hairline);
+    }
+    .ministry-table tr:last-child td { border-bottom: none; }
+    .ministry-table tr:hover td { background: #f5faf6; }
+    .ministry-table.hidden { display: none; }
+
+    /* ─────────────────── DRAWER NOVO MINISTÉRIO ─────────────────── */
+    .drawer-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.38);
+      z-index: 500;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.22s;
+    }
+    .drawer-overlay.open { opacity: 1; pointer-events: auto; }
+
+    .drawer {
+      position: fixed;
+      top: 0; right: 0; bottom: 0;
+      width: 52vw;
+      max-width: 780px;
+      min-width: 400px;
+      background: var(--canvas);
+      box-shadow: -8px 0 48px rgba(0,0,0,0.18);
+      display: flex;
+      flex-direction: column;
+      transform: translateX(100%);
+      transition: transform 0.26s cubic-bezier(.4,0,.2,1);
+      z-index: 501;
+      overflow: hidden;
+    }
+    .drawer-overlay.open .drawer { transform: translateX(0); }
+
+    /* Drawer header — gradiente teal */
+    .drawer-header {
+      background: linear-gradient(135deg, #051f20 0%, #163832 60%, #235347 100%);
+      padding: 28px 32px 24px;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+    .drawer-header-text {}
+    .drawer-title {
+      font-family: "SF Pro Display", system-ui, -apple-system, sans-serif;
+      font-size: 22px;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: -0.374px;
+      line-height: 1.1;
+      margin-bottom: 6px;
+    }
+    .drawer-subtitle {
+      font-size: 14px;
+      font-weight: 400;
+      color: rgba(255,255,255,0.72);
+      letter-spacing: -0.12px;
+    }
+    .drawer-close {
+      width: 36px; height: 36px;
+      border: none;
+      background: #8eb69b;
+      border-radius: var(--radius-pill);
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: #fff;
+      flex-shrink: 0;
+      margin-left: 16px;
+      transition: background 0.12s;
+    }
+    .drawer-close:hover { background: rgba(255,255,255,0.28); }
+    .drawer-close svg { width: 18px; height: 18px; }
+
+    /* Drawer body */
+    .drawer-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 28px 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+    }
+    .drawer-body::-webkit-scrollbar { width: 4px; }
+    .drawer-body::-webkit-scrollbar-thumb { background: var(--hairline); border-radius: 4px; }
+
+    .field-group { display: flex; flex-direction: column; gap: 8px; }
+    .field-label {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--ink);
+      letter-spacing: -0.12px;
+    }
+    .field-input {
+      height: 46px;
+      background: var(--canvas);
+      border: 1.5px solid var(--hairline);
+      border-radius: var(--radius-sm);
+      padding: 0 16px;
+      font-size: 15px;
+      font-family: inherit;
+      color: var(--ink);
+      outline: none;
+      letter-spacing: -0.224px;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .field-input::placeholder { color: var(--ink-subtle); }
+    .field-input:focus {
+      border-color: var(--primary-focus);
+      box-shadow: 0 0 0 3px rgba(35,83,71,0.10);
+    }
+    .field-input.error { border-color: #ff3b30; }
+    .field-textarea {
+      height: 100px;
+      resize: vertical;
+      padding: 12px 16px;
+      line-height: 1.5;
+    }
+
+    /* Campo de busca líder */
+    .leader-search-wrap {
+      position: relative;
+      width: 100%;
+    }
+    .leader-search-wrap svg {
+      position: absolute;
+      left: 14px; top: 50%;
+      transform: translateY(-50%);
+      width: 16px; height: 16px;
+      color: var(--ink-subtle);
+      pointer-events: none;
+    }
+    .leader-search-wrap .field-input {
+      padding-left: 42px;
+      width: 100%;
+    }
+
+    /* ── Modal de confirmação de exclusão ── */
+    .confirm-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.40);
+      z-index: 600;
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.18s;
+    }
+    .confirm-overlay.open { opacity: 1; pointer-events: auto; }
+
+    .confirm-modal {
+      background: var(--canvas);
+      border-radius: var(--radius-lg);
+      width: 420px;
+      max-width: calc(100vw - 40px);
+      box-shadow: 0 24px 64px rgba(0,0,0,0.20);
+      transform: translateY(10px) scale(0.98);
+      transition: transform 0.18s;
+      overflow: hidden;
+    }
+    .confirm-overlay.open .confirm-modal { transform: translateY(0) scale(1); }
+
+    .confirm-icon-wrap {
+      display: flex;
+      justify-content: center;
+      padding: 32px 24px 0;
+    }
+    .confirm-icon {
+      width: 56px; height: 56px;
+      border-radius: 50%;
+      background: #fff5f5;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .confirm-icon svg { width: 26px; height: 26px; color: #e53935; }
+
+    .confirm-content {
+      padding: 20px 28px 24px;
+      text-align: center;
+    }
+    .confirm-title {
+      font-family: "SF Pro Display", system-ui, -apple-system, sans-serif;
+      font-size: 17px;
+      font-weight: 600;
+      color: var(--ink);
+      letter-spacing: -0.374px;
+      line-height: 1.3;
+      margin-bottom: 10px;
+    }
+    .confirm-desc {
+      font-size: 13.5px;
+      color: var(--ink-muted);
+      letter-spacing: -0.12px;
+      line-height: 1.5;
+    }
+
+    .confirm-footer {
+      display: flex;
+      gap: 10px;
+      padding: 0 24px 24px;
+    }
+    .btn-confirm-cancel {
+      flex: 1;
+      height: 46px;
+      background: var(--canvas-input);
+      border: none;
+      border-radius: var(--radius-pill);
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--ink-muted);
+      font-family: inherit;
+      cursor: pointer;
+      transition: background 0.12s;
+      letter-spacing: -0.224px;
+    }
+    .btn-confirm-cancel:hover { background: var(--hairline); }
+    .btn-confirm-delete {
+      flex: 1;
+      height: 46px;
+      background: #e53935;
+      border: none;
+      border-radius: var(--radius-pill);
+      font-size: 14px;
+      font-weight: 600;
+      color: #fff;
+      font-family: inherit;
+      cursor: pointer;
+      letter-spacing: -0.224px;
+      transition: background 0.12s, transform 0.1s;
+    }
+    .btn-confirm-delete:hover { background: #c62828; }
+    .btn-confirm-delete:active { transform: scale(0.97); }
+
+    /* Tela de sucesso */
+    .drawer-success {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 48px 32px;
+      gap: 16px;
+      text-align: center;
+    }
+    .drawer-success.hidden { display: none; }
+    .drawer-body.hidden    { display: none; }
+
+    .success-icon {
+      width: 72px; height: 72px;
+      border-radius: 50%;
+      background: rgba(35,83,71,0.10);
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 8px;
+    }
+    .success-icon svg { width: 34px; height: 34px; color: var(--primary); }
+
+    .success-title {
+      font-family: "SF Pro Display", system-ui, -apple-system, sans-serif;
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--ink);
+      letter-spacing: -0.374px;
+    }
+    .success-name {
+      font-size: 15px;
+      color: var(--ink-muted);
+      letter-spacing: -0.224px;
+    }
+    .success-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      width: 100%;
+      max-width: 320px;
+      margin-top: 12px;
+    }
+    .btn-success-continue {
+      height: 50px;
+      width: 100%;
+      background: transparent;
+      border: 1.5px solid var(--primary);
+      border-radius: var(--radius-pill);
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--primary);
+      font-family: inherit;
+      cursor: pointer;
+      letter-spacing: -0.224px;
+      transition: background 0.12s;
+    }
+    .btn-success-continue:hover { background: rgba(35,83,71,0.06); }
+    .btn-success-done {
+      height: 50px;
+      width: 100%;
+      background: var(--primary);
+      border: none;
+      border-radius: var(--radius-pill);
+      font-size: 14px;
+      font-weight: 600;
+      color: #fff;
+      font-family: inherit;
+      cursor: pointer;
+      letter-spacing: -0.224px;
+      transition: background 0.12s, transform 0.1s;
+    }
+    .btn-success-done:hover { background: var(--primary-dark); }
+    .btn-success-done:active { transform: scale(0.97); }
+
+    /* Drawer footer */
+    .drawer-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 32px 22px;
+      border-top: 1px solid var(--hairline);
+      flex-shrink: 0;
+    }
+    .btn-drawer-cancel {
+      height: 50px;
+      padding: 0 18px;
+      background: transparent;
+      border: 1px solid var(--hairline);
+      border-radius: var(--radius-pill);
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--ink-muted);
+      font-family: inherit;
+      cursor: pointer;
+      letter-spacing: -0.224px;
+      transition: background 0.12s;
+    }
+    .btn-drawer-cancel:hover { background: var(--canvas-input); }
+    .btn-drawer-save {
+      height: 50px;
+      padding: 0 22px;
+      background: var(--primary);
+      border: none;
+      border-radius: var(--radius-pill);
+      font-size: 14px;
+      font-weight: 600;
+      color: #fff;
+      font-family: inherit;
+      cursor: pointer;
+      letter-spacing: -0.224px;
+      transition: background 0.12s, transform 0.1s;
+    }
+    .btn-drawer-save:hover { background: var(--primary-dark); }
+    .btn-drawer-save:active { transform: scale(0.97); }
+  </style>
+</head>
+<body>
+<script>if(localStorage.getItem('sidebar-collapsed')==='1')document.body.classList.add('sidebar-collapsed')</script>
+
+  <!-- ── Sidebar ── -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark">
+        <img src="/IMG/logo.png" alt="Logo" style="width:52px;height:52px;object-fit:contain;">
+      </div>
+      <div class="logo-text" id="churchName"></div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a class="nav-item" href="/dashboard">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        <span>Dashboard</span>
+      </a>
+      <a class="nav-item active" href="/ministerios">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        <span>Ministérios</span>
+      </a>
+      <a class="nav-item" href="/departamentos">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <span>Departamentos</span>
+      </a>
+      <a class="nav-item" href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        <span>Templates</span>
+      </a>
+      <a class="nav-item" href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <span>Eventos</span>
+      </a>
+      <a class="nav-item" href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        <span>Escalação</span>
+      </a>
+      <a class="nav-item" href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+        <span>Músicas</span>
+      </a>
+      <a class="nav-item" href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span>Voluntários</span>
+      </a>
+      <a class="nav-item" href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <span>Líderes</span>
+      </a>
+      <a class="nav-item" href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <span>Triagem</span>
+      </a>
+      <a class="nav-item" href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        <span>Presença</span>
+      </a>
+      <a class="nav-item" href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        <span>Gamificação</span>
+      </a>
+      <a class="nav-item" href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        <span>Relatórios</span>
+      </a>
+      <a class="nav-item" href="/configuracoes">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        <span>Configurações</span>
+      </a>
+    </nav>
+  </aside>
+
+  <!-- ── Main ── -->
+  <div class="main">
+
+    <!-- Topbar -->
+    <header class="topbar">
+      <div class="search-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" placeholder="Buscar eventos, voluntários..." />
+      </div>
+
+      <div class="topbar-actions">
+        <button class="icon-btn" title="Notificações">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        </button>
+        <button class="icon-btn" title="Configurações" onclick="window.location.href='/configuracoes'">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </button>
+        <button class="icon-btn" id="collapseBtn" title="Recolher menu">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="transition:transform 0.22s"><polyline points="11 17 6 12 11 7"/><polyline points="18 17 13 12 18 7"/></svg>
+        </button>
+        <div class="avatar-menu-wrap">
+          <div class="avatar" id="avatarBtn">A</div>
+          <div class="avatar-dropdown" id="avatarDropdown">
+            <div class="dropdown-header">
+              <div class="dropdown-name" id="dropdownName">—</div>
+              <div class="dropdown-email" id="dropdownEmail">—</div>
+            </div>
+            <a class="dropdown-item" href="/editar-perfil">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              Editar Perfil
+            </a>
+            <a class="dropdown-item" href="/configuracoes">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+              Configurações
+            </a>
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item danger" href="#" id="logoutBtn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+              Sair
+            </a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Content -->
+    <main class="content">
+
+      <!-- Hero -->
+      <div class="hero">
+        <div class="hero-title">Ministérios</div>
+        <div class="hero-desc">Gerencie os ministérios da sua igreja.</div>
+        <button class="hero-btn" id="btnNovoMinisterio">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Novo Ministério
+        </button>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-row">
+        <div class="stat-card active-filter" id="cardTodos" onclick="setFiltro('todos')">
+          <div class="stat-icon dark-teal">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          </div>
+          <div>
+            <div class="stat-value" id="statMinisterios">0</div>
+            <div class="stat-label">Total de Ministérios</div>
+          </div>
+        </div>
+        <div class="stat-card" id="cardAtivos" onclick="setFiltro('ativos')">
+          <div class="stat-icon mid-teal">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div>
+            <div class="stat-value" id="statAtivos">0</div>
+            <div class="stat-label">Ministérios Ativos</div>
+          </div>
+        </div>
+        <div class="stat-card" id="cardArquivados" onclick="setFiltro('arquivados')">
+          <div class="stat-icon light-green">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8v13H3V8"/><path d="M1 3h22v5H1z"/><path d="M10 12h4"/></svg>
+          </div>
+          <div>
+            <div class="stat-value" id="statArquivados">0</div>
+            <div class="stat-label">Ministérios Arquivados</div>
+          </div>
+        </div>
+        <div class="stat-card" id="cardDepartamentos" onclick="window.location.href='/departamentos'" style="cursor:pointer;">
+          <div class="stat-icon dark-teal">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+          </div>
+          <div>
+            <div class="stat-value" id="statDepartamentos">0</div>
+            <div class="stat-label">Departamentos</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Lista -->
+      <div class="list-card">
+        <div class="list-header">
+          <div class="list-title">Lista de Ministérios</div>
+          <div class="list-controls">
+            <div class="view-toggle">
+              <button class="view-btn active" id="btnBlocos">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+                Blocos
+              </button>
+              <button class="view-btn" id="btnTabela">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+                Tabela
+              </button>
+            </div>
+            <div class="list-search">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input type="text" placeholder="Buscar..." id="searchMinisterios" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Empty state (padrão quando não há ministérios) -->
+        <div class="list-empty" id="emptyState">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          <div class="list-empty-text">Nenhum ministério encontrado</div>
+        </div>
+
+        <!-- Grid view -->
+        <div class="ministry-grid hidden" id="gridView"></div>
+
+        <!-- Table view -->
+        <table class="ministry-table hidden" id="tableView">
+          <thead>
+            <tr>
+              <th>Ministério</th>
+              <th>Descrição</th>
+              <th>Departamentos</th>
+              <th>Líder</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- ── Drawer Novo Ministério ── -->
+  <div class="drawer-overlay" id="drawerOverlay">
+    <div class="drawer">
+
+      <!-- Header gradiente -->
+      <div class="drawer-header">
+        <div class="drawer-header-text">
+          <div class="drawer-title">Novo Ministério</div>
+          <div class="drawer-subtitle">Preencha os dados para criar um novo ministério</div>
+        </div>
+        <button class="drawer-close" id="drawerClose">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <!-- Body: formulário -->
+      <div class="drawer-body" id="drawerForm">
+
+        <div class="field-group">
+          <label class="field-label">Nome do Ministério *</label>
+          <input class="field-input" type="text" placeholder="Ex: Louvor, Kids, Recepção..." id="fieldNome" />
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">Descrição</label>
+          <textarea class="field-input field-textarea" placeholder="Descreva o propósito do ministério..." id="fieldDesc"></textarea>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">Vincular Líder (opcional)</label>
+          <div class="leader-search-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input class="field-input" type="text" placeholder="Buscar líder por nome ou email..." id="fieldLider" />
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Body: sucesso (oculto até salvar) -->
+      <div class="drawer-success hidden" id="drawerSuccess">
+        <div class="success-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="success-title">Ministério criado com sucesso!</div>
+        <div class="success-name" id="successName"></div>
+        <div class="success-actions">
+          <button class="btn-success-continue" id="btnContinuar">+ Criar outro ministério</button>
+          <button class="btn-success-done" id="btnConcluir">Voltar</button>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="drawer-footer" id="drawerFooter">
+        <button class="btn-drawer-cancel" id="drawerCancel">Cancelar</button>
+        <button class="btn-drawer-save" id="drawerSave">Criar Ministério</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── Modal de confirmação de arquivamento ── -->
+  <div class="confirm-overlay" id="archiveOverlay">
+    <div class="confirm-modal">
+      <div class="confirm-icon-wrap">
+        <div class="confirm-icon" style="background:#f0f6f2">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8v13H3V8"/><path d="M1 3h22v5H1z"/><path d="M10 12h4"/></svg>
+        </div>
+      </div>
+      <div class="confirm-content">
+        <div class="confirm-title">Arquivar este ministério?</div>
+        <div class="confirm-desc">O ministério ficará inativo e não aparecerá nas listagens principais. Você pode restaurá-lo a qualquer momento.</div>
+      </div>
+      <div class="confirm-footer">
+        <button class="btn-confirm-cancel" id="archiveCancel">Cancelar</button>
+        <button class="btn-confirm-delete" style="background:var(--primary)" id="archiveConfirm">Sim, arquivar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Modal de confirmação de exclusão ── -->
+  <div class="confirm-overlay" id="confirmOverlay">
+    <div class="confirm-modal">
+      <div class="confirm-icon-wrap">
+        <div class="confirm-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+        </div>
+      </div>
+      <div class="confirm-content">
+        <div class="confirm-title">Tem certeza que deseja excluir este ministério?</div>
+        <div class="confirm-desc">Se esse ministério for excluído não terá como recuperá-lo.</div>
+      </div>
+      <div class="confirm-footer">
+        <button class="btn-confirm-cancel" id="confirmCancel">Cancelar</button>
+        <button class="btn-confirm-delete" id="confirmDelete">Sim, excluir</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/auth-fetch.js"></script>
+  <script>
+    const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
+    const igreja  = JSON.parse(localStorage.getItem('igreja')  || '{}');
+
+    // Church name na sidebar
+    const churchNameEl = document.getElementById('churchName');
+    if (churchNameEl && igreja.nome) churchNameEl.textContent = igreja.nome;
+
+    // Avatar
+    function getInitial(nome) {
+      return (nome || '').replace(/^(Sr\.|Sra\.)\s*/, '')[0]?.toUpperCase() || '?';
+    }
+    if (usuario.nome) {
+      document.getElementById('avatarBtn').textContent     = getInitial(usuario.nome);
+      document.getElementById('dropdownName').textContent  = usuario.nome;
+      document.getElementById('dropdownEmail').textContent = usuario.email || '';
+    }
+
+    // Sidebar collapse
+    if (localStorage.getItem('sidebar-collapsed') === '1') {
+      document.body.classList.add('sidebar-collapsed');
+    }
+    document.getElementById('collapseBtn').addEventListener('click', () => {
+      document.body.classList.toggle('sidebar-collapsed');
+      localStorage.setItem('sidebar-collapsed', document.body.classList.contains('sidebar-collapsed') ? '1' : '0');
+    });
+
+    // Avatar dropdown
+    const avatarBtn      = document.getElementById('avatarBtn');
+    const avatarDropdown = document.getElementById('avatarDropdown');
+    avatarBtn.addEventListener('click', e => { e.stopPropagation(); avatarDropdown.classList.toggle('open'); });
+    document.addEventListener('click', () => avatarDropdown.classList.remove('open'));
+
+    // Logout
+    document.getElementById('logoutBtn').addEventListener('click', async e => {
+      e.preventDefault();
+      try { await authFetch('/api/auth/logout', { method: 'POST' }); } catch (_) {}
+      localStorage.clear();
+      window.location.href = '/';
+    });
+
+    // ── Filtro ──
+    let filtroAtivo = 'todos';
+
+    function setFiltro(f) {
+      filtroAtivo = f;
+      // stat cards
+      document.getElementById('cardTodos').classList.toggle('active-filter',      f === 'todos');
+      document.getElementById('cardAtivos').classList.toggle('active-filter',     f === 'ativos');
+      document.getElementById('cardArquivados').classList.toggle('active-filter', f === 'arquivados');
+      renderLista(document.getElementById('searchMinisterios').value);
+    }
+
+    // ── View toggle ──
+    const btnBlocos = document.getElementById('btnBlocos');
+    const btnTabela = document.getElementById('btnTabela');
+    const gridView  = document.getElementById('gridView');
+    const tableView = document.getElementById('tableView');
+    let   currentView = 'blocos';
+
+    function setView(v) {
+      currentView = v;
+      btnBlocos.classList.toggle('active', v === 'blocos');
+      btnTabela.classList.toggle('active', v === 'tabela');
+      if (ministerios.length > 0) {
+        gridView.classList.toggle('hidden',  v !== 'blocos');
+        tableView.classList.toggle('hidden', v !== 'tabela');
+      }
+    }
+    btnBlocos.addEventListener('click', () => setView('blocos'));
+    btnTabela.addEventListener('click', () => setView('tabela'));
+
+    // ── Estado ──
+    let ministerios = [];
+    let _departments = [];
+
+    // ── Render ──
+    function renderStats() {
+      const arquivados = ministerios.filter(m => m.is_active === false).length;
+      const ativos     = ministerios.length - arquivados;
+      document.getElementById('statMinisterios').textContent = ministerios.length;
+      document.getElementById('statAtivos').textContent      = ativos;
+      document.getElementById('statArquivados').textContent  = arquivados;
+    }
+
+    function renderLista(filtro) {
+      const q = (filtro || '').toLowerCase();
+      let lista = ministerios.filter(m => (m.name || '').toLowerCase().includes(q));
+      if (filtroAtivo === 'ativos')     lista = lista.filter(m => m.is_active !== false);
+      if (filtroAtivo === 'arquivados') lista = lista.filter(m => m.is_active === false);
+      const empty = document.getElementById('emptyState');
+
+      if (lista.length === 0) {
+        empty.style.display = 'flex';
+        gridView.classList.add('hidden');
+        tableView.classList.add('hidden');
+        return;
+      }
+
+      empty.style.display = 'none';
+
+      // Grid
+      gridView.innerHTML = lista.map(m => {
+        const iconColor  = m.color || '#8eb69b';
+        const lider      = m.leader_name || m.lider || '';
+        const initial    = lider ? lider[0].toUpperCase() : '';
+        const arquivado  = m.is_active === false;
+        const deptCount  = _departments.filter(d => d.ministry_id === m.id && d.is_active !== false).length;
+        return `
+        <div class="ministry-card${arquivado ? ' archived' : ''}">
+          <div class="mc-clickable" onclick="window.location.href='/ministerio/${m.id}'">
+            <div class="mc-top">
+              <div class="mc-icon" style="background:${iconColor}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+              </div>
+              <div class="mc-info">
+                <div class="mc-name" style="display:flex;align-items:center;gap:8px">
+                  ${m.name}
+                  ${arquivado ? '<span class="archived-badge">Arquivado</span>' : ''}
+                </div>
+                ${m.description ? `<div class="mc-desc">${m.description}</div>` : ''}
+              </div>
+            </div>
+            <div class="mc-stats">
+              <div class="mc-stat">
+                <div class="mc-stat-value">${deptCount}</div>
+                <div class="mc-stat-label">Departamentos</div>
+              </div>
+            </div>
+            <div class="mc-leader">
+              <div class="mc-leader-avatar" style="background:${lider ? iconColor : 'var(--canvas-input)'}; color:${lider ? '#fff' : 'var(--ink-subtle)'}">
+                ${lider ? initial : '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>'}
+              </div>
+              <div>
+                <div class="mc-leader-tag">Líder</div>
+                <div class="mc-leader-name" style="${!lider ? 'color:var(--ink-subtle);font-weight:400' : ''}">${lider || 'Não definido'}</div>
+              </div>
+            </div>
+          </div>
+          <div class="mc-footer" onclick="event.stopPropagation()">
+            ${arquivado
+              ? `<button class="btn-desarquivar" onclick="desarquivarMinisterio('${m.id}', this)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8v13H3V8"/><path d="M1 3h22v5H1z"/><path d="M10 12h4"/></svg>
+                  Restaurar
+                </button>`
+              : `<button class="btn-arquivar" onclick="abrirArquivar('${m.id}', this)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8v13H3V8"/><path d="M1 3h22v5H1z"/><path d="M10 12h4"/></svg>
+                  Arquivar
+                </button>`
+            }
+            <button class="btn-excluir" onclick="excluirMinisterio('${m.id}', this)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+              Excluir
+            </button>
+          </div>
+        </div>`;
+      }).join('');
+
+      // Table
+      document.getElementById('tableBody').innerHTML = lista.map(m => {
+        const iconColor = m.color || '#8eb69b';
+        const lider     = m.leader_name || m.lider || '';
+        return `
+        <tr>
+          <td>
+            <div style="display:flex;align-items:center;gap:12px">
+              <div style="width:40px;height:40px;border-radius:10px;background:${iconColor};display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+              </div>
+              <span style="font-weight:600;color:var(--ink)">${m.name}</span>
+            </div>
+          </td>
+          <td style="color:var(--ink-muted);max-width:320px">
+            <span style="display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${m.description || '—'}</span>
+          </td>
+          <td>
+            <span style="display:inline-flex;align-items:center;justify-content:center;min-width:32px;height:28px;padding:0 10px;background:rgba(35,83,71,0.10);border-radius:9999px;font-size:13px;font-weight:600;color:var(--primary)">0</span>
+          </td>
+          <td style="color:var(--ink)">${lider || '<span style="color:var(--ink-subtle)">—</span>'}</td>
+          <td>
+            <div style="display:flex;align-items:center;gap:8px">
+              <button style="height:32px;padding:0 14px;background:var(--canvas-input);border:none;border-radius:9999px;font-size:13px;font-weight:500;color:var(--ink);font-family:inherit;cursor:pointer;letter-spacing:-0.12px">Ver</button>
+              <button class="btn-excluir" style="height:32px;width:32px;padding:0;display:flex;align-items:center;justify-content:center" onclick="excluirMinisterio('${m.id}', this)">
+                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+              </button>
+            </div>
+          </td>
+        </tr>`;
+      }).join('');
+
+      setView(currentView);
+    }
+
+    // Search
+    document.getElementById('searchMinisterios').addEventListener('input', e => {
+      renderLista(e.target.value);
+    });
+
+    // ── Carregar ministérios da API ──
+    async function carregarMinisterios() {
+      try {
+        const [mRes, dRes] = await Promise.all([
+          authFetch('/api/ministry').then(r => r.json()),
+          authFetch('/api/department').then(r => r.json()).catch(() => ({ departments: [] }))
+        ]);
+        ministerios   = mRes.ministries   || [];
+        _departments  = dRes.departments  || [];
+        renderStats();
+        renderLista(document.getElementById('searchMinisterios').value);
+      } catch (err) {
+        console.error('[ministerios]', err);
+      }
+    }
+
+    // ── Drawer ──
+    const drawerOverlay = document.getElementById('drawerOverlay');
+
+    const drawerForm    = document.getElementById('drawerForm');
+    const drawerSuccess = document.getElementById('drawerSuccess');
+    const drawerFooter  = document.getElementById('drawerFooter');
+
+    function mostrarFormulario() {
+      drawerForm.classList.remove('hidden');
+      drawerSuccess.classList.add('hidden');
+      drawerFooter.style.display = '';
+    }
+
+    function mostrarSucesso(nome) {
+      document.getElementById('successName').textContent = `"${nome}"`;
+      drawerForm.classList.add('hidden');
+      drawerSuccess.classList.remove('hidden');
+      drawerFooter.style.display = 'none';
+    }
+
+    function limparFormulario() {
+      document.getElementById('fieldNome').value  = '';
+      document.getElementById('fieldDesc').value  = '';
+      document.getElementById('fieldLider').value = '';
+      document.getElementById('fieldNome').classList.remove('error');
+    }
+
+    let _editingId = null;
+
+    function abrirDrawer() {
+      _editingId = null;
+      limparFormulario();
+      mostrarFormulario();
+      document.querySelector('.drawer-title').textContent    = 'Novo Ministério';
+      document.querySelector('.drawer-subtitle').textContent = 'Preencha os dados para criar um novo ministério';
+      document.getElementById('drawerSave').textContent      = 'Criar Ministério';
+      drawerOverlay.classList.add('open');
+      setTimeout(() => document.getElementById('fieldNome').focus(), 260);
+    }
+
+    function abrirEditar(id) {
+      const m = ministerios.find(x => x.id === id);
+      if (!m) return;
+      _editingId = id;
+      limparFormulario();
+      mostrarFormulario();
+      document.querySelector('.drawer-title').textContent    = 'Editar Ministério';
+      document.querySelector('.drawer-subtitle').textContent = 'Atualize os dados do ministério';
+      document.getElementById('drawerSave').textContent      = 'Salvar Alterações';
+      document.getElementById('fieldNome').value  = m.name        || '';
+      document.getElementById('fieldDesc').value  = m.description || '';
+      document.getElementById('fieldLider').value = m.leader_name || m.lider || '';
+      drawerOverlay.classList.add('open');
+      setTimeout(() => document.getElementById('fieldNome').focus(), 260);
+    }
+
+    function fecharDrawer() {
+      drawerOverlay.classList.remove('open');
+      _editingId = null;
+      setTimeout(mostrarFormulario, 280);
+    }
+
+    document.getElementById('btnNovoMinisterio').addEventListener('click', abrirDrawer);
+    document.getElementById('drawerClose').addEventListener('click', fecharDrawer);
+    document.getElementById('drawerCancel').addEventListener('click', fecharDrawer);
+    drawerOverlay.addEventListener('click', e => { if (e.target === drawerOverlay) fecharDrawer(); });
+
+    // Botão "Criar outro ministério"
+    document.getElementById('btnContinuar').addEventListener('click', () => {
+      limparFormulario();
+      mostrarFormulario();
+      setTimeout(() => document.getElementById('fieldNome').focus(), 80);
+    });
+
+    // Botão "Voltar"
+    document.getElementById('btnConcluir').addEventListener('click', () => {
+      window.location.reload();
+    });
+
+    document.getElementById('drawerSave').addEventListener('click', async () => {
+      const nomeInput = document.getElementById('fieldNome');
+      const nome = nomeInput.value.trim();
+      if (!nome) {
+        nomeInput.classList.add('error');
+        nomeInput.focus();
+        return;
+      }
+      nomeInput.classList.remove('error');
+
+      const saveBtn = document.getElementById('drawerSave');
+      const originalLabel = saveBtn.textContent;
+      saveBtn.textContent = 'Salvando...';
+      saveBtn.disabled    = true;
+
+      const payload = {
+        name:        nome,
+        description: document.getElementById('fieldDesc').value.trim(),
+      };
+
+      try {
+        let res, json;
+        if (_editingId) {
+          res  = await authFetch(`/api/ministry/${_editingId}`, { method: 'PUT', body: JSON.stringify(payload) });
+          json = await res.json();
+          if (!res.ok) throw new Error(json.error || 'Erro ao salvar');
+          const idx = ministerios.findIndex(m => m.id === _editingId);
+          if (idx !== -1) ministerios[idx] = { ...ministerios[idx], ...json.ministry };
+          renderStats();
+          renderLista(document.getElementById('searchMinisterios').value);
+          fecharDrawer();
+        } else {
+          res  = await authFetch('/api/ministry', { method: 'POST', body: JSON.stringify(payload) });
+          json = await res.json();
+          if (!res.ok) throw new Error(json.error || 'Erro ao salvar');
+          ministerios.push(json.ministry);
+          renderStats();
+          renderLista(document.getElementById('searchMinisterios').value);
+          mostrarSucesso(nome);
+        }
+      } catch (err) {
+        console.error('[drawerSave]', err);
+        mostrarToast('Erro ao salvar: ' + err.message);
+      } finally {
+        saveBtn.textContent = originalLabel;
+        saveBtn.disabled    = false;
+      }
+    });
+
+    // ── Toast de erro ──
+    function mostrarToast(msg) {
+      let t = document.getElementById('toastMsg');
+      if (!t) {
+        t = document.createElement('div');
+        t.id = 'toastMsg';
+        t.style.cssText = 'position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:#1d1d1f;color:#fff;padding:12px 22px;border-radius:9999px;font-size:14px;font-weight:500;letter-spacing:-0.224px;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,0.18);transition:opacity 0.2s';
+        document.body.appendChild(t);
+      }
+      t.textContent = msg;
+      t.style.opacity = '1';
+      clearTimeout(t._timer);
+      t._timer = setTimeout(() => { t.style.opacity = '0'; }, 3500);
+    }
+
+    // ── Modal de confirmação de exclusão ──
+    const confirmOverlay = document.getElementById('confirmOverlay');
+    let   _pendingDelete = null; // { id, btn }
+
+    function abrirConfirm(id, btn) {
+      _pendingDelete = { id, btn };
+      confirmOverlay.classList.add('open');
+    }
+    function fecharConfirm() {
+      confirmOverlay.classList.remove('open');
+      _pendingDelete = null;
+    }
+
+    document.getElementById('confirmCancel').addEventListener('click', () => {
+      fecharConfirm();
+      window.location.reload();
+    });
+
+    document.getElementById('confirmDelete').addEventListener('click', async () => {
+      if (!_pendingDelete) return;
+      const { id, btn } = _pendingDelete;
+      document.getElementById('confirmDelete').textContent = 'Excluindo...';
+      document.getElementById('confirmDelete').disabled    = true;
+      try {
+        const res  = await authFetch(`/api/ministry/${id}`, { method: 'DELETE' });
+        const json = await res.json();
+        if (!res.ok) {
+          fecharConfirm();
+          mostrarToast(json.error || 'Erro ao excluir');
+          if (btn) btn.disabled = false;
+          return;
+        }
+        window.location.reload();
+      } catch (err) {
+        fecharConfirm();
+        mostrarToast('Erro ao excluir: ' + err.message);
+        if (btn) btn.disabled = false;
+      } finally {
+        document.getElementById('confirmDelete').textContent = 'Sim, excluir';
+        document.getElementById('confirmDelete').disabled    = false;
+      }
+    });
+
+    // ── Excluir ministério ──
+    function excluirMinisterio(id, btn) {
+      btn.disabled = true;
+      abrirConfirm(id, btn);
+    }
+
+    // ── Arquivar ministério ──
+    const archiveOverlay = document.getElementById('archiveOverlay');
+    let _pendingArchive  = null;
+
+    function abrirArquivar(id, btn) {
+      _pendingArchive = { id, btn };
+      archiveOverlay.classList.add('open');
+    }
+    function fecharArchive() {
+      archiveOverlay.classList.remove('open');
+      _pendingArchive = null;
+    }
+
+    document.getElementById('archiveCancel').addEventListener('click', fecharArchive);
+
+    document.getElementById('archiveConfirm').addEventListener('click', async () => {
+      if (!_pendingArchive) return;
+      const { id, btn } = _pendingArchive;
+      const confirmBtn = document.getElementById('archiveConfirm');
+      confirmBtn.textContent = 'Arquivando...';
+      confirmBtn.disabled    = true;
+      try {
+        const res  = await authFetch(`/api/ministry/${id}`, {
+          method: 'PUT',
+          body:   JSON.stringify({ is_active: false }),
+        });
+        const json = await res.json();
+        if (!res.ok) { mostrarToast(json.error || 'Erro ao arquivar'); return; }
+        const idx = ministerios.findIndex(m => m.id === id);
+        if (idx !== -1) ministerios[idx].is_active = false;
+        renderStats();
+        renderLista(document.getElementById('searchMinisterios').value);
+        fecharArchive();
+      } catch (err) {
+        mostrarToast('Erro ao arquivar: ' + err.message);
+      } finally {
+        confirmBtn.textContent = 'Sim, arquivar';
+        confirmBtn.disabled    = false;
+        if (btn) btn.disabled  = false;
+      }
+    });
+
+    async function desarquivarMinisterio(id, btn) {
+      btn.disabled = true;
+      try {
+        const res  = await authFetch(`/api/ministry/${id}`, {
+          method: 'PUT',
+          body:   JSON.stringify({ is_active: true }),
+        });
+        const json = await res.json();
+        if (!res.ok) { mostrarToast(json.error || 'Erro ao restaurar'); btn.disabled = false; return; }
+        const idx = ministerios.findIndex(m => m.id === id);
+        if (idx !== -1) ministerios[idx].is_active = true;
+        renderStats();
+        renderLista(document.getElementById('searchMinisterios').value);
+      } catch (err) {
+        mostrarToast('Erro ao restaurar: ' + err.message);
+        btn.disabled = false;
+      }
+    }
+
+    // ── Init ──
+    carregarMinisterios();
+  </script>
+</body>
+</html>

@@ -1,0 +1,1863 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hug Software — Departamentos</title>
+  <link rel="icon" type="image/png" href="/IMG/logo.png">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary:         #235347;
+      --primary-light:   #8eb69b;
+      --primary-focus:   #235347;
+      --primary-dark:    #0b2b26;
+      --accent-green:    #8eb69b;
+      --ink:             #1d1d1f;
+      --ink-muted:       #6e6e73;
+      --ink-subtle:      #aeaeb2;
+      --canvas:          #ffffff;
+      --canvas-page:     #f0f6f2;
+      --canvas-input:    #f2f2f7;
+      --hairline:        #e0e0e0;
+      --on-dark:         #ffffff;
+      --on-dark-muted:   rgba(255,255,255,0.65);
+      --sidebar-w:       220px;
+      --topbar-h:        64px;
+      --radius-sm:       8px;
+      --radius-md:       12px;
+      --radius-lg:       18px;
+      --radius-pill:     9999px;
+    }
+
+    body {
+      min-height: 100vh;
+      background: var(--canvas-page);
+      font-family: "SF Pro Text", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      -webkit-font-smoothing: antialiased;
+      display: flex;
+    }
+
+    /* ─────────────────── SIDEBAR ─────────────────── */
+    .sidebar {
+      width: var(--sidebar-w);
+      min-height: 100vh;
+      background: linear-gradient(180deg, #051f20 0%, #0b2b26 55%, #163832 100%);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      z-index: 100;
+      overflow: hidden;
+      transition: width 0.22s cubic-bezier(.4,0,.2,1);
+    }
+
+    .sidebar-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 24px 20px 28px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      transition: padding 0.22s, gap 0.22s;
+    }
+
+    .logo-mark {
+      width: 42px; height: 42px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .logo-text {
+      font-family: "SF Pro Display", system-ui, -apple-system, sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--on-dark);
+      letter-spacing: 0.6px;
+      line-height: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      opacity: 1;
+      transition: opacity 0.15s, width 0.22s;
+    }
+    .logo-text span { color: var(--primary-light); }
+
+    .sidebar-nav {
+      flex: 1;
+      padding: 14px 0;
+      overflow-y: auto;
+      scrollbar-width: none;
+    }
+    .sidebar-nav::-webkit-scrollbar { display: none; }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 11px 20px;
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--on-dark-muted);
+      text-decoration: none;
+      letter-spacing: -0.224px;
+      transition: background 0.12s ease, color 0.12s ease, padding 0.22s, justify-content 0.22s;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .nav-item:hover { color: var(--on-dark); background: rgba(255,255,255,0.07); }
+    .nav-item.active {
+      color: var(--on-dark);
+      background: rgba(255,255,255,0.13);
+      font-weight: 600;
+    }
+    .nav-item svg { width: 18px; height: 18px; flex-shrink: 0; opacity: 0.85; }
+    .nav-item.active svg { opacity: 1; }
+    .nav-item span { overflow: hidden; opacity: 1; transition: opacity 0.15s; }
+
+    body.sidebar-collapsed .sidebar { width: 64px; }
+    body.sidebar-collapsed .sidebar-logo { padding: 24px 11px 28px; gap: 0; justify-content: center; }
+    body.sidebar-collapsed .logo-text { opacity: 0; width: 0; }
+    body.sidebar-collapsed .nav-item { padding: 11px 0; justify-content: center; gap: 0; }
+    body.sidebar-collapsed .nav-item span { opacity: 0; width: 0; }
+    body.sidebar-collapsed .main { margin-left: 64px; }
+    body.sidebar-collapsed #collapseBtn svg { transform: rotate(180deg); }
+
+    /* ─────────────────── MAIN AREA ─────────────────── */
+    .main {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      transition: margin-left 0.22s cubic-bezier(.4,0,.2,1);
+    }
+
+    /* ─────────────────── TOPBAR ─────────────────── */
+    .topbar {
+      height: var(--topbar-h);
+      background: var(--canvas);
+      border-bottom: 1px solid var(--hairline);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0 24px;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .search-wrap {
+      flex: 1;
+      max-width: 420px;
+      position: relative;
+    }
+    .search-wrap svg {
+      position: absolute;
+      left: 12px; top: 50%;
+      transform: translateY(-50%);
+      width: 15px; height: 15px;
+      color: var(--ink-subtle);
+    }
+    .search-wrap input {
+      width: 100%;
+      height: 40px;
+      background: var(--canvas-input);
+      border: 1px solid transparent;
+      border-radius: var(--radius-pill);
+      padding: 0 16px 0 40px;
+      font-size: 14px;
+      font-family: inherit;
+      color: var(--ink);
+      outline: none;
+      letter-spacing: -0.224px;
+      transition: border-color 0.15s;
+    }
+    .search-wrap input::placeholder { color: var(--ink-subtle); }
+    .search-wrap input:focus { border-color: var(--primary-focus); background: var(--canvas); }
+
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-left: auto;
+    }
+
+    .icon-btn {
+      width: 40px; height: 40px;
+      border-radius: var(--radius-pill);
+      border: none;
+      background: none;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--ink-muted);
+      transition: background 0.12s, color 0.12s;
+    }
+    .icon-btn:hover { background: var(--canvas-input); color: var(--ink); }
+    .icon-btn svg { width: 20px; height: 20px; }
+
+    .avatar {
+      width: 40px; height: 40px;
+      border-radius: var(--radius-pill);
+      background: #e8612a;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+      font-weight: 600;
+      color: #fff;
+      cursor: pointer;
+      margin-left: 4px;
+      letter-spacing: -0.12px;
+      user-select: none;
+    }
+
+    .avatar-menu-wrap { position: relative; }
+    .avatar-dropdown {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      width: 220px;
+      background: var(--canvas);
+      border: 1px solid var(--hairline);
+      border-radius: var(--radius-md);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.10), 0 2px 6px rgba(0,0,0,0.06);
+      padding: 6px;
+      z-index: 200;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(-6px);
+      transition: opacity 0.15s, transform 0.15s;
+    }
+    .avatar-dropdown.open { opacity: 1; pointer-events: auto; transform: translateY(0); }
+    .dropdown-header { padding: 10px 12px 12px; border-bottom: 1px solid var(--hairline); margin-bottom: 6px; }
+    .dropdown-name { font-size: 14px; font-weight: 600; color: var(--ink); letter-spacing: -0.224px; }
+    .dropdown-email { font-size: 12px; color: var(--ink-subtle); letter-spacing: -0.12px; margin-top: 2px; }
+    .dropdown-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 12px; font-size: 14px; font-weight: 400;
+      color: var(--ink); letter-spacing: -0.224px;
+      border-radius: var(--radius-sm); text-decoration: none;
+      cursor: pointer; transition: background 0.12s;
+    }
+    .dropdown-item:hover { background: var(--canvas-page); }
+    .dropdown-item svg { width: 16px; height: 16px; color: var(--ink-muted); flex-shrink: 0; }
+    .dropdown-item.danger { color: #ff3b30; }
+    .dropdown-item.danger svg { color: #ff3b30; }
+    .dropdown-item.danger:hover { background: rgba(255,59,48,0.06); }
+    .dropdown-divider { height: 1px; background: var(--hairline); margin: 6px 0; }
+
+    /* ─────────────────── LAYOUT COM SIDEBAR DIREITA ─────────────────── */
+    .content {
+      padding: 32px;
+      min-width: 0;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .page-layout {
+      display: block;
+    }
+
+    /* ─────────────────── HERO ─────────────────── */
+    .hero {
+      background: linear-gradient(135deg, #051f20 0%, #163832 55%, #235347 100%);
+      border-radius: var(--radius-lg);
+      padding: 36px 44px;
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 24px;
+    }
+    .hero::after {
+      content: "";
+      position: absolute;
+      width: 320px; height: 320px;
+      border-radius: 50%;
+      border: 56px solid rgba(255,255,255,0.07);
+      right: -60px; top: -90px;
+      pointer-events: none;
+    }
+    .hero::before {
+      content: "";
+      position: absolute;
+      width: 180px; height: 180px;
+      border-radius: 50%;
+      border: 32px solid rgba(255,255,255,0.05);
+      right: 140px; bottom: -60px;
+      pointer-events: none;
+    }
+
+    .hero-title {
+      font-family: "SF Pro Display", system-ui, -apple-system, sans-serif;
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--on-dark);
+      letter-spacing: -0.374px;
+      line-height: 1.14;
+      margin-bottom: 8px;
+    }
+    .hero-desc {
+      font-size: 15px;
+      font-weight: 400;
+      color: var(--on-dark-muted);
+      letter-spacing: -0.224px;
+      line-height: 1.5;
+      margin-bottom: 24px;
+    }
+    .hero-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      height: 42px;
+      padding: 0 22px;
+      background: var(--canvas);
+      border: none;
+      border-radius: var(--radius-pill);
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--primary-dark);
+      letter-spacing: -0.224px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.15s, transform 0.1s;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    }
+    .hero-btn:hover { background: #f0f6f2; }
+    .hero-btn:active { transform: scale(0.97); }
+    .hero-btn svg { width: 16px; height: 16px; }
+
+    /* ─────────────────── STATS ROW ─────────────────── */
+    .stats-row {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .stat-card {
+      background: var(--canvas);
+      border: 1px solid var(--hairline);
+      border-radius: var(--radius-md);
+      padding: 20px 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex: 1;
+      cursor: pointer;
+      transition: box-shadow 0.14s, border-color 0.14s, transform 0.1s;
+      user-select: none;
+    }
+    .stat-card:hover {
+      box-shadow: 0 4px 16px rgba(35,83,71,0.10);
+      border-color: rgba(35,83,71,0.25);
+    }
+    .stat-card:active { transform: scale(0.98); }
+    .stat-card.active-filter {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(35,83,71,0.10);
+    }
+    .stat-card.active-filter .stat-value { color: var(--primary); }
+
+    .stat-icon {
+      width: 52px; height: 52px;
+      border-radius: var(--radius-sm);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .stat-icon svg { width: 26px; height: 26px; }
+    .stat-icon.dark-teal  { background: #8eb69b; color: #fff; }
+    .stat-icon.mid-teal   { background: rgba(35,83,71,0.15); color: var(--primary); }
+    .stat-icon.light-green { background: rgba(142,182,155,0.14); color: #235347; }
+
+    .stat-value {
+      font-family: "SF Pro Display", system-ui, -apple-system, sans-serif;
+      font-size: 28px;
+      font-weight: 600;
+      color: var(--ink);
+      letter-spacing: -0.374px;
+      line-height: 1;
+    }
+    .stat-label {
+      font-size: 13px;
+      font-weight: 400;
+      color: var(--ink-muted);
+      letter-spacing: -0.224px;
+      margin-top: 4px;
+    }
+
+    /* ─────────────────── LIST CARD ─────────────────── */
+    .list-card {
+      background: var(--canvas);
+      border: 1px solid var(--hairline);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+
+    .list-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--hairline);
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .list-title {
+      font-family: "SF Pro Display", system-ui, -apple-system, sans-serif;
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--ink);
+      letter-spacing: -0.374px;
+    }
+
+    .list-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    /* Blocos / Tabela toggle */
+    .view-toggle {
+      display: flex;
+      background: var(--canvas-input);
+      border-radius: var(--radius-sm);
+      padding: 3px;
+      gap: 2px;
+    }
+    .view-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      height: 32px;
+      padding: 0 12px;
+      border: none;
+      background: none;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 400;
+      font-family: inherit;
+      color: var(--ink-muted);
+      cursor: pointer;
+      letter-spacing: -0.12px;
+      transition: background 0.12s, color 0.12s;
+      white-space: nowrap;
+    }
+    .view-btn svg { width: 14px; height: 14px; flex-shrink: 0; }
+    .view-btn.active {
+      background: var(--canvas);
+      color: var(--ink);
+      font-weight: 500;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+
+    /* Ministry filter dropdown */
+    .ministry-filter-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .ministry-filter-icon {
+      position: absolute;
+      left: 12px;
+      width: 15px; height: 15px;
+      color: var(--primary);
+      pointer-events: none;
+      z-index: 1;
+    }
+    .ministry-filter {
+      height: 36px;
+      padding: 0 38px 0 34px;
+      background: var(--canvas);
+      border: 1.5px solid var(--hairline);
+      border-radius: var(--radius-pill);
+      font-size: 13px;
+      font-weight: 500;
+      font-family: inherit;
+      color: var(--ink);
+      outline: none;
+      letter-spacing: -0.12px;
+      cursor: pointer;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      min-width: 180px;
+      -webkit-appearance: none;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23aeaeb2' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+    }
+    .ministry-filter:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(35,83,71,0.10);
+    }
+
+    /* Search inline */
+    .list-search { position: relative; }
+    .list-search svg {
+      position: absolute;
+      left: 10px; top: 50%;
+      transform: translateY(-50%);
+      width: 14px; height: 14px;
+      color: var(--ink-subtle);
+      pointer-events: none;
+    }
+    .list-search input {
+      height: 36px;
+      width: 180px;
+      background: var(--canvas-input);
+      border: 1px solid transparent;
+      border-radius: var(--radius-pill);
+      padding: 0 14px 0 32px;
+      font-size: 13px;
+      font-family: inherit;
+      color: var(--ink);
+      outline: none;
+      letter-spacing: -0.12px;
+      transition: border-color 0.15s, width 0.2s;
+    }
+    .list-search input::placeholder { color: var(--ink-subtle); }
+    .list-search input:focus {
+      border-color: var(--primary-focus);
+      background: var(--canvas);
+      width: 220px;
+    }
+
+    /* Empty state */
+    .list-empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 72px 24px;
+      gap: 12px;
+      color: var(--ink-subtle);
+    }
+    .list-empty svg { width: 40px; height: 40px; opacity: 0.35; }
+    .list-empty-text {
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--ink-subtle);
+      letter-spacing: -0.224px;
+    }
+    .list-empty-hint {
+      font-size: 13px;
+      color: var(--ink-subtle);
+      letter-spacing: -0.12px;
+      text-align: center;
+      max-width: 280px;
+      line-height: 1.5;
+      opacity: 0.7;
+    }
+
+    /* ─────────────────── DEPARTMENT GRID (BLOCOS) ─────────────────── */
+    .dept-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+      padding: 24px;
+    }
+    .dept-grid.hidden { display: none; }
+
+    .dept-card {
+      background: var(--canvas);
+      border: 1px solid var(--hairline);
+      border-radius: var(--radius-md);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      transition: box-shadow 0.14s;
+      cursor: pointer;
+    }
+    .dept-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+    .dept-card.archived { opacity: 0.62; }
+
+    .dc-top {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 18px 18px 14px;
+    }
+    .dc-icon {
+      width: 48px; height: 48px;
+      border-radius: var(--radius-sm);
+      background: rgba(35,83,71,0.12);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      color: var(--primary);
+    }
+    .dc-icon svg { width: 22px; height: 22px; }
+    .dc-info { flex: 1; min-width: 0; }
+    .dc-name-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .dc-name {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--ink);
+      letter-spacing: -0.224px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .dc-ministry {
+      font-size: 12px;
+      color: var(--primary);
+      letter-spacing: -0.12px;
+      margin-top: 2px;
+      font-weight: 500;
+    }
+    .dc-desc {
+      font-size: 13px;
+      color: var(--ink-muted);
+      letter-spacing: -0.12px;
+      line-height: 1.4;
+      margin-top: 3px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .dc-stats {
+      display: flex;
+      border-top: 1px solid var(--hairline);
+      border-bottom: 1px solid var(--hairline);
+    }
+    .dc-stat {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 12px 8px;
+    }
+    .dc-stat + .dc-stat { border-left: 1px solid var(--hairline); }
+    .dc-stat-value {
+      font-family: "SF Pro Display", system-ui, -apple-system, sans-serif;
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--primary);
+      letter-spacing: -0.374px;
+      line-height: 1;
+    }
+    .dc-stat-label {
+      font-size: 11px;
+      color: var(--ink-subtle);
+      letter-spacing: 0.2px;
+      margin-top: 4px;
+    }
+
+    .dc-leader {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--hairline);
+    }
+    .dc-leader-avatar {
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      background: var(--primary);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px;
+      font-weight: 600;
+      color: #fff;
+      flex-shrink: 0;
+      letter-spacing: -0.12px;
+    }
+    .dc-leader-tag {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      color: var(--ink-subtle);
+    }
+    .dc-leader-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--ink);
+      letter-spacing: -0.12px;
+    }
+
+    .dc-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 18px;
+      border-top: 1px solid var(--hairline);
+    }
+
+    .archived-badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      height: 22px; padding: 0 10px;
+      background: rgba(0,0,0,0.06);
+      border-radius: var(--radius-pill);
+      font-size: 11px; font-weight: 600;
+      color: var(--ink-muted); letter-spacing: 0.2px;
+    }
+    .dc-status {
+      display: inline-flex; align-items: center; gap: 4px;
+      height: 22px; padding: 0 10px;
+      background: rgba(35,83,71,0.09);
+      border-radius: var(--radius-pill);
+      font-size: 11px; font-weight: 600;
+      color: var(--primary); letter-spacing: 0.2px;
+    }
+
+    .btn-dc-excluir {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      height: 32px;
+      padding: 0 12px;
+      background: transparent;
+      border: 1.5px solid #ffcdd2;
+      border-radius: var(--radius-pill);
+      font-size: 12px;
+      font-weight: 500;
+      color: #e53935;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background 0.12s, border-color 0.12s;
+    }
+    .btn-dc-excluir:hover { background: #fff5f5; border-color: #e53935; }
+    .btn-dc-excluir svg { width: 13px; height: 13px; }
+
+    .btn-dc-arquivar {
+      display: flex; align-items: center; gap: 5px;
+      height: 32px; padding: 0 12px;
+      background: transparent;
+      border: 1.5px solid var(--hairline);
+      border-radius: var(--radius-pill);
+      font-size: 12px; font-weight: 500;
+      color: var(--ink-muted); font-family: inherit;
+      cursor: pointer; transition: background 0.12s, border-color 0.12s;
+    }
+    .btn-dc-arquivar:hover { background: var(--canvas-input); border-color: var(--ink-subtle); color: var(--ink); }
+    .btn-dc-arquivar svg { width: 13px; height: 13px; }
+
+    .btn-dc-restaurar {
+      display: flex; align-items: center; gap: 5px;
+      height: 32px; padding: 0 12px;
+      background: rgba(35,83,71,0.08);
+      border: 1.5px solid rgba(35,83,71,0.20);
+      border-radius: var(--radius-pill);
+      font-size: 12px; font-weight: 500;
+      color: var(--primary); font-family: inherit;
+      cursor: pointer; transition: background 0.12s;
+    }
+    .btn-dc-restaurar:hover { background: rgba(35,83,71,0.14); }
+    .btn-dc-restaurar svg { width: 13px; height: 13px; }
+
+    /* ─────────────────── TABLE VIEW ─────────────────── */
+    .dept-table { width: 100%; border-collapse: collapse; }
+    .dept-table th {
+      padding: 12px 24px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--ink-muted);
+      text-align: left;
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+      border-bottom: 1px solid var(--hairline);
+      background: var(--canvas-page);
+    }
+    .dept-table td {
+      padding: 14px 24px;
+      font-size: 14px;
+      color: var(--ink);
+      letter-spacing: -0.224px;
+      border-bottom: 1px solid var(--hairline);
+      vertical-align: middle;
+    }
+    .dept-table tr:last-child td { border-bottom: none; }
+    .dept-table tr:hover td { background: #f5faf6; cursor: pointer; }
+    .dept-table.hidden { display: none; }
+
+    .td-ministry-pill {
+      display: inline-flex;
+      align-items: center;
+      height: 22px;
+      padding: 0 10px;
+      background: rgba(35,83,71,0.09);
+      border-radius: var(--radius-pill);
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--primary);
+    }
+    .td-actions { display: flex; align-items: center; gap: 6px; }
+
+    /* ─────────────────── DRAWER NOVO DEPARTAMENTO ─────────────────── */
+    .drawer-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.38);
+      z-index: 500;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.22s;
+    }
+    .drawer-overlay.open { opacity: 1; pointer-events: auto; }
+    .drawer {
+      position: fixed;
+      top: 0; right: 0; bottom: 0;
+      width: 52vw;
+      max-width: 780px;
+      min-width: 400px;
+      background: var(--canvas);
+      box-shadow: -8px 0 48px rgba(0,0,0,0.18);
+      display: flex;
+      flex-direction: column;
+      transform: translateX(100%);
+      transition: transform 0.26s cubic-bezier(.4,0,.2,1);
+      z-index: 501;
+      overflow: hidden;
+    }
+    .drawer-overlay.open .drawer { transform: translateX(0); }
+
+    .drawer-header {
+      background: linear-gradient(135deg, #051f20 0%, #163832 60%, #235347 100%);
+      padding: 28px 32px 24px;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+    .drawer-title {
+      font-family: "SF Pro Display", system-ui, -apple-system, sans-serif;
+      font-size: 22px;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: -0.374px;
+      line-height: 1.1;
+      margin-bottom: 6px;
+    }
+    .drawer-subtitle {
+      font-size: 14px;
+      font-weight: 400;
+      color: rgba(255,255,255,0.72);
+      letter-spacing: -0.12px;
+    }
+    .drawer-close {
+      width: 36px; height: 36px;
+      border: none;
+      background: #8eb69b;
+      border-radius: var(--radius-pill);
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: #fff;
+      flex-shrink: 0;
+      margin-left: 16px;
+      transition: background 0.12s;
+    }
+    .drawer-close:hover { background: rgba(255,255,255,0.28); }
+    .drawer-close svg { width: 18px; height: 18px; }
+
+    .drawer-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 28px 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+    }
+    .drawer-body::-webkit-scrollbar { width: 4px; }
+    .drawer-body::-webkit-scrollbar-thumb { background: var(--hairline); border-radius: 4px; }
+
+    .field-group { display: flex; flex-direction: column; gap: 8px; }
+    .field-label {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--ink);
+      letter-spacing: -0.12px;
+    }
+    .field-input {
+      height: 46px;
+      background: var(--canvas);
+      border: 1.5px solid var(--hairline);
+      border-radius: var(--radius-sm);
+      padding: 0 16px;
+      font-size: 15px;
+      font-family: inherit;
+      color: var(--ink);
+      outline: none;
+      letter-spacing: -0.224px;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .field-input::placeholder { color: var(--ink-subtle); }
+    .field-input:focus {
+      border-color: var(--primary-focus);
+      box-shadow: 0 0 0 3px rgba(35,83,71,0.10);
+    }
+    .field-input.error { border-color: #ff3b30; }
+    .field-textarea { height: 100px; resize: vertical; padding: 12px 16px; line-height: 1.5; }
+
+    select.field-input {
+      -webkit-appearance: none;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23aeaeb2' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      padding-right: 42px;
+      cursor: pointer;
+    }
+
+    .leader-search-wrap { position: relative; width: 100%; }
+    .leader-search-wrap svg {
+      position: absolute;
+      left: 14px; top: 50%;
+      transform: translateY(-50%);
+      width: 16px; height: 16px;
+      color: var(--ink-subtle);
+      pointer-events: none;
+    }
+    .leader-search-wrap .field-input { padding-left: 42px; width: 100%; }
+
+    .drawer-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 32px 22px;
+      border-top: 1px solid var(--hairline);
+      flex-shrink: 0;
+    }
+    .btn-drawer-cancel {
+      height: 50px; padding: 0 18px;
+      background: transparent;
+      border: 1px solid var(--hairline);
+      border-radius: var(--radius-pill);
+      font-size: 14px; font-weight: 400; color: var(--ink-muted);
+      font-family: inherit; cursor: pointer; letter-spacing: -0.224px;
+      transition: background 0.12s;
+    }
+    .btn-drawer-cancel:hover { background: var(--canvas-input); }
+    .btn-drawer-save {
+      height: 50px; padding: 0 22px;
+      background: var(--primary);
+      border: none;
+      border-radius: var(--radius-pill);
+      font-size: 14px; font-weight: 600; color: #fff;
+      font-family: inherit; cursor: pointer; letter-spacing: -0.224px;
+      transition: background 0.12s, transform 0.1s;
+    }
+    .btn-drawer-save:hover { background: var(--primary-dark); }
+    .btn-drawer-save:active { transform: scale(0.97); }
+
+    .drawer-success { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 48px 32px; gap: 16px; text-align: center; }
+    .drawer-success.hidden { display: none; }
+    .drawer-body.hidden { display: none; }
+    .drawer-footer.hidden { display: none; }
+    .success-icon { width: 72px; height: 72px; border-radius: 50%; background: rgba(35,83,71,0.10); display: flex; align-items: center; justify-content: center; margin-bottom: 8px; }
+    .success-icon svg { width: 34px; height: 34px; color: var(--primary); }
+    .success-title { font-family: "SF Pro Display", system-ui, -apple-system, sans-serif; font-size: 20px; font-weight: 600; color: var(--ink); letter-spacing: -0.374px; }
+    .success-name { font-size: 15px; color: var(--ink-muted); letter-spacing: -0.224px; }
+    .success-actions { display: flex; flex-direction: column; gap: 10px; width: 100%; max-width: 320px; margin-top: 12px; }
+    .btn-success-continue { height: 50px; width: 100%; background: transparent; border: 1.5px solid var(--primary); border-radius: var(--radius-pill); font-size: 14px; font-weight: 600; color: var(--primary); font-family: inherit; cursor: pointer; letter-spacing: -0.224px; transition: background 0.12s; }
+    .btn-success-continue:hover { background: rgba(35,83,71,0.06); }
+    .btn-success-done { height: 50px; width: 100%; background: var(--primary); border: none; border-radius: var(--radius-pill); font-size: 14px; font-weight: 600; color: #fff; font-family: inherit; cursor: pointer; letter-spacing: -0.224px; transition: background 0.12s; }
+    .btn-success-done:hover { background: var(--primary-dark); }
+
+    /* ─────────────────── CONFIRM MODAL ─────────────────── */
+    .confirm-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.40);
+      z-index: 600;
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.18s;
+    }
+    .confirm-overlay.open { opacity: 1; pointer-events: auto; }
+    .confirm-modal {
+      background: var(--canvas);
+      border-radius: var(--radius-lg);
+      width: 420px;
+      max-width: calc(100vw - 40px);
+      box-shadow: 0 24px 64px rgba(0,0,0,0.20);
+      transform: translateY(10px) scale(0.98);
+      transition: transform 0.18s;
+      overflow: hidden;
+    }
+    .confirm-overlay.open .confirm-modal { transform: translateY(0) scale(1); }
+    .confirm-icon-wrap { display: flex; justify-content: center; padding: 32px 24px 0; }
+    .confirm-icon { width: 56px; height: 56px; border-radius: 50%; background: #fff5f5; display: flex; align-items: center; justify-content: center; }
+    .confirm-icon svg { width: 26px; height: 26px; color: #e53935; }
+    .confirm-icon.teal { background: rgba(35,83,71,0.10); }
+    .confirm-icon.teal svg { color: var(--primary); }
+    .confirm-content { padding: 20px 28px 24px; text-align: center; }
+    .confirm-title { font-family: "SF Pro Display", system-ui, -apple-system, sans-serif; font-size: 17px; font-weight: 600; color: var(--ink); letter-spacing: -0.374px; line-height: 1.3; margin-bottom: 10px; }
+    .confirm-desc { font-size: 14px; font-weight: 400; color: var(--ink-muted); letter-spacing: -0.224px; line-height: 1.5; }
+    .confirm-actions { display: flex; gap: 12px; padding: 0 28px 28px; }
+    .btn-confirm-cancel { flex: 1; height: 46px; background: var(--canvas-input); border: none; border-radius: var(--radius-pill); font-size: 14px; font-weight: 500; color: var(--ink); font-family: inherit; cursor: pointer; letter-spacing: -0.224px; transition: background 0.12s; }
+    .btn-confirm-cancel:hover { background: var(--hairline); }
+    .btn-confirm-delete { flex: 1; height: 46px; background: #e53935; border: none; border-radius: var(--radius-pill); font-size: 14px; font-weight: 600; color: #fff; font-family: inherit; cursor: pointer; letter-spacing: -0.224px; transition: background 0.12s; }
+    .btn-confirm-delete:hover { background: #c62828; }
+    .btn-confirm-archive { flex: 1; height: 46px; background: var(--primary); border: none; border-radius: var(--radius-pill); font-size: 14px; font-weight: 600; color: #fff; font-family: inherit; cursor: pointer; letter-spacing: -0.224px; transition: background 0.12s; }
+    .btn-confirm-archive:hover { background: var(--primary-dark); }
+
+    /* ─────────────────── TOAST ─────────────────── */
+    .toast {
+      position: fixed;
+      bottom: 28px; left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--ink);
+      color: #fff;
+      padding: 10px 22px;
+      border-radius: var(--radius-pill);
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: -0.224px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s, transform 0.2s;
+      z-index: 900;
+      white-space: nowrap;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .toast.error { background: #e53935; }
+    .toast.success { background: var(--primary); }
+
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+<script>if(localStorage.getItem('sidebar-collapsed')==='1')document.body.classList.add('sidebar-collapsed')</script>
+
+  <!-- ── Sidebar ── -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark">
+        <img src="/IMG/logo.png" alt="Logo" style="width:52px;height:52px;object-fit:contain;">
+      </div>
+      <div class="logo-text" id="churchName"></div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a class="nav-item" href="/dashboard">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        <span>Dashboard</span>
+      </a>
+      <a class="nav-item" href="/ministerios">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        <span>Ministérios</span>
+      </a>
+      <a class="nav-item active" href="/departamentos">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <span>Departamentos</span>
+      </a>
+      <a class="nav-item" href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        <span>Templates</span>
+      </a>
+      <a class="nav-item" href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <span>Eventos</span>
+      </a>
+      <a class="nav-item" href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        <span>Escalação</span>
+      </a>
+      <a class="nav-item" href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+        <span>Músicas</span>
+      </a>
+      <a class="nav-item" href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span>Voluntários</span>
+      </a>
+      <a class="nav-item" href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <span>Líderes</span>
+      </a>
+      <a class="nav-item" href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <span>Triagem</span>
+      </a>
+      <a class="nav-item" href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        <span>Presença</span>
+      </a>
+      <a class="nav-item" href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        <span>Gamificação</span>
+      </a>
+      <a class="nav-item" href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        <span>Relatórios</span>
+      </a>
+      <a class="nav-item" href="/configuracoes">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        <span>Configurações</span>
+      </a>
+    </nav>
+  </aside>
+
+  <!-- ── Main ── -->
+  <div class="main">
+
+    <!-- Topbar -->
+    <header class="topbar">
+      <div class="search-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" placeholder="Buscar eventos, voluntários..." />
+      </div>
+
+      <div class="topbar-actions">
+        <button class="icon-btn" title="Notificações">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        </button>
+        <button class="icon-btn" title="Configurações" onclick="window.location.href='/configuracoes'">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </button>
+        <button class="icon-btn" id="collapseBtn" title="Recolher menu">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="transition:transform 0.22s"><polyline points="11 17 6 12 11 7"/><polyline points="18 17 13 12 18 7"/></svg>
+        </button>
+        <div class="avatar-menu-wrap">
+          <div class="avatar" id="avatarBtn">A</div>
+          <div class="avatar-dropdown" id="avatarDropdown">
+            <div class="dropdown-header">
+              <div class="dropdown-name" id="dropdownName">—</div>
+              <div class="dropdown-email" id="dropdownEmail">—</div>
+            </div>
+            <a class="dropdown-item" href="/editar-perfil">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              Editar Perfil
+            </a>
+            <a class="dropdown-item" href="/configuracoes">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+              Configurações
+            </a>
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item danger" href="#" id="logoutBtn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+              Sair
+            </a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Content -->
+    <main class="content">
+
+      <!-- Hero (full width, above the 2-col layout) -->
+      <div class="hero">
+        <div class="hero-title">Departamentos</div>
+        <div class="hero-desc">Gerencie os departamentos e funções da sua igreja.</div>
+        <button class="hero-btn" id="btnNovoDepartamento">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Novo Departamento
+        </button>
+      </div>
+
+      <!-- Stats (full width) -->
+      <div class="stats-row">
+        <div class="stat-card active-filter" id="cardTodos" onclick="setFiltro('todos')">
+          <div class="stat-icon dark-teal">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </div>
+          <div>
+            <div class="stat-value" id="statDepartamentos">0</div>
+            <div class="stat-label">Total de Departamentos</div>
+          </div>
+        </div>
+        <div class="stat-card" id="cardAtivos" onclick="setFiltro('ativos')">
+          <div class="stat-icon mid-teal">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div>
+            <div class="stat-value" id="statAtivos">0</div>
+            <div class="stat-label">Departamentos Ativos</div>
+          </div>
+        </div>
+        <div class="stat-card" id="cardArquivados" onclick="setFiltro('arquivados')">
+          <div class="stat-icon light-green">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8v13H3V8"/><path d="M1 3h22v5H1z"/><path d="M10 12h4"/></svg>
+          </div>
+          <div>
+            <div class="stat-value" id="statArquivados">0</div>
+            <div class="stat-label">Departamentos Arquivados</div>
+          </div>
+        </div>
+        <div class="stat-card" id="cardFuncoes" onclick="setFiltro('funcoes')">
+          <div class="stat-icon dark-teal">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+          </div>
+          <div>
+            <div class="stat-value" id="statFuncoes">0</div>
+            <div class="stat-label">Funções</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2-col layout: list + right sidebar -->
+      <div class="page-layout">
+
+        <!-- Left: list card -->
+        <div>
+          <div class="list-card">
+            <div class="list-header">
+              <div class="list-title">Lista de Departamentos</div>
+              <div class="list-controls">
+                <div class="view-toggle">
+                  <button class="view-btn active" id="btnBlocos">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+                    Blocos
+                  </button>
+                  <button class="view-btn" id="btnTabela">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+                    Tabela
+                  </button>
+                </div>
+                <div class="ministry-filter-wrap">
+                  <svg class="ministry-filter-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                  <select class="ministry-filter" id="ministryFilter">
+                    <option value="">Todos os Ministérios</option>
+                  </select>
+                </div>
+                <div class="list-search">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                  <input type="text" placeholder="Buscar..." id="searchDepts" />
+                </div>
+              </div>
+            </div>
+
+            <!-- Empty state -->
+            <div class="list-empty" id="emptyState">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              <div class="list-empty-text">Nenhum departamento encontrado</div>
+              <div class="list-empty-hint">Crie seu primeiro departamento clicando no botão acima</div>
+            </div>
+
+            <!-- Grid view -->
+            <div class="dept-grid hidden" id="gridView"></div>
+
+            <!-- Table view -->
+            <table class="dept-table hidden" id="tableView">
+              <thead>
+                <tr>
+                  <th>Departamento</th>
+                  <th>Ministério</th>
+                  <th>Descrição</th>
+                  <th>Status</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody id="tableBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+    </main>
+  </div>
+
+  <!-- ── Drawer Novo Departamento ── -->
+  <div class="drawer-overlay" id="drawerOverlay">
+    <div class="drawer">
+
+      <!-- Header gradiente -->
+      <div class="drawer-header">
+        <div class="drawer-header-text" id="drawerHeaderText">
+          <div class="drawer-title" id="drawerTitle">Novo Departamento</div>
+          <div class="drawer-subtitle" id="drawerSubtitle">Preencha os dados para criar um novo departamento</div>
+        </div>
+        <button class="drawer-close" id="drawerClose">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <!-- Body: formulário -->
+      <div class="drawer-body" id="drawerForm">
+
+        <div class="field-group">
+          <label class="field-label">Nome do Departamento *</label>
+          <input class="field-input" type="text" placeholder="Ex: Louvor Adulto, Kids, Produção..." id="fieldNome" />
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">Ministério *</label>
+          <select class="field-input" id="fieldMinisterio">
+            <option value="">Selecione um ministério...</option>
+          </select>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">Descrição</label>
+          <textarea class="field-input field-textarea" placeholder="Descreva o propósito do departamento..." id="fieldDesc"></textarea>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">Vincular Líder (opcional)</label>
+          <div class="leader-search-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input class="field-input" type="text" placeholder="Buscar líder por nome ou email..." id="fieldLider" />
+          </div>
+        </div>
+
+        <div class="field-group hidden" id="fieldStatusGroup">
+          <label class="field-label">Status</label>
+          <select class="field-input" id="fieldStatus">
+            <option value="true">Ativo</option>
+            <option value="false">Arquivado</option>
+          </select>
+        </div>
+
+      </div>
+
+      <!-- Body: sucesso -->
+      <div class="drawer-success hidden" id="drawerSuccess">
+        <div class="success-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="success-title">Departamento criado com sucesso!</div>
+        <div class="success-name" id="successName"></div>
+        <div class="success-actions">
+          <button class="btn-success-continue" id="btnContinuar">+ Criar outro departamento</button>
+          <button class="btn-success-done" id="btnConcluir">Voltar</button>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="drawer-footer" id="drawerFooter">
+        <button class="btn-drawer-cancel" id="btnCancelar">Cancelar</button>
+        <button class="btn-drawer-save" id="btnSalvar">Criar Departamento</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── Modal Excluir ── -->
+  <div class="confirm-overlay" id="confirmOverlay">
+    <div class="confirm-modal">
+      <div class="confirm-icon-wrap">
+        <div class="confirm-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+        </div>
+      </div>
+      <div class="confirm-content">
+        <div class="confirm-title">Excluir departamento?</div>
+        <div class="confirm-desc">Esta ação é permanente e não poderá ser desfeita.</div>
+      </div>
+      <div class="confirm-actions">
+        <button class="btn-confirm-cancel" id="confirmCancelDelete">Cancelar</button>
+        <button class="btn-confirm-delete" id="confirmDelete">Sim, excluir</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Modal Arquivar ── -->
+  <div class="confirm-overlay" id="archiveOverlay">
+    <div class="confirm-modal">
+      <div class="confirm-icon-wrap">
+        <div class="confirm-icon teal">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8v13H3V8"/><path d="M1 3h22v5H1z"/><path d="M10 12h4"/></svg>
+        </div>
+      </div>
+      <div class="confirm-content">
+        <div class="confirm-title" id="archiveTitle">Arquivar departamento?</div>
+        <div class="confirm-desc" id="archiveDesc">O departamento ficará inativo mas não será excluído.</div>
+      </div>
+      <div class="confirm-actions">
+        <button class="btn-confirm-cancel" id="confirmCancelArchive">Cancelar</button>
+        <button class="btn-confirm-archive" id="confirmArchive">Sim, arquivar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Toast ── -->
+  <div class="toast" id="toast"></div>
+
+  <script src="/js/auth-fetch.js"></script>
+  <script>
+    /* ─── Auth / Init ─── */
+    let _departments = []
+    let _ministries  = []
+    let _pendingDelete  = null
+    let _pendingArchive = null
+    let _viewMode = 'blocos'
+    let _filtroMinisterio = ''
+    let _filtroStatus = 'todos'
+    let _searchTerm = ''
+    async function init() {
+      const meData = await authFetch('/api/auth/me').then(r => r.json()).catch(() => ({}))
+      const { usuario, igreja } = meData
+      if (!usuario) { window.location.href = '/'; return }
+
+      const initials = (usuario.nickname || usuario.email || 'U').charAt(0).toUpperCase()
+      document.getElementById('avatarBtn').textContent     = initials
+      document.getElementById('dropdownName').textContent  = usuario.nickname || '—'
+      document.getElementById('dropdownEmail').textContent = usuario.email    || '—'
+      if (igreja?.nome) document.getElementById('churchName').textContent = igreja.nome
+
+      await Promise.all([loadMinistries(), loadDepartments()])
+    }
+
+    async function loadMinistries() {
+      const res  = await authFetch('/api/ministry').then(r => r.json()).catch(() => ({ ministries: [] }))
+      _ministries = res.ministries || []
+      populateMinistryFilter()
+      populateMinistrySelect()
+    }
+
+    async function loadDepartments() {
+      const res = await authFetch('/api/department').then(r => r.json()).catch(() => ({ departments: [] }))
+      _departments = res.departments || []
+      renderAll()
+    }
+
+    function populateMinistryFilter() {
+      const sel = document.getElementById('ministryFilter')
+      const prev = sel.value
+      sel.innerHTML = '<option value="">Todos os Ministérios</option>'
+      _ministries.filter(m => m.is_active !== false).forEach(m => {
+        const opt = document.createElement('option')
+        opt.value = m.id
+        opt.textContent = m.name
+        sel.appendChild(opt)
+      })
+      if (prev && [...sel.options].some(o => o.value === prev)) sel.value = prev
+    }
+
+    function populateMinistrySelect() {
+      const sel = document.getElementById('fieldMinisterio')
+      sel.innerHTML = '<option value="">Selecione um ministério...</option>'
+      const ativos = _ministries.filter(m => m.is_active !== false)
+      ativos.forEach(m => {
+        const opt = document.createElement('option')
+        opt.value = m.id
+        opt.textContent = m.name
+        sel.appendChild(opt)
+      })
+    }
+
+    /* ─── Stats & Filter ─── */
+    function setFiltro(f) {
+      _filtroStatus = f
+      document.querySelectorAll('.stat-card').forEach(c => c.classList.remove('active-filter'))
+      const map = { todos: 'cardTodos', ativos: 'cardAtivos', arquivados: 'cardArquivados', funcoes: 'cardFuncoes' }
+      document.getElementById(map[f])?.classList.add('active-filter')
+      renderAll()
+    }
+
+    function renderAll() {
+      const total     = _departments.length
+      const ativos    = _departments.filter(d => d.is_active !== false).length
+      const arquivados = _departments.filter(d => d.is_active === false).length
+
+      document.getElementById('statDepartamentos').textContent = total
+      document.getElementById('statAtivos').textContent        = ativos
+      document.getElementById('statArquivados').textContent    = arquivados
+      document.getElementById('statFuncoes').textContent       = 0
+
+      let filtered = _departments
+      if (_filtroStatus === 'ativos')     filtered = filtered.filter(d => d.is_active !== false)
+      if (_filtroStatus === 'arquivados') filtered = filtered.filter(d => d.is_active === false)
+      if (_filtroMinisterio) filtered = filtered.filter(d => d.ministry_id === _filtroMinisterio)
+      if (_searchTerm) {
+        const q = _searchTerm.toLowerCase()
+        filtered = filtered.filter(d =>
+          d.name.toLowerCase().includes(q) ||
+          (d.description || '').toLowerCase().includes(q) ||
+          (d.db_ministry?.name || '').toLowerCase().includes(q)
+        )
+      }
+
+      if (_viewMode === 'blocos') renderGrid(filtered)
+      else                        renderTable(filtered)
+    }
+
+    /* ─── Grid View ─── */
+    function renderGrid(list) {
+      const grid  = document.getElementById('gridView')
+      const empty = document.getElementById('emptyState')
+      const table = document.getElementById('tableView')
+
+      grid.classList.remove('hidden')
+      table.classList.add('hidden')
+
+      if (!list.length) {
+        empty.classList.remove('hidden')
+        grid.classList.add('hidden')
+        return
+      }
+      empty.classList.add('hidden')
+
+      grid.innerHTML = list.map(d => {
+        const isArchived = d.is_active === false
+        const ministryName = d.db_ministry?.name || '—'
+        const desc = d.description || ''
+        const lider = d.leader_name || ''
+        const liderInitial = lider ? lider[0].toUpperCase() : ''
+        return `
+        <div class="dept-card${isArchived ? ' archived' : ''}" onclick="handleCardClick('${d.id}')">
+          <div class="dc-top">
+            <div class="dc-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </div>
+            <div class="dc-info">
+              <div class="dc-name-row">
+                <div class="dc-name">${esc(d.name)}</div>
+                ${isArchived
+                  ? '<span class="archived-badge">Arquivado</span>'
+                  : '<span class="dc-status">Ativo</span>'
+                }
+              </div>
+              <div class="dc-ministry">${esc(ministryName)}</div>
+              ${desc ? `<div class="dc-desc">${esc(desc)}</div>` : ''}
+            </div>
+          </div>
+          <div class="dc-stats">
+            <div class="dc-stat">
+              <div class="dc-stat-value">0</div>
+              <div class="dc-stat-label">Funções</div>
+            </div>
+          </div>
+          <div class="dc-leader">
+            <div class="dc-leader-avatar" style="${lider ? '' : 'background:var(--canvas-input);color:var(--ink-subtle)'}">
+              ${lider ? liderInitial : '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>'}
+            </div>
+            <div>
+              <div class="dc-leader-tag">Líder</div>
+              <div class="dc-leader-name" style="${!lider ? 'color:var(--ink-subtle);font-weight:400' : ''}">${lider || 'Não definido'}</div>
+            </div>
+          </div>
+          <div class="dc-footer" onclick="event.stopPropagation()">
+            ${isArchived
+              ? `<button class="btn-dc-restaurar" onclick="abrirRestaurar('${d.id}')">
+                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.45"/></svg>
+                   Restaurar
+                 </button>
+                 <button class="btn-dc-excluir" onclick="abrirExcluir('${d.id}')">
+                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M9 6V4h6v2"/></svg>
+                   Excluir
+                 </button>`
+              : `<button class="btn-dc-arquivar" onclick="abrirArquivar('${d.id}')">
+                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8v13H3V8"/><path d="M1 3h22v5H1z"/><path d="M10 12h4"/></svg>
+                   Arquivar
+                 </button>
+                 <button class="btn-dc-excluir" onclick="abrirExcluir('${d.id}')">
+                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M9 6V4h6v2"/></svg>
+                   Excluir
+                 </button>`
+            }
+          </div>
+        </div>`
+      }).join('')
+    }
+
+    /* ─── Table View ─── */
+    function renderTable(list) {
+      const grid  = document.getElementById('gridView')
+      const empty = document.getElementById('emptyState')
+      const table = document.getElementById('tableView')
+      const tbody = document.getElementById('tableBody')
+
+      grid.classList.add('hidden')
+      table.classList.remove('hidden')
+
+      if (!list.length) {
+        empty.classList.remove('hidden')
+        table.classList.add('hidden')
+        return
+      }
+      empty.classList.add('hidden')
+
+      tbody.innerHTML = list.map(d => {
+        const isArchived = d.is_active === false
+        const ministryName = d.db_ministry?.name || '—'
+        return `
+        <tr onclick="handleCardClick('${d.id}')">
+          <td><strong>${esc(d.name)}</strong></td>
+          <td><span class="td-ministry-pill">${esc(ministryName)}</span></td>
+          <td style="color:var(--ink-muted);max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(d.description || '—')}</td>
+          <td>${isArchived
+            ? '<span class="archived-badge">Arquivado</span>'
+            : '<span class="dc-status">Ativo</span>'
+          }</td>
+          <td onclick="event.stopPropagation()">
+            <div class="td-actions">
+              ${isArchived
+                ? `<button class="btn-dc-restaurar" onclick="abrirRestaurar('${d.id}')">Restaurar</button>`
+                : `<button class="btn-dc-arquivar" onclick="abrirArquivar('${d.id}')">Arquivar</button>`
+              }
+              <button class="btn-dc-excluir" onclick="abrirExcluir('${d.id}')">Excluir</button>
+            </div>
+          </td>
+        </tr>`
+      }).join('')
+    }
+
+    function esc(str) {
+      return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')
+    }
+
+    let _editingId = null
+
+    function handleCardClick(id) {
+      window.location.href = `/departamento/${id}`
+    }
+
+    /* ─── Drawer ─── */
+    function _resetDrawerForm() {
+      document.getElementById('fieldNome').value       = ''
+      document.getElementById('fieldDesc').value       = ''
+      document.getElementById('fieldMinisterio').value = ''
+      document.getElementById('fieldLider').value      = ''
+      document.getElementById('fieldNome').classList.remove('error')
+      document.getElementById('fieldMinisterio').classList.remove('error')
+      document.getElementById('drawerHeaderText').classList.remove('hidden')
+      document.getElementById('drawerForm').classList.remove('hidden')
+      document.getElementById('drawerSuccess').classList.add('hidden')
+      document.getElementById('drawerFooter').classList.remove('hidden')
+    }
+
+    function abrirDrawer() {
+      _editingId = null
+      _resetDrawerForm()
+      document.getElementById('fieldStatusGroup').classList.add('hidden')
+      document.getElementById('drawerTitle').textContent    = 'Novo Departamento'
+      document.getElementById('drawerSubtitle').textContent = 'Preencha os dados para criar um novo departamento'
+      document.getElementById('btnSalvar').textContent      = 'Criar Departamento'
+      document.getElementById('drawerOverlay').classList.add('open')
+    }
+
+    function abrirDrawerEditar(id) {
+      const d = _departments.find(x => x.id === id)
+      if (!d) return
+      _editingId = id
+      _resetDrawerForm()
+
+      document.getElementById('fieldNome').value       = d.name || ''
+      document.getElementById('fieldDesc').value       = d.description || ''
+      document.getElementById('fieldLider').value      = d.leader_name || ''
+      document.getElementById('fieldStatus').value     = d.is_active === false ? 'false' : 'true'
+      document.getElementById('fieldStatusGroup').classList.remove('hidden')
+      document.getElementById('drawerTitle').textContent    = 'Editar Departamento'
+      document.getElementById('drawerSubtitle').textContent = 'Atualize os dados do departamento'
+      document.getElementById('btnSalvar').textContent      = 'Salvar Alterações'
+
+      // seleciona o ministério atual
+      const sel = document.getElementById('fieldMinisterio')
+      // garante que o ministério aparece mesmo se arquivado
+      if (d.ministry_id && ![...sel.options].some(o => o.value === d.ministry_id)) {
+        const opt = document.createElement('option')
+        opt.value = d.ministry_id
+        opt.textContent = d.db_ministry?.name || d.ministry_id
+        sel.appendChild(opt)
+      }
+      sel.value = d.ministry_id || ''
+
+      document.getElementById('drawerOverlay').classList.add('open')
+    }
+
+    function fecharDrawer() {
+      document.getElementById('drawerOverlay').classList.remove('open')
+    }
+
+    document.getElementById('btnNovoDepartamento').addEventListener('click', abrirDrawer)
+    document.getElementById('drawerClose').addEventListener('click', fecharDrawer)
+    document.getElementById('btnCancelar').addEventListener('click', fecharDrawer)
+    document.getElementById('drawerOverlay').addEventListener('click', e => {
+      if (e.target === document.getElementById('drawerOverlay')) fecharDrawer()
+    })
+
+    document.getElementById('btnSalvar').addEventListener('click', async () => {
+      const nome       = document.getElementById('fieldNome').value.trim()
+      const ministerio = document.getElementById('fieldMinisterio').value
+      const desc       = document.getElementById('fieldDesc').value.trim()
+
+      if (!nome) {
+        document.getElementById('fieldNome').classList.add('error')
+        document.getElementById('fieldNome').focus()
+        return
+      }
+      document.getElementById('fieldNome').classList.remove('error')
+
+      if (!ministerio) {
+        document.getElementById('fieldMinisterio').classList.add('error')
+        return
+      }
+      document.getElementById('fieldMinisterio').classList.remove('error')
+
+      const btn = document.getElementById('btnSalvar')
+      btn.disabled = true
+
+      if (_editingId) {
+        /* ── EDITAR ── */
+        btn.textContent = 'Salvando...'
+        const isActive = document.getElementById('fieldStatus').value === 'true'
+        const res  = await authFetch(`/api/department/${_editingId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: nome, ministry_id: ministerio, description: desc || null, is_active: isActive })
+        })
+        const data = await res.json()
+        btn.textContent = 'Salvar Alterações'
+        btn.disabled = false
+        if (!res.ok) { showToast(data.error || 'Erro ao salvar', 'error'); return }
+        const idx = _departments.findIndex(x => x.id === _editingId)
+        if (idx !== -1) _departments[idx] = { ..._departments[idx], ...data.department }
+        renderAll()
+        fecharDrawer()
+        showToast('Departamento atualizado com sucesso!')
+      } else {
+        /* ── CRIAR ── */
+        btn.textContent = 'Salvando...'
+        const res  = await authFetch('/api/department', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: nome, ministry_id: ministerio, description: desc || null })
+        })
+        const data = await res.json()
+        btn.textContent = 'Criar Departamento'
+        btn.disabled = false
+        if (!res.ok) { showToast(data.error || 'Erro ao criar departamento', 'error'); return }
+        _departments.push(data.department)
+        renderAll()
+        document.getElementById('successName').textContent = data.department.name
+        document.getElementById('drawerHeaderText').classList.add('hidden')
+        document.getElementById('drawerForm').classList.add('hidden')
+        document.getElementById('drawerFooter').classList.add('hidden')
+        document.getElementById('drawerSuccess').classList.remove('hidden')
+      }
+    })
+
+    document.getElementById('btnContinuar').addEventListener('click', () => {
+      _editingId = null
+      _resetDrawerForm()
+      document.getElementById('fieldStatusGroup').classList.add('hidden')
+      document.getElementById('drawerTitle').textContent    = 'Novo Departamento'
+      document.getElementById('drawerSubtitle').textContent = 'Preencha os dados para criar um novo departamento'
+      document.getElementById('btnSalvar').textContent      = 'Criar Departamento'
+    })
+    document.getElementById('btnConcluir').addEventListener('click', fecharDrawer)
+
+    /* ─── Archive ─── */
+    function abrirArquivar(id) {
+      _pendingArchive = { id, mode: 'archive' }
+      document.getElementById('archiveTitle').textContent = 'Arquivar departamento?'
+      document.getElementById('archiveDesc').textContent  = 'O departamento ficará inativo mas não será excluído.'
+      document.getElementById('confirmArchive').textContent = 'Sim, arquivar'
+      document.getElementById('archiveOverlay').classList.add('open')
+    }
+    function abrirRestaurar(id) {
+      _pendingArchive = { id, mode: 'restore' }
+      document.getElementById('archiveTitle').textContent = 'Restaurar departamento?'
+      document.getElementById('archiveDesc').textContent  = 'O departamento voltará a ser exibido como ativo.'
+      document.getElementById('confirmArchive').textContent = 'Sim, restaurar'
+      document.getElementById('archiveOverlay').classList.add('open')
+    }
+    document.getElementById('confirmCancelArchive').addEventListener('click', () => {
+      document.getElementById('archiveOverlay').classList.remove('open')
+      _pendingArchive = null
+    })
+    document.getElementById('confirmArchive').addEventListener('click', async () => {
+      if (!_pendingArchive) return
+      const { id, mode } = _pendingArchive
+      const is_active = mode === 'restore'
+      document.getElementById('archiveOverlay').classList.remove('open')
+
+      const res  = await authFetch(`/api/department/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ is_active })
+      })
+      const data = await res.json()
+      if (!res.ok) { showToast(data.error || 'Erro ao atualizar', 'error'); return }
+
+      const idx = _departments.findIndex(d => d.id === id)
+      if (idx !== -1) _departments[idx] = data.department
+      renderAll()
+      showToast(mode === 'archive' ? 'Departamento arquivado' : 'Departamento restaurado', 'success')
+      _pendingArchive = null
+    })
+
+    /* ─── Delete ─── */
+    function abrirExcluir(id) {
+      _pendingDelete = id
+      document.getElementById('confirmOverlay').classList.add('open')
+    }
+    document.getElementById('confirmCancelDelete').addEventListener('click', () => {
+      document.getElementById('confirmOverlay').classList.remove('open')
+      _pendingDelete = null
+    })
+    document.getElementById('confirmDelete').addEventListener('click', async () => {
+      if (!_pendingDelete) return
+      const id = _pendingDelete
+      document.getElementById('confirmOverlay').classList.remove('open')
+
+      const res  = await authFetch(`/api/department/${id}`, { method: 'DELETE' })
+      const data = await res.json()
+      if (!res.ok) { showToast(data.error || 'Erro ao excluir', 'error'); return }
+
+      _departments = _departments.filter(d => d.id !== id)
+      renderAll()
+      showToast('Departamento excluído', 'success')
+      _pendingDelete = null
+    })
+
+    /* ─── View toggle ─── */
+    document.getElementById('btnBlocos').addEventListener('click', () => {
+      _viewMode = 'blocos'
+      document.getElementById('btnBlocos').classList.add('active')
+      document.getElementById('btnTabela').classList.remove('active')
+      renderAll()
+    })
+    document.getElementById('btnTabela').addEventListener('click', () => {
+      _viewMode = 'tabela'
+      document.getElementById('btnTabela').classList.add('active')
+      document.getElementById('btnBlocos').classList.remove('active')
+      renderAll()
+    })
+
+    /* ─── Ministry filter ─── */
+    document.getElementById('ministryFilter').addEventListener('change', e => {
+      _filtroMinisterio = e.target.value
+      renderAll()
+    })
+
+    /* ─── Search ─── */
+    document.getElementById('searchDepts').addEventListener('input', e => {
+      _searchTerm = e.target.value.trim()
+      renderAll()
+    })
+
+    /* ─── Calendar ─── */
+    /* ─── Sidebar collapse ─── */
+    if (localStorage.getItem('sidebar-collapsed') === '1') {
+      document.body.classList.add('sidebar-collapsed')
+    }
+    document.getElementById('collapseBtn').addEventListener('click', () => {
+      document.body.classList.toggle('sidebar-collapsed')
+      localStorage.setItem('sidebar-collapsed', document.body.classList.contains('sidebar-collapsed') ? '1' : '0')
+    })
+
+    /* ─── Avatar dropdown ─── */
+    document.getElementById('avatarBtn').addEventListener('click', e => {
+      e.stopPropagation()
+      document.getElementById('avatarDropdown').classList.toggle('open')
+    })
+    document.addEventListener('click', () => {
+      document.getElementById('avatarDropdown').classList.remove('open')
+    })
+
+    /* ─── Logout ─── */
+    document.getElementById('logoutBtn').addEventListener('click', async e => {
+      e.preventDefault()
+      await authFetch('/api/auth/logout', { method: 'POST' }).catch(() => {})
+      window.location.href = '/'
+    })
+
+    /* ─── Toast ─── */
+    let _toastTimer = null
+    function showToast(msg, type = '') {
+      const t = document.getElementById('toast')
+      t.textContent = msg
+      t.className   = 'toast show' + (type ? ' ' + type : '')
+      if (_toastTimer) clearTimeout(_toastTimer)
+      _toastTimer = setTimeout(() => t.classList.remove('show'), 3000)
+    }
+
+    init()
+  </script>
+</body>
+</html>
