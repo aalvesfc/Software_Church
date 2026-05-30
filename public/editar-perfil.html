@@ -1,26 +1,31 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Hug Software — Editar Perfil</title>
+  <script src="/js/auth-check.js"></script>
+  <script src="/js/page-loader.js"></script>
+  <script src="/js/cache.js"></script>
   <link rel="icon" type="image/png" href="/IMG/logo.png">
   <style>
+    * { font-family: 'Plus Jakarta Sans', sans-serif !important; }
+
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --primary:         #235347;
-      --primary-light:   #8eb69b;
-      --primary-focus:   #235347;
-      --primary-dark:    #0b2b26;
-      --accent-yellow:   #f5a623;
-      --accent-green:    #8eb69b;
+      --primary:         #8B5CF6;
+      --primary-light:   #DDD6FE;
+      --primary-focus:   #8B5CF6;
+      --primary-dark:    #7C3AED;
+      --accent-yellow:   #ff5500;
+      --accent-green:    #DDD6FE;
       --muted-teal:      #99bfc2;
       --ink:             #1d1d1f;
       --ink-muted:       #6e6e73;
       --ink-subtle:      #aeaeb2;
       --canvas:          #ffffff;
-      --canvas-page:     #f0f6f2;
+      --canvas-page: #ECE9E7;
       --canvas-input:    #f2f2f7;
       --hairline:        #e0e0e0;
       --on-dark:         #ffffff;
@@ -36,7 +41,7 @@
     body {
       min-height: 100vh;
       background: var(--canvas-page);
-      font-family: "SF Pro Text", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-family: sans-serif;
       -webkit-font-smoothing: antialiased;
       display: flex;
     }
@@ -44,15 +49,15 @@
     /* ─────────────────── SIDEBAR ─────────────────── */
     .sidebar {
       width: var(--sidebar-w);
-      min-height: 100vh;
-      background: linear-gradient(180deg, #051f20 0%, #0b2b26 55%, #163832 100%);
+      min-height: unset;
+      background: #1c1c1c;
       display: flex;
       flex-direction: column;
       flex-shrink: 0;
       position: fixed;
       top: 0; left: 0; bottom: 0;
       z-index: 100;
-      overflow: hidden;
+      overflow: visible;
       transition: width 0.22s cubic-bezier(.4,0,.2,1);
     }
 
@@ -67,7 +72,7 @@
 
     .logo-mark {
       width: 42px; height: 42px;
-      background: linear-gradient(135deg, #8eb69b, #235347);
+      background: linear-gradient(135deg, #DDD6FE, #8B5CF6);
       border-radius: 11px;
       display: flex; align-items: center; justify-content: center;
       box-shadow: rgba(0,0,0,0.22) 0 3px 12px;
@@ -76,7 +81,7 @@
     .logo-mark svg { width: 22px; height: 22px; color: #fff; }
 
     .logo-text {
-      font-family: "SF Pro Display", system-ui, -apple-system, sans-serif;
+      font-family: sans-serif;
       font-size: 15px;
       font-weight: 700;
       color: var(--on-dark);
@@ -131,6 +136,50 @@
     body.sidebar-collapsed .main { margin-left: 64px; }
     body.sidebar-collapsed #collapseBtn svg { transform: rotate(180deg); }
 
+    /* ── Tooltip sidebar ── */
+    .nav-item {
+      position: relative;
+    }
+    .nav-item::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      left: calc(100% + 12px);
+      top: 50%;
+      transform: translateY(-50%) translateX(-6px);
+      background: #1a1a1a;
+      color: #FFFFFF;
+      font-size: 12px;
+      font-weight: 500;
+      padding: 6px 12px;
+      border-radius: 8px;
+      white-space: nowrap;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.15s ease, transform 0.15s ease;
+      z-index: 9999;
+      letter-spacing: 0.1px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.28);
+    }
+    .nav-item::before {
+      content: '';
+      position: absolute;
+      left: calc(100% + 6px);
+      top: 50%;
+      transform: translateY(-50%) translateX(-6px);
+      border: 5px solid transparent;
+      border-right-color: #1a1a1a;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.15s ease, transform 0.15s ease;
+      z-index: 9999;
+    }
+    .nav-item:hover::after,
+    .nav-item:hover::before {
+      opacity: 1;
+      transform: translateY(-50%) translateX(0);
+    }
+
+
     /* ─────────────────── MAIN AREA ─────────────────── */
     .main {
       margin-left: var(--sidebar-w);
@@ -141,54 +190,91 @@
       transition: margin-left 0.22s cubic-bezier(.4,0,.2,1);
     }
 
-    /* ─────────────────── TOPBAR ─────────────────── */
+        /* ─────────────────── TOPBAR ─────────────────── */
     .topbar {
-      height: var(--topbar-h);
-      background: var(--canvas);
-      border-bottom: 1px solid var(--hairline);
+      height: 72px;
       display: flex;
       align-items: center;
-      gap: 12px;
-      padding: 0 24px;
+      justify-content: flex-end;
+      padding: 0 28px;
       position: sticky;
       top: 0;
       z-index: 50;
+      background: linear-gradient(135deg, #ECE9E700 0%, #ECE9E7 100%);
+      backdrop-filter: blur(1px);
+      -webkit-backdrop-filter: blur(1px);
     }
 
+    /* Search pill + botão */
     .search-wrap {
-      flex: 1;
-      max-width: 420px;
-      position: relative;
-    }
-    .search-wrap svg {
-      position: absolute;
-      left: 12px; top: 50%;
-      transform: translateY(-50%);
-      width: 15px; height: 15px;
-      color: var(--ink-subtle);
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
     .search-wrap input {
-      width: 100%;
-      height: 40px;
-      background: var(--canvas-input);
-      border: 1px solid transparent;
+      width: 300px;
+      height: 42px;
+      background: #FFFFFF;
+      border: 1.5px solid #EEEEEE;
       border-radius: var(--radius-pill);
-      padding: 0 16px 0 40px;
+      padding: 0 18px;
       font-size: 14px;
       font-family: inherit;
-      color: var(--ink);
+      color: #1A1A1A;
       outline: none;
-      letter-spacing: -0.224px;
-      transition: border-color 0.15s;
+      transition: border-color 0.15s, box-shadow 0.15s;
     }
-    .search-wrap input::placeholder { color: var(--ink-subtle); }
-    .search-wrap input:focus { border-color: var(--primary-focus); background: var(--canvas); }
+    .search-wrap input::placeholder { color: #AAAAAA; }
+    .search-wrap input:focus {
+      border-color: #CCCCCC;
+      box-shadow: 0 0 0 3px rgba(0,0,0,0.05);
+    }
+    .search-btn {
+      width: 42px; height: 42px;
+      border-radius: 50%;
+      border: none;
+      background: #8B5CF6;
+      color: #FFFFFF;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: background 0.15s;
+    }
+    .search-btn:hover { background: #7C3AED; }
+    .search-btn svg { width: 18px; height: 18px; }
 
+    /* Ícones do topbar */
     .topbar-actions {
       display: flex;
       align-items: center;
-      gap: 4px;
-      margin-left: auto;
+      gap: 8px;
+    }
+    .topbar-actions .icon-btn {
+      width: 42px; height: 42px;
+      background: #FFFFFF;
+      border: 1.5px solid #EEEEEE;
+      border-radius: 50%;
+      color: #555555;
+    }
+    .topbar-actions .icon-btn:hover {
+      background: #F5F5F5;
+      border-color: #DDDDDD;
+      color: #1A1A1A;
+    }
+
+    /* Badge de notificação */
+    .notif-wrap {
+      position: relative;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .notif-badge {
+      position: absolute;
+      top: 6px; right: 6px;
+      width: 9px; height: 9px;
+      background: #EF4444;
+      border-radius: 50%;
+      border: 2px solid var(--canvas-page);
+      pointer-events: none;
     }
 
     .icon-btn {
@@ -291,10 +377,23 @@
     /* ─────────────────── CONTENT ─────────────────── */
     .content {
       flex: 1;
-      padding: 32px;
-      max-width: 860px;
-      width: 100%;
+      padding: 28px 32px;
     }
+
+    /* ─────────────────── HERO ─────────────────── */
+    .hero { background: linear-gradient(135deg, #0a0a0a 0%, #8B5CF6 45%, #DDD6FE 80%, #ff5500 100%); border-radius: var(--radius-lg); padding: 28px 36px; position: relative; overflow: hidden; margin-bottom: 24px; display: flex; align-items: center; gap: 20px; }
+    .hero::after { content: ""; position: absolute; width: 300px; height: 300px; border-radius: 50%; border: 56px solid rgba(255,255,255,0.06); right: -60px; top: -100px; pointer-events: none; }
+    .hero::before { content: ""; position: absolute; width: 180px; height: 180px; border-radius: 50%; border: 32px solid rgba(255,255,255,0.04); right: 140px; bottom: -60px; pointer-events: none; }
+    .hero-icon { width: 52px; height: 52px; background: rgba(255,255,255,0.12); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; flex-shrink: 0; backdrop-filter: blur(1px); }
+    .hero-icon svg { width: 26px; height: 26px; color: #fff; }
+    .hero-title { font-family: sans-serif; font-size: 28px; font-weight: 600; color: #fff; letter-spacing: -0.374px; line-height: 1.14; }
+    .hero-desc { font-size: 14px; color: rgba(255,255,255,0.65); letter-spacing: -0.224px; margin-top: 4px; }
+    .hero-action { margin-left: auto; flex-shrink: 0; display: flex; align-items: center; gap: 10px; position: relative; z-index: 1; }
+    .btn-hero-cancel { display: inline-flex; align-items: center; height: 40px; padding: 0 20px; background: rgba(255,255,255,0.10); border: 1.5px solid rgba(255,255,255,0.30); border-radius: var(--radius-pill); font-family: inherit; font-size: 14px; font-weight: 500; color: rgba(255,255,255,0.85); cursor: pointer; transition: background 0.15s, border-color 0.15s; white-space: nowrap; }
+    .btn-hero-cancel:hover { background: rgba(255,255,255,0.18); border-color: rgba(255,255,255,0.55); }
+    .btn-hero-save { display: inline-flex; align-items: center; height: 40px; padding: 0 22px; background: rgba(255,255,255,0.18); border: 1.5px solid rgba(255,255,255,0.55); border-radius: var(--radius-pill); font-family: inherit; font-size: 14px; font-weight: 600; color: #fff; cursor: pointer; transition: background 0.15s, border-color 0.15s; white-space: nowrap; }
+    .btn-hero-save:hover { background: rgba(255,255,255,0.28); border-color: rgba(255,255,255,0.8); }
+    .btn-hero-save:disabled { opacity: 0.5; cursor: default; }
 
     /* ─────────────────── BREADCRUMB ─────────────────── */
     .breadcrumb {
@@ -322,7 +421,7 @@
       margin-bottom: 28px;
     }
     .page-title {
-      font-family: "SF Pro Display", system-ui, -apple-system, sans-serif;
+      font-family: sans-serif;
       font-size: 28px;
       font-weight: 600;
       color: var(--ink);
@@ -358,7 +457,7 @@
       padding: 0 22px;
       border: none;
       border-radius: var(--radius-pill);
-      background: linear-gradient(135deg, #235347, #8eb69b);
+      background: linear-gradient(135deg, #8B5CF6, #DDD6FE);
       font-family: inherit;
       font-size: 14px;
       font-weight: 600;
@@ -421,7 +520,7 @@
       border-radius: var(--radius-pill);
       background: #e8612a;
       display: flex; align-items: center; justify-content: center;
-      font-family: "SF Pro Display", system-ui, -apple-system, sans-serif;
+      font-family: sans-serif;
       font-size: 34px;
       font-weight: 600;
       color: #fff;
@@ -440,10 +539,12 @@
     }
     .avatar-edit-btn:hover { background: var(--primary-dark); }
     .avatar-edit-btn svg { width: 13px; height: 13px; color: #fff; }
+    .avatar-lg img { width: 100%; height: 100%; object-fit: cover; border-radius: var(--radius-pill); display: block; }
+    .avatar-sm img { width: 100%; height: 100%; object-fit: cover; border-radius: var(--radius-pill); display: block; }
 
     .profile-info { flex: 1; }
     .profile-name {
-      font-family: "SF Pro Display", system-ui, -apple-system, sans-serif;
+      font-family: sans-serif;
       font-size: 22px;
       font-weight: 600;
       color: var(--ink);
@@ -464,7 +565,7 @@
       font-size: 12px;
       font-weight: 500;
       color: var(--primary);
-      background: rgba(35,83,71,0.10);
+      background: rgba(151,71,255,0.10);
       border-radius: var(--radius-pill);
       padding: 4px 10px;
       letter-spacing: -0.12px;
@@ -478,6 +579,13 @@
       padding: 4px 10px;
       letter-spacing: -0.12px;
     }
+    /* cores por perfil */
+    .badge-role.role-owner            { background: rgba(151,71,255,0.12); color: var(--primary); }
+    .badge-role.role-admin            { background: rgba(109,31,214,0.10); color: var(--primary-dark); }
+    .badge-role.role-lider            { background: #fff3e0; color: #e07400; }
+    .badge-role.role-lider_departamento { background: #fff3e0; color: #e07400; }
+    .badge-role.role-secretario       { background: #ECE9E7; color: var(--primary); }
+    .badge-role.role-voluntario       { background: var(--canvas-input); color: var(--ink-muted); }
 
     .profile-stats {
       display: flex;
@@ -488,7 +596,7 @@
       text-align: center;
     }
     .profile-stat-value {
-      font-family: "SF Pro Display", system-ui, -apple-system, sans-serif;
+      font-family: sans-serif;
       font-size: 22px;
       font-weight: 600;
       color: var(--ink);
@@ -507,31 +615,214 @@
       border: 1px solid var(--hairline);
       border-radius: var(--radius-lg);
       padding: 28px 32px;
-      margin-bottom: 20px;
     }
 
     .form-section-header {
       display: flex;
       align-items: center;
       gap: 10px;
-      margin-bottom: 24px;
       padding-bottom: 18px;
       border-bottom: 1px solid var(--hairline);
+      cursor: pointer;
+      user-select: none;
     }
+    .form-section-header:hover .accordion-chevron,
+    .danger-section-header:hover .accordion-chevron { color: var(--ink); }
+    .accordion-body {
+      overflow: hidden;
+      transition: max-height 0.32s cubic-bezier(0.4,0,0.2,1), opacity 0.25s;
+    }
+    .accordion-body.open  { max-height: 2000px; opacity: 1; padding-top: 24px; }
+    .accordion-body.closed { max-height: 0; opacity: 0; padding-top: 0; }
+    .accordion-chevron {
+      margin-left: auto;
+      flex-shrink: 0;
+      width: 18px; height: 18px;
+      color: var(--ink-subtle);
+      transition: transform 0.28s cubic-bezier(0.4,0,0.2,1), color 0.15s;
+    }
+    .accordion-chevron.rotated { transform: rotate(180deg); }
+
+    /* ── 2-column layout ── */
+    .content-grid {
+      display: grid;
+      grid-template-columns: 1fr 360px;
+      gap: 20px;
+      align-items: start;
+    }
+    .content-main { display: flex; flex-direction: column; gap: 16px; }
+    .content-aside { display: flex; flex-direction: column; gap: 16px; }
+    @media (max-width: 860px) {
+      .content-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ── Aside cards ── */
+    .aside-card {
+      background: var(--canvas);
+      border: 1px solid var(--hairline);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+    }
+    .aside-card + .aside-card { margin-top: 0; }
+    .aside-card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--hairline);
+    }
+    .aside-card-icon {
+      width: 36px; height: 36px;
+      border-radius: var(--radius-sm);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .aside-card-icon svg { width: 18px; height: 18px; }
+    .aside-card-icon.purple { background: rgba(151,71,255,0.10); color: var(--primary); }
+    .aside-card-icon.red    { background: rgba(255,59,48,0.10);  color: #ff3b30; }
+    .aside-card-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--ink);
+      letter-spacing: -0.2px;
+    }
+
+    /* ── Aside list ── */
+    .aside-list { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
+    .aside-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      background: var(--canvas-input);
+      border-radius: var(--radius-md);
+      border: 1px solid transparent;
+      transition: border-color 0.15s;
+    }
+    .aside-item:hover { border-color: var(--hairline); }
+    .aside-item-info { flex: 1; min-width: 0; }
+    .aside-item-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--ink);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .aside-item-sub {
+      font-size: 12px;
+      color: var(--ink-muted);
+      margin-top: 2px;
+    }
+    .aside-item-badge {
+      font-size: 11px;
+      font-weight: 500;
+      padding: 3px 9px;
+      border-radius: var(--radius-pill);
+      flex-shrink: 0;
+    }
+    .aside-item-badge.ativo    { background: rgba(52,199,89,0.12);   color: #1a7a35; }
+    .aside-item-badge.inativo  { background: rgba(142,142,147,0.12); color: var(--ink-muted); }
+    .aside-item-badge.pendente { background: rgba(255,149,0,0.13);   color: #b36200; }
+    .aside-item-remove {
+      width: 26px; height: 26px;
+      border-radius: 50%;
+      border: none;
+      background: transparent;
+      color: var(--ink-subtle);
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      transition: background 0.15s, color 0.15s;
+    }
+    .aside-item-remove:hover { background: rgba(255,59,48,0.10); color: #ff3b30; }
+    .aside-item-remove svg { width: 14px; height: 14px; }
+    .aside-empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      padding: 28px 16px;
+      color: var(--ink-muted);
+      font-size: 13px;
+      text-align: center;
+    }
+    .aside-empty svg { width: 22px; height: 22px; color: var(--ink-subtle); }
+    .aside-empty-icon {
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .aside-empty-icon.green { background: rgba(52,199,89,0.12); color: #1a7a35; }
+    .aside-empty-icon svg { width: 22px; height: 22px; }
+
+    /* ── Aside desc ── */
+    .aside-desc {
+      font-size: 13px;
+      color: var(--ink-muted);
+      margin-bottom: 14px;
+      line-height: 1.4;
+    }
+
+    /* ── Indisponibilidade type buttons ── */
+    .indisp-type-btns {
+      display: flex;
+      gap: 6px;
+      flex-wrap: nowrap;
+      margin-bottom: 14px;
+    }
+    .indisp-type-btn {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11.5px;
+      font-weight: 500;
+      padding: 7px 8px;
+      flex: 1;
+      justify-content: center;
+      white-space: nowrap;
+      border-radius: var(--radius-pill);
+      border: 1.5px solid var(--hairline);
+      background: var(--canvas-input);
+      color: var(--ink-muted);
+      cursor: pointer;
+      transition: all 0.15s;
+      font-family: inherit;
+    }
+    .indisp-type-btn svg { width: 13px; height: 13px; flex-shrink: 0; }
+    .indisp-type-btn.orange { color: #b36200; border-color: rgba(255,149,0,0.35); background: rgba(255,149,0,0.08); }
+    .indisp-type-btn.orange:hover { background: rgba(255,149,0,0.15); }
+    .indisp-type-btn.blue   { color: #0a6dd9; border-color: rgba(10,132,255,0.35); background: rgba(10,132,255,0.08); }
+    .indisp-type-btn.blue:hover { background: rgba(10,132,255,0.15); }
+    .indisp-type-btn.pink   { color: #c0005e; border-color: rgba(255,45,85,0.35); background: rgba(255,45,85,0.08); }
+    .indisp-type-btn.pink:hover { background: rgba(255,45,85,0.15); }
+
+    /* ── Indisponibilidade inline form ── */
+    .indisp-form {
+      background: var(--canvas);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--hairline);
+      padding: 16px;
+      margin-bottom: 14px;
+      margin-top: 12px;
+    }
+    .indisp-type-btn.selected { outline: 2px solid currentColor; outline-offset: 1px; }
+    .indisp-form-fields { display: flex; flex-direction: column; gap: 10px; }
+    .indisp-form-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px; }
+    .btn-sm { font-size: 12px !important; padding: 6px 16px !important; height: auto !important; }
     .form-section-icon {
       width: 36px; height: 36px;
       border-radius: var(--radius-sm);
       display: flex; align-items: center; justify-content: center;
       flex-shrink: 0;
     }
-    .form-section-icon.teal { background: rgba(35,83,71,0.10); color: var(--primary); }
+    .form-section-icon.teal { background: rgba(151,71,255,0.10); color: var(--primary); }
     .form-section-icon.dark { background: #1d1d1f; color: #fff; }
-    .form-section-icon.yellow { background: rgba(245,166,35,0.10); color: var(--accent-yellow); }
+    .form-section-icon.yellow { background: rgba(255,85,0,0.10); color: var(--accent-yellow); }
     .form-section-icon.green { background: rgba(142,182,155,0.10); color: var(--accent-green); }
     .form-section-icon svg { width: 18px; height: 18px; }
 
     .form-section-title {
-      font-family: "SF Pro Display", system-ui, -apple-system, sans-serif;
+      font-family: sans-serif;
       font-size: 16px;
       font-weight: 600;
       color: var(--ink);
@@ -728,15 +1019,15 @@
       border: 1px solid rgba(255,59,48,0.25);
       border-radius: var(--radius-lg);
       padding: 28px 32px;
-      margin-bottom: 20px;
     }
     .danger-section-header {
       display: flex;
       align-items: center;
       gap: 10px;
-      margin-bottom: 20px;
       padding-bottom: 18px;
       border-bottom: 1px solid rgba(255,59,48,0.12);
+      cursor: pointer;
+      user-select: none;
     }
     .danger-icon {
       width: 36px; height: 36px;
@@ -748,7 +1039,7 @@
     }
     .danger-icon svg { width: 18px; height: 18px; }
     .danger-title {
-      font-family: "SF Pro Display", system-ui, -apple-system, sans-serif;
+      font-family: sans-serif;
       font-size: 16px;
       font-weight: 600;
       color: #ff3b30;
@@ -802,112 +1093,462 @@
       gap: 10px;
       padding: 24px 0 8px;
     }
-  </style>
+
+    /* ─────────────────── CROP MODAL ─────────────────── */
+    .crop-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.72);
+      z-index: 900;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .crop-box {
+      background: var(--canvas);
+      border-radius: var(--radius-lg);
+      padding: 28px 32px;
+      width: 340px;
+      display: flex; flex-direction: column; gap: 20px;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.32);
+    }
+    .crop-title {
+      font-family: sans-serif;
+      font-size: 17px; font-weight: 600;
+      color: var(--ink); letter-spacing: -0.224px;
+    }
+    .crop-viewport {
+      width: 220px; height: 220px;
+      border-radius: 50%;
+      overflow: hidden;
+      position: relative;
+      cursor: grab;
+      margin: 0 auto;
+      border: 3px solid var(--primary);
+      background: var(--canvas-input);
+      user-select: none;
+      flex-shrink: 0;
+    }
+    .crop-viewport:active { cursor: grabbing; }
+    .crop-viewport img {
+      position: absolute;
+      top: 0; left: 0;
+      touch-action: none;
+      pointer-events: none;
+    }
+    .crop-zoom-wrap { display: flex; flex-direction: column; gap: 6px; }
+    .crop-zoom-label { font-size: 12px; color: var(--ink-subtle); font-weight: 500; letter-spacing: 0.4px; text-transform: uppercase; }
+    .crop-zoom-slider { width: 100%; accent-color: var(--primary); cursor: pointer; }
+    .crop-actions { display: flex; justify-content: flex-end; gap: 10px; }
+  
+    
+    /* ══════════════════════════════════════════════════════
+       DESIGN UPDATE — Tokens minimalistas (todas as páginas)
+       ══════════════════════════════════════════════════════ */
+
+    /* ── Fundo da página ── */
+    :root { --canvas-page: #ECE9E7; }
+    body  { background: #ECE9E7; }
+
+    /* ── Hero banner ── */
+    .hero {
+      background: linear-gradient(135deg, #1A1A1A 0%, #7C3AED 55%, #8B5CF6 100%) !important;
+      border-radius: 20px !important;
+    }
+
+    /* ── Stat cards ── */
+    .stat-card {
+      background: #FFFFFF !important;
+      border: 1px solid #EEEEEE !important;
+      border-radius: 20px !important;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04) !important;
+      transition: box-shadow 0.2s, transform 0.2s !important;
+    }
+    .stat-card:hover {
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08) !important;
+      transform: translateY(-2px) !important;
+    }
+    .stat-value {
+      font-size: 2rem !important;
+      font-weight: 700 !important;
+      color: #1A1A1A !important;
+      letter-spacing: -0.5px !important;
+      line-height: 1 !important;
+    }
+    .stat-label {
+      font-size: 12px !important;
+      font-weight: 500 !important;
+      color: #8A8A8A !important;
+      text-transform: uppercase !important;
+      letter-spacing: 0.5px !important;
+      margin-top: 6px !important;
+    }
+
+    /* ── Títulos de seção ── */
+    .section-title, .page-title {
+      font-size: 18px !important;
+      font-weight: 700 !important;
+      color: #1A1A1A !important;
+      letter-spacing: -0.3px !important;
+    }
+    .card-title {
+      font-size: 15px !important;
+      font-weight: 700 !important;
+      color: #1A1A1A !important;
+    }
+
+    /* ── Cards de conteúdo (detalhe) ── */
+    .detail-card, .content-card, .section-card, .review-info-card,
+    .profile-card, .aside-card, .pontuacao-card, .setting-card,
+    .accordion-card, .summary-card, .card-link-block {
+      background: #FFFFFF !important;
+      border: 1px solid #EEEEEE !important;
+      border-radius: 20px !important;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04) !important;
+    }
+
+    /* ── Cards de lista / item (com hover) ── */
+    .list-card, .ministry-card, .dept-card, .func-card,
+    .template-card, .bloco-card, .dispon-card, .type-card,
+    .ev-card, .lds-card, .option-card, .check-card,
+    .pending-card-click {
+      background: #FFFFFF !important;
+      border: 1px solid #EEEEEE !important;
+      border-radius: 20px !important;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04) !important;
+      transition: box-shadow 0.2s, transform 0.2s !important;
+    }
+    .list-card:hover, .ministry-card:hover, .dept-card:hover, .func-card:hover,
+    .template-card:hover, .bloco-card:hover, .dispon-card:hover, .type-card:hover,
+    .ev-card:hover, .lds-card:hover, .option-card:hover, .check-card:hover,
+    .pending-card-click:hover {
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08) !important;
+      transform: translateY(-2px) !important;
+    }
+
+    /* ── Cabeçalho de card ── */
+    .card-header {
+      border-bottom: 1px solid #EEEEEE !important;
+    }
+
+    /* ── Escalação: cards de departamento ── */
+    .dept-card-header {
+      background: #ECE9E7 !important;
+      border-bottom: 1px solid #EEEEEE !important;
+      border-radius: 20px 20px 0 0 !important;
+    }
+
+    /* ── Badges de data ── */
+    .event-date-badge, .ev-card-day, .ev-card-badge {
+      background: #7C3AED !important;
+      border-radius: 12px !important;
+    }
+
+    /* ── Tabelas ── */
+    .table-wrap, .table-container {
+      background: #FFFFFF !important;
+      border: 1px solid #EEEEEE !important;
+      border-radius: 20px !important;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04) !important;
+      overflow: hidden !important;
+    }
+    thead th {
+      font-size: 11px !important;
+      font-weight: 600 !important;
+      color: #8A8A8A !important;
+      text-transform: uppercase !important;
+      letter-spacing: 0.5px !important;
+      background: #ECE9E7 !important;
+    }
+
+    /* ── Painel lateral (detalhe) ── */
+    .right-panel {
+      background: #FFFFFF !important;
+      border-left: 1px solid #EEEEEE !important;
+    }
+
+    /* ══════════════════════════════════════════════════════
+       FIM DESIGN UPDATE
+       ══════════════════════════════════════════════════════ */
+    /* ══════════════════════════════════════════════════════
+       SIDEBAR REDESIGN — Floating pill dark
+       ══════════════════════════════════════════════════════ */
+    :root { --sidebar-w: 60px; }
+
+    /* ── Estrutura base ── */
+    .sidebar {
+      width: 60px !important;
+      background: #1c1c1c !important;
+      border-radius: 24px !important;
+      top: 16px !important;
+      bottom: 16px !important;
+      left: 12px !important;
+      min-height: unset !important;
+      height: auto !important;
+      padding: 16px 8px !important;
+      align-items: center !important;
+      overflow: visible !important;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.18) !important;
+      border-right: none !important;
+    }
+
+    /* ── Logo ── */
+    .sidebar-logo { display: none !important; }
+    .logo-text    { display: none !important; }
+
+    /* ── Nav ── */
+    .sidebar-nav {
+      padding: 0 !important;
+      align-items: center !important;
+      gap: 4px !important;
+      overflow: visible !important;
+      flex-direction: column !important;
+    }
+    .nav-item {
+      width: 44px !important; height: 44px !important;
+      min-height: 44px !important;
+      padding: 10px !important;
+      border-radius: 14px !important;
+      color: rgba(255,255,255,0.5) !important;
+      justify-content: center !important;
+      gap: 0 !important;
+      background: none !important;
+      letter-spacing: 0 !important;
+    }
+    .nav-item span { display: none !important; }
+    .nav-item svg {
+      width: 20px !important; height: 20px !important;
+      opacity: 1 !important; flex-shrink: 0 !important;
+    }
+    .nav-item:hover {
+      background: rgba(255,255,255,0.1) !important;
+      color: rgba(255,255,255,0.9) !important;
+    }
+    .nav-item.active {
+      background: #FFFFFF !important;
+      color: #1A1A1A !important;
+    }
+    .nav-item.active svg { opacity: 1 !important; }
+
+    /* ── Transição suave ── */
+    .sidebar { transition: transform 0.25s cubic-bezier(.4,0,.2,1), opacity 0.25s !important; }
+    .main    { transition: margin-left 0.25s cubic-bezier(.4,0,.2,1) !important; }
+
+    /* ── Collapsed: sidebar sai pela esquerda ── */
+    body.sidebar-collapsed .sidebar {
+      transform: translateX(calc(-100% - 20px)) !important;
+      opacity: 0 !important;
+      pointer-events: none !important;
+    }
+    body.sidebar-collapsed .main { margin-left: 16px !important; }
+    /* ── Quando collapsed: empurra conteúdo à direita do botão restaurar ── */
+    body.sidebar-collapsed .content {
+      padding-left: 60px !important;
+    }
+    body.sidebar-collapsed .topbar {
+      padding-left: 64px !important;
+    }
+
+
+    /* ── Botão flutuante para restaurar sidebar ── */
+    .sidebar-restore-btn {
+      display: none;
+      position: fixed;
+      top: 20px; left: 16px;
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      background: #1c1c1c;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      align-items: center; justify-content: center;
+      z-index: 200;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      transition: background 0.15s;
+    }
+    .sidebar-restore-btn:hover { background: #333; }
+    .sidebar-restore-btn svg { width: 18px; height: 18px; }
+    body.sidebar-collapsed .sidebar-restore-btn { display: flex; }
+
+    /* ── Main area offset ── */
+    .main { margin-left: 84px !important; }
+
+    /* ── Rodapé da sidebar ── */
+    .sidebar > div:last-child, .sidebar-footer {
+      border-top: none !important;
+      background: none !important;
+      padding: 0 !important;
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      justify-content: center !important;
+      gap: 8px !important;
+      margin-top: auto !important;
+      width: 100% !important;
+    }
+    .sidebar .icon-btn {
+      width: 40px !important; height: 40px !important;
+      border-radius: 50% !important;
+      color: rgba(255,255,255,0.7) !important;
+      background: rgba(255,255,255,0.08) !important;
+      border: none !important;
+      flex-shrink: 0 !important;
+    }
+    .sidebar .icon-btn:hover {
+      background: rgba(255,255,255,0.16) !important;
+      color: #FFFFFF !important;
+    }
+    /* ══════════════════════════════════════════════════════ */
+
+    /* ── Avatar no rodapé da sidebar ── */
+    .sidebar-footer {
+      padding-top: 8px !important;
+      border-top: 1px solid rgba(255,255,255,0.08) !important;
+    }
+    .sidebar .avatar-menu-wrap {
+      position: relative !important;
+      margin: 0 !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+    }
+    .sidebar .avatar {
+      width: 40px !important; height: 40px !important;
+      border-radius: 50% !important;
+      font-size: 13px !important;
+      margin-left: 0 !important;
+      cursor: pointer !important;
+      box-shadow: 0 0 0 2px rgba(255,255,255,0.15) !important;
+    }
+    .sidebar .avatar-dropdown {
+      position: fixed !important;
+      left: 84px !important;
+      bottom: 16px !important;
+      top: auto !important;
+      right: auto !important;
+      transform: translateX(-8px) !important;
+      transition: opacity 0.15s, transform 0.15s !important;
+    }
+    .sidebar .avatar-dropdown.open {
+      transform: translateX(0) !important;
+      opacity: 1 !important;
+      pointer-events: auto !important;
+    }
+  
+    /* ── Notif Dropdown ── */
+    .notif-badge{position:absolute;top:-4px;right:-4px;background:#E85D6A;color:#fff;border-radius:50%;width:18px;height:18px;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;pointer-events:none;}
+    .notif-dropdown{position:absolute;top:48px;right:0;width:360px;background:#fff;border-radius:16px;border:1px solid #E8E5E2;box-shadow:0 8px 32px rgba(0,0,0,0.12);z-index:300;display:none;overflow:hidden;}
+    .notif-dropdown.open{display:block;}
+    .notif-header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid #F5F3F0;}
+    .notif-list{max-height:360px;overflow-y:auto;}
+    .notif-item{padding:12px 16px;border-bottom:1px solid #F5F3F0;cursor:pointer;display:flex;gap:12px;align-items:flex-start;transition:background 0.1s;}
+    .notif-item:hover{background:#F5F3F0;}
+    .notif-item.unread{background:rgba(145,86,241,0.06);}
+    .notif-icon{width:36px;height:36px;border-radius:50%;background:#EDE5FF;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#9156F1;}
+    .notif-content{flex:1;min-width:0;}
+    .notif-title{font-weight:600;font-size:13px;color:#1C1C1C;margin-bottom:2px;}
+    .notif-body{font-size:12px;color:#5C5955;line-height:1.4;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .notif-time{font-size:11px;color:#9E9B96;}
+    .notif-footer{padding:10px 16px;border-top:1px solid #F5F3F0;text-align:center;}
+    </style>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/responsive.css">
 </head>
 <body>
 <script>if(localStorage.getItem('sidebar-collapsed')==='1')document.body.classList.add('sidebar-collapsed')</script>
 
   <!-- ── Sidebar ── -->
   <aside class="sidebar">
-    <div class="sidebar-logo">
-      <div class="logo-mark">
-        <img src="/IMG/logo.png" alt="Logo" style="width:52px;height:52px;object-fit:contain;">
-      </div>
-      <div class="logo-text" id="churchName"></div>
-    </div>
 
     <nav class="sidebar-nav">
-      <a class="nav-item" href="/dashboard">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-        <span>Dashboard</span>
-      </a>
-      <a class="nav-item" href="#">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-        <span>Ministérios</span>
-      </a>
-      <a class="nav-item" href="/departamentos">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-        <span>Departamentos</span>
-      </a>
-      <a class="nav-item" href="#">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-        <span>Templates</span>
-      </a>
-      <a class="nav-item" href="#">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-        <span>Eventos</span>
-      </a>
-      <a class="nav-item" href="#">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-        <span>Escalação</span>
-      </a>
-      <a class="nav-item" href="#">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
-        <span>Músicas</span>
-      </a>
-      <a class="nav-item" href="#">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-        <span>Voluntários</span>
-      </a>
-      <a class="nav-item" href="#">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-        <span>Líderes</span>
-      </a>
-      <a class="nav-item" href="#">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <span>Triagem</span>
-      </a>
-      <a class="nav-item" href="#">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-        <span>Presença</span>
-      </a>
-      <a class="nav-item" href="#">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-        <span>Gamificação</span>
-      </a>
-      <a class="nav-item" href="#">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-        <span>Relatórios</span>
-      </a>
-      <a class="nav-item" href="/configuracoes">
+      <a class="nav-item" href="/configuracoes" data-tooltip="Configurações" data-menu="configuracoes">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
         <span>Configurações</span>
       </a>
-    </nav>
+      <a class="nav-item" data-tooltip="Dashboard" data-menu="dashboard" href="/dashboard">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        <span>Dashboard</span>
+      </a>
+      <a class="nav-item" href="/departamentos" data-tooltip="Departamentos" data-menu="departamentos">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><path d="M2 12h20"/></svg>
+        <span>Departamentos</span>
+      </a>
+      <a class="nav-item" href="/escalacoes" data-tooltip="Escalações" data-menu="escalacao">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></svg>
+        <span>Escalação</span>
+      </a>
+      <a class="nav-item" href="/eventos" data-tooltip="Eventos" data-menu="eventos">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <span>Eventos</span>
+      </a>
+      <a class="nav-item" href="/indisponibilidade" data-tooltip="Indisponibilidade" data-menu="indisponibilidade">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M10 14l4 4"/><path d="M14 14l-4 4"/></svg>
+        <span>Indisponibilidade</span>
+      </a>
+      <a class="nav-item" href="/ministerios" data-tooltip="Ministérios" data-menu="ministerios">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4"/><path d="M10 4h4"/><path d="M3 11l9-7 9 7"/><rect x="5" y="11" width="14" height="10" rx="1"/><path d="M10 21v-5h4v5"/></svg>
+        <span>Ministérios</span>
+      </a>
+      <a class="nav-item" href="/musicas" data-tooltip="Músicas" data-menu="musicas">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+        <span>Músicas</span>
+      </a>
+      <a class="nav-item" href="/templates" data-tooltip="Templates" data-menu="templates">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+        <span>Templates</span>
+      </a>      <a class="nav-item" href="/voluntarios" data-tooltip="Voluntários" data-menu="voluntarios">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span>Voluntários</span>
+      </a>      <a class="nav-item" href="/notificacoes" data-tooltip="Notificações" data-menu="notificacoes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span>Notificações</span></a>
+</nav>
   </aside>
 
   <!-- ── Main ── -->
   <div class="main">
 
+
     <!-- Topbar -->
     <header class="topbar">
-      <div class="search-wrap">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input type="text" placeholder="Buscar eventos, voluntários..." />
-      </div>
 
+      <!-- Direita: search + ícones -->
       <div class="topbar-actions">
-        <button class="icon-btn" title="Notificações">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-        </button>
-        <button class="icon-btn" title="Configurações">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-        </button>
+        <!-- Search pill + botão -->
+        <div class="search-wrap">
+          <input type="text" placeholder="Search..." id="topSearch" />
+          <button class="search-btn" title="Buscar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          </button>
+        </div>
+
+        <!-- Notificações -->
+        <div class="notif-wrapper" style="position:relative;">
+          <button class="icon-btn notif-btn" id="notifBtn" title="Notificações">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            <span class="notif-badge" id="notifBadge" style="display:none">0</span>
+          </button>
+          <div class="notif-dropdown" id="notifDropdown">
+            <div class="notif-header">
+              <span style="font-weight:600;font-size:14px">Notificações</span>
+              <button id="markAllRead" style="font-size:12px;color:#9156F1;background:none;border:none;cursor:pointer;font-family:inherit">Marcar todas como lidas</button>
+            </div>
+            <div class="notif-list" id="notifList"></div>
+            <div class="notif-footer"><a href="/notificacoes" style="font-size:13px;color:#9156F1;text-decoration:none">Ver todas</a></div>
+          </div>
+        </div>
+
+        <!-- Collapse + avatar movidos pelo sidebar-ui.js -->
         <button class="icon-btn" id="collapseBtn" title="Recolher menu">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="transition:transform 0.22s"><polyline points="11 17 6 12 11 7"/><polyline points="18 17 13 12 18 7"/></svg>
         </button>
         <div class="avatar-menu-wrap">
-          <div class="avatar-sm" id="avatarSm">A</div>
+          <div class="avatar" id="avatarBtn">A</div>
           <div class="avatar-dropdown" id="avatarDropdown">
             <div class="dropdown-header">
               <div class="dropdown-name" id="dropdownName">—</div>
               <div class="dropdown-email" id="dropdownEmail">—</div>
             </div>
-            <a class="dropdown-item" id="linkEditarPerfil" href="/editar-perfil">
+            <a class="dropdown-item" href="/editar-perfil">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
               Editar Perfil
             </a>
-            <a class="dropdown-item" href="/configuracoes">
+            <a class="dropdown-item" href="/configuracoes" data-menu-dropdown="configuracoes">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
               Configurações
             </a>
@@ -924,22 +1565,17 @@
     <!-- Content -->
     <main class="content">
 
-      <!-- Breadcrumb -->
-      <div class="breadcrumb">
-        <a href="dashboard.html">Dashboard</a>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-        <span>Editar Perfil</span>
-      </div>
-
-      <!-- Page Header -->
-      <div class="page-header">
-        <div>
-          <h1 class="page-title">Editar Perfil</h1>
-          <p class="page-subtitle">Gerencie suas informações pessoais e preferências de conta</p>
+      <!-- Hero -->
+      <div class="hero">
+        <div class="hero-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
         </div>
-        <div class="header-actions">
-          <button class="btn-secondary" onclick="history.back()">Cancelar</button>
-          <button class="btn-primary" id="btnSalvar" onclick="salvarPerfil()">Salvar Alterações</button>
+        <div>
+          <div class="hero-title">Editar Perfil</div>
+          <div class="hero-desc">Gerencie suas informações pessoais e preferências de conta</div>
+        </div>
+        <div class="hero-action">
+          <button class="btn-hero-cancel" onclick="history.back()">Cancelar</button>
         </div>
       </div>
 
@@ -947,37 +1583,26 @@
       <div class="profile-card">
         <div class="avatar-wrap">
           <div class="avatar-lg" id="avatarLg">A</div>
-          <button class="avatar-edit-btn" title="Alterar foto">
+          <input type="file" id="avatarInput" accept="image/*" style="display:none">
+          <button class="avatar-edit-btn" id="avatarEditBtn" title="Alterar foto">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
           </button>
         </div>
         <div class="profile-info">
           <div class="profile-name" id="profileName">—</div>
-          <div class="profile-role" id="profileRole">—</div>
           <div class="profile-badges">
             <span class="badge-ministry" id="profileChurch">—</span>
-            <span class="badge-role" id="profileRoleTag">—</span>
-          </div>
-        </div>
-        <div class="profile-stats">
-          <div class="profile-stat">
-            <div class="profile-stat-value">24</div>
-            <div class="profile-stat-label">Eventos</div>
-          </div>
-          <div class="profile-stat">
-            <div class="profile-stat-value">5 pts</div>
-            <div class="profile-stat-label">Pontos</div>
-          </div>
-          <div class="profile-stat">
-            <div class="profile-stat-value">#1</div>
-            <div class="profile-stat-label">Ranking</div>
+            <span class="badge-role" id="profileRole">—</span>
           </div>
         </div>
       </div>
 
+      <div class="content-grid">
+      <div class="content-main">
+
       <!-- Informações Pessoais -->
       <div class="form-section">
-        <div class="form-section-header">
+        <div class="form-section-header" onclick="toggleAccordion(this)">
           <div class="form-section-icon teal">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
           </div>
@@ -985,8 +1610,10 @@
             <div class="form-section-title">Informações Pessoais</div>
             <div class="form-section-desc">Seus dados básicos de identificação</div>
           </div>
+          <svg class="accordion-chevron rotated" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
         </div>
 
+        <div class="accordion-body open">
         <div class="form-grid">
           <div class="form-field">
             <label class="form-label">Nome completo <span>(obrigatório)</span></label>
@@ -1028,72 +1655,12 @@
             </select>
           </div>
         </div>
-      </div>
-
-      <!-- Ministério & Função -->
-      <div class="form-section">
-        <div class="form-section-header">
-          <div class="form-section-icon green">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-          </div>
-          <div>
-            <div class="form-section-title">Ministério & Função</div>
-            <div class="form-section-desc">Informações sobre sua participação na igreja</div>
-          </div>
-        </div>
-
-        <div class="form-grid triple">
-          <div class="form-field">
-            <label class="form-label">Ministério</label>
-            <select class="form-select">
-              <option value="louvor" selected>Ministério de Louvor</option>
-              <option value="infantil">Ministério Infantil</option>
-              <option value="jovens">Ministério de Jovens</option>
-              <option value="intercessao">Ministério de Intercessão</option>
-            </select>
-          </div>
-          <div class="form-field">
-            <label class="form-label">Departamento</label>
-            <select class="form-select">
-              <option value="">Selecione...</option>
-              <option value="som">Som</option>
-              <option value="midia">Mídia</option>
-              <option value="recepcao">Recepção</option>
-              <option value="louvor">Louvor</option>
-            </select>
-          </div>
-          <div class="form-field">
-            <label class="form-label">Função</label>
-            <select class="form-select">
-              <option value="admin" selected>Administrador</option>
-              <option value="lider">Líder</option>
-              <option value="voluntario">Voluntário</option>
-            </select>
-          </div>
-          <div class="form-field">
-            <label class="form-label">Data de Ingresso</label>
-            <input class="form-input" type="date" disabled style="color:var(--ink-subtle)" value="2024-01-15" />
-            <span class="form-hint">Gerenciado pelo administrador</span>
-          </div>
-          <div class="form-field">
-            <label class="form-label">Habilidades / Instrumentos</label>
-            <input class="form-input" type="text" placeholder="ex: Violão, Bateria, Voz..." />
-          </div>
-          <div class="form-field">
-            <label class="form-label">Disponibilidade</label>
-            <select class="form-select">
-              <option value="sempre">Sempre disponível</option>
-              <option value="fins">Fins de semana</option>
-              <option value="semana">Durante a semana</option>
-              <option value="sob">Sob consulta</option>
-            </select>
-          </div>
         </div>
       </div>
 
       <!-- Segurança -->
       <div class="form-section">
-        <div class="form-section-header">
+        <div class="form-section-header" onclick="toggleAccordion(this)">
           <div class="form-section-icon dark">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
           </div>
@@ -1101,8 +1668,10 @@
             <div class="form-section-title">Senha & Segurança</div>
             <div class="form-section-desc">Altere sua senha e configure opções de acesso</div>
           </div>
+          <svg class="accordion-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
         </div>
 
+        <div class="accordion-body closed">
         <div class="form-grid">
           <div class="form-field col-span-2">
             <label class="form-label">Senha Atual</label>
@@ -1139,65 +1708,12 @@
             </div>
           </div>
         </div>
-      </div>
-
-      <!-- Notificações -->
-      <div class="form-section">
-        <div class="form-section-header">
-          <div class="form-section-icon yellow">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-          </div>
-          <div>
-            <div class="form-section-title">Notificações</div>
-            <div class="form-section-desc">Controle quais avisos você deseja receber</div>
-          </div>
-        </div>
-
-        <div class="toggle-row">
-          <div class="toggle-info">
-            <div class="toggle-label">Novos eventos agendados</div>
-            <div class="toggle-desc">Receba um aviso quando um novo evento for criado</div>
-          </div>
-          <label class="switch">
-            <input type="checkbox" checked />
-            <span class="switch-track"></span>
-          </label>
-        </div>
-        <div class="toggle-row">
-          <div class="toggle-info">
-            <div class="toggle-label">Escalas e confirmações</div>
-            <div class="toggle-desc">Seja notificado quando for escalado para um evento</div>
-          </div>
-          <label class="switch">
-            <input type="checkbox" checked />
-            <span class="switch-track"></span>
-          </label>
-        </div>
-        <div class="toggle-row">
-          <div class="toggle-info">
-            <div class="toggle-label">Lembretes de eventos</div>
-            <div class="toggle-desc">Receba lembretes 24h antes de cada evento</div>
-          </div>
-          <label class="switch">
-            <input type="checkbox" />
-            <span class="switch-track"></span>
-          </label>
-        </div>
-        <div class="toggle-row">
-          <div class="toggle-info">
-            <div class="toggle-label">Atualizações de ranking</div>
-            <div class="toggle-desc">Seja notificado quando sua posição no ranking mudar</div>
-          </div>
-          <label class="switch">
-            <input type="checkbox" />
-            <span class="switch-track"></span>
-          </label>
         </div>
       </div>
 
       <!-- Zona de Perigo -->
       <div class="danger-zone">
-        <div class="danger-section-header">
+        <div class="danger-section-header" onclick="toggleAccordion(this)">
           <div class="danger-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
           </div>
@@ -1205,7 +1721,9 @@
             <div class="danger-title">Zona de Perigo</div>
             <div class="danger-desc">Ações irreversíveis relacionadas à sua conta</div>
           </div>
+          <svg class="accordion-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
         </div>
+        <div class="accordion-body closed">
         <div class="danger-row">
           <div class="danger-row-info">
             <div class="danger-row-label">Encerrar sessão em todos os dispositivos</div>
@@ -1213,20 +1731,112 @@
           </div>
           <button class="btn-danger">Encerrar Sessões</button>
         </div>
+        </div>
       </div>
 
-      <!-- Bottom Actions -->
-      <div class="bottom-actions">
-        <button class="btn-secondary" onclick="history.back()">Cancelar</button>
-        <button class="btn-primary">Salvar Alterações</button>
-      </div>
+      </div><!-- /content-main -->
+
+      <!-- Aside: Departamentos + Indisponibilidades -->
+      <div class="content-aside">
+
+        <!-- Departamentos -->
+        <div class="aside-card">
+          <div class="aside-card-header">
+            <div class="aside-card-icon purple">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            </div>
+            <div class="aside-card-title">Departamentos</div>
+          </div>
+          <div id="deptList" class="aside-list">
+            <div class="aside-empty">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              Carregando...
+            </div>
+          </div>
+        </div>
+
+        <!-- Indisponibilidades -->
+        <div class="aside-card">
+          <div class="aside-card-header">
+            <div class="aside-card-icon red">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            </div>
+            <div class="aside-card-title">Indisponibilidades</div>
+          </div>
+          <div class="indisp-type-btns">
+            <button class="indisp-type-btn orange" onclick="abrirFormIndisp('data_unica', this)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              Data Única
+            </button>
+            <button class="indisp-type-btn blue" onclick="abrirFormIndisp('periodo', this)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="14" x2="16" y2="14"/></svg>
+              Período
+            </button>
+            <button class="indisp-type-btn pink" onclick="abrirFormIndisp('departamento', this)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+              Departamento
+            </button>
+          </div>
+
+          <!-- Inline form (hidden by default) -->
+          <div class="indisp-form" id="indispForm" style="display:none">
+            <div class="indisp-form-fields" id="indispFormFields"></div>
+            <div class="indisp-form-actions">
+              <button class="btn-secondary btn-sm" onclick="fecharFormIndisp()">Cancelar</button>
+              <button class="btn-primary btn-sm" onclick="salvarIndisp()">Salvar</button>
+            </div>
+          </div>
+
+          <div id="indispList" class="aside-list">
+            <div class="aside-empty">
+              <div class="aside-empty-icon green">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              </div>
+              Nenhuma indisponibilidade cadastrada
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /content-aside -->
+      </div><!-- /content-grid -->
 
     </main>
   </div>
 
+  <!-- Modal de ajuste de foto -->
+  <div class="crop-overlay" id="cropOverlay" style="display:none">
+    <div class="crop-box">
+      <div class="crop-title">Ajustar foto</div>
+      <div class="crop-viewport" id="cropViewport">
+        <img id="cropImg" alt="Foto">
+      </div>
+      <div class="crop-zoom-wrap">
+        <div class="crop-zoom-label">Zoom</div>
+        <input type="range" class="crop-zoom-slider" id="zoomSlider" min="100" max="300" value="100">
+      </div>
+      <div class="crop-actions">
+        <button class="btn-secondary" onclick="fecharCrop()">Cancelar</button>
+        <button class="btn-primary" onclick="aplicarCrop()">Aplicar</button>
+      </div>
+    </div>
+  </div>
+
   <div class="toast" id="toast"></div>
 
+  <script src="/js/auth-fetch.js"></script>
+  <script src="/js/sidebar-permissions.js"></script>
+    <script src="/js/sidebar-ui.js"></script>
   <script>
+    // ── Accordion ──
+    function toggleAccordion(header) {
+      const body    = header.nextElementSibling;
+      const chevron = header.querySelector('.accordion-chevron');
+      const isOpen  = body.classList.contains('open');
+      body.classList.toggle('open',   !isOpen);
+      body.classList.toggle('closed',  isOpen);
+      chevron.classList.toggle('rotated', !isOpen);
+    }
+
     // ── Logout ──
     async function fazerLogout(e) {
       e.preventDefault();
@@ -1237,12 +1847,11 @@
           headers: { Authorization: `Bearer ${token}` }
         });
       } catch (_) {}
-      localStorage.clear();
-      window.location.href = '/';
+      clearSession();
     }
 
     // ── Menu dropdown do avatar ──
-    document.getElementById('linkEditarPerfil').style.display = 'none';
+    const _linkEditar = document.getElementById('linkEditarPerfil'); if (_linkEditar) _linkEditar.style.display = 'none';
 
     const avatarBtn = document.getElementById('avatarSm');
     const avatarDropdown = document.getElementById('avatarDropdown');
@@ -1258,7 +1867,7 @@
     if (localStorage.getItem('sidebar-collapsed') === '1') {
       document.body.classList.add('sidebar-collapsed');
     }
-    document.getElementById('collapseBtn').addEventListener('click', () => {
+    (document.getElementById('collapseBtn')||{addEventListener:()=>{}}).addEventListener('click', () => {
       document.body.classList.toggle('sidebar-collapsed');
       localStorage.setItem('sidebar-collapsed', document.body.classList.contains('sidebar-collapsed') ? '1' : '0');
     });
@@ -1269,23 +1878,34 @@
       return clean[0]?.toUpperCase() || '?';
     }
 
-    function getRoleLabel(role) {
-      const map = { admin: 'Administrador', lider: 'Líder', voluntario: 'Voluntário' };
-      return map[role] || role || '—';
+    function getRoleLabel(slug) {
+      const map = { owner: 'Dono', admin: 'Administrador', lider: 'Líder', lider_departamento: 'Líder de Departamento', secretario: 'Secretário', voluntario: 'Voluntário' };
+      return map[slug] || slug || '—';
+    }
+
+    function setAvatar(url) {
+      const img = `<img src="${url}" alt="Avatar">`;
+      document.getElementById('avatarLg').innerHTML = img;
+      document.getElementById('avatarSm').innerHTML = img;
     }
 
     function preencherPagina(usuario, igreja) {
       const initial   = getInitial(usuario.nome);
-      const roleLabel = getRoleLabel(usuario.role);
+      const roleLabel = getRoleLabel(usuario.perfil_slug);
 
-      document.getElementById('avatarSm').textContent       = initial;
-      document.getElementById('avatarLg').textContent       = initial;
+      if (usuario.avatar) {
+        setAvatar(usuario.avatar);
+      } else {
+        document.getElementById('avatarSm').textContent = initial;
+        document.getElementById('avatarLg').textContent = initial;
+      }
       document.getElementById('dropdownName').textContent   = usuario.nome;
       document.getElementById('dropdownEmail').textContent  = usuario.email || '';
-      document.getElementById('profileName').textContent    = usuario.nome;
-      document.getElementById('profileRole').textContent    = `${roleLabel} · ${(igreja && igreja.nome) || '—'}`;
-      document.getElementById('profileChurch').textContent  = (igreja && igreja.nome) || '—';
-      document.getElementById('profileRoleTag').textContent = roleLabel;
+      document.getElementById('profileName').textContent   = usuario.nome;
+      document.getElementById('profileChurch').textContent = (igreja && igreja.nome) || '—';
+      const roleEl = document.getElementById('profileRole');
+      roleEl.textContent = getRoleLabel(usuario.perfil_slug);
+      roleEl.className   = 'badge-role' + (usuario.perfil_slug ? ` role-${usuario.perfil_slug}` : '');
       const churchNameEl = document.getElementById('churchName');
       if (churchNameEl && igreja && igreja.nome) churchNameEl.textContent = igreja.nome;
 
@@ -1319,8 +1939,8 @@
 
     // ── Carrega tudo da API em paralelo ──
     async function carregarPerfil() {
-      const token = localStorage.getItem('access_token');
-      if (!token) { window.location.href = '/'; return; }
+      if (!await checkAuth()) return
+      const token = localStorage.getItem('access_token')
 
       try {
         const [reMe, reGeneros, reEstados] = await Promise.all([
@@ -1357,7 +1977,195 @@
         if (u.nome) preencherPagina(u, i);
       }
     }
-    carregarPerfil().then(() => ativarAutoSave());
+    carregarPerfil().then(() => ativarAutoSave()).finally(() => window.hideLoader());
+
+    // ── Departamentos ──
+    async function carregarDepartamentos() {
+      try {
+        const r = await authFetch('/api/user/departamentos')
+        const d = await r.json()
+        renderDepts((d.departamentos || []).filter(d => d.status === 'ativo'))
+      } catch (_) {}
+    }
+
+    function renderDepts(lista) {
+      const el = document.getElementById('deptList')
+      if (!lista.length) {
+        el.innerHTML = `<div class="aside-empty">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          Nenhum departamento encontrado
+        </div>`
+        return
+      }
+      el.innerHTML = lista.map(d => `
+        <div class="aside-item">
+          <div class="aside-item-info">
+            <div class="aside-item-name">${d.funcao_name || 'Sem função definida'}</div>
+            <div class="aside-item-sub">${d.department_name}</div>
+          </div>
+        </div>
+      `).join('')
+    }
+
+    function capitalize(s) { return s ? s[0].toUpperCase() + s.slice(1) : '' }
+
+    // ── Indisponibilidades ──
+    let _indisps = []
+    let _indispTipo = null
+    let _deptosList = []
+
+    async function carregarIndisponibilidades() {
+      try {
+        const r = await authFetch('/api/user/indisponibilidades')
+        const d = await r.json()
+        _indisps = d.indisponibilidades || []
+        renderIndisps()
+      } catch (_) {}
+    }
+
+    function renderIndisps() {
+      const el = document.getElementById('indispList')
+      if (!_indisps.length) {
+        el.innerHTML = `<div class="aside-empty">
+          <div class="aside-empty-icon green">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          Nenhuma indisponibilidade cadastrada
+        </div>`
+        return
+      }
+
+      const fmt = d => {
+        if (!d) return ''
+        const [y, m, day] = d.split('-')
+        return `${day}/${m}/${y}`
+      }
+      const labels = { data_unica: 'Data Única', periodo: 'Período', departamento: 'Departamento' }
+
+      el.innerHTML = _indisps.map(i => {
+        let sub = fmt(i.start_date)
+        if (i.end_date) sub += ` → ${fmt(i.end_date)}`
+        if (i.db_department?.name) sub += ` · ${i.db_department.name}`
+        return `
+          <div class="aside-item">
+            <div class="aside-item-info">
+              <div class="aside-item-name">${labels[i.type] || i.type}</div>
+              <div class="aside-item-sub">${sub}</div>
+            </div>
+            <button class="aside-item-remove" onclick="removerIndisp('${i.id}')" title="Remover">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+          </div>
+        `
+      }).join('')
+    }
+
+    async function abrirFormIndisp(tipo, btn) {
+      const form = document.getElementById('indispForm')
+      const jaAberto = _indispTipo === tipo && form.style.display !== 'none'
+
+      // Remove seleção de todos os botões
+      document.querySelectorAll('.indisp-type-btn').forEach(b => b.classList.remove('selected'))
+
+      if (jaAberto) { fecharFormIndisp(); return }
+
+      btn?.classList.add('selected')
+      _indispTipo = tipo
+      const fieldsEl = document.getElementById('indispFormFields')
+      let html = ''
+
+      if (tipo === 'data_unica') {
+        html = `<div class="form-field">
+          <label class="form-label">Data</label>
+          <input class="form-input" type="date" id="indispDate1">
+        </div>`
+      } else if (tipo === 'periodo') {
+        html = `
+          <div class="form-field">
+            <label class="form-label">Início</label>
+            <input class="form-input" type="date" id="indispDate1">
+          </div>
+          <div class="form-field">
+            <label class="form-label">Fim</label>
+            <input class="form-input" type="date" id="indispDate2">
+          </div>`
+      } else if (tipo === 'departamento') {
+        if (!_deptosList.length) {
+          const r = await authFetch('/api/user/departamentos')
+          const d = await r.json()
+          _deptosList = d.departamentos || []
+        }
+        const opts = _deptosList.map(d => `<option value="${d.department_id}">${d.department_name}</option>`).join('')
+        html = `
+          <div class="form-field">
+            <label class="form-label">Departamento</label>
+            <select class="form-select" id="indispDept"><option value="">Selecione...</option>${opts}</select>
+          </div>
+          <div class="form-field">
+            <label class="form-label">Início</label>
+            <input class="form-input" type="date" id="indispDate1">
+          </div>
+          <div class="form-field">
+            <label class="form-label">Fim</label>
+            <input class="form-input" type="date" id="indispDate2">
+          </div>`
+      }
+
+      html += `<div class="form-field">
+        <label class="form-label">Observação</label>
+        <input class="form-input" type="text" id="indispNotes" placeholder="Opcional">
+      </div>`
+
+      fieldsEl.innerHTML = html
+      document.getElementById('indispForm').style.display = 'block'
+    }
+
+    function fecharFormIndisp() {
+      document.getElementById('indispForm').style.display = 'none'
+      document.querySelectorAll('.indisp-type-btn').forEach(b => b.classList.remove('selected'))
+      _indispTipo = null
+    }
+
+    async function salvarIndisp() {
+      const start_date    = document.getElementById('indispDate1')?.value || null
+      const end_date      = document.getElementById('indispDate2')?.value || null
+      const department_id = document.getElementById('indispDept')?.value  || null
+      const notes         = document.getElementById('indispNotes')?.value || null
+
+      if (!start_date) { mostrarToast('Informe a data', 'error'); return }
+
+      try {
+        const r = await authFetch('/api/user/indisponibilidades', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ type: _indispTipo, start_date, end_date, department_id, notes })
+        })
+        const d = await r.json()
+        if (!r.ok) throw new Error(d.error)
+        _indisps.unshift(d.indisponibilidade)
+        renderIndisps()
+        fecharFormIndisp()
+        mostrarToast('Indisponibilidade salva')
+      } catch (e) {
+        mostrarToast(e.message || 'Erro ao salvar', 'error')
+      }
+    }
+
+    async function removerIndisp(id) {
+      if (!confirm('Remover esta indisponibilidade?')) return
+      try {
+        const r = await authFetch(`/api/user/indisponibilidades/${id}`, { method: 'DELETE' })
+        if (!r.ok) throw new Error('Erro ao remover')
+        _indisps = _indisps.filter(i => i.id !== id)
+        renderIndisps()
+        mostrarToast('Removida')
+      } catch (e) {
+        mostrarToast(e.message || 'Erro', 'error')
+      }
+    }
+
+    carregarDepartamentos()
+    carregarIndisponibilidades()
 
     // ── Toast ──
     let toastTimer = null;
@@ -1433,6 +2241,146 @@
       });
     }
 
+    // ── Crop / Upload de avatar ──
+    const CROP_SIZE = 220;
+    let _cropX = 0, _cropY = 0, _cropZoom = 1;
+    let _cropImgW = 0, _cropImgH = 0;
+    let _dragging = false, _dragStartX = 0, _dragStartY = 0;
+
+    document.getElementById('avatarEditBtn').addEventListener('click', () => {
+      document.getElementById('avatarInput').click();
+    });
+
+    document.getElementById('avatarInput').addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      e.target.value = '';
+      if (!file) return;
+      if (!file.type.startsWith('image/')) { mostrarToast('Selecione uma imagem (JPG, PNG…)', 'error'); return; }
+      if (file.size > 10 * 1024 * 1024) { mostrarToast('Imagem deve ter no máximo 10 MB', 'error'); return; }
+
+      const reader = new FileReader();
+      reader.onload = (ev) => abrirCrop(ev.target.result);
+      reader.readAsDataURL(file);
+    });
+
+    function abrirCrop(src) {
+      const img = document.getElementById('cropImg');
+      img.onload = () => {
+        _cropImgW = img.naturalWidth;
+        _cropImgH = img.naturalHeight;
+        const minZoom = Math.max(CROP_SIZE / _cropImgW, CROP_SIZE / _cropImgH);
+        _cropZoom = minZoom;
+        _cropX = (CROP_SIZE - _cropImgW * _cropZoom) / 2;
+        _cropY = (CROP_SIZE - _cropImgH * _cropZoom) / 2;
+        const slider = document.getElementById('zoomSlider');
+        slider.min   = Math.round(minZoom * 100);
+        slider.max   = Math.round(minZoom * 100 * 3);
+        slider.value = slider.min;
+        aplicarTransform();
+      };
+      img.src = src;
+      document.getElementById('cropOverlay').style.display = 'flex';
+    }
+
+    function fecharCrop() {
+      document.getElementById('cropOverlay').style.display = 'none';
+    }
+
+    function aplicarTransform() {
+      const img = document.getElementById('cropImg');
+      img.style.width  = (_cropImgW * _cropZoom) + 'px';
+      img.style.height = (_cropImgH * _cropZoom) + 'px';
+      img.style.left   = _cropX + 'px';
+      img.style.top    = _cropY + 'px';
+    }
+
+    function clampCrop() {
+      const maxX = 0, maxY = 0;
+      const minX = CROP_SIZE - _cropImgW * _cropZoom;
+      const minY = CROP_SIZE - _cropImgH * _cropZoom;
+      _cropX = Math.min(maxX, Math.max(minX, _cropX));
+      _cropY = Math.min(maxY, Math.max(minY, _cropY));
+    }
+
+    // Arrastar com mouse
+    const vp = document.getElementById('cropViewport');
+    vp.addEventListener('mousedown', (e) => {
+      _dragging = true;
+      _dragStartX = e.clientX - _cropX;
+      _dragStartY = e.clientY - _cropY;
+      e.preventDefault();
+    });
+    document.addEventListener('mousemove', (e) => {
+      if (!_dragging) return;
+      _cropX = e.clientX - _dragStartX;
+      _cropY = e.clientY - _dragStartY;
+      clampCrop(); aplicarTransform();
+    });
+    document.addEventListener('mouseup', () => { _dragging = false; });
+
+    // Arrastar com toque
+    vp.addEventListener('touchstart', (e) => {
+      const t = e.touches[0];
+      _dragging = true;
+      _dragStartX = t.clientX - _cropX;
+      _dragStartY = t.clientY - _cropY;
+    }, { passive: true });
+    vp.addEventListener('touchmove', (e) => {
+      if (!_dragging) return;
+      const t = e.touches[0];
+      _cropX = t.clientX - _dragStartX;
+      _cropY = t.clientY - _dragStartY;
+      clampCrop(); aplicarTransform();
+      e.preventDefault();
+    }, { passive: false });
+    vp.addEventListener('touchend', () => { _dragging = false; });
+
+    // Zoom slider
+    document.getElementById('zoomSlider').addEventListener('input', (e) => {
+      const newZoom = parseInt(e.target.value) / 100;
+      const cx = CROP_SIZE / 2, cy = CROP_SIZE / 2;
+      const px = (cx - _cropX) / _cropZoom;
+      const py = (cy - _cropY) / _cropZoom;
+      _cropZoom = newZoom;
+      _cropX = cx - px * _cropZoom;
+      _cropY = cy - py * _cropZoom;
+      clampCrop(); aplicarTransform();
+    });
+
+    async function aplicarCrop() {
+      const canvas = document.createElement('canvas');
+      canvas.width = canvas.height = CROP_SIZE;
+      const ctx = canvas.getContext('2d');
+      const img = document.getElementById('cropImg');
+      ctx.drawImage(
+        img,
+        -_cropX / _cropZoom, -_cropY / _cropZoom,
+        CROP_SIZE / _cropZoom, CROP_SIZE / _cropZoom,
+        0, 0, CROP_SIZE, CROP_SIZE
+      );
+      const base64 = canvas.toDataURL('image/jpeg', 0.92);
+      fecharCrop();
+      setAvatar(base64);
+
+      try {
+        const token = localStorage.getItem('access_token');
+        const res = await fetch('/api/user/avatar', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ photo_base64: base64 })
+        });
+        const dados = await res.json();
+        if (!res.ok) throw new Error(dados.error);
+        setAvatar(dados.avatar_url);
+        const u = JSON.parse(localStorage.getItem('usuario') || '{}');
+        u.avatar = dados.avatar_url;
+        localStorage.setItem('usuario', JSON.stringify(u));
+        mostrarToast('Foto atualizada com sucesso!');
+      } catch (err) {
+        mostrarToast('Erro ao salvar foto: ' + err.message, 'error');
+      }
+    }
+
     function togglePwd(id, btn) {
       const input = document.getElementById(id);
       const isHidden = input.type === 'password';
@@ -1467,5 +2415,8 @@
     }
   </script>
 
+  <script src="/js/top-search.js"></script>
+  <script src="/js/mobile-sidebar.js"></script>
+<script src="/js/notif-ui.js"></script>
 </body>
 </html>

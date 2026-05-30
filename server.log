@@ -1,0 +1,625 @@
+◇ injected env (6) from .env // tip: ⌘ enable debugging { debug: true }
+Servidor rodando em http://localhost:3000
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[TypeError: fetch failed] {
+  [cause]: ConnectTimeoutError: Connect Timeout Error (attempted addresses: 172.64.149.246:443, timeout: 10000ms)
+      at onConnectTimeout (node:internal/deps/undici/undici:1981:23)
+      at Immediate._onImmediate (node:internal/deps/undici/undici:1947:35)
+      at process.processImmediate (node:internal/timers:504:21) {
+    code: 'UND_ERR_CONNECT_TIMEOUT'
+  }
+}
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[TypeError: fetch failed] {
+  [cause]: Error: getaddrinfo ENOTFOUND mobhpayqxwxikjiurddz.supabase.co
+      at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+    errno: -3008,
+    code: 'ENOTFOUND',
+    syscall: 'getaddrinfo',
+    hostname: 'mobhpayqxwxikjiurddz.supabase.co'
+  }
+}
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[evento GET] church=1f5b8dd7-ba76-4de7-97c0-58a7467eaf73 total=26
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[evento GET] church=1f5b8dd7-ba76-4de7-97c0-58a7467eaf73 total=26
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[evento GET] church=1f5b8dd7-ba76-4de7-97c0-58a7467eaf73 total=26
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[evento GET] church=1f5b8dd7-ba76-4de7-97c0-58a7467eaf73 total=26
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[evento GET] church=1f5b8dd7-ba76-4de7-97c0-58a7467eaf73 total=26
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[evento GET] church=1f5b8dd7-ba76-4de7-97c0-58a7467eaf73 total=26
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[evento GET] church=1f5b8dd7-ba76-4de7-97c0-58a7467eaf73 total=26
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[TypeError: fetch failed] {
+  [cause]: Error: getaddrinfo ENOTFOUND mobhpayqxwxikjiurddz.supabase.co
+      at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+    errno: -3008,
+    code: 'ENOTFOUND',
+    syscall: 'getaddrinfo',
+    hostname: 'mobhpayqxwxikjiurddz.supabase.co'
+  }
+}
+[TypeError: fetch failed] {
+  [cause]: Error: getaddrinfo ENOTFOUND mobhpayqxwxikjiurddz.supabase.co
+      at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+    errno: -3008,
+    code: 'ENOTFOUND',
+    syscall: 'getaddrinfo',
+    hostname: 'mobhpayqxwxikjiurddz.supabase.co'
+  }
+}
+[TypeError: fetch failed] {
+  [cause]: Error: getaddrinfo ENOTFOUND mobhpayqxwxikjiurddz.supabase.co
+      at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+    errno: -3008,
+    code: 'ENOTFOUND',
+    syscall: 'getaddrinfo',
+    hostname: 'mobhpayqxwxikjiurddz.supabase.co'
+  }
+}
+[TypeError: fetch failed] {
+  [cause]: Error: getaddrinfo ENOTFOUND mobhpayqxwxikjiurddz.supabase.co
+      at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+    errno: -3008,
+    code: 'ENOTFOUND',
+    syscall: 'getaddrinfo',
+    hostname: 'mobhpayqxwxikjiurddz.supabase.co'
+  }
+}
+[TypeError: fetch failed] {
+  [cause]: Error: getaddrinfo ENOTFOUND mobhpayqxwxikjiurddz.supabase.co
+      at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+    errno: -3008,
+    code: 'ENOTFOUND',
+    syscall: 'getaddrinfo',
+    hostname: 'mobhpayqxwxikjiurddz.supabase.co'
+  }
+}
+[TypeError: fetch failed] {
+  [cause]: Error: getaddrinfo ENOTFOUND mobhpayqxwxikjiurddz.supabase.co
+      at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+    errno: -3008,
+    code: 'ENOTFOUND',
+    syscall: 'getaddrinfo',
+    hostname: 'mobhpayqxwxikjiurddz.supabase.co'
+  }
+}
+[TypeError: fetch failed] {
+  [cause]: Error: getaddrinfo ENOTFOUND mobhpayqxwxikjiurddz.supabase.co
+      at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+    errno: -3008,
+    code: 'ENOTFOUND',
+    syscall: 'getaddrinfo',
+    hostname: 'mobhpayqxwxikjiurddz.supabase.co'
+  }
+}
+[TypeError: fetch failed] {
+  [cause]: Error: getaddrinfo ENOTFOUND mobhpayqxwxikjiurddz.supabase.co
+      at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+    errno: -3008,
+    code: 'ENOTFOUND',
+    syscall: 'getaddrinfo',
+    hostname: 'mobhpayqxwxikjiurddz.supabase.co'
+  }
+}
+[TypeError: fetch failed] {
+  [cause]: Error: getaddrinfo ENOTFOUND mobhpayqxwxikjiurddz.supabase.co
+      at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+    errno: -3008,
+    code: 'ENOTFOUND',
+    syscall: 'getaddrinfo',
+    hostname: 'mobhpayqxwxikjiurddz.supabase.co'
+  }
+}
+[TypeError: fetch failed] {
+  [cause]: Error: getaddrinfo ENOTFOUND mobhpayqxwxikjiurddz.supabase.co
+      at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+    errno: -3008,
+    code: 'ENOTFOUND',
+    syscall: 'getaddrinfo',
+    hostname: 'mobhpayqxwxikjiurddz.supabase.co'
+  }
+}
+[TypeError: fetch failed] {
+  [cause]: Error: getaddrinfo ENOTFOUND mobhpayqxwxikjiurddz.supabase.co
+      at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+    errno: -3008,
+    code: 'ENOTFOUND',
+    syscall: 'getaddrinfo',
+    hostname: 'mobhpayqxwxikjiurddz.supabase.co'
+  }
+}
+[TypeError: fetch failed] {
+  [cause]: Error: getaddrinfo ENOTFOUND mobhpayqxwxikjiurddz.supabase.co
+      at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+    errno: -3008,
+    code: 'ENOTFOUND',
+    syscall: 'getaddrinfo',
+    hostname: 'mobhpayqxwxikjiurddz.supabase.co'
+  }
+}
+◇ injected env (6) from .env // tip: ⌘ multiple files { path: ['.env.local', '.env'] }
+Servidor rodando em http://localhost:3000
+[me] email=admin@hub.com perfil_id=da2b6f88-490f-45bd-bdf2-97901c335314 db_perfil={"slug":"owner"} perfil_slug=owner permissions_count=1
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[evento GET] church=1f5b8dd7-ba76-4de7-97c0-58a7467eaf73 total=26
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[evento GET] church=1f5b8dd7-ba76-4de7-97c0-58a7467eaf73 total=26
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[evento GET] church=1f5b8dd7-ba76-4de7-97c0-58a7467eaf73 total=26
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[evento GET] church=1f5b8dd7-ba76-4de7-97c0-58a7467eaf73 total=26
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[evento GET] church=1f5b8dd7-ba76-4de7-97c0-58a7467eaf73 total=26
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[evento GET] church=1f5b8dd7-ba76-4de7-97c0-58a7467eaf73 total=26
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[evento GET] church=1f5b8dd7-ba76-4de7-97c0-58a7467eaf73 total=26
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[evento GET] church=1f5b8dd7-ba76-4de7-97c0-58a7467eaf73 total=26
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=admin@hub.com perfil_id=da2b6f88-490f-45bd-bdf2-97901c335314 db_perfil={"slug":"owner"} perfil_slug=owner permissions_count=1
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[evento GET] church=1f5b8dd7-ba76-4de7-97c0-58a7467eaf73 total=26
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[evento GET] church=1f5b8dd7-ba76-4de7-97c0-58a7467eaf73 total=26
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[evento GET] church=1f5b8dd7-ba76-4de7-97c0-58a7467eaf73 total=26
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[evento GET] church=1f5b8dd7-ba76-4de7-97c0-58a7467eaf73 total=26
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=admin@hub.com perfil_id=da2b6f88-490f-45bd-bdf2-97901c335314 db_perfil={"slug":"owner"} perfil_slug=owner permissions_count=1
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[evento GET] church=1f5b8dd7-ba76-4de7-97c0-58a7467eaf73 total=26
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[evento GET] church=1f5b8dd7-ba76-4de7-97c0-58a7467eaf73 total=26
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[evento GET] church=1f5b8dd7-ba76-4de7-97c0-58a7467eaf73 total=26
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[evento GET] church=1f5b8dd7-ba76-4de7-97c0-58a7467eaf73 total=26
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=admin@hub.com perfil_id=da2b6f88-490f-45bd-bdf2-97901c335314 db_perfil={"slug":"owner"} perfil_slug=owner permissions_count=1
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[evento GET] church=1f5b8dd7-ba76-4de7-97c0-58a7467eaf73 total=26
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[evento GET] church=1f5b8dd7-ba76-4de7-97c0-58a7467eaf73 total=26
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[evento GET] church=1f5b8dd7-ba76-4de7-97c0-58a7467eaf73 total=26
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[evento GET] church=1f5b8dd7-ba76-4de7-97c0-58a7467eaf73 total=26
+[me] email=admin@hub.com perfil_id=da2b6f88-490f-45bd-bdf2-97901c335314 db_perfil={"slug":"owner"} perfil_slug=owner permissions_count=1
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[evento GET] church=1f5b8dd7-ba76-4de7-97c0-58a7467eaf73 total=26
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[evento GET] church=1f5b8dd7-ba76-4de7-97c0-58a7467eaf73 total=26
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[evento GET] church=1f5b8dd7-ba76-4de7-97c0-58a7467eaf73 total=26
+[me] email=admin@hub.com perfil_id=da2b6f88-490f-45bd-bdf2-97901c335314 db_perfil={"slug":"owner"} perfil_slug=owner permissions_count=1
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[evento GET] church=1f5b8dd7-ba76-4de7-97c0-58a7467eaf73 total=26
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[evento GET] church=1f5b8dd7-ba76-4de7-97c0-58a7467eaf73 total=26
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[evento GET] church=1f5b8dd7-ba76-4de7-97c0-58a7467eaf73 total=26
+[me] email=admin@hub.com perfil_id=da2b6f88-490f-45bd-bdf2-97901c335314 db_perfil={"slug":"owner"} perfil_slug=owner permissions_count=1
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[evento GET] church=1f5b8dd7-ba76-4de7-97c0-58a7467eaf73 total=26
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[evento GET] church=1f5b8dd7-ba76-4de7-97c0-58a7467eaf73 total=26
+[me] email=admin@hub.com perfil_id=da2b6f88-490f-45bd-bdf2-97901c335314 db_perfil={"slug":"owner"} perfil_slug=owner permissions_count=1
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[evento GET] church=1f5b8dd7-ba76-4de7-97c0-58a7467eaf73 total=26
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[evento GET] church=1f5b8dd7-ba76-4de7-97c0-58a7467eaf73 total=26
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[evento GET] church=1f5b8dd7-ba76-4de7-97c0-58a7467eaf73 total=26
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[evento GET] church=1f5b8dd7-ba76-4de7-97c0-58a7467eaf73 total=26
+[me] email=admin@hub.com perfil_id=da2b6f88-490f-45bd-bdf2-97901c335314 db_perfil={"slug":"owner"} perfil_slug=owner permissions_count=1
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[evento GET] church=1f5b8dd7-ba76-4de7-97c0-58a7467eaf73 total=26
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=admin@hub.com perfil_id=da2b6f88-490f-45bd-bdf2-97901c335314 db_perfil={"slug":"owner"} perfil_slug=owner permissions_count=1
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[evento GET] church=1f5b8dd7-ba76-4de7-97c0-58a7467eaf73 total=26
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[evento GET] church=1f5b8dd7-ba76-4de7-97c0-58a7467eaf73 total=26
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=admin@hub.com perfil_id=da2b6f88-490f-45bd-bdf2-97901c335314 db_perfil={"slug":"owner"} perfil_slug=owner permissions_count=1
+[evento GET] church=1f5b8dd7-ba76-4de7-97c0-58a7467eaf73 total=26
+[evento GET] church=1f5b8dd7-ba76-4de7-97c0-58a7467eaf73 total=26
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[evento GET] church=1f5b8dd7-ba76-4de7-97c0-58a7467eaf73 total=26
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[evento GET] church=1f5b8dd7-ba76-4de7-97c0-58a7467eaf73 total=26
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[GET /api/escala-equipe] eventId=56a016d6-7c3b-4094-98a2-e979235037d9 userId=4fac3800-c2ac-4353-9712-684d2ad92646 church=1f5b8dd7-ba76-4de7-97c0-58a7467eaf73
+[evento GET] church=1f5b8dd7-ba76-4de7-97c0-58a7467eaf73 total=26
+[escala-equipe] escalaId=def92ba4-bbfd-4ac0-aabe-7ba4353748db items=3 memberIds=["6c338f21-d430-431f-b22c-be082dbd7251","8e84d39a-eba5-428d-8311-e88d2338bf42","08eacb58-a2c6-452e-a14e-4dc565cf0aac"]
+[evento GET] church=1f5b8dd7-ba76-4de7-97c0-58a7467eaf73 total=26
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[GET /api/escala-equipe] eventId=96431016-1445-4d19-b63e-d406b7b85b81 userId=4fac3800-c2ac-4353-9712-684d2ad92646 church=1f5b8dd7-ba76-4de7-97c0-58a7467eaf73
+[evento GET] church=1f5b8dd7-ba76-4de7-97c0-58a7467eaf73 total=26
+[evento GET] church=1f5b8dd7-ba76-4de7-97c0-58a7467eaf73 total=26
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[GET /api/escala-equipe] eventId=1330c1b3-eccb-4b70-affd-5d2cf6915214 userId=4fac3800-c2ac-4353-9712-684d2ad92646 church=1f5b8dd7-ba76-4de7-97c0-58a7467eaf73
+[evento GET] church=1f5b8dd7-ba76-4de7-97c0-58a7467eaf73 total=26
+[me] email=admin@hub.com perfil_id=da2b6f88-490f-45bd-bdf2-97901c335314 db_perfil={"slug":"owner"} perfil_slug=owner permissions_count=1
+[evento GET] church=1f5b8dd7-ba76-4de7-97c0-58a7467eaf73 total=26
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[evento GET] church=1f5b8dd7-ba76-4de7-97c0-58a7467eaf73 total=26
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[evento GET] church=1f5b8dd7-ba76-4de7-97c0-58a7467eaf73 total=26
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[evento GET] church=1f5b8dd7-ba76-4de7-97c0-58a7467eaf73 total=26
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=admin@hub.com perfil_id=da2b6f88-490f-45bd-bdf2-97901c335314 db_perfil={"slug":"owner"} perfil_slug=owner permissions_count=1
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=admin@hub.com perfil_id=da2b6f88-490f-45bd-bdf2-97901c335314 db_perfil={"slug":"owner"} perfil_slug=owner permissions_count=1
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[evento GET] church=1f5b8dd7-ba76-4de7-97c0-58a7467eaf73 total=26
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[evento GET] church=1f5b8dd7-ba76-4de7-97c0-58a7467eaf73 total=26
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=admin@hub.com perfil_id=da2b6f88-490f-45bd-bdf2-97901c335314 db_perfil={"slug":"owner"} perfil_slug=owner permissions_count=1
+[evento GET] church=1f5b8dd7-ba76-4de7-97c0-58a7467eaf73 total=26
+[me] email=admin@hub.com perfil_id=da2b6f88-490f-45bd-bdf2-97901c335314 db_perfil={"slug":"owner"} perfil_slug=owner permissions_count=1
+[evento GET] church=1f5b8dd7-ba76-4de7-97c0-58a7467eaf73 total=26
+[me] email=admin@hub.com perfil_id=da2b6f88-490f-45bd-bdf2-97901c335314 db_perfil={"slug":"owner"} perfil_slug=owner permissions_count=1
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=admin@hub.com perfil_id=da2b6f88-490f-45bd-bdf2-97901c335314 db_perfil={"slug":"owner"} perfil_slug=owner permissions_count=1
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=admin@hub.com perfil_id=da2b6f88-490f-45bd-bdf2-97901c335314 db_perfil={"slug":"owner"} perfil_slug=owner permissions_count=1
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[evento GET] church=1f5b8dd7-ba76-4de7-97c0-58a7467eaf73 total=26
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=admin@hub.com perfil_id=da2b6f88-490f-45bd-bdf2-97901c335314 db_perfil={"slug":"owner"} perfil_slug=owner permissions_count=1
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=admin@hub.com perfil_id=da2b6f88-490f-45bd-bdf2-97901c335314 db_perfil={"slug":"owner"} perfil_slug=owner permissions_count=1
+[me] email=admin@hub.com perfil_id=da2b6f88-490f-45bd-bdf2-97901c335314 db_perfil={"slug":"owner"} perfil_slug=owner permissions_count=1
+[me] email=admin@hub.com perfil_id=da2b6f88-490f-45bd-bdf2-97901c335314 db_perfil={"slug":"owner"} perfil_slug=owner permissions_count=1
+[me] email=admin@hub.com perfil_id=da2b6f88-490f-45bd-bdf2-97901c335314 db_perfil={"slug":"owner"} perfil_slug=owner permissions_count=1
+[me] email=admin@hub.com perfil_id=da2b6f88-490f-45bd-bdf2-97901c335314 db_perfil={"slug":"owner"} perfil_slug=owner permissions_count=1
+[TypeError: fetch failed] {
+  [cause]: Error: getaddrinfo ENOTFOUND mobhpayqxwxikjiurddz.supabase.co
+      at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+    errno: -3008,
+    code: 'ENOTFOUND',
+    syscall: 'getaddrinfo',
+    hostname: 'mobhpayqxwxikjiurddz.supabase.co'
+  }
+}
+[TypeError: fetch failed] {
+  [cause]: Error: getaddrinfo ENOTFOUND mobhpayqxwxikjiurddz.supabase.co
+      at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+    errno: -3008,
+    code: 'ENOTFOUND',
+    syscall: 'getaddrinfo',
+    hostname: 'mobhpayqxwxikjiurddz.supabase.co'
+  }
+}
+[TypeError: fetch failed] {
+  [cause]: Error: getaddrinfo ENOTFOUND mobhpayqxwxikjiurddz.supabase.co
+      at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+    errno: -3008,
+    code: 'ENOTFOUND',
+    syscall: 'getaddrinfo',
+    hostname: 'mobhpayqxwxikjiurddz.supabase.co'
+  }
+}
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=admin@hub.com perfil_id=da2b6f88-490f-45bd-bdf2-97901c335314 db_perfil={"slug":"owner"} perfil_slug=owner permissions_count=1
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[evento GET] church=1f5b8dd7-ba76-4de7-97c0-58a7467eaf73 total=26
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[evento GET] church=1f5b8dd7-ba76-4de7-97c0-58a7467eaf73 total=26
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[GET /api/escala-equipe] eventId=56a016d6-7c3b-4094-98a2-e979235037d9 userId=4fac3800-c2ac-4353-9712-684d2ad92646 church=1f5b8dd7-ba76-4de7-97c0-58a7467eaf73
+[evento GET] church=1f5b8dd7-ba76-4de7-97c0-58a7467eaf73 total=26
+[escala-equipe] escalaId=def92ba4-bbfd-4ac0-aabe-7ba4353748db items=3 memberIds=["6c338f21-d430-431f-b22c-be082dbd7251","8e84d39a-eba5-428d-8311-e88d2338bf42","08eacb58-a2c6-452e-a14e-4dc565cf0aac"]
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[evento GET] church=1f5b8dd7-ba76-4de7-97c0-58a7467eaf73 total=26
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[GET /api/escala-equipe] eventId=ddf3ec09-09ad-4d3e-b568-9071b9226a8f userId=4fac3800-c2ac-4353-9712-684d2ad92646 church=1f5b8dd7-ba76-4de7-97c0-58a7467eaf73
+[evento GET] church=1f5b8dd7-ba76-4de7-97c0-58a7467eaf73 total=26
+[escala-equipe] escalaId=731491a2-7ad1-4426-b496-c76e841d4f6b items=3 memberIds=["6c338f21-d430-431f-b22c-be082dbd7251","08eacb58-a2c6-452e-a14e-4dc565cf0aac","5b2ed1eb-30d9-4c93-aa32-ccaac7ad928c"]
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=admin@hub.com perfil_id=da2b6f88-490f-45bd-bdf2-97901c335314 db_perfil={"slug":"owner"} perfil_slug=owner permissions_count=1
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=admin@hub.com perfil_id=da2b6f88-490f-45bd-bdf2-97901c335314 db_perfil={"slug":"owner"} perfil_slug=owner permissions_count=1
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=admin@hub.com perfil_id=da2b6f88-490f-45bd-bdf2-97901c335314 db_perfil={"slug":"owner"} perfil_slug=owner permissions_count=1
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=admin@hub.com perfil_id=da2b6f88-490f-45bd-bdf2-97901c335314 db_perfil={"slug":"owner"} perfil_slug=owner permissions_count=1
+[me] email=admin@hub.com perfil_id=da2b6f88-490f-45bd-bdf2-97901c335314 db_perfil={"slug":"owner"} perfil_slug=owner permissions_count=1
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=admin@hub.com perfil_id=da2b6f88-490f-45bd-bdf2-97901c335314 db_perfil={"slug":"owner"} perfil_slug=owner permissions_count=1
+[evento GET] church=1f5b8dd7-ba76-4de7-97c0-58a7467eaf73 total=26
+[me] email=admin@hub.com perfil_id=da2b6f88-490f-45bd-bdf2-97901c335314 db_perfil={"slug":"owner"} perfil_slug=owner permissions_count=1
+[me] email=admin@hub.com perfil_id=da2b6f88-490f-45bd-bdf2-97901c335314 db_perfil={"slug":"owner"} perfil_slug=owner permissions_count=1
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[evento GET] church=1f5b8dd7-ba76-4de7-97c0-58a7467eaf73 total=26
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=admin@hub.com perfil_id=da2b6f88-490f-45bd-bdf2-97901c335314 db_perfil={"slug":"owner"} perfil_slug=owner permissions_count=1
+[me] email=admin@hub.com perfil_id=da2b6f88-490f-45bd-bdf2-97901c335314 db_perfil={"slug":"owner"} perfil_slug=owner permissions_count=1
+[me] email=admin@hub.com perfil_id=da2b6f88-490f-45bd-bdf2-97901c335314 db_perfil={"slug":"owner"} perfil_slug=owner permissions_count=1
+[evento GET] church=1f5b8dd7-ba76-4de7-97c0-58a7467eaf73 total=26
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=admin@hub.com perfil_id=da2b6f88-490f-45bd-bdf2-97901c335314 db_perfil={"slug":"owner"} perfil_slug=owner permissions_count=1
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[evento GET] church=1f5b8dd7-ba76-4de7-97c0-58a7467eaf73 total=26
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=admin@hub.com perfil_id=da2b6f88-490f-45bd-bdf2-97901c335314 db_perfil={"slug":"owner"} perfil_slug=owner permissions_count=1
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[evento GET] church=1f5b8dd7-ba76-4de7-97c0-58a7467eaf73 total=26
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[evento GET] church=1f5b8dd7-ba76-4de7-97c0-58a7467eaf73 total=26
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=admin@hub.com perfil_id=da2b6f88-490f-45bd-bdf2-97901c335314 db_perfil={"slug":"owner"} perfil_slug=owner permissions_count=1
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[evento GET] church=1f5b8dd7-ba76-4de7-97c0-58a7467eaf73 total=26
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[TypeError: fetch failed] {
+  [cause]: Error: getaddrinfo ENOTFOUND mobhpayqxwxikjiurddz.supabase.co
+      at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+    errno: -3008,
+    code: 'ENOTFOUND',
+    syscall: 'getaddrinfo',
+    hostname: 'mobhpayqxwxikjiurddz.supabase.co'
+  }
+}
+[TypeError: fetch failed] {
+  [cause]: Error: getaddrinfo ENOTFOUND mobhpayqxwxikjiurddz.supabase.co
+      at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+    errno: -3008,
+    code: 'ENOTFOUND',
+    syscall: 'getaddrinfo',
+    hostname: 'mobhpayqxwxikjiurddz.supabase.co'
+  }
+}
+[TypeError: fetch failed] {
+  [cause]: Error: getaddrinfo ENOTFOUND mobhpayqxwxikjiurddz.supabase.co
+      at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+    errno: -3008,
+    code: 'ENOTFOUND',
+    syscall: 'getaddrinfo',
+    hostname: 'mobhpayqxwxikjiurddz.supabase.co'
+  }
+}
+[TypeError: fetch failed] {
+  [cause]: Error: getaddrinfo ENOTFOUND mobhpayqxwxikjiurddz.supabase.co
+      at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+    errno: -3008,
+    code: 'ENOTFOUND',
+    syscall: 'getaddrinfo',
+    hostname: 'mobhpayqxwxikjiurddz.supabase.co'
+  }
+}
+[TypeError: fetch failed] {
+  [cause]: Error: getaddrinfo ENOTFOUND mobhpayqxwxikjiurddz.supabase.co
+      at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26) {
+    errno: -3008,
+    code: 'ENOTFOUND',
+    syscall: 'getaddrinfo',
+    hostname: 'mobhpayqxwxikjiurddz.supabase.co'
+  }
+}
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=admin@hub.com perfil_id=da2b6f88-490f-45bd-bdf2-97901c335314 db_perfil={"slug":"owner"} perfil_slug=owner permissions_count=1
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[evento GET] church=1f5b8dd7-ba76-4de7-97c0-58a7467eaf73 total=26
+[evento GET] church=1f5b8dd7-ba76-4de7-97c0-58a7467eaf73 total=26
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[evento GET] church=1f5b8dd7-ba76-4de7-97c0-58a7467eaf73 total=26
+[evento GET] church=1f5b8dd7-ba76-4de7-97c0-58a7467eaf73 total=26
+[me] email=admin@hub.com perfil_id=da2b6f88-490f-45bd-bdf2-97901c335314 db_perfil={"slug":"owner"} perfil_slug=owner permissions_count=1
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=admin@hub.com perfil_id=da2b6f88-490f-45bd-bdf2-97901c335314 db_perfil={"slug":"owner"} perfil_slug=owner permissions_count=1
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=admin@hub.com perfil_id=da2b6f88-490f-45bd-bdf2-97901c335314 db_perfil={"slug":"owner"} perfil_slug=owner permissions_count=1
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=admin@hub.com perfil_id=da2b6f88-490f-45bd-bdf2-97901c335314 db_perfil={"slug":"owner"} perfil_slug=owner permissions_count=1
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=admin@hub.com perfil_id=da2b6f88-490f-45bd-bdf2-97901c335314 db_perfil={"slug":"owner"} perfil_slug=owner permissions_count=1
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=admin@hub.com perfil_id=da2b6f88-490f-45bd-bdf2-97901c335314 db_perfil={"slug":"owner"} perfil_slug=owner permissions_count=1
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=admin@hub.com perfil_id=da2b6f88-490f-45bd-bdf2-97901c335314 db_perfil={"slug":"owner"} perfil_slug=owner permissions_count=1
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=admin@hub.com perfil_id=da2b6f88-490f-45bd-bdf2-97901c335314 db_perfil={"slug":"owner"} perfil_slug=owner permissions_count=1
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=admin@hub.com perfil_id=da2b6f88-490f-45bd-bdf2-97901c335314 db_perfil={"slug":"owner"} perfil_slug=owner permissions_count=1
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=admin@hub.com perfil_id=da2b6f88-490f-45bd-bdf2-97901c335314 db_perfil={"slug":"owner"} perfil_slug=owner permissions_count=1
+[me] email=felipe.admfg@gmail.com perfil_id=ac51973d-b218-4167-901d-f1cf395ec88e db_perfil={"slug":"voluntario"} perfil_slug=voluntario permissions_count=4
+[evento GET] church=1f5b8dd7-ba76-4de7-97c0-58a7467eaf73 total=26
+[me] email=felipe.admfg@gmail.com perfil_id=ac51973d-b218-4167-901d-f1cf395ec88e db_perfil={"slug":"voluntario"} perfil_slug=voluntario permissions_count=4
+[evento GET] church=1f5b8dd7-ba76-4de7-97c0-58a7467eaf73 total=26
+[me] email=felipe.admfg@gmail.com perfil_id=ac51973d-b218-4167-901d-f1cf395ec88e db_perfil={"slug":"voluntario"} perfil_slug=voluntario permissions_count=4
+[evento GET] church=1f5b8dd7-ba76-4de7-97c0-58a7467eaf73 total=26
+[me] email=felipe.admfg@gmail.com perfil_id=ac51973d-b218-4167-901d-f1cf395ec88e db_perfil={"slug":"voluntario"} perfil_slug=voluntario permissions_count=4
+[evento GET] church=1f5b8dd7-ba76-4de7-97c0-58a7467eaf73 total=26
+[me] email=admin@hub.com perfil_id=da2b6f88-490f-45bd-bdf2-97901c335314 db_perfil={"slug":"owner"} perfil_slug=owner permissions_count=1
+[evento GET] church=1f5b8dd7-ba76-4de7-97c0-58a7467eaf73 total=26
+[me] email=admin@hub.com perfil_id=da2b6f88-490f-45bd-bdf2-97901c335314 db_perfil={"slug":"owner"} perfil_slug=owner permissions_count=1
+[me] email=admin@hub.com perfil_id=da2b6f88-490f-45bd-bdf2-97901c335314 db_perfil={"slug":"owner"} perfil_slug=owner permissions_count=1

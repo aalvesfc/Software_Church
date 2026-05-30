@@ -1,0 +1,3190 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hug Software — Eventos</title>
+  <script src="/js/auth-check.js"></script>
+  <script src="/js/page-loader.js"></script>
+  <script src="/js/cache.js"></script>
+  <link rel="icon" type="image/png" href="/IMG/logo.png">
+  <style>
+    * { font-family: 'Plus Jakarta Sans', sans-serif !important; }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary:         #8B5CF6;
+      --primary-light:   #DDD6FE;
+      --primary-focus:   #8B5CF6;
+      --primary-dark:    #7C3AED;
+      --accent-yellow:   #ff5500;
+      --accent-green:    #34c759;
+      --accent-red:      #ff3b30;
+      --accent-blue:     #007aff;
+      --muted-teal:      #99bfc2;
+      --ink:             #1d1d1f;
+      --ink-muted:       #6e6e73;
+      --ink-subtle:      #aeaeb2;
+      --canvas:          #ffffff;
+      --canvas-page: #ECE9E7;
+      --canvas-input:    #f2f2f7;
+      --hairline:        #e0e0e0;
+      --on-dark:         #ffffff;
+      --on-dark-muted:   rgba(255,255,255,0.65);
+      --sidebar-w:       220px;
+      --topbar-h:        64px;
+      --radius-sm:       8px;
+      --radius-md:       12px;
+      --radius-lg:       18px;
+      --radius-pill:     9999px;
+    }
+
+    body {
+      min-height: 100vh;
+      background: var(--canvas-page);
+      font-family: sans-serif;
+      -webkit-font-smoothing: antialiased;
+      display: flex;
+    }
+
+    /* ─────────────────── SIDEBAR ─────────────────── */
+    .sidebar {
+      width: var(--sidebar-w);
+      min-height: unset;
+      background: #1c1c1c;
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      z-index: 100;
+      overflow: visible;
+      transition: width 0.22s cubic-bezier(.4,0,.2,1);
+    }
+
+    .sidebar-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 24px 20px 28px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      transition: padding 0.22s, gap 0.22s;
+    }
+
+    .logo-mark {
+      width: 42px; height: 42px;
+      background: linear-gradient(135deg, #DDD6FE, #8B5CF6);
+      border-radius: 11px;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: rgba(0,0,0,0.22) 0 3px 12px;
+      flex-shrink: 0;
+    }
+    .logo-mark svg { width: 22px; height: 22px; color: #fff; }
+
+    .logo-text {
+      font-family: sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--on-dark);
+      letter-spacing: 0.6px;
+      line-height: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      opacity: 1;
+      transition: opacity 0.15s, width 0.22s;
+    }
+    .logo-text span { color: var(--primary-light); }
+
+    .sidebar-nav {
+      flex: 1;
+      padding: 14px 0;
+      overflow-y: auto;
+      scrollbar-width: none;
+    }
+    .sidebar-nav::-webkit-scrollbar { display: none; }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 11px 20px;
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--on-dark-muted);
+      text-decoration: none;
+      letter-spacing: -0.224px;
+      border-radius: 0;
+      transition: background 0.12s ease, color 0.12s ease, padding 0.22s, justify-content 0.22s;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .nav-item:hover { color: var(--on-dark); background: rgba(255,255,255,0.07); }
+    .nav-item.active {
+      color: var(--on-dark);
+      background: rgba(255,255,255,0.13);
+      font-weight: 600;
+    }
+    .nav-item svg { width: 18px; height: 18px; flex-shrink: 0; opacity: 0.85; }
+    .nav-item.active svg { opacity: 1; }
+    .nav-item span { overflow: hidden; opacity: 1; transition: opacity 0.15s; }
+
+    body.sidebar-collapsed .sidebar { width: 64px; }
+    body.sidebar-collapsed .sidebar-logo { padding: 24px 11px 28px; gap: 0; justify-content: center; }
+    body.sidebar-collapsed .logo-text { opacity: 0; width: 0; }
+    body.sidebar-collapsed .nav-item { padding: 11px 0; justify-content: center; gap: 0; }
+    body.sidebar-collapsed .nav-item span { opacity: 0; width: 0; }
+    body.sidebar-collapsed .main { margin-left: 64px; }
+    body.sidebar-collapsed #collapseBtn svg { transform: rotate(180deg); }
+
+    /* ── Tooltip sidebar ── */
+    .nav-item {
+      position: relative;
+    }
+    .nav-item::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      left: calc(100% + 12px);
+      top: 50%;
+      transform: translateY(-50%) translateX(-6px);
+      background: #1a1a1a;
+      color: #FFFFFF;
+      font-size: 12px;
+      font-weight: 500;
+      padding: 6px 12px;
+      border-radius: 8px;
+      white-space: nowrap;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.15s ease, transform 0.15s ease;
+      z-index: 9999;
+      letter-spacing: 0.1px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.28);
+    }
+    .nav-item::before {
+      content: '';
+      position: absolute;
+      left: calc(100% + 6px);
+      top: 50%;
+      transform: translateY(-50%) translateX(-6px);
+      border: 5px solid transparent;
+      border-right-color: #1a1a1a;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.15s ease, transform 0.15s ease;
+      z-index: 9999;
+    }
+    .nav-item:hover::after,
+    .nav-item:hover::before {
+      opacity: 1;
+      transform: translateY(-50%) translateX(0);
+    }
+
+
+    /* ─────────────────── MAIN ─────────────────── */
+    .main {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      transition: margin-left 0.22s cubic-bezier(.4,0,.2,1);
+    }
+
+        /* ─────────────────── TOPBAR ─────────────────── */
+    .topbar {
+      height: 72px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding: 0 28px;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: linear-gradient(135deg, #ECE9E700 0%, #ECE9E7 100%);
+      backdrop-filter: blur(1px);
+      -webkit-backdrop-filter: blur(1px);
+    }
+
+    /* Search pill + botão */
+    .search-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .search-wrap input {
+      width: 300px;
+      height: 42px;
+      background: #FFFFFF;
+      border: 1.5px solid #EEEEEE;
+      border-radius: var(--radius-pill);
+      padding: 0 18px;
+      font-size: 14px;
+      font-family: inherit;
+      color: #1A1A1A;
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .search-wrap input::placeholder { color: #AAAAAA; }
+    .search-wrap input:focus {
+      border-color: #CCCCCC;
+      box-shadow: 0 0 0 3px rgba(0,0,0,0.05);
+    }
+    .search-btn {
+      width: 42px; height: 42px;
+      border-radius: 50%;
+      border: none;
+      background: #8B5CF6;
+      color: #FFFFFF;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: background 0.15s;
+    }
+    .search-btn:hover { background: #7C3AED; }
+    .search-btn svg { width: 18px; height: 18px; }
+
+    /* Ícones do topbar */
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .topbar-actions .icon-btn {
+      width: 42px; height: 42px;
+      background: #FFFFFF;
+      border: 1.5px solid #EEEEEE;
+      border-radius: 50%;
+      color: #555555;
+    }
+    .topbar-actions .icon-btn:hover {
+      background: #F5F5F5;
+      border-color: #DDDDDD;
+      color: #1A1A1A;
+    }
+
+    /* Badge de notificação */
+    .notif-wrap {
+      position: relative;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .notif-badge {
+      position: absolute;
+      top: 6px; right: 6px;
+      width: 9px; height: 9px;
+      background: #EF4444;
+      border-radius: 50%;
+      border: 2px solid var(--canvas-page);
+      pointer-events: none;
+    }
+
+    .icon-btn {
+      width: 40px; height: 40px;
+      border-radius: var(--radius-pill);
+      border: none;
+      background: none;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--ink-muted);
+      transition: background 0.12s, color 0.12s;
+    }
+    .icon-btn:hover { background: var(--canvas-input); color: var(--ink); }
+    .icon-btn svg { width: 20px; height: 20px; }
+
+    .avatar {
+      width: 40px; height: 40px;
+      border-radius: var(--radius-pill);
+      background: #e8612a;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+      font-weight: 600;
+      color: #fff;
+      cursor: pointer;
+      margin-left: 4px;
+      letter-spacing: -0.12px;
+    }
+
+    .avatar-menu-wrap { position: relative; }
+    .avatar-dropdown {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      width: 220px;
+      background: var(--canvas);
+      border: 1px solid var(--hairline);
+      border-radius: var(--radius-md);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.10), 0 2px 6px rgba(0,0,0,0.06);
+      padding: 6px;
+      z-index: 200;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(-6px);
+      transition: opacity 0.15s, transform 0.15s;
+    }
+    .avatar-dropdown.open { opacity: 1; pointer-events: auto; transform: translateY(0); }
+    .dropdown-header { padding: 10px 12px 12px; border-bottom: 1px solid var(--hairline); margin-bottom: 6px; }
+    .dropdown-name { font-size: 14px; font-weight: 600; color: var(--ink); letter-spacing: -0.224px; }
+    .dropdown-email { font-size: 12px; color: var(--ink-subtle); letter-spacing: -0.12px; margin-top: 2px; }
+    .dropdown-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 12px;
+      font-size: 14px; font-weight: 400; color: var(--ink);
+      letter-spacing: -0.224px;
+      border-radius: var(--radius-sm);
+      text-decoration: none; cursor: pointer;
+      transition: background 0.12s;
+    }
+    .dropdown-item:hover { background: var(--canvas-page); }
+    .dropdown-item svg { width: 16px; height: 16px; color: var(--ink-muted); flex-shrink: 0; }
+    .dropdown-item.danger { color: #ff3b30; }
+    .dropdown-item.danger svg { color: #ff3b30; }
+    .dropdown-item.danger:hover { background: rgba(255,59,48,0.06); }
+    .dropdown-divider { height: 1px; background: var(--hairline); margin: 6px 0; }
+
+    /* ─────────────────── LAYOUT ─────────────────── */
+    .content-wrap {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 300px;
+      gap: 0;
+    }
+
+    .content {
+      padding: 32px;
+      min-width: 0;
+    }
+
+    /* ─────────────────── PAGE GREETING ─────────────────── */
+    .page-greeting {
+      margin-bottom: 28px;
+      padding: 8px 0 4px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .pg-title {
+      font-size: 30px;
+      font-weight: 700;
+      color: #8B5CF6;
+      letter-spacing: -0.5px;
+      line-height: 1.2;
+    }
+    .pg-sub {
+      font-size: 16px;
+      color: #8A8A8A;
+      font-weight: 400;
+      font-style: italic;
+      margin-top: 6px;
+    }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      height: 40px;
+      padding: 0 20px;
+      background: rgba(255,255,255,0.18);
+      border: 1.5px solid rgba(255,255,255,0.55);
+      border-radius: var(--radius-pill);
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--on-dark);
+      letter-spacing: -0.224px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.15s, border-color 0.15s;
+      white-space: nowrap;
+    }
+    .btn-primary:hover { background: rgba(255,255,255,0.28); border-color: rgba(255,255,255,0.8); }
+    .btn-primary svg { width: 16px; height: 16px; }
+
+    /* ─────────────────── STATS ─────────────────── */
+    .stats-row {
+      display: flex;
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+
+    .stat-card {
+      background: var(--canvas);
+      border: 1px solid #EEEEEE;
+      border-radius: 20px;
+      padding: 20px 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex: 1;
+      text-decoration: none;
+      cursor: pointer;
+      transition: box-shadow 0.15s, border-color 0.15s;
+      user-select: none;
+      min-width: 0;
+    }
+    .stat-card:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+    .stat-card.active { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(139,92,246,0.1); }
+
+    .stat-icon {
+      width: 48px; height: 48px;
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .stat-icon svg { width: 22px; height: 22px; }
+    .stat-icon.dark  { background: #F3F4F6; color: #6B7280; }
+    .stat-icon.blue  { background: rgba(0,122,255,0.08); color: #007AFF; }
+    .stat-icon.green { background: rgba(52,199,89,0.10); color: #34C759; }
+    .stat-icon.red   { background: rgba(255,59,48,0.10); color: #FF3B30; }
+
+    .stat-info { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+
+    .stat-value {
+      font-size: 28px;
+      font-weight: 700;
+      color: #1A1A1A;
+      letter-spacing: -0.5px;
+      line-height: 1;
+    }
+    .stat-label {
+      font-size: 11px;
+      font-weight: 500;
+      color: #9CA3AF;
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    /* ─────────────────── CONTENT CARD ─────────────────── */
+    .content-card {
+      background: var(--canvas);
+      border: 1px solid var(--hairline);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+
+    .content-count {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--hairline);
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .content-count-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--ink);
+      letter-spacing: -0.224px;
+    }
+
+    .content-badge {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--ink-muted);
+      background: var(--canvas-input);
+      border-radius: var(--radius-pill);
+      padding: 3px 9px;
+    }
+
+    .list-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .view-toggle {
+      display: flex;
+      background: var(--canvas-input);
+      border-radius: var(--radius-pill);
+      padding: 3px;
+    }
+    .view-btn {
+      height: 32px;
+      padding: 0 14px;
+      border: none;
+      border-radius: var(--radius-pill);
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--ink-muted);
+      cursor: pointer;
+      background: none;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.12s, color 0.12s;
+    }
+    .view-btn svg { width: 14px; height: 14px; }
+    .view-btn.active {
+      background: var(--canvas);
+      color: var(--ink);
+      font-weight: 600;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+
+    .list-search {
+      position: relative;
+      display: flex;
+      align-items: center;
+      height: 36px;
+      background: var(--canvas);
+      border: 1px solid var(--hairline);
+      border-radius: var(--radius-pill);
+      padding: 0 14px 0 32px;
+      transition: border-color 0.12s;
+    }
+    .list-search:focus-within { border-color: var(--primary); }
+    .list-search svg {
+      position: absolute;
+      left: 10px; top: 50%;
+      transform: translateY(-50%);
+      width: 14px; height: 14px;
+      color: var(--ink-subtle);
+    }
+    .list-search input {
+      border: none;
+      outline: none;
+      font-family: inherit;
+      font-size: 13px;
+      color: var(--ink);
+      background: transparent;
+      width: 180px;
+      letter-spacing: -0.224px;
+    }
+    .list-search input::placeholder { color: var(--ink-subtle); }
+
+    /* ─────────────────── CARDS (view lista) ─────────────────── */
+    .ev-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; padding: 20px 20px 0; }
+
+    /* Paginação */
+    .paginacao {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 20px;
+    }
+    .pag-btn {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      border: 1.5px solid #E0E0E0;
+      background: #FFFFFF;
+      color: #1A1A1A;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.15s, border-color 0.15s, color 0.15s;
+      flex-shrink: 0;
+    }
+    .pag-btn:hover:not(:disabled) { background: #8B5CF6; border-color: #8B5CF6; color: #fff; }
+    .pag-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+    .pag-btn svg { width: 15px; height: 15px; }
+    .pag-info {
+      font-size: 14px;
+      font-weight: 600;
+      color: #1A1A1A;
+      min-width: 52px;
+      text-align: center;
+      letter-spacing: -0.2px;
+    }
+    .pag-sep { color: #AAAAAA; margin: 0 2px; font-weight: 400; }
+    .ev-card {
+      background: var(--canvas);
+      border: 1px solid var(--hairline);
+      border-radius: var(--radius-lg);
+      padding: 0;
+      display: flex; flex-direction: column;
+      cursor: pointer; overflow: hidden;
+      transition: box-shadow 0.15s, transform 0.12s, border-color 0.15s;
+    }
+    .ev-card:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.09); transform: translateY(-2px); border-color: transparent; }
+    .ev-card-accent {
+      height: 3px; width: 100%; flex-shrink: 0;
+    }
+    .ev-card.agendado  .ev-card-accent { background: var(--accent-blue); }
+    .ev-card.concluido .ev-card-accent { background: var(--accent-green); }
+    .ev-card.cancelado .ev-card-accent { background: var(--accent-red); }
+    .ev-card-inner { padding: 16px; display: flex; flex-direction: column; gap: 12px; flex: 1; }
+    .ev-card-top { display: flex; align-items: flex-start; gap: 12px; }
+    .ev-card-badge {
+      width: 46px; height: 50px; flex-shrink: 0;
+      background: linear-gradient(160deg, #2d0078 0%, #8B5CF6 60%, #DDD6FE 100%);
+      border-radius: var(--radius-md);
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;
+      box-shadow: 0 2px 8px rgba(151,71,255,0.35);
+    }
+    .ev-card-day { font-size: 19px; font-weight: 700; color: #fff; line-height: 1; font-family: sans-serif; }
+    .ev-card-mon { font-size: 10px; font-weight: 500; color: rgba(255,255,255,0.75); letter-spacing: 0.6px; text-transform: uppercase; }
+    .ev-card-title { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 5px; }
+    .ev-card-name { font-size: 14px; font-weight: 600; color: #ad8aff; letter-spacing: -0.2px; line-height: 1.3; }
+    .ev-card-meta { display: flex; flex-direction: column; gap: 5px; padding-top: 2px; border-top: 1px solid var(--hairline); }
+    .ev-card-meta-row { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--ink-muted); }
+    .ev-card-meta-row svg { width: 12px; height: 12px; flex-shrink: 0; color: var(--ink-subtle); }
+    .ev-card-btn {
+      height: 30px; padding: 0 12px; border-radius: 6px; font-size: 12px; font-weight: 500;
+      font-family: inherit; cursor: pointer; border: 1px solid var(--hairline);
+      background: var(--canvas); color: var(--ink-muted); transition: background 0.12s;
+    }
+    .ev-card-btn:hover { background: var(--canvas-input); }
+    .ev-card-btn.green { border-color: rgba(52,199,89,0.3); color: var(--accent-green); background: rgba(52,199,89,0.06); }
+    .ev-card-btn.green:hover { background: rgba(52,199,89,0.12); }
+
+    /* ─────────────────── CALENDÁRIO COMPLETO ─────────────────── */
+    .full-cal { display: flex; flex-direction: column; padding: 20px; gap: 16px; }
+    .full-cal-nav { display: flex; align-items: center; gap: 10px; }
+    .full-cal-nav-btn {
+      width: 34px; height: 34px; border-radius: var(--radius-md); border: none; cursor: pointer;
+      background: var(--primary); color: #fff; display: flex; align-items: center; justify-content: center;
+      transition: opacity 0.12s;
+    }
+    .full-cal-nav-btn:hover { opacity: 0.82; }
+    .full-cal-nav-btn svg { width: 16px; height: 16px; }
+    .full-cal-today-btn {
+      height: 34px; padding: 0 16px; border-radius: var(--radius-md); border: 1.5px solid var(--primary);
+      background: rgba(151,71,255,0.07); color: var(--primary); font-size: 13px; font-weight: 600;
+      font-family: inherit; cursor: pointer;
+    }
+    .full-cal-title { flex: 1; text-align: center; font-size: 18px; font-weight: 700; color: var(--ink); letter-spacing: -0.374px; }
+    .full-cal-sub-toggle { display: flex; background: var(--primary); border-radius: var(--radius-md); overflow: hidden; }
+    .full-cal-sub-btn {
+      padding: 6px 14px; font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.65);
+      background: none; border: none; cursor: pointer; font-family: inherit;
+    }
+    .full-cal-sub-btn.active { background: rgba(0,0,0,0.25); color: #fff; }
+    .full-cal-grid { border: 1px solid var(--hairline); border-radius: var(--radius-lg); overflow: hidden; }
+    .full-cal-head { display: grid; grid-template-columns: repeat(7,1fr); background: var(--canvas-page); }
+    .full-cal-head-cell { padding: 10px 0; text-align: center; font-size: 11px; font-weight: 600; color: var(--ink-muted); letter-spacing: 0.5px; text-transform: uppercase; }
+    .full-cal-body { display: grid; grid-template-columns: repeat(7,1fr); }
+    .full-cal-cell {
+      min-height: 90px; border-top: 1px solid var(--hairline); border-right: 1px solid var(--hairline);
+      padding: 6px; display: flex; flex-direction: column; gap: 3px; background: var(--canvas);
+    }
+    .full-cal-cell:nth-child(7n) { border-right: none; }
+    .full-cal-cell.other-month { background: var(--canvas-page); }
+    .full-cal-cell.today { background: rgba(151,71,255,0.04); }
+    .full-cal-cell-num { font-size: 13px; font-weight: 500; color: var(--ink-muted); text-align: right; padding: 0 2px 2px; }
+    .full-cal-cell.today .full-cal-cell-num { color: var(--primary); font-weight: 700; }
+    .full-cal-cell.other-month .full-cal-cell-num { color: var(--ink-subtle); }
+    .full-cal-event {
+      background: var(--primary); color: #fff; border-radius: 4px;
+      padding: 2px 5px; font-size: 11px; font-weight: 500; white-space: nowrap;
+      overflow: hidden; text-overflow: ellipsis; cursor: pointer; line-height: 1.5;
+    }
+    .full-cal-event:hover { opacity: 0.85; }
+
+    /* ── Week view ── */
+    .week-cal-grid { display: grid; grid-template-columns: repeat(7,1fr); border: 1px solid var(--hairline); border-radius: var(--radius-lg); overflow: hidden; }
+    .week-cal-col { border-right: 1px solid var(--hairline); display: flex; flex-direction: column; background: var(--canvas); }
+    .week-cal-col:last-child { border-right: none; }
+    .week-cal-col.today { background: rgba(151,71,255,0.04); }
+    .week-cal-head-cell {
+      display: flex; flex-direction: column; align-items: center;
+      padding: 10px 4px 8px; border-bottom: 1px solid var(--hairline);
+      background: var(--canvas-page); gap: 4px;
+    }
+    .week-cal-dow { font-size: 10px; font-weight: 600; color: var(--ink-muted); letter-spacing: 0.5px; text-transform: uppercase; }
+    .week-cal-num {
+      font-size: 16px; font-weight: 600; color: var(--ink);
+      width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 50%;
+    }
+    .week-cal-num.today { background: var(--primary); color: #fff; }
+    .week-cal-body-cell { flex: 1; padding: 4px; display: flex; flex-direction: column; gap: 3px; min-height: 160px; }
+
+    .event-date-badge {
+      width: 44px; height: 48px;
+      background: var(--primary);
+      border-radius: var(--radius-sm);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1px;
+      flex-shrink: 0;
+    }
+    .event-date-day {
+      font-family: sans-serif;
+      font-size: 17px;
+      font-weight: 600;
+      color: #fff;
+      line-height: 1;
+    }
+    .event-date-mon {
+      font-size: 10px;
+      font-weight: 400;
+      color: rgba(255,255,255,0.75);
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+    }
+
+    .event-info {}
+    .event-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: #ad8aff;
+      letter-spacing: -0.224px;
+    }
+    .event-sub {
+      font-size: 12px;
+      color: var(--ink-muted);
+      letter-spacing: -0.12px;
+      margin-top: 2px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .event-sub svg { width: 12px; height: 12px; flex-shrink: 0; }
+
+    .badge-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      font-weight: 600;
+      border-radius: var(--radius-pill);
+      padding: 4px 10px;
+      letter-spacing: 0.2px;
+      white-space: nowrap;
+    }
+    .badge-status.agendado  { color: var(--accent-blue);  background: rgba(0,122,255,0.10); }
+    .badge-status.concluido { color: var(--accent-green); background: rgba(52,199,89,0.10); }
+    .badge-status.cancelado { color: var(--accent-red);   background: rgba(255,59,48,0.10); }
+
+    /* Grade de blocos */
+    .event-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; padding: 20px; }
+    .event-block {
+      background: var(--canvas);
+      border: 1px solid var(--hairline);
+      border-radius: var(--radius-md);
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      cursor: pointer;
+      transition: box-shadow 0.15s, transform 0.15s;
+    }
+    .event-block:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); transform: translateY(-1px); }
+    .event-block-top { display: flex; align-items: flex-start; justify-content: space-between; }
+    .event-block-body {}
+    .event-block-name { font-size: 15px; font-weight: 600; color: #ad8aff; letter-spacing: -0.224px; line-height: 1.3; }
+    .event-block-meta { margin-top: 8px; display: flex; flex-direction: column; gap: 5px; }
+    .event-block-meta-row {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 12px; color: var(--ink-muted); letter-spacing: -0.12px;
+    }
+    .event-block-meta-row svg { width: 12px; height: 12px; flex-shrink: 0; }
+    .event-block-footer {
+      padding-top: 10px;
+      border-top: 1px solid var(--hairline);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--ink-muted);
+    }
+    .event-block-footer svg { width: 13px; height: 13px; }
+
+    /* ─────────────────── ESTADO VAZIO ─────────────────── */
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 64px 24px;
+      gap: 12px;
+    }
+    .empty-icon {
+      width: 56px; height: 56px;
+      color: var(--ink-subtle);
+    }
+    .empty-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--ink-muted);
+      letter-spacing: -0.224px;
+    }
+    .empty-sub {
+      font-size: 13px;
+      color: var(--ink-subtle);
+      letter-spacing: -0.12px;
+    }
+    .empty-action {
+      margin-top: 4px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      height: 36px;
+      padding: 0 18px;
+      background: var(--primary);
+      border-radius: var(--radius-pill);
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 500;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+    .empty-action:hover { opacity: 0.85; }
+    .empty-action svg { width: 14px; height: 14px; }
+
+    /* ─────────────────── RIGHT PANEL ─────────────────── */
+    .right-panel {
+      padding: 20px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      overflow: visible;
+      background: transparent;
+      align-self: start;
+      position: sticky;
+      top: 88px;
+    }
+    .right-card {
+      background: var(--canvas);
+      border: 1px solid #EEEEEE;
+      border-radius: 20px;
+      padding: 20px 16px;
+    }
+
+    /* Mini Calendário */
+    .cal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+    .cal-month {
+      font-size: 14px;
+      font-weight: 700;
+      color: #1A1A1A;
+      letter-spacing: -0.2px;
+    }
+    .cal-nav {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--ink-muted);
+      padding: 5px;
+      display: flex;
+      border-radius: var(--radius-sm);
+      transition: background 0.12s;
+    }
+    .cal-nav:hover { background: var(--canvas-input); }
+    .cal-nav svg { width: 15px; height: 15px; }
+    .cal-grid { width: 100%; border-collapse: collapse; }
+    .cal-grid th {
+      font-size: 11px;
+      font-weight: 600;
+      color: #AAAAAA;
+      text-align: center;
+      padding-bottom: 8px;
+      letter-spacing: 0.3px;
+      text-transform: uppercase;
+    }
+    .cal-grid td { text-align: center; padding: 2px 0; }
+    .cal-day {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 400;
+      color: #1A1A1A;
+      cursor: pointer;
+      transition: background 0.12s;
+    }
+    .cal-day:hover { background: #F0EAFF; }
+    .cal-day.today { background: var(--primary); color: #fff; font-weight: 700; }
+    .cal-day.has-event { font-weight: 600; color: var(--primary); }
+    .cal-day.has-event.today { color: #fff; }
+    .cal-dots { display: flex; align-items: center; justify-content: center; gap: 2px; height: 5px; margin-top: 1px; }
+    .cal-dot { width: 3px; height: 3px; border-radius: 50%; background: var(--primary); flex-shrink: 0; }
+    .cal-dot.white { background: #fff; }
+
+    /* ── Popup de eventos do dia (mini calendário) ── */
+    #calDayPopup {
+      position: fixed;
+      z-index: 9999;
+      background: #FFFFFF;
+      border: 1px solid #EEEEEE;
+      border-radius: 14px;
+      box-shadow: 0 8px 28px rgba(0,0,0,0.14);
+      padding: 14px;
+      min-width: 220px;
+      max-width: 280px;
+      display: none;
+    }
+    #calDayPopup.open { display: block; }
+    .cdp-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    .cdp-title {
+      font-size: 13px; font-weight: 700; color: #1A1A1A; letter-spacing: -0.2px;
+    }
+    .cdp-close {
+      width: 24px; height: 24px; border-radius: 50%;
+      border: none; background: #F3F4F6; color: #6B7280;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; font-size: 14px; line-height: 1;
+      transition: background 0.12s;
+    }
+    .cdp-close:hover { background: #E5E7EB; }
+    .cdp-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 10px; border-radius: 10px;
+      cursor: pointer; text-decoration: none;
+      transition: background 0.12s;
+      margin-bottom: 4px;
+    }
+    .cdp-item:last-child { margin-bottom: 0; }
+    .cdp-item:hover { background: #F5F0FF; }
+    .cdp-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--primary); flex-shrink: 0;
+    }
+    .cdp-info { flex: 1; min-width: 0; }
+    .cdp-name {
+      font-size: 13px; font-weight: 600; color: #1A1A1A;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      letter-spacing: -0.2px;
+    }
+    .cdp-time {
+      font-size: 11px; color: #9CA3AF; margin-top: 1px;
+    }
+    .cal-day.other-month { color: #CCCCCC; font-weight: 400; }
+
+    /* Próximos Eventos panel */
+    .panel-section-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #1A1A1A;
+      letter-spacing: -0.2px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .panel-link {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--primary);
+      text-decoration: none;
+    }
+    .panel-link:hover { opacity: 0.72; }
+
+    .upcoming-list { display: flex; flex-direction: column; gap: 6px; }
+    .upcoming-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px;
+      border-radius: 10px;
+      background: #FAFAFA;
+      border: 1px solid #F0F0F0;
+      transition: background 0.12s;
+      cursor: pointer;
+    }
+    .upcoming-item:hover { background: #F5F0FF; border-color: #DDD6FE; }
+    .upcoming-dot {
+      width: 34px; height: 34px;
+      border-radius: 8px;
+      background: var(--primary);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      flex-shrink: 0;
+      gap: 0;
+    }
+    .upcoming-day  { font-size: 13px; font-weight: 700; color: #fff; line-height: 1; }
+    .upcoming-mon  { font-size: 8px; font-weight: 500; color: rgba(255,255,255,0.75); text-transform: uppercase; letter-spacing: 0.3px; }
+    .upcoming-info { flex: 1; min-width: 0; }
+    .upcoming-name { font-size: 13px; font-weight: 600; color: #1A1A1A; letter-spacing: -0.2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .upcoming-time { font-size: 11px; color: var(--ink-muted); letter-spacing: -0.12px; margin-top: 1px; }
+
+    .empty-panel {
+      text-align: center;
+      padding: 24px 0;
+      font-size: 13px;
+      color: var(--ink-subtle);
+      letter-spacing: -0.12px;
+    }
+
+    /* Ações Rápidas */
+    .quick-actions { display: flex; flex-direction: column; gap: 8px; }
+    .quick-action {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--hairline);
+      background: var(--canvas);
+      cursor: pointer;
+      transition: background 0.12s, border-color 0.12s;
+      text-decoration: none;
+    }
+    .quick-action:hover { background: var(--canvas-page); border-color: var(--primary); }
+    .quick-action-icon {
+      width: 36px; height: 36px;
+      border-radius: var(--radius-sm);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .quick-action-icon svg { width: 18px; height: 18px; }
+    .quick-action-icon.teal  { background: rgba(151,71,255,0.12); color: var(--primary); }
+    .quick-action-icon.green { background: rgba(52,199,89,0.12); color: var(--accent-green); }
+    .quick-action-title { font-size: 13px; font-weight: 600; color: var(--ink); letter-spacing: -0.224px; }
+    .quick-action-sub   { font-size: 11px; color: var(--ink-muted); letter-spacing: -0.12px; margin-top: 1px; }
+
+    /* ─────────────────── MODAL WIZARD ─────────────────── */
+    .modal-backdrop {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.3);
+      z-index: 300;
+    }
+    .modal-backdrop.open { display: block; }
+
+    .modal {
+      position: fixed;
+      top: 0; right: 0; bottom: 0;
+      width: 52vw;
+      max-width: 780px;
+      min-width: 400px;
+      background: var(--canvas);
+      display: flex;
+      flex-direction: column;
+      box-shadow: -8px 0 40px rgba(0,0,0,0.18);
+      transform: translateX(100%);
+      transition: transform 0.28s cubic-bezier(.4,0,.2,1);
+      z-index: 301;
+    }
+    .modal-backdrop.open .modal { transform: translateX(0); }
+
+    .modal-header {
+      background: linear-gradient(135deg, #0a0a0a 0%, #8B5CF6 50%, #DDD6FE 100%);
+      padding: 24px 24px 16px;
+      position: relative;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .modal-header::after {
+      content: "";
+      position: absolute;
+      width: 200px; height: 200px;
+      border-radius: 50%;
+      border: 40px solid rgba(255,255,255,0.05);
+      right: -40px; top: -60px;
+      pointer-events: none;
+    }
+    .modal-header-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      position: relative;
+      z-index: 1;
+    }
+    .modal-title {
+      font-family: sans-serif;
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--on-dark);
+      letter-spacing: -0.374px;
+    }
+    .modal-subtitle {
+      font-size: 13px;
+      font-weight: 400;
+      color: var(--on-dark-muted);
+      letter-spacing: -0.224px;
+      margin-top: 3px;
+    }
+    .modal-close {
+      width: 28px; height: 28px;
+      border: 1.5px solid rgba(255,255,255,0.3);
+      background: rgba(255,255,255,0.1);
+      border-radius: var(--radius-pill);
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: rgba(255,255,255,0.8);
+      flex-shrink: 0;
+      transition: background 0.12s;
+    }
+    .modal-close:hover { background: rgba(255,255,255,0.2); }
+    .modal-close svg { width: 14px; height: 14px; }
+
+    .step-indicator {
+      display: flex;
+      align-items: center;
+      margin-top: 16px;
+      position: relative;
+      z-index: 1;
+    }
+    .step-dot {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      border: 2px solid rgba(255,255,255,0.3);
+      display: flex; align-items: center; justify-content: center;
+      font-family: sans-serif;
+      font-size: 12px; font-weight: 600;
+      color: rgba(255,255,255,0.5);
+      flex-shrink: 0;
+      transition: all 0.2s;
+    }
+    .step-dot.active { background: #fff; border-color: #fff; color: var(--primary); }
+    .step-dot.done   { background: rgba(255,255,255,0.2); border-color: rgba(255,255,255,0.6); color: #fff; }
+    .step-line {
+      flex: 1; height: 1.5px;
+      background: rgba(255,255,255,0.2);
+      transition: background 0.2s;
+    }
+    .step-line.done { background: rgba(255,255,255,0.5); }
+
+    .modal-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px;
+    }
+    .step-panel { display: none; flex-direction: column; gap: 16px; }
+    .step-panel.active { display: flex; }
+
+    .step-section-title {
+      display: flex; align-items: center; gap: 8px;
+      font-family: sans-serif;
+      font-size: 15px; font-weight: 600;
+      color: var(--primary);
+      letter-spacing: -0.224px;
+    }
+    .step-section-title svg { width: 16px; height: 16px; }
+
+    .field { display: flex; flex-direction: column; gap: 6px; }
+    .field label { font-size: 13px; font-weight: 600; color: var(--ink); letter-spacing: -0.224px; }
+    .field input, .field textarea, .field select {
+      height: 40px;
+      background: var(--canvas);
+      border: 1px solid var(--hairline);
+      border-radius: var(--radius-md);
+      padding: 0 14px;
+      font-size: 14px; font-family: inherit;
+      color: var(--ink); outline: none;
+      letter-spacing: -0.224px;
+      transition: border-color 0.15s;
+      width: 100%;
+    }
+    .field textarea { height: 80px; padding: 10px 14px; resize: vertical; }
+    .field input:focus, .field textarea:focus, .field select:focus { border-color: var(--primary); }
+    .field input::placeholder, .field textarea::placeholder { color: var(--ink-subtle); }
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    .tag-input-wrapper {
+      min-height: 40px;
+      background: var(--canvas);
+      border: 1px solid var(--hairline);
+      border-radius: var(--radius-md);
+      padding: 5px 10px;
+      display: flex; flex-wrap: wrap; gap: 5px; align-items: center;
+      cursor: text; transition: border-color 0.15s;
+      position: relative;
+    }
+    .tag-input-wrapper:focus-within { border-color: var(--primary); }
+    .tag-item {
+      display: flex; align-items: center; gap: 4px;
+      background: rgba(151,71,255,0.09);
+      border: 1px solid rgba(151,71,255,0.22);
+      border-radius: var(--radius-pill);
+      padding: 2px 6px 2px 9px;
+      font-size: 12px; font-weight: 500; color: var(--primary);
+      white-space: nowrap;
+    }
+    .tag-remove {
+      width: 14px; height: 14px; border-radius: 50%;
+      background: rgba(151,71,255,0.15); border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--primary); font-size: 10px; line-height: 1; padding: 0;
+    }
+    .tag-remove:hover { background: rgba(151,71,255,0.28); }
+    .tag-input-inner {
+      border: none; background: transparent; outline: none;
+      font-size: 14px; font-family: inherit; color: var(--ink);
+      letter-spacing: -0.224px; min-width: 120px; flex: 1;
+    }
+    .tag-input-inner::placeholder { color: var(--ink-subtle); }
+    .tag-suggestions {
+      position: absolute; top: calc(100% + 4px); left: 0; right: 0;
+      background: var(--canvas);
+      border: 1px solid var(--hairline);
+      border-radius: var(--radius-md);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.10);
+      z-index: 500; overflow: hidden;
+      display: none;
+    }
+    .tag-suggestions.open { display: block; }
+    .tag-suggestion-item {
+      padding: 9px 14px; font-size: 13px; color: var(--ink);
+      cursor: pointer; transition: background 0.1s;
+    }
+    .tag-suggestion-item:hover { background: var(--canvas-input); }
+
+    .option-list { display: flex; flex-direction: column; gap: 8px; }
+    .option-card {
+      padding: 14px 16px;
+      border: 1px solid var(--hairline);
+      border-radius: var(--radius-lg);
+      cursor: pointer;
+      background: var(--canvas);
+      transition: border-color 0.12s;
+    }
+    .option-card:hover { border-color: var(--primary-light); }
+    .option-card.selected { border: 2px solid var(--primary); background: rgba(151,71,255,0.04); padding: 13px 15px; }
+    .recur-type-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .option-card-title { font-size: 14px; font-weight: 600; color: var(--ink); letter-spacing: -0.224px; }
+    .option-card-sub { font-size: 12px; color: var(--ink-muted); letter-spacing: -0.12px; margin-top: 2px; }
+
+    .check-card {
+      display: flex; align-items: flex-start; gap: 12px;
+      padding: 14px 16px;
+      border: 1px solid var(--hairline);
+      border-radius: var(--radius-lg);
+      cursor: pointer;
+      background: var(--canvas);
+      transition: border-color 0.12s;
+    }
+    .check-card:hover { border-color: var(--primary-light); }
+    .check-card input[type="checkbox"] { display: none; }
+    .check-box {
+      width: 20px; height: 20px;
+      border: 2px solid var(--hairline);
+      border-radius: 6px;
+      flex-shrink: 0;
+      margin-top: 1px;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.12s, border-color 0.12s;
+    }
+    .check-card.checked .check-box { background: var(--primary); border-color: var(--primary); }
+    .check-box svg { width: 12px; height: 12px; color: #fff; display: none; }
+    .check-card.checked .check-box svg { display: block; }
+    .check-label-title { font-size: 14px; font-weight: 600; color: var(--ink); letter-spacing: -0.224px; }
+    .check-label-sub { font-size: 12px; color: var(--ink-muted); letter-spacing: -0.12px; margin-top: 2px; }
+
+    .recur-cal { border: 1px solid var(--hairline); border-radius: var(--radius-lg); padding: 16px; }
+    .recur-cal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    .recur-cal-month {
+      font-family: sans-serif;
+      font-size: 14px; font-weight: 600; color: var(--ink); letter-spacing: -0.224px;
+    }
+    .recur-cal-nav {
+      background: none; border: none; cursor: pointer;
+      color: var(--ink-muted); padding: 4px;
+      border-radius: var(--radius-sm); display: flex; transition: background 0.12s;
+    }
+    .recur-cal-nav:hover { background: var(--canvas-input); }
+    .recur-cal-nav svg { width: 14px; height: 14px; }
+    .recur-cal-grid { width: 100%; border-collapse: collapse; }
+    .recur-cal-grid th { font-size: 11px; font-weight: 400; color: var(--ink-subtle); text-align: center; padding-bottom: 6px; }
+    .recur-cal-grid td { text-align: center; padding: 2px 0; }
+    .recur-day {
+      width: 30px; height: 30px;
+      border-radius: var(--radius-pill);
+      display: inline-flex; align-items: center; justify-content: center;
+      font-size: 12px; color: var(--ink);
+      cursor: pointer; transition: background 0.12s;
+    }
+    .recur-day:hover:not(.other-month):not(.disabled):not(.event-date) { background: var(--canvas-input); }
+    .recur-day.event-date { background: var(--primary-dark); color: #fff; font-weight: 600; cursor: default; }
+    .recur-day.selected { background: var(--primary); color: #fff; font-weight: 600; }
+    .recur-day.other-month { color: var(--ink-subtle); cursor: default; }
+    .recur-day.disabled { color: var(--ink-subtle); opacity: 0.35; cursor: default; }
+    .selected-dates-preview { font-size: 12px; color: var(--ink-muted); letter-spacing: -0.12px; margin-top: 4px; line-height: 1.6; }
+
+    .summary-card {
+      background: var(--canvas);
+      border: 1px solid var(--hairline);
+      border-radius: var(--radius-lg);
+      padding: 18px 20px;
+      display: flex; flex-direction: column; gap: 14px;
+    }
+    .summary-row { display: flex; flex-direction: column; gap: 2px; }
+    .summary-label { font-size: 11px; font-weight: 400; color: var(--ink-subtle); letter-spacing: 0.2px; text-transform: uppercase; }
+    .summary-value { font-size: 14px; font-weight: 600; color: var(--ink); letter-spacing: -0.224px; }
+    .summary-recur { background: rgba(151,71,255,0.06); border-radius: var(--radius-md); padding: 12px 14px; margin-top: 2px; }
+    .summary-recur-title { font-size: 13px; font-weight: 600; color: var(--primary); letter-spacing: -0.224px; }
+    .summary-recur-dates { font-size: 12px; color: var(--ink-muted); letter-spacing: -0.12px; margin-top: 4px; line-height: 1.6; }
+
+    .modal-footer {
+      padding: 16px 24px;
+      border-top: 1px solid var(--hairline);
+      display: flex; align-items: center; justify-content: space-between;
+      flex-shrink: 0;
+    }
+    .btn-back {
+      display: inline-flex; align-items: center; gap: 6px;
+      height: 38px; padding: 0 18px;
+      background: var(--canvas);
+      border: 1px solid var(--hairline);
+      border-radius: var(--radius-pill);
+      font-family: inherit; font-size: 14px; font-weight: 400;
+      color: var(--ink-muted); cursor: pointer;
+      transition: border-color 0.12s, color 0.12s;
+    }
+    .btn-back:hover { border-color: var(--ink-subtle); color: var(--ink); }
+    .btn-back svg { width: 14px; height: 14px; }
+    .btn-next {
+      display: inline-flex; align-items: center; gap: 6px;
+      height: 38px; padding: 0 22px;
+      background: var(--primary);
+      border: none; border-radius: var(--radius-pill);
+      font-family: inherit; font-size: 14px; font-weight: 600;
+      color: #fff; cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s;
+    }
+    .btn-next:hover { opacity: 0.88; }
+    .btn-next:active { transform: scale(0.97); }
+    .btn-next:disabled { opacity: 0.5; cursor: default; }
+    .btn-next svg { width: 14px; height: 14px; }
+
+    .toast {
+      position: fixed;
+      bottom: 28px; right: 28px;
+      background: var(--ink);
+      color: #fff;
+      font-size: 13px; font-weight: 500;
+      letter-spacing: -0.224px;
+      padding: 12px 20px;
+      border-radius: var(--radius-md);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+      z-index: 500;
+      opacity: 0; transform: translateY(8px);
+      transition: opacity 0.22s, transform 0.22s;
+      pointer-events: none;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    .toast.success { background: var(--primary); }
+    .toast.error   { background: var(--accent-red); }
+  
+    
+    /* ══════════════════════════════════════════════════════
+       DESIGN UPDATE — Tokens minimalistas (todas as páginas)
+       ══════════════════════════════════════════════════════ */
+
+    /* ── Fundo da página ── */
+    :root { --canvas-page: #ECE9E7; }
+    body  { background: #ECE9E7; }
+
+
+    /* ── Stat cards ── */
+    .stat-card {
+      background: #FFFFFF !important;
+      border: 1px solid #EEEEEE !important;
+      border-radius: 20px !important;
+      padding: 20px 24px !important;
+      gap: 16px !important;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04) !important;
+      transition: box-shadow 0.2s, transform 0.2s !important;
+    }
+    .stat-card:hover {
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08) !important;
+      transform: translateY(-2px) !important;
+    }
+    .stat-icon {
+      width: 48px !important;
+      height: 48px !important;
+      border-radius: 12px !important;
+    }
+    .stat-icon svg { width: 22px !important; height: 22px !important; }
+    .stat-value {
+      font-size: 28px !important;
+      font-weight: 700 !important;
+      color: #1A1A1A !important;
+      letter-spacing: -0.5px !important;
+      line-height: 1 !important;
+    }
+    .stat-label {
+      font-size: 11px !important;
+      font-weight: 500 !important;
+      color: #9CA3AF !important;
+      text-transform: uppercase !important;
+      letter-spacing: 0.5px !important;
+      margin-top: 4px !important;
+    }
+
+    /* ── Títulos de seção ── */
+    .section-title, .page-title {
+      font-size: 18px !important;
+      font-weight: 700 !important;
+      color: #1A1A1A !important;
+      letter-spacing: -0.3px !important;
+    }
+    .card-title {
+      font-size: 15px !important;
+      font-weight: 700 !important;
+      color: #1A1A1A !important;
+    }
+
+    /* ── Cards de conteúdo (detalhe) ── */
+    .detail-card, .content-card, .section-card, .review-info-card,
+    .profile-card, .aside-card, .pontuacao-card, .setting-card,
+    .accordion-card, .summary-card, .card-link-block {
+      background: #FFFFFF !important;
+      border: 1px solid #EEEEEE !important;
+      border-radius: 20px !important;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04) !important;
+    }
+
+    /* ── Cards de lista / item (com hover) ── */
+    .list-card, .ministry-card, .dept-card, .func-card,
+    .template-card, .bloco-card, .dispon-card, .type-card,
+    .ev-card, .lds-card, .option-card, .check-card,
+    .pending-card-click {
+      background: #FFFFFF !important;
+      border: 1px solid #EEEEEE !important;
+      border-radius: 20px !important;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04) !important;
+      transition: box-shadow 0.2s, transform 0.2s !important;
+    }
+    .list-card:hover, .ministry-card:hover, .dept-card:hover, .func-card:hover,
+    .template-card:hover, .bloco-card:hover, .dispon-card:hover, .type-card:hover,
+    .ev-card:hover, .lds-card:hover, .option-card:hover, .check-card:hover,
+    .pending-card-click:hover {
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08) !important;
+      transform: translateY(-2px) !important;
+    }
+
+    /* ── Cabeçalho de card ── */
+    .card-header {
+      border-bottom: 1px solid #EEEEEE !important;
+    }
+
+    /* ── Escalação: cards de departamento ── */
+    .dept-card-header {
+      background: #ECE9E7 !important;
+      border-bottom: 1px solid #EEEEEE !important;
+      border-radius: 20px 20px 0 0 !important;
+    }
+
+    /* ── Badges de data ── */
+    .event-date-badge, .ev-card-day, .ev-card-badge {
+      background: #7C3AED !important;
+      border-radius: 12px !important;
+    }
+
+    /* ── Tabelas ── */
+    .table-wrap, .table-container {
+      background: #FFFFFF !important;
+      border: 1px solid #EEEEEE !important;
+      border-radius: 20px !important;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04) !important;
+      overflow: hidden !important;
+    }
+    thead th {
+      font-size: 11px !important;
+      font-weight: 600 !important;
+      color: #8A8A8A !important;
+      text-transform: uppercase !important;
+      letter-spacing: 0.5px !important;
+    }
+
+    /* ── Painel lateral (detalhe) ── */
+    .right-panel {
+      background: transparent !important;
+      border-left: none !important;
+      overflow: visible !important;
+      align-self: start !important;
+      position: sticky !important;
+      top: 88px !important;
+    }
+    .right-card {
+      background: #FFFFFF !important;
+      border: 1px solid #EEEEEE !important;
+      border-radius: 20px !important;
+    }
+
+    /* ══════════════════════════════════════════════════════
+       FIM DESIGN UPDATE
+       ══════════════════════════════════════════════════════ */
+    /* ══════════════════════════════════════════════════════
+       SIDEBAR REDESIGN — Floating pill dark
+       ══════════════════════════════════════════════════════ */
+    :root { --sidebar-w: 60px; }
+
+    /* ── Estrutura base ── */
+    .sidebar {
+      width: 60px !important;
+      background: #1c1c1c !important;
+      border-radius: 24px !important;
+      top: 16px !important;
+      bottom: 16px !important;
+      left: 12px !important;
+      min-height: unset !important;
+      height: auto !important;
+      padding: 16px 8px !important;
+      align-items: center !important;
+      overflow: visible !important;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.18) !important;
+      border-right: none !important;
+    }
+
+    /* ── Logo ── */
+    .sidebar-logo { display: none !important; }
+    .logo-text    { display: none !important; }
+
+    /* ── Nav ── */
+    .sidebar-nav {
+      padding: 0 !important;
+      align-items: center !important;
+      gap: 4px !important;
+      overflow: visible !important;
+      flex-direction: column !important;
+    }
+    .nav-item {
+      width: 44px !important; height: 44px !important;
+      min-height: 44px !important;
+      padding: 10px !important;
+      border-radius: 14px !important;
+      color: rgba(255,255,255,0.5) !important;
+      justify-content: center !important;
+      gap: 0 !important;
+      background: none !important;
+      letter-spacing: 0 !important;
+    }
+    .nav-item span { display: none !important; }
+    .nav-item svg {
+      width: 20px !important; height: 20px !important;
+      opacity: 1 !important; flex-shrink: 0 !important;
+    }
+    .nav-item:hover {
+      background: rgba(255,255,255,0.1) !important;
+      color: rgba(255,255,255,0.9) !important;
+    }
+    .nav-item.active {
+      background: #FFFFFF !important;
+      color: #1A1A1A !important;
+    }
+    .nav-item.active svg { opacity: 1 !important; }
+
+    /* ── Transição suave ── */
+    .sidebar { transition: transform 0.25s cubic-bezier(.4,0,.2,1), opacity 0.25s !important; }
+    .main    { transition: margin-left 0.25s cubic-bezier(.4,0,.2,1) !important; }
+
+    /* ── Collapsed: sidebar sai pela esquerda ── */
+    body.sidebar-collapsed .sidebar {
+      transform: translateX(calc(-100% - 20px)) !important;
+      opacity: 0 !important;
+      pointer-events: none !important;
+    }
+    body.sidebar-collapsed .main { margin-left: 16px !important; }
+    /* ── Quando collapsed: empurra conteúdo à direita do botão restaurar ── */
+    body.sidebar-collapsed .content {
+      padding-left: 60px !important;
+    }
+    body.sidebar-collapsed .topbar {
+      padding-left: 64px !important;
+    }
+
+
+    /* ── Botão flutuante para restaurar sidebar ── */
+    .sidebar-restore-btn {
+      display: none;
+      position: fixed;
+      top: 20px; left: 16px;
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      background: #1c1c1c;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      align-items: center; justify-content: center;
+      z-index: 200;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      transition: background 0.15s;
+    }
+    .sidebar-restore-btn:hover { background: #333; }
+    .sidebar-restore-btn svg { width: 18px; height: 18px; }
+    body.sidebar-collapsed .sidebar-restore-btn { display: flex; }
+
+    /* ── Main area offset ── */
+    .main { margin-left: 84px !important; }
+
+    /* ── Rodapé da sidebar ── */
+    .sidebar > div:last-child, .sidebar-footer {
+      border-top: none !important;
+      background: none !important;
+      padding: 0 !important;
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      justify-content: center !important;
+      gap: 8px !important;
+      margin-top: auto !important;
+      width: 100% !important;
+    }
+    .sidebar .icon-btn {
+      width: 40px !important; height: 40px !important;
+      border-radius: 50% !important;
+      color: rgba(255,255,255,0.7) !important;
+      background: rgba(255,255,255,0.08) !important;
+      border: none !important;
+      flex-shrink: 0 !important;
+    }
+    .sidebar .icon-btn:hover {
+      background: rgba(255,255,255,0.16) !important;
+      color: #FFFFFF !important;
+    }
+    /* ══════════════════════════════════════════════════════ */
+
+    /* ── Avatar no rodapé da sidebar ── */
+    .sidebar-footer {
+      padding-top: 8px !important;
+      border-top: 1px solid rgba(255,255,255,0.08) !important;
+    }
+    .sidebar .avatar-menu-wrap {
+      position: relative !important;
+      margin: 0 !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+    }
+    .sidebar .avatar {
+      width: 40px !important; height: 40px !important;
+      border-radius: 50% !important;
+      font-size: 13px !important;
+      margin-left: 0 !important;
+      cursor: pointer !important;
+      box-shadow: 0 0 0 2px rgba(255,255,255,0.15) !important;
+    }
+    .sidebar .avatar-dropdown {
+      position: fixed !important;
+      left: 84px !important;
+      bottom: 16px !important;
+      top: auto !important;
+      right: auto !important;
+      transform: translateX(-8px) !important;
+      transition: opacity 0.15s, transform 0.15s !important;
+    }
+    .sidebar .avatar-dropdown.open {
+      transform: translateX(0) !important;
+      opacity: 1 !important;
+      pointer-events: auto !important;
+    }
+  
+    /* ── Notif Dropdown ── */
+    .notif-badge{position:absolute;top:-4px;right:-4px;background:#E85D6A;color:#fff;border-radius:50%;width:18px;height:18px;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;pointer-events:none;}
+    .notif-dropdown{position:absolute;top:48px;right:0;width:360px;background:#fff;border-radius:16px;border:1px solid #E8E5E2;box-shadow:0 8px 32px rgba(0,0,0,0.12);z-index:300;display:none;overflow:hidden;}
+    .notif-dropdown.open{display:block;}
+    .notif-header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid #F5F3F0;}
+    .notif-list{max-height:360px;overflow-y:auto;}
+    .notif-item{padding:12px 16px;border-bottom:1px solid #F5F3F0;cursor:pointer;display:flex;gap:12px;align-items:flex-start;transition:background 0.1s;}
+    .notif-item:hover{background:#F5F3F0;}
+    .notif-item.unread{background:rgba(145,86,241,0.06);}
+    .notif-icon{width:36px;height:36px;border-radius:50%;background:#EDE5FF;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#9156F1;}
+    .notif-content{flex:1;min-width:0;}
+    .notif-title{font-weight:600;font-size:13px;color:#1C1C1C;margin-bottom:2px;}
+    .notif-body{font-size:12px;color:#5C5955;line-height:1.4;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .notif-time{font-size:11px;color:#9E9B96;}
+    .notif-footer{padding:10px 16px;border-top:1px solid #F5F3F0;text-align:center;}
+    </style>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/responsive.css">
+</head>
+<body>
+<script>if(localStorage.getItem('sidebar-collapsed')==='1')document.body.classList.add('sidebar-collapsed')</script>
+
+  <!-- ── Sidebar ── -->
+  <aside class="sidebar">
+
+    <nav class="sidebar-nav">
+      <a class="nav-item" href="/configuracoes" data-tooltip="Configurações" data-menu="configuracoes">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l-.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        <span>Configurações</span>
+      </a>      <a class="nav-item" data-tooltip="Dashboard" data-menu="dashboard" href="/dashboard">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        <span>Dashboard</span>
+      </a>      <a class="nav-item" href="/departamentos" data-tooltip="Departamentos" data-menu="departamentos">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><path d="M2 12h20"/></svg>
+        <span>Departamentos</span>
+      </a>      <a class="nav-item" href="/escalacoes" data-tooltip="Escalações" data-menu="escalacao">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></svg>
+        <span>Escalação</span>
+      </a>      <a class="nav-item active" href="/eventos" data-tooltip="Eventos" data-menu="eventos">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <span>Eventos</span>
+      </a>      <a class="nav-item" href="/indisponibilidade" data-tooltip="Indisponibilidade" data-menu="indisponibilidade">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M10 14l4 4"/><path d="M14 14l-4 4"/></svg>
+        <span>Indisponibilidade</span>
+      </a>      <a class="nav-item" href="/ministerios" data-tooltip="Ministérios" data-menu="ministerios">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4"/><path d="M10 4h4"/><path d="M3 11l9-7 9 7"/><rect x="5" y="11" width="14" height="10" rx="1"/><path d="M10 21v-5h4v5"/></svg>
+        <span>Ministérios</span>
+      </a>      <a class="nav-item" href="/musicas" data-tooltip="Músicas" data-menu="musicas">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+        <span>Músicas</span>
+      </a>      <a class="nav-item" href="/templates" data-tooltip="Templates" data-menu="templates">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+        <span>Templates</span>
+      </a>      <a class="nav-item" href="/voluntarios" data-tooltip="Voluntários" data-menu="voluntarios">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span>Voluntários</span>
+      </a>      <a class="nav-item" href="/notificacoes" data-tooltip="Notificações" data-menu="notificacoes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span>Notificações</span></a></nav>
+  </aside>
+
+  <!-- ── Main ── -->
+  <div class="main">
+    <header class="topbar">
+
+      <!-- Direita: search + ícones -->
+      <div class="topbar-actions">
+        <!-- Search pill + botão -->
+        <div class="search-wrap">
+          <input type="text" placeholder="Search..." id="topSearch" />
+          <button class="search-btn" title="Buscar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          </button>
+        </div>
+
+        <!-- Notificações -->
+        <div class="notif-wrapper" style="position:relative;">
+          <button class="icon-btn notif-btn" id="notifBtn" title="Notificações">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            <span class="notif-badge" id="notifBadge" style="display:none">0</span>
+          </button>
+          <div class="notif-dropdown" id="notifDropdown">
+            <div class="notif-header">
+              <span style="font-weight:600;font-size:14px">Notificações</span>
+              <button id="markAllRead" style="font-size:12px;color:#9156F1;background:none;border:none;cursor:pointer;font-family:inherit">Marcar todas como lidas</button>
+            </div>
+            <div class="notif-list" id="notifList"></div>
+            <div class="notif-footer"><a href="/notificacoes" style="font-size:13px;color:#9156F1;text-decoration:none">Ver todas</a></div>
+          </div>
+        </div>
+
+        <!-- Collapse + avatar movidos pelo sidebar-ui.js -->
+        <button class="icon-btn" id="collapseBtn" title="Recolher menu">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="transition:transform 0.22s"><polyline points="11 17 6 12 11 7"/><polyline points="18 17 13 12 18 7"/></svg>
+        </button>
+        <div class="avatar-menu-wrap">
+          <div class="avatar" id="avatarBtn">A</div>
+          <div class="avatar-dropdown" id="avatarDropdown">
+            <div class="dropdown-header">
+              <div class="dropdown-name" id="dropdownName">—</div>
+              <div class="dropdown-email" id="dropdownEmail">—</div>
+            </div>
+            <a class="dropdown-item" href="/editar-perfil">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              Editar Perfil
+            </a>
+            <a class="dropdown-item" href="/configuracoes" data-menu-dropdown="configuracoes">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+              Configurações
+            </a>
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item danger" href="#" onclick="fazerLogout(event)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+              Sair
+            </a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Content + Right Panel -->
+    <div class="content-wrap">
+
+      <main class="content">
+
+        <!-- Page Greeting -->
+        <div class="page-greeting">
+          <div>
+            <h1 class="pg-title">Eventos</h1>
+            <p class="pg-sub">Acompanhe todos os eventos da sua congregação</p>
+          </div>
+          <button id="btnNovoEvento" class="btn-primary" onclick="abrirModal()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Novo Evento
+          </button>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-row">
+          <div class="stat-card" id="statCardTotal" onclick="setStatFilter(null)">
+            <div class="stat-icon dark">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            </div>
+            <div class="stat-info">
+              <div class="stat-value" id="statTotal">—</div>
+              <div class="stat-label">Total este mês</div>
+            </div>
+          </div>
+          <div class="stat-card" id="statCardAgendados" onclick="setStatFilter('agendado')">
+            <div class="stat-icon blue">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </div>
+            <div class="stat-info">
+              <div class="stat-value" id="statAgendados">—</div>
+              <div class="stat-label">Agendados</div>
+            </div>
+          </div>
+          <div class="stat-card" id="statCardConcluidos" onclick="setStatFilter('concluido')">
+            <div class="stat-icon green">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <div class="stat-info">
+              <div class="stat-value" id="statConcluidos">—</div>
+              <div class="stat-label">Concluídos</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Lista de Eventos -->
+        <div class="content-card">
+          <div class="content-count">
+            <div class="content-count-title">
+              <span>Lista de eventos</span>
+              <span class="content-badge" id="contentCount">0</span>
+            </div>
+            <div class="list-controls">
+              <div class="list-search">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input id="searchInput" placeholder="Buscar eventos..." oninput="_page=0;renderAll()" />
+              </div>
+            </div>
+          </div>
+
+          <div id="eventosArea"></div>
+        </div>
+
+      </main>
+
+      <!-- Right Panel -->
+      <aside class="right-panel">
+
+        <!-- Card: Mini Calendário -->
+        <div class="right-card">
+          <div class="cal-header">
+            <button class="cal-nav" onclick="calNavMes(-1)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+            <span class="cal-month" id="calMonth"></span>
+            <button class="cal-nav" onclick="calNavMes(1)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
+          </div>
+          <table class="cal-grid">
+            <thead>
+              <tr><th>D</th><th>S</th><th>T</th><th>Q</th><th>Q</th><th>S</th><th>S</th></tr>
+            </thead>
+            <tbody id="calBody"></tbody>
+          </table>
+        </div>
+
+        <!-- Card: Próximos Eventos -->
+        <div class="right-card">
+          <div class="panel-section-title">
+            Próximos Eventos
+            <a class="panel-link" href="#" onclick="document.getElementById('searchInput').focus()">Ver todos</a>
+          </div>
+          <div class="upcoming-list" id="upcomingList">
+            <div class="empty-panel">Nenhum evento agendado</div>
+          </div>
+        </div>
+
+      </aside>
+    </div>
+  </div>
+
+  <!-- Drawer Novo Evento — Wizard 5 etapas -->
+  <div class="modal-backdrop" id="modalBackdrop" onclick="fecharModal(event)">
+    <div class="modal" id="drawerPanel" onclick="event.stopPropagation()">
+
+      <!-- Header -->
+      <div class="modal-header">
+        <div class="modal-header-top">
+          <div>
+            <div class="modal-title" id="modalTitle">Novo Evento</div>
+            <div class="modal-subtitle">Preencha os dados do evento</div>
+          </div>
+          <button class="modal-close" onclick="fecharModal()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <div class="step-indicator">
+          <div class="step-dot active" id="sdot1">1</div>
+          <div class="step-line" id="sline1"></div>
+          <div class="step-dot" id="sdot2">2</div>
+          <div class="step-line" id="sline2"></div>
+          <div class="step-dot" id="sdot3">3</div>
+          <div class="step-line" id="sline3"></div>
+          <div class="step-dot" id="sdot4">4</div>
+          <div class="step-line" id="sline4"></div>
+          <div class="step-dot" id="sdot5">5</div>
+        </div>
+      </div>
+
+      <!-- Body -->
+      <div class="modal-body">
+        <input type="hidden" id="editId" />
+
+        <!-- Etapa 1: Informacoes Basicas -->
+        <div class="step-panel active" id="step1">
+          <div class="step-section-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            Informacoes Basicas
+          </div>
+          <div class="field">
+            <label>Nome do Evento *</label>
+            <input type="text" id="fieldName" placeholder="Ex: Culto de Domingo" />
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label>Data de Inicio *</label>
+              <input type="date" id="fieldStartDate" />
+            </div>
+            <div class="field">
+              <label>Data de Termino</label>
+              <input type="date" id="fieldEndDate" />
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label>Horario de Inicio *</label>
+              <input type="text" id="fieldStartTime" placeholder="hh:mm" maxlength="5" inputmode="numeric" />
+            </div>
+            <div class="field">
+              <label>Horario de Termino</label>
+              <input type="text" id="fieldEndTime" placeholder="hh:mm" maxlength="5" inputmode="numeric" />
+            </div>
+          </div>
+          <div class="field">
+            <label>Local</label>
+            <div class="tag-input-wrapper" id="locationWrapper" onclick="document.getElementById('locationTagInput').focus()">
+              <input class="tag-input-inner" id="locationTagInput" placeholder="Digite e pressione Enter" autocomplete="off" />
+              <div class="tag-suggestions" id="locationSuggestions"></div>
+            </div>
+          </div>
+          <div class="field">
+            <label>Descricao</label>
+            <textarea id="fieldDesc" placeholder="Detalhes do evento..."></textarea>
+          </div>
+        </div>
+
+        <!-- Etapa 2: Template de Evento -->
+        <div class="step-panel" id="step2">
+          <div class="step-section-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            Template de Evento
+          </div>
+          <div class="option-list" id="templateList">
+            <div class="option-card selected" onclick="selectTemplate(this, '')">
+              <div class="option-card-title">Sem template</div>
+              <div class="option-card-sub">Criar evento sem template predefinido</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Etapa 3: Template de Cronograma -->
+        <div class="step-panel" id="step3">
+          <div class="step-section-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+            Template de Cronograma
+          </div>
+          <div class="option-list">
+            <div class="option-card selected" id="optSemCronograma" onclick="selectCronograma(this, false)">
+              <div class="option-card-title">Sem cronograma</div>
+              <div class="option-card-sub">Criar evento sem template de cronograma</div>
+            </div>
+            <div class="option-card" id="optComCronograma" onclick="selectCronograma(this, true)">
+              <div class="option-card-title">Com cronograma</div>
+              <div class="option-card-sub">Ativar cronograma de atividades para este evento</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Etapa 4: Recorrência -->
+        <div class="step-panel" id="step4">
+          <div class="step-section-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-.18-5.76"/></svg>
+            Recorrência
+          </div>
+          <div class="recur-type-grid">
+            <div class="option-card selected" id="recurNone" onclick="selectRecorrencia('none')">
+              <div class="option-card-title">Sem recorrência</div>
+              <div class="option-card-sub">Evento único, sem repetição</div>
+            </div>
+            <div class="option-card" id="recurSemanal" onclick="selectRecorrencia('semanal')">
+              <div class="option-card-title">Semanal</div>
+              <div class="option-card-sub">Toda semana no mesmo dia</div>
+            </div>
+            <div class="option-card" id="recurQuinzenal" onclick="selectRecorrencia('quinzenal')">
+              <div class="option-card-title">Quinzenal</div>
+              <div class="option-card-sub">A cada 2 semanas no mesmo dia</div>
+            </div>
+            <div class="option-card" id="recurMensalDia" onclick="selectRecorrencia('mensal_dia')">
+              <div class="option-card-title">Mensal por dia</div>
+              <div class="option-card-sub">Todo mês no mesmo dia (ex: todo dia 15)</div>
+            </div>
+            <div class="option-card" id="recurMensalSemana" onclick="selectRecorrencia('mensal_semana')">
+              <div class="option-card-title">Mensal por semana</div>
+              <div class="option-card-sub">Todo mês no mesmo dia da semana (ex: toda 1ª sexta)</div>
+            </div>
+            <div class="option-card" id="recurPersonalizado" onclick="selectRecorrencia('personalizado')">
+              <div class="option-card-title">Personalizado</div>
+              <div class="option-card-sub">Selecione as datas manualmente</div>
+            </div>
+          </div>
+
+          <!-- Quantidade — visível para semanal / quinzenal / mensal -->
+          <div id="recurEndDateSection" style="display:none; margin-top:4px;">
+            <div class="field-group">
+              <label class="field-label" for="fieldRecurCount">Quantas vezes quer repetir?</label>
+              <input type="number" class="field-input" id="fieldRecurCount" min="1" max="104" placeholder="Ex: 10" style="max-width:180px;" />
+            </div>
+          </div>
+
+          <!-- Calendário manual — só para "Personalizado" -->
+          <div id="recurrencePanel" style="display:none; flex-direction:column; gap:12px; margin-top:4px;">
+            <div style="font-size:13px; font-weight:600; color:var(--ink); letter-spacing:-0.224px;">Selecione as datas em que o evento vai se repetir:</div>
+            <div class="recur-cal">
+              <div class="recur-cal-header">
+                <button class="recur-cal-nav" onclick="recurCalNav(-1)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+                </button>
+                <span class="recur-cal-month" id="recurCalMonth"></span>
+                <button class="recur-cal-nav" onclick="recurCalNav(1)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                </button>
+              </div>
+              <table class="recur-cal-grid">
+                <thead><tr><th>D</th><th>S</th><th>T</th><th>Q</th><th>Q</th><th>S</th><th>S</th></tr></thead>
+                <tbody id="recurCalBody"></tbody>
+              </table>
+            </div>
+            <div class="selected-dates-preview" id="selectedDatesPreview">Nenhuma data selecionada</div>
+          </div>
+        </div>
+
+        <!-- Etapa 5: Resumo -->
+        <div class="step-panel" id="step5">
+          <div class="step-section-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            Resumo
+          </div>
+          <div class="summary-card" id="summaryCard"></div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="modal-footer">
+        <button class="btn-back" id="btnBack" onclick="voltarStep()" style="visibility:hidden">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          Voltar
+        </button>
+        <button class="btn-next" id="btnNext" onclick="proxStep()">
+          Proximo
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+<script src="/js/auth-fetch.js"></script>
+  <script src="/js/sidebar-permissions.js"></script>
+    <script src="/js/sidebar-ui.js"></script>
+<script>
+function fazerLogout(e) {
+  e?.preventDefault()
+  clearSession()
+}
+
+// ── Estado ────────────────────────────────────────────
+let _eventos = []
+let _isLiderDept = false
+let _view = 'lista'
+let _calSubView = 'mes'   // 'mes' | 'semana'
+let _calYear, _calMonth
+let _calWeekMonday = null
+let _statFilter = null    // null | 'agendado' | 'concluido'
+let _page = 0
+const PER_PAGE = 8
+
+// ── Init ──────────────────────────────────────────────
+async function init() {
+  if (!await checkAuth()) return
+  const now = new Date()
+  _calYear  = now.getFullYear()
+  _calMonth = now.getMonth()
+  const dow0 = now.getDay()
+  _calWeekMonday = new Date(now)
+  _calWeekMonday.setDate(now.getDate() - (dow0 === 0 ? 6 : dow0 - 1))
+  _calWeekMonday.setHours(0,0,0,0)
+
+  // Sidebar collapse
+  ;(document.getElementById('collapseBtn')||{addEventListener:()=>{}}).addEventListener('click', () => {
+    const c = document.body.classList.toggle('sidebar-collapsed')
+    localStorage.setItem('sidebar-collapsed', c ? '1' : '0')
+  })
+
+  // Avatar dropdown
+  document.getElementById('avatarBtn').addEventListener('click', e => {
+    e.stopPropagation()
+    document.getElementById('avatarDropdown').classList.toggle('open')
+  })
+  document.addEventListener('click', () => document.getElementById('avatarDropdown').classList.remove('open'))
+
+  // Top search → repassa para o campo interno
+  document.getElementById('topSearch').addEventListener('input', e => {
+    document.getElementById('searchInput').value = e.target.value
+    renderAll()
+  })
+
+  const meData = await authFetch('/api/auth/me').then(r => r.json()).catch(() => ({}))
+  const { usuario, igreja } = meData
+  if (!usuario) { window.location.href = '/'; return }
+
+  const _cnel = document.getElementById('churchName'); if (_cnel) _cnel.textContent = igreja?.nome  || 'Igreja';
+  document.getElementById('avatarBtn').textContent     = (usuario.nickname || usuario.nome || 'U').charAt(0).toUpperCase()
+  ;(function(){ var _u=JSON.parse(localStorage.getItem('usuario')||'{}'); if(_u && _u.avatar){ var _el=document.getElementById('avatarBtn'); if(_el) _el.innerHTML='<img src="'+_u.avatar+'" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%">'; } })();
+  document.getElementById('dropdownName').textContent  = usuario.nickname || usuario.nome || '—'
+  document.getElementById('dropdownEmail').textContent = usuario.email || '—'
+
+  // Restrições por perfil
+  if (usuario.perfil_slug === 'lider_departamento') {
+    _isLiderDept = true
+    document.getElementById('btnNovoEvento')?.remove()
+  }
+
+  await carregarEventos()
+  renderCalendario()
+
+  // Máscara hh:mm nos campos de horário
+  function applyTimeMask(input) {
+    input.addEventListener('keydown', function(e) {
+      // Permite: dígitos, Backspace, Delete, Tab, setas
+      if (!/^\d$/.test(e.key) && !['Backspace','Delete','Tab','ArrowLeft','ArrowRight'].includes(e.key)) {
+        e.preventDefault()
+      }
+      // Backspace antes do ":" remove o separador junto
+      if (e.key === 'Backspace' && this.value.endsWith(':')) {
+        e.preventDefault()
+        this.value = this.value.slice(0, -1)
+      }
+    })
+
+    input.addEventListener('input', function() {
+      let digits = this.value.replace(/\D/g, '').slice(0, 4)
+      let result = ''
+
+      if (digits.length === 0) { this.value = ''; return }
+
+      // Horas
+      let h1 = digits[0]
+      // Se primeiro dígito > 2 → só pode ser 0x (ex: "3" vira "03:")
+      if (parseInt(h1) > 2) {
+        digits = '0' + digits
+      }
+      const hPart = digits.slice(0, 2)
+      // Se as 2 horas > 23 → corrige para 23
+      if (digits.length >= 2 && parseInt(hPart) > 23) {
+        digits = '23' + digits.slice(2)
+      }
+
+      if (digits.length <= 2) {
+        result = digits
+      } else {
+        let mPart = digits.slice(2, 4)
+        // Primeiro dígito dos minutos > 5 → força 0x
+        if (mPart.length >= 1 && parseInt(mPart[0]) > 5) {
+          mPart = '0' + mPart[0]
+        }
+        // Se minutos > 59 → corrige para 59
+        if (mPart.length === 2 && parseInt(mPart) > 59) {
+          mPart = '59'
+        }
+        result = digits.slice(0, 2) + ':' + mPart
+      }
+
+      // Auto-insere ":" ao completar 2 dígitos de hora
+      if (digits.length === 2 && !this.value.includes(':')) {
+        result = digits + ':'
+      }
+
+      this.value = result
+    })
+
+    input.addEventListener('blur', function() {
+      const parts = this.value.split(':')
+      if (parts.length === 2 && parts[1].length === 2) {
+        const h = Math.min(23, parseInt(parts[0]) || 0).toString().padStart(2, '0')
+        const m = Math.min(59, parseInt(parts[1]) || 0).toString().padStart(2, '0')
+        this.value = `${h}:${m}`
+      } else {
+        this.value = ''
+      }
+    })
+  }
+  applyTimeMask(document.getElementById('fieldStartTime'))
+  applyTimeMask(document.getElementById('fieldEndTime'))
+
+  // Tag input — Enter/vírgula adicionam, Backspace remove última
+  const _locInput = document.getElementById('locationTagInput')
+  const _locSugg  = document.getElementById('locationSuggestions')
+
+  _locInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault()
+      addLocationTag(this.value)
+      this.value = ''
+      _locSugg.classList.remove('open')
+    } else if (e.key === 'Backspace' && this.value === '' && _locationTags.length) {
+      removeLocationTag(_locationTags.length - 1)
+    } else if (e.key === 'Escape') {
+      _locSugg.classList.remove('open')
+    }
+  })
+
+  _locInput.addEventListener('input', function() {
+    renderLocationSuggestions(this.value)
+  })
+
+  _locInput.addEventListener('focus', function() {
+    renderLocationSuggestions(this.value)
+  })
+
+  _locInput.addEventListener('blur', function() {
+    setTimeout(() => {
+      _locSugg.classList.remove('open')
+      if (this.value.trim()) { addLocationTag(this.value); this.value = '' }
+    }, 150)
+  })
+}
+
+// ── Carregar ──────────────────────────────────────────
+async function carregarEventos() {
+  const cached = CacheManager.get('eventos')
+  if (cached) {
+    _eventos = cached
+    renderStats()
+    renderAll()
+    renderUpcoming()
+    renderCalendario()
+    return
+  }
+  try {
+    const res = await authFetch('/api/evento')
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}))
+      console.error('[carregarEventos] HTTP', res.status, body)
+      throw new Error()
+    }
+    const { eventos } = await res.json()
+    _eventos = eventos || []
+    console.log('[carregarEventos] total=%d', _eventos.length)
+    CacheManager.set('eventos', _eventos)
+  } catch (err) {
+    console.error('[carregarEventos] erro:', err)
+    _eventos = []
+  }
+  renderStats()
+  renderAll()
+  renderUpcoming()
+  renderCalendario()
+}
+
+// ── Stats ─────────────────────────────────────────────
+function renderStats() {
+  const now = new Date()
+  const yr  = now.getFullYear(), mo = now.getMonth()
+  const thisMonth = _eventos.filter(e => {
+    if (!e.start_date) return false
+    const d = new Date(e.start_date + 'T12:00:00')
+    return d.getFullYear() === yr && d.getMonth() === mo
+  })
+  const total      = thisMonth.length
+  const agendados  = thisMonth.filter(e => e.status === 'agendado' && !isEventPast(e)).length
+  const concluidos = thisMonth.filter(e => e.status === 'concluido' || (e.status === 'agendado' && isEventPast(e))).length
+
+  document.getElementById('statTotal').textContent      = total
+  document.getElementById('statAgendados').textContent  = agendados
+  document.getElementById('statConcluidos').textContent = concluidos
+
+  document.getElementById('statCardTotal').classList.toggle('active',      _statFilter === null)
+  document.getElementById('statCardAgendados').classList.toggle('active',  _statFilter === 'agendado')
+  document.getElementById('statCardConcluidos').classList.toggle('active', _statFilter === 'concluido')
+}
+
+function setStatFilter(f) {
+  _statFilter = (_statFilter === f && f !== null) ? null : f
+  _page = 0
+  renderStats()
+  renderAll()
+}
+
+// ── Filtro ────────────────────────────────────────────
+function filteredEventos() {
+  const q = (document.getElementById('searchInput')?.value || '').toLowerCase().trim()
+  let list = q
+    ? _eventos.filter(e =>
+        (e.name || '').toLowerCase().includes(q) ||
+        (Array.isArray(e.location) ? e.location.join(' ') : (e.location || '')).toLowerCase().includes(q) ||
+        (e.description || '').toLowerCase().includes(q)
+      )
+    : [..._eventos]
+
+  if (_statFilter === 'agendado') {
+    list = list.filter(e => e.status === 'agendado' && !isEventPast(e))
+  } else if (_statFilter === 'concluido') {
+    list = list.filter(e => e.status === 'concluido' || (e.status === 'agendado' && isEventPast(e)))
+  }
+
+  return list.sort((a, b) => (a.start_date || '').localeCompare(b.start_date || ''))
+}
+
+// ── Render ────────────────────────────────────────────
+function renderAll() {
+  const area = document.getElementById('eventosArea')
+  const list = filteredEventos()
+  document.getElementById('contentCount').textContent = list.length
+
+  if (!list.length) {
+    area.innerHTML = `
+      <div class="empty-state">
+        <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <div class="empty-title">Nenhum evento encontrado</div>
+        <div class="empty-sub">${_isLiderDept ? 'Nenhum evento agendado no momento.' : 'Crie seu primeiro evento para começar'}</div>
+        ${_isLiderDept ? '' : `<button class="empty-action" onclick="abrirModal()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Novo Evento
+        </button>`}
+      </div>`
+    return
+  }
+
+  if (_view === 'lista') renderLista(area, list)
+  else if (_calSubView === 'semana') renderCalWeek(area)
+  else renderCalFull(area)
+}
+
+function setView(v) {
+  _view = v
+  _page = 0
+  document.getElementById('btnLista').classList.toggle('active', v === 'lista')
+  document.getElementById('btnCalendario').classList.toggle('active', v === 'calendario')
+  renderAll()
+}
+
+const MESES_BR = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez']
+const STATUS_LABEL = { agendado: 'Agendado', concluido: 'Concluído', cancelado: 'Cancelado' }
+const fmtTime = t => t ? t.slice(0, 5) : ''
+
+function parseDateBadge(dateStr) {
+  if (!dateStr) return { day: '—', mon: '—' }
+  const d = new Date(dateStr + 'T12:00:00')
+  return { day: d.getDate(), mon: MESES_BR[d.getMonth()] }
+}
+
+function isEventPast(e) {
+  if (!e.start_date) return false
+  const time = e.start_time || '23:59:59'
+  return new Date(`${e.start_date}T${time}`) < new Date()
+}
+
+function renderLista(area, list) {
+  const total      = list.length
+  const totalPages = Math.ceil(total / PER_PAGE)
+  if (_page >= totalPages) _page = Math.max(0, totalPages - 1)
+  const paginated  = list.slice(_page * PER_PAGE, (_page + 1) * PER_PAGE)
+
+  const cardsHtml = paginated.map(e => {
+    const { day, mon } = parseDateBadge(e.start_date)
+    const rawStatus = e.status || 'agendado'
+    const status    = rawStatus === 'agendado' && isEventPast(e) ? 'concluido' : rawStatus
+    const horario = e.start_time ? (e.end_time ? `${fmtTime(e.start_time)} – ${fmtTime(e.end_time)}` : fmtTime(e.start_time)) : ''
+    const local   = e.location?.length ? (Array.isArray(e.location) ? e.location.join(', ') : e.location) : ''
+    return `
+      <div class="ev-card ${status}" onclick="editarEvento('${e.id}')">
+        <div class="ev-card-accent"></div>
+        <div class="ev-card-inner">
+          <div class="ev-card-top">
+            <div class="ev-card-badge">
+              <span class="ev-card-day">${day}</span>
+              <span class="ev-card-mon">${mon}</span>
+            </div>
+            <div class="ev-card-title">
+              <div class="ev-card-name">${e.name || '—'}</div>
+              <span class="badge-status ${status}">${STATUS_LABEL[status] || status}</span>
+            </div>
+          </div>
+          ${horario || local ? `<div class="ev-card-meta">
+            ${horario ? `<div class="ev-card-meta-row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${horario}</div>` : ''}
+            ${local   ? `<div class="ev-card-meta-row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>${local}</div>` : ''}
+          </div>` : ''}
+        </div>
+      </div>`
+  }).join('')
+
+  const paginacaoHtml = totalPages > 1 ? `
+    <div class="paginacao">
+      <button class="pag-btn" onclick="irPagina(${_page - 1})" ${_page === 0 ? 'disabled' : ''}>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <span class="pag-info">${_page + 1} <span class="pag-sep">/</span> ${totalPages}</span>
+      <button class="pag-btn" onclick="irPagina(${_page + 1})" ${_page >= totalPages - 1 ? 'disabled' : ''}>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+    </div>` : ''
+
+  area.innerHTML = `<div class="ev-cards">${cardsHtml}</div>${paginacaoHtml}`
+}
+
+function irPagina(p) {
+  _page = p
+  renderAll()
+  document.getElementById('eventosArea')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+}
+
+function renderCalFull(area) {
+  const DIAS = ['DOM.','SEG.','TER.','QUA.','QUI.','SEX.','SÁB.']
+  const MESES_FULL = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro']
+  const today = new Date()
+  const todayY = today.getFullYear(), todayM = today.getMonth(), todayD = today.getDate()
+
+  // Indexa eventos por data
+  const byDate = {}
+  _eventos.forEach(e => {
+    if (!e.start_date) return
+    if (!byDate[e.start_date]) byDate[e.start_date] = []
+    byDate[e.start_date].push(e)
+  })
+
+  const firstDay    = new Date(_calYear, _calMonth, 1).getDay()
+  const daysInMonth = new Date(_calYear, _calMonth + 1, 0).getDate()
+  const daysInPrev  = new Date(_calYear, _calMonth, 0).getDate()
+  const total       = Math.ceil((firstDay + daysInMonth) / 7) * 7
+
+  let cells = '', day = 1, nextDay = 1
+  for (let i = 0; i < total; i++) {
+    let num, dateStr = '', extraCls = ''
+    if (i < firstDay) {
+      num = daysInPrev - firstDay + i + 1
+      extraCls = 'other-month'
+    } else if (day > daysInMonth) {
+      num = nextDay++
+      extraCls = 'other-month'
+    } else {
+      num = day
+      dateStr = `${_calYear}-${String(_calMonth+1).padStart(2,'0')}-${String(num).padStart(2,'0')}`
+      if (_calYear === todayY && _calMonth === todayM && num === todayD) extraCls = 'today'
+      day++
+    }
+    const evs = dateStr ? (byDate[dateStr] || []) : []
+    const evHtml = evs.slice(0,3).map(e =>
+      `<div class="full-cal-event" onclick="event.stopPropagation();editarEvento('${e.id}')" title="${e.name}">${fmtTime(e.start_time)} ${e.name || ''}</div>`
+    ).join('') + (evs.length > 3 ? `<div style="font-size:10px;color:var(--ink-muted);padding:0 2px">+${evs.length-3} mais</div>` : '')
+    cells += `<div class="full-cal-cell ${extraCls}"><div class="full-cal-cell-num">${num}</div>${evHtml}</div>`
+  }
+
+  area.innerHTML = `
+    <div class="full-cal">
+      <div class="full-cal-nav">
+        <button class="full-cal-nav-btn" onclick="calNavMes(-1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>
+        <button class="full-cal-nav-btn" onclick="calNavMes(1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button>
+        <button class="full-cal-today-btn" onclick="calGoToday()">Hoje</button>
+        <div class="full-cal-title">${MESES_FULL[_calMonth].toLowerCase()} de ${_calYear}</div>
+        <div class="full-cal-sub-toggle">
+          <button class="full-cal-sub-btn active" onclick="setCalSubView('mes')">Mês</button>
+          <button class="full-cal-sub-btn" onclick="setCalSubView('semana')">Semana</button>
+        </div>
+      </div>
+      <div class="full-cal-grid">
+        <div class="full-cal-head">${DIAS.map(d => `<div class="full-cal-head-cell">${d}</div>`).join('')}</div>
+        <div class="full-cal-body">${cells}</div>
+      </div>
+    </div>`
+}
+
+// ── Upcoming Panel ────────────────────────────────────
+function renderUpcoming() {
+  const now     = new Date()
+  const today   = now.toISOString().split('T')[0]
+  const dow     = now.getDay()                                    // 0=Dom … 6=Sáb
+  const endOfWeek = new Date(now)
+  endOfWeek.setDate(now.getDate() + (dow === 0 ? 0 : 7 - dow))  // Domingo desta semana (seg–dom)
+  const weekEnd = endOfWeek.toISOString().split('T')[0]
+
+  const upcoming = _eventos
+    .filter(e => e.status === 'agendado' && e.start_date >= today && e.start_date <= weekEnd)
+    .sort((a, b) => a.start_date.localeCompare(b.start_date))
+
+  const el = document.getElementById('upcomingList')
+  if (!upcoming.length) {
+    el.innerHTML = '<div class="empty-panel">Nenhum evento esta semana</div>'
+    return
+  }
+
+  el.innerHTML = upcoming.map(e => {
+    const { day, mon } = parseDateBadge(e.start_date)
+    const horario = fmtTime(e.start_time)
+    return `
+      <div class="upcoming-item" onclick="editarEvento('${e.id}')">
+        <div class="upcoming-dot">
+          <span class="upcoming-day">${day}</span>
+          <span class="upcoming-mon">${mon}</span>
+        </div>
+        <div class="upcoming-info">
+          <div class="upcoming-name">${e.name || '—'}</div>
+          <div class="upcoming-time">${horario || 'Horário não definido'}</div>
+        </div>
+      </div>`
+  }).join('')
+}
+
+// ── Calendário ────────────────────────────────────────
+function renderCalendario() {
+  const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro']
+  document.getElementById('calMonth').textContent = `${meses[_calMonth]} ${_calYear}`
+
+  const eventCounts = new Map()
+  _eventos
+    .filter(e => {
+      if (!e.start_date) return false
+      const d = new Date(e.start_date + 'T12:00:00')
+      return d.getFullYear() === _calYear && d.getMonth() === _calMonth
+    })
+    .forEach(e => {
+      const d = new Date(e.start_date + 'T12:00:00').getDate()
+      eventCounts.set(d, (eventCounts.get(d) || 0) + 1)
+    })
+
+  const today = new Date()
+  const todayY = today.getFullYear(), todayM = today.getMonth(), todayD = today.getDate()
+
+  const firstDay = new Date(_calYear, _calMonth, 1).getDay()
+  const daysInMonth = new Date(_calYear, _calMonth + 1, 0).getDate()
+  const daysInPrev  = new Date(_calYear, _calMonth, 0).getDate()
+
+  let rows = '', day = 1, nextDay = 1, cell = 0
+  const total = Math.ceil((firstDay + daysInMonth) / 7) * 7
+
+  rows = '<tr>'
+  for (let i = 0; i < total; i++) {
+    if (i % 7 === 0 && i > 0) rows += '</tr><tr>'
+    let cls = 'cal-day', num, otherMonth = false
+    if (i < firstDay) {
+      num = daysInPrev - firstDay + i + 1; cls += ' other-month'; otherMonth = true
+    } else if (day > daysInMonth) {
+      num = nextDay++; cls += ' other-month'; otherMonth = true
+    } else {
+      num = day
+      const isToday = _calYear === todayY && _calMonth === todayM && num === todayD
+      if (isToday) cls += ' today'
+      const count = eventCounts.get(num) || 0
+      if (count > 0) cls += ' has-event'
+      day++
+    }
+    const dotCount = otherMonth ? 0 : (eventCounts.get(num) || 0)
+    const dotCls   = cls.includes('today') ? 'cal-dot white' : 'cal-dot'
+    const dotsHtml = dotCount > 0
+      ? `<div class="cal-dots">${Array(Math.min(dotCount, 3)).fill(`<span class="${dotCls}"></span>`).join('')}</div>`
+      : ''
+    const clickAttr = (!otherMonth && dotCount > 0)
+      ? ` onclick="calDiaClick(event,${_calYear},${_calMonth+1},${num})" style="cursor:pointer"`
+      : ''
+    rows += `<td${clickAttr}><span class="${cls}">${num}</span>${dotsHtml}</td>`
+  }
+  rows += '</tr>'
+  document.getElementById('calBody').innerHTML = rows
+}
+
+// ── Popup de eventos do dia ───────────────────────────────
+function calDiaClick(e, year, month, day) {
+  e.stopPropagation()
+  const popup = document.getElementById('calDayPopup')
+
+  // Eventos desse dia
+  const dateStr = `${year}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}`
+  const evs = _eventos.filter(ev => ev.start_date === dateStr)
+  if (!evs.length) return
+
+  // 1 evento → vai direto
+  if (evs.length === 1) {
+    editarEvento(evs[0].id)
+    return
+  }
+
+  // Vários eventos → mostra popup
+  const MESES = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez']
+  const titulo = `${day} de ${MESES[month-1]}`
+  const esc = s => (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+
+  popup.innerHTML = `
+    <div class="cdp-header">
+      <span class="cdp-title">${titulo}</span>
+      <button class="cdp-close" onclick="fecharCalPopup()">✕</button>
+    </div>
+    ${evs.map(ev => {
+      const hora = ev.start_time ? ev.start_time.slice(0,5) : ''
+      return `<div class="cdp-item" onclick="editarEvento('${ev.id}')">
+        <span class="cdp-dot"></span>
+        <div class="cdp-info">
+          <div class="cdp-name">${esc(ev.name)}</div>
+          ${hora ? `<div class="cdp-time">${hora}</div>` : ''}
+        </div>
+        <svg viewBox="0 0 24 24" fill="none" stroke="#C4B5FD" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;flex-shrink:0">
+          <polyline points="9 18 15 12 9 6"/>
+        </svg>
+      </div>`
+    }).join('')}
+  `
+
+  // Posiciona o popup perto do clique
+  popup.classList.add('open')
+  const vw = window.innerWidth, vh = window.innerHeight
+  const pw = popup.offsetWidth  || 240
+  const ph = popup.offsetHeight || 160
+  let x = e.clientX + 10
+  let y = e.clientY + 10
+  if (x + pw > vw - 8) x = e.clientX - pw - 10
+  if (y + ph > vh - 8) y = e.clientY - ph - 10
+  popup.style.left = x + 'px'
+  popup.style.top  = y + 'px'
+}
+
+function fecharCalPopup() {
+  document.getElementById('calDayPopup').classList.remove('open')
+}
+
+// Fecha popup ao clicar fora
+document.addEventListener('click', function(e) {
+  const popup = document.getElementById('calDayPopup')
+  if (popup && popup.classList.contains('open') && !popup.contains(e.target)) {
+    fecharCalPopup()
+  }
+})
+
+function setCalSubView(v) {
+  _calSubView = v
+  renderAll()
+}
+
+function calNavMes(dir) {
+  _calMonth += dir
+  if (_calMonth > 11) { _calMonth = 0; _calYear++ }
+  if (_calMonth < 0)  { _calMonth = 11; _calYear-- }
+  if (_view === 'calendario') renderAll()
+  else renderCalendario()
+}
+
+function calNavSemana(dir) {
+  _calWeekMonday = new Date(_calWeekMonday)
+  _calWeekMonday.setDate(_calWeekMonday.getDate() + dir * 7)
+  renderAll()
+}
+
+function calGoToday() {
+  const now = new Date()
+  _calYear  = now.getFullYear()
+  _calMonth = now.getMonth()
+  const dow0 = now.getDay()
+  _calWeekMonday = new Date(now)
+  _calWeekMonday.setDate(now.getDate() - (dow0 === 0 ? 6 : dow0 - 1))
+  _calWeekMonday.setHours(0,0,0,0)
+  if (_view === 'calendario') renderAll()
+  else renderCalendario()
+}
+
+function renderCalWeek(area) {
+  const DIAS = ['SEG.','TER.','QUA.','QUI.','SEX.','SÁB.','DOM.']
+  const MESES_FULL = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro']
+  const todayStr = new Date().toISOString().split('T')[0]
+
+  const days = []
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(_calWeekMonday)
+    d.setDate(d.getDate() + i)
+    days.push(d)
+  }
+
+  const startDay = days[0], endDay = days[6]
+  const titleText = startDay.getMonth() === endDay.getMonth()
+    ? `${startDay.getDate()}–${endDay.getDate()} de ${MESES_FULL[startDay.getMonth()].toLowerCase()} de ${startDay.getFullYear()}`
+    : `${startDay.getDate()} ${MESES_FULL[startDay.getMonth()].toLowerCase()} – ${endDay.getDate()} ${MESES_FULL[endDay.getMonth()].toLowerCase()} ${endDay.getFullYear()}`
+
+  const byDate = {}
+  _eventos.forEach(e => {
+    if (!e.start_date) return
+    if (!byDate[e.start_date]) byDate[e.start_date] = []
+    byDate[e.start_date].push(e)
+  })
+
+  const cols = days.map((d, i) => {
+    const dateStr = d.toISOString().split('T')[0]
+    const isToday = dateStr === todayStr
+    const evs = byDate[dateStr] || []
+    const evHtml = evs.map(e =>
+      `<div class="full-cal-event" onclick="editarEvento('${e.id}')" title="${e.name}">${fmtTime(e.start_time)} ${e.name || ''}</div>`
+    ).join('')
+    return `
+      <div class="week-cal-col${isToday ? ' today' : ''}">
+        <div class="week-cal-head-cell">
+          <span class="week-cal-dow">${DIAS[i]}</span>
+          <span class="week-cal-num${isToday ? ' today' : ''}">${d.getDate()}</span>
+        </div>
+        <div class="week-cal-body-cell">${evHtml}</div>
+      </div>`
+  }).join('')
+
+  area.innerHTML = `
+    <div class="full-cal">
+      <div class="full-cal-nav">
+        <button class="full-cal-nav-btn" onclick="calNavSemana(-1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>
+        <button class="full-cal-nav-btn" onclick="calNavSemana(1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button>
+        <button class="full-cal-today-btn" onclick="calGoToday()">Hoje</button>
+        <div class="full-cal-title">${titleText}</div>
+        <div class="full-cal-sub-toggle">
+          <button class="full-cal-sub-btn" onclick="setCalSubView('mes')">Mês</button>
+          <button class="full-cal-sub-btn active" onclick="setCalSubView('semana')">Semana</button>
+        </div>
+      </div>
+      <div class="week-cal-grid">${cols}</div>
+    </div>`
+}
+
+async function concluirEvento(id) {
+  if (!confirm('Marcar este evento como concluído?')) return
+  try {
+    const r = await authFetch(`/api/evento/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: 'concluido' })
+    })
+    if (!r.ok) throw new Error((await r.json()).error || r.statusText)
+    CacheManager.invalidate('eventos')
+    await carregarEventos()
+  } catch (e) {
+    alert('Erro ao concluir evento: ' + e.message)
+  }
+}
+
+// ── Modal Wizard ──────────────────────────────────────
+let _editId = null
+let _wizStep = 1
+let _selectedTemplateId = ''
+let _hasCronograma = false
+let _recurrenceType = 'none'   // none | semanal | quinzenal | mensal_dia | mensal_semana | personalizado
+let _selectedDates = []
+let _recurCalYear, _recurCalMonth
+let _templates = []
+let _locationTags = []
+
+function renderLocationTags() {
+  const wrapper = document.getElementById('locationWrapper')
+  const input   = document.getElementById('locationTagInput')
+  wrapper.querySelectorAll('.tag-item').forEach(t => t.remove())
+  _locationTags.forEach((tag, i) => {
+    const el = document.createElement('div')
+    el.className = 'tag-item'
+    el.innerHTML = `${tag}<button class="tag-remove" onclick="removeLocationTag(${i})" type="button">✕</button>`
+    wrapper.insertBefore(el, input)
+  })
+  input.placeholder = _locationTags.length ? '' : 'Digite e pressione Enter'
+}
+
+function addLocationTag(val) {
+  const tag = val.trim()
+  if (!tag) return
+  const normalized = tag.toLowerCase()
+  if (_locationTags.some(t => t.toLowerCase() === normalized)) return  // sem duplicatas
+  _locationTags.push(tag)
+  renderLocationTags()
+}
+
+function removeLocationTag(i) {
+  _locationTags.splice(i, 1)
+  renderLocationTags()
+}
+
+function renderLocationSuggestions(query) {
+  const sugg = document.getElementById('locationSuggestions')
+  if (!sugg) return
+
+  // Coleta todos os locais únicos já usados nos eventos carregados
+  const allLocations = new Set()
+  _eventos.forEach(e => {
+    if (Array.isArray(e.location)) e.location.forEach(l => l && allLocations.add(l))
+    else if (e.location) allLocations.add(e.location)
+  })
+
+  const q = (query || '').trim().toLowerCase()
+  const matches = [...allLocations].filter(l =>
+    !_locationTags.some(t => t.toLowerCase() === l.toLowerCase()) &&
+    (!q || l.toLowerCase().includes(q))
+  )
+
+  if (!matches.length) { sugg.classList.remove('open'); return }
+
+  sugg.innerHTML = matches.slice(0, 6).map(l =>
+    `<div class="tag-suggestion-item" onmousedown="addLocationTag('${l.replace(/'/g,"\\'")}');document.getElementById('locationTagInput').value='';document.getElementById('locationSuggestions').classList.remove('open')">${l}</div>`
+  ).join('')
+  sugg.classList.add('open')
+}
+
+function abrirModal(evento = null) {
+  _editId = evento?.id || null
+  _wizStep = 1
+  _selectedTemplateId = evento?.template_id || ''
+  _hasCronograma      = evento?.has_cronograma || false
+  _selectedDates      = evento?.recurrence_config?.datas || []
+
+  // Restaura tipo de recorrência
+  const rt = evento?.recurrence_type
+  const rm = evento?.recurrence_config?.modo
+  if (!rt)                              _recurrenceType = 'none'
+  else if (rt === 'semanal')            _recurrenceType = 'semanal'
+  else if (rt === 'quinzenal')          _recurrenceType = 'quinzenal'
+  else if (rt === 'mensal' && rm === 'semana') _recurrenceType = 'mensal_semana'
+  else if (rt === 'mensal')             _recurrenceType = 'mensal_dia'
+  else if (rt === 'personalizado')      _recurrenceType = 'personalizado'
+  else                                  _recurrenceType = 'none'
+
+  const now = new Date()
+  _recurCalYear  = now.getFullYear()
+  _recurCalMonth = now.getMonth()
+
+  document.getElementById('modalTitle').textContent   = evento ? 'Editar Evento' : 'Novo Evento'
+  document.getElementById('editId').value             = evento?.id || ''
+  document.getElementById('fieldName').value          = evento?.name || ''
+  document.getElementById('fieldDesc').value          = evento?.description || ''
+  document.getElementById('fieldStartDate').value     = evento?.start_date || ''
+  document.getElementById('fieldEndDate').value       = evento?.end_date || ''
+  document.getElementById('fieldStartTime').value     = evento?.start_time || ''
+  document.getElementById('fieldEndTime').value       = evento?.end_time || ''
+  _locationTags = Array.isArray(evento?.location) ? [...evento.location] : (evento?.location ? [evento.location] : [])
+  renderLocationTags()
+
+  // Recorrência — sincroniza option cards e painéis
+  _syncRecurUI()
+  document.getElementById('fieldRecurCount').value = evento?.recurrence_config?.count || ''
+
+  // Cronograma
+  const oSem = document.getElementById('optSemCronograma')
+  const oCom = document.getElementById('optComCronograma')
+  if (_hasCronograma) { oSem.classList.remove('selected'); oCom.classList.add('selected') }
+  else { oSem.classList.add('selected'); oCom.classList.remove('selected') }
+
+  irStep(1)
+  const backdrop = document.getElementById('modalBackdrop')
+  const drawer   = document.getElementById('drawerPanel')
+  drawer.style.transform = 'translateX(100%)'
+  backdrop.classList.add('open')
+  requestAnimationFrame(() => { drawer.style.transform = '' })
+  carregarTemplatesWizard()
+  setTimeout(() => document.getElementById('fieldName').focus(), 300)
+}
+
+function fecharModal(e) {
+  if (e && e.target !== document.getElementById('modalBackdrop')) return
+  const backdrop = document.getElementById('modalBackdrop')
+  const drawer   = document.getElementById('drawerPanel')
+  drawer.style.transform = 'translateX(100%)'
+  setTimeout(() => backdrop.classList.remove('open'), 280)
+}
+
+function editarEvento(id) {
+  window.location.href = `/evento/${id}`
+}
+
+async function carregarTemplatesWizard() {
+  try {
+    const res = await authFetch('/api/template')
+    if (!res.ok) return
+    const { templates } = await res.json()
+    _templates = templates || []
+    renderTemplateOptions()
+  } catch { _templates = [] }
+}
+
+function renderTemplateOptions() {
+  const list = document.getElementById('templateList')
+  const items = [
+    `<div class="option-card ${!_selectedTemplateId ? 'selected' : ''}" onclick="selectTemplate(this,'')">
+      <div class="option-card-title">Sem template</div>
+      <div class="option-card-sub">Criar evento sem template predefinido</div>
+    </div>`,
+    ..._templates.map(t =>
+      `<div class="option-card ${_selectedTemplateId === t.id ? 'selected' : ''}" onclick="selectTemplate(this,'${t.id}')">
+        <div class="option-card-title">${t.name || '—'}</div>
+        <div class="option-card-sub">${t.description || ''}</div>
+      </div>`)
+  ]
+  list.innerHTML = items.join('')
+}
+
+function selectTemplate(el, id) {
+  _selectedTemplateId = id
+  document.querySelectorAll('#templateList .option-card').forEach(c => c.classList.remove('selected'))
+  el.classList.add('selected')
+}
+
+function selectCronograma(el, val) {
+  _hasCronograma = val
+  document.getElementById('optSemCronograma').classList.toggle('selected', !val)
+  document.getElementById('optComCronograma').classList.toggle('selected', val)
+}
+
+function selectRecorrencia(type) {
+  _recurrenceType = type
+  _syncRecurUI()
+  if (type === 'personalizado') renderRecurCal()
+}
+
+function _syncRecurUI() {
+  const ids = { none:'recurNone', semanal:'recurSemanal', quinzenal:'recurQuinzenal',
+                mensal_dia:'recurMensalDia', mensal_semana:'recurMensalSemana', personalizado:'recurPersonalizado' }
+  Object.entries(ids).forEach(([t, id]) => {
+    document.getElementById(id)?.classList.toggle('selected', t === _recurrenceType)
+  })
+  const hasRule = _recurrenceType !== 'none'
+  const isCustom = _recurrenceType === 'personalizado'
+  document.getElementById('recurEndDateSection').style.display  = (hasRule && !isCustom) ? 'block' : 'none'
+  document.getElementById('recurrencePanel').style.display      = isCustom ? 'flex' : 'none'
+}
+
+// ── Calendário de recorrência ─────────────────────────
+function renderRecurCal() {
+  const MESES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro']
+  document.getElementById('recurCalMonth').textContent = `${MESES[_recurCalMonth]} ${_recurCalYear}`
+
+  const eventDate = document.getElementById('fieldStartDate').value
+  const todayStr  = new Date().toISOString().split('T')[0]
+  const firstDay  = new Date(_recurCalYear, _recurCalMonth, 1).getDay()
+  const daysInMonth = new Date(_recurCalYear, _recurCalMonth + 1, 0).getDate()
+  const daysInPrev  = new Date(_recurCalYear, _recurCalMonth, 0).getDate()
+  const total = Math.ceil((firstDay + daysInMonth) / 7) * 7
+
+  let rows = '<tr>', day = 1, nextDay = 1
+  for (let i = 0; i < total; i++) {
+    if (i % 7 === 0 && i > 0) rows += '</tr><tr>'
+    let cls = 'recur-day', num, dateStr = ''
+    if (i < firstDay) {
+      num = daysInPrev - firstDay + i + 1; cls += ' other-month'
+    } else if (day > daysInMonth) {
+      num = nextDay++; cls += ' other-month'
+    } else {
+      num = day
+      dateStr = `${_recurCalYear}-${String(_recurCalMonth+1).padStart(2,'0')}-${String(num).padStart(2,'0')}`
+      if (dateStr === eventDate) cls += ' event-date'
+      else if (_selectedDates.includes(dateStr)) cls += ' selected'
+      else if (dateStr < todayStr) cls += ' disabled'
+      day++
+    }
+    const clickable = dateStr && dateStr !== eventDate && dateStr >= todayStr
+    rows += `<td><span class="${cls}" ${clickable ? `onclick="toggleRecurDate('${dateStr}')"` : ''}>${num}</span></td>`
+  }
+  rows += '</tr>'
+  document.getElementById('recurCalBody').innerHTML = rows
+
+  const el = document.getElementById('selectedDatesPreview')
+  if (!_selectedDates.length) { el.textContent = 'Nenhuma data selecionada'; return }
+  const fmt = _selectedDates.map(d => new Date(d+'T12:00:00').toLocaleDateString('pt-BR',{day:'numeric',month:'short'}))
+  el.textContent = `${_selectedDates.length} repeticao(oes): ${fmt.join(', ')}`
+}
+
+function toggleRecurDate(dateStr) {
+  const idx = _selectedDates.indexOf(dateStr)
+  if (idx >= 0) _selectedDates.splice(idx, 1)
+  else _selectedDates.push(dateStr)
+  _selectedDates.sort()
+  renderRecurCal()
+}
+
+function recurCalNav(dir) {
+  _recurCalMonth += dir
+  if (_recurCalMonth > 11) { _recurCalMonth = 0; _recurCalYear++ }
+  if (_recurCalMonth < 0)  { _recurCalMonth = 11; _recurCalYear-- }
+  renderRecurCal()
+}
+
+// ── Navegação entre etapas ────────────────────────────
+function irStep(n) {
+  _wizStep = n
+  for (let i = 1; i <= 5; i++) {
+    document.getElementById(`step${i}`).classList.toggle('active', i === n)
+    const dot = document.getElementById(`sdot${i}`)
+    dot.classList.remove('active','done')
+    if (i < n) dot.classList.add('done')
+    else if (i === n) dot.classList.add('active')
+    if (i < 5) document.getElementById(`sline${i}`).classList.toggle('done', i < n)
+  }
+  const btnBack = document.getElementById('btnBack')
+  const btnNext = document.getElementById('btnNext')
+  btnBack.style.visibility = n > 1 ? 'visible' : 'hidden'
+  if (n === 5) {
+    renderSummary()
+    btnNext.innerHTML = 'Salvar'
+  } else {
+    btnNext.innerHTML = 'Proximo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>'
+  }
+}
+
+function proxStep() {
+  if (_wizStep === 1) {
+    const name = document.getElementById('fieldName').value.trim()
+    const date = document.getElementById('fieldStartDate').value
+    const time = document.getElementById('fieldStartTime').value
+    if (!name) { showToast('Nome obrigatório', 'error'); return }
+    if (!date) { showToast('Data de início obrigatória', 'error'); return }
+    if (!time) { showToast('Horário obrigatório', 'error'); return }
+  }
+  if (_wizStep === 4 && _recurrenceType === 'personalizado') renderRecurCal()
+  if (_wizStep < 5) irStep(_wizStep + 1)
+  else salvarEvento()
+}
+
+function voltarStep() {
+  if (_wizStep > 1) irStep(_wizStep - 1)
+}
+
+function renderSummary() {
+  const name      = document.getElementById('fieldName').value.trim() || '—'
+  const startDate = document.getElementById('fieldStartDate').value
+  const endDate   = document.getElementById('fieldEndDate').value
+  const startTime = document.getElementById('fieldStartTime').value
+  const endTime   = document.getElementById('fieldEndTime').value
+  const location  = _locationTags.join(', ')
+
+  const fmt = d => d ? new Date(d+'T12:00:00').toLocaleDateString('pt-BR',{day:'numeric',month:'long',year:'numeric'}) : null
+  const timeStr = startTime ? (endTime ? `${startTime} – ${endTime}` : startTime) : null
+
+  let html = `
+    <div class="summary-row"><div class="summary-label">Nome do Evento</div><div class="summary-value">${name}</div></div>
+    <div class="summary-row"><div class="summary-label">Data de Inicio</div><div class="summary-value">${fmt(startDate) || '—'}</div></div>`
+  if (endDate && endDate !== startDate) html += `<div class="summary-row"><div class="summary-label">Data de Termino</div><div class="summary-value">${fmt(endDate)}</div></div>`
+  if (timeStr) html += `<div class="summary-row"><div class="summary-label">Horario</div><div class="summary-value">${timeStr}</div></div>`
+  if (location) html += `<div class="summary-row"><div class="summary-label">Local</div><div class="summary-value">${location}</div></div>`
+  if (_hasCronograma) html += `<div class="summary-row"><div class="summary-label">Cronograma</div><div class="summary-value">Sim</div></div>`
+  const recurLabels = { semanal:'Semanal', quinzenal:'Quinzenal', mensal_dia:'Mensal por dia', mensal_semana:'Mensal por semana', personalizado:'Personalizado' }
+  if (_recurrenceType !== 'none') {
+    const count = parseInt(document.getElementById('fieldRecurCount')?.value) || null
+    if (_recurrenceType === 'personalizado' && _selectedDates.length) {
+      const formatted = _selectedDates.map(d => new Date(d+'T12:00:00').toLocaleDateString('pt-BR',{day:'numeric',month:'short'})).join(', ')
+      html += `<div class="summary-recur">
+        <div class="summary-recur-title">Recorrência: Personalizado — ${_selectedDates.length} data${_selectedDates.length > 1 ? 's' : ''}</div>
+        <div class="summary-recur-dates">${formatted}</div>
+      </div>`
+    } else if (_recurrenceType !== 'personalizado') {
+      const countStr = count ? `, ${count} vez${count > 1 ? 'es' : ''}` : ''
+      html += `<div class="summary-row"><div class="summary-label">Recorrência</div><div class="summary-value">${recurLabels[_recurrenceType]}${countStr}</div></div>`
+    }
+  }
+  document.getElementById('summaryCard').innerHTML = html
+}
+
+function _buildApiRecurrenceType() {
+  if (_recurrenceType === 'none')          return null
+  if (_recurrenceType === 'semanal')       return 'semanal'
+  if (_recurrenceType === 'quinzenal')     return 'quinzenal'
+  if (_recurrenceType === 'mensal_dia')    return 'mensal'
+  if (_recurrenceType === 'mensal_semana') return 'mensal'
+  if (_recurrenceType === 'personalizado') return 'personalizado'
+  return null
+}
+
+function _buildApiRecurrenceConfig() {
+  const count = parseInt(document.getElementById('fieldRecurCount')?.value) || null
+  if (_recurrenceType === 'mensal_dia')    return { modo: 'dia',    count }
+  if (_recurrenceType === 'mensal_semana') return { modo: 'semana', count }
+  if (_recurrenceType === 'semanal' || _recurrenceType === 'quinzenal') return { count }
+  if (_recurrenceType === 'personalizado' && _selectedDates.length) return { datas: _selectedDates }
+  return null
+}
+
+async function salvarEvento() {
+  const name      = document.getElementById('fieldName').value.trim()
+  const startDate = document.getElementById('fieldStartDate').value
+  const startTime = document.getElementById('fieldStartTime').value
+  if (!name || !startDate || !startTime) { showToast('Nome, data e horário são obrigatórios', 'error'); return }
+
+  const payload = {
+    name,
+    description:       document.getElementById('fieldDesc').value.trim() || null,
+    start_date:        startDate,
+    end_date:          document.getElementById('fieldEndDate').value || null,
+    start_time:        startTime || null,
+    end_time:          document.getElementById('fieldEndTime').value || null,
+    location:          _locationTags.length ? _locationTags : null,
+    template_id:       _selectedTemplateId || null,
+    has_cronograma:      _hasCronograma,
+    recurrence_type:   _buildApiRecurrenceType(),
+    recurrence_config: _buildApiRecurrenceConfig(),
+  }
+
+  const btn = document.getElementById('btnNext')
+  btn.disabled = true
+  btn.textContent = 'Salvando...'
+
+  try {
+    const isEdit = !!_editId
+    const res = await authFetch(
+      isEdit ? `/api/evento/${_editId}` : '/api/evento',
+      { method: isEdit ? 'PUT' : 'POST', body: JSON.stringify(payload) }
+    )
+    if (!res.ok) {
+      const { error } = await res.json()
+      showToast(error || 'Erro ao salvar', 'error'); return
+    }
+    fecharModal()
+    CacheManager.invalidate('eventos')
+    showToast(isEdit ? 'Evento atualizado!' : 'Evento criado!', 'success')
+    await carregarEventos()
+  } catch {
+    showToast('Erro de conexão', 'error')
+  } finally {
+    btn.disabled = false
+    btn.innerHTML = _wizStep === 5 ? 'Salvar' : 'Proximo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>'
+  }
+}
+
+async function confirmarExcluir(id) {
+  const ev = _eventos.find(e => e.id === id)
+  if (!confirm(`Excluir o evento "${ev?.name || ''}"?`)) return
+
+  try {
+    const res = await authFetch(`/api/evento/${id}`, { method: 'DELETE' })
+    if (!res.ok) { showToast('Erro ao excluir', 'error'); return }
+    CacheManager.invalidate('eventos')
+    showToast('Evento excluído', 'success')
+    await carregarEventos()
+  } catch {
+    showToast('Erro de conexão', 'error')
+  }
+}
+
+// ── Toast ─────────────────────────────────────────────
+let _toastTimer
+function showToast(msg, type = '') {
+  const t = document.getElementById('toast')
+  t.textContent = msg
+  t.className = `toast${type ? ' ' + type : ''} show`
+  clearTimeout(_toastTimer)
+  _toastTimer = setTimeout(() => t.classList.remove('show'), 3000)
+}
+
+// ── Keyboard ──────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') document.getElementById('modalBackdrop').classList.remove('open')
+})
+
+init().finally(() => window.hideLoader())
+</script>
+  <!-- Popup: eventos do dia no mini calendário -->
+  <div id="calDayPopup" role="dialog" aria-modal="true"></div>
+
+  <script src="/js/top-search.js"></script>
+  <script src="/js/mobile-sidebar.js"></script>
+<script src="/js/notif-ui.js"></script>
+</body>
+</html>

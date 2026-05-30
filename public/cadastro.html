@@ -1,0 +1,1059 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cadastro de Voluntário</title>
+  <link rel="icon" type="image/png" href="/IMG/logo.png">
+  <style>
+    * { font-family: 'Plus Jakarta Sans', sans-serif !important; }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary:       #8B5CF6;
+      --primary-light: #DDD6FE;
+      --primary-focus: #8B5CF6;
+      --ink:           #1d1d1f;
+      --ink-muted:     #6e6e73;
+      --ink-subtle:    #aeaeb2;
+      --canvas:        #ffffff;
+      --canvas-input:  #f2f2f7;
+      --canvas-bg:     #f5f3ff;
+      --on-dark:       #ffffff;
+      --success:       #34c759;
+      --danger:        #ff3b30;
+      --radius-sm:     8px;
+      --radius-md:     14px;
+      --radius-lg:     22px;
+      --radius-pill:   9999px;
+    }
+
+    body {
+      min-height: 100vh;
+      background: var(--canvas-bg);
+      font-family: sans-serif;
+      -webkit-font-smoothing: antialiased;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 32px 20px 48px;
+    }
+
+    /* ── Fatal error ── */
+    .fatal-overlay {
+      position: fixed; inset: 0;
+      background: var(--canvas-bg);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 100;
+    }
+    .fatal-box {
+      text-align: center;
+      max-width: 360px;
+      padding: 40px;
+      background: var(--canvas);
+      border-radius: var(--radius-lg);
+      box-shadow: 0 8px 40px rgba(0,0,0,0.10);
+    }
+    .fatal-icon { font-size: 48px; margin-bottom: 16px; }
+    .fatal-title { font-size: 22px; font-weight: 600; color: var(--ink); margin-bottom: 8px; }
+    .fatal-desc { font-size: 15px; color: var(--ink-muted); line-height: 1.5; }
+
+    /* ── Church header ── */
+    .church-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+    .church-logo {
+      width: 40px; height: 40px;
+      border-radius: 10px;
+      object-fit: cover;
+    }
+    .church-name {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--ink);
+      letter-spacing: -0.3px;
+    }
+
+    /* ── Card ── */
+    .cad-card {
+      width: 100%;
+      max-width: 560px;
+      background: var(--canvas);
+      border-radius: var(--radius-lg);
+      box-shadow: 0 8px 40px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.06);
+      padding: 40px;
+    }
+
+    /* ── Stepper ── */
+    .stepper {
+      display: flex;
+      align-items: center;
+      margin-bottom: 36px;
+    }
+    .step-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+    .step-dot {
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      background: var(--canvas-input);
+      color: var(--ink-subtle);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 600;
+      transition: background 0.2s, color 0.2s;
+    }
+    .step-dot svg { width: 16px; height: 16px; }
+    .step-item.active .step-dot { background: var(--primary); color: var(--on-dark); }
+    .step-item.done .step-dot { background: var(--success); color: var(--on-dark); }
+    .step-lbl {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--ink-subtle);
+      white-space: nowrap;
+    }
+    .step-item.active .step-lbl { color: var(--primary); font-weight: 600; }
+    .step-item.done .step-lbl { color: var(--success); }
+    .step-line {
+      flex: 1;
+      height: 2px;
+      background: var(--canvas-input);
+      margin: 0 6px 20px;
+      transition: background 0.2s;
+    }
+    .step-line.done { background: var(--success); }
+
+    /* ── Step panels ── */
+    .step-panel { display: none; }
+    .step-panel.active { display: block; }
+
+    .step-title {
+      font-size: 26px;
+      font-weight: 600;
+      color: var(--ink);
+      letter-spacing: -0.374px;
+      margin-bottom: 6px;
+    }
+    .step-desc {
+      font-size: 14px;
+      color: var(--ink-muted);
+      line-height: 1.5;
+      margin-bottom: 28px;
+    }
+
+    /* ── Google button ── */
+    .btn-google {
+      width: 100%;
+      height: 46px;
+      background: var(--canvas);
+      border: 1.5px solid #e0e0e0;
+      border-radius: var(--radius-pill);
+      display: flex; align-items: center; justify-content: center;
+      gap: 10px;
+      font-family: inherit;
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--ink);
+      cursor: pointer;
+      margin-bottom: 16px;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .btn-google:hover { background: #fafafa; border-color: #ccc; }
+    .btn-google svg { width: 20px; height: 20px; }
+
+    /* ── Divider ── */
+    .divider {
+      display: flex; align-items: center; gap: 12px;
+      margin: 0 0 20px;
+      color: var(--ink-subtle);
+      font-size: 13px;
+    }
+    .divider::before, .divider::after {
+      content: ''; flex: 1; height: 1px; background: var(--canvas-input);
+    }
+
+    /* ── Fields ── */
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+    label {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--ink);
+      letter-spacing: -0.1px;
+    }
+    .input-wrap { position: relative; }
+
+    input[type="email"],
+    input[type="password"],
+    input[type="text"],
+    input[type="tel"],
+    input[type="date"],
+    select {
+      width: 100%;
+      height: 44px;
+      background: var(--canvas-input);
+      border: 1px solid transparent;
+      border-radius: var(--radius-md);
+      padding: 0 16px;
+      font-size: 15px;
+      font-family: inherit;
+      color: var(--ink);
+      outline: none;
+      transition: border-color 0.15s, background 0.15s;
+      appearance: none;
+    }
+    input:focus, select:focus {
+      border-color: var(--primary-focus);
+      background: var(--canvas);
+    }
+    input.readonly {
+      color: var(--ink-muted);
+      cursor: default;
+    }
+    input.readonly:focus { border-color: transparent; background: var(--canvas-input); }
+
+    select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236e6e73' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      background-size: 16px;
+      padding-right: 36px;
+      cursor: pointer;
+    }
+
+    .input-pw { padding-right: 48px; }
+    .toggle-pw {
+      position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+      background: none; border: none; cursor: pointer; padding: 0;
+      color: var(--ink-subtle); display: flex; align-items: center;
+    }
+    .toggle-pw svg { width: 20px; height: 20px; }
+
+    /* ── OTP ── */
+    .otp-row {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin: 8px 0 24px;
+    }
+    .otp-inp {
+      width: 52px; height: 60px;
+      text-align: center;
+      font-size: 24px;
+      font-weight: 700;
+      border-radius: var(--radius-md);
+      border: 1.5px solid var(--canvas-input);
+      background: var(--canvas-input);
+      color: var(--ink);
+      outline: none;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .otp-inp:focus { border-color: var(--primary); background: var(--canvas); }
+
+    /* ── Photo upload (step 4) ── */
+    .photo-upload-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .photo-circle {
+      width: 72px; height: 72px;
+      border-radius: 50%;
+      background: var(--canvas-input);
+      border: 2px dashed var(--primary);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      overflow: hidden;
+      flex-shrink: 0;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .photo-circle:hover { background: rgba(151,71,255,0.06); }
+    .photo-placeholder {
+      display: flex; flex-direction: column; align-items: center; gap: 4px;
+      color: var(--primary);
+    }
+    .photo-placeholder svg { width: 24px; height: 24px; }
+    .photo-upload-label { font-size: 14px; font-weight: 500; color: var(--ink); }
+    .photo-upload-hint  { font-size: 12px; color: var(--ink-muted); margin-top: 2px; }
+
+    /* ── Form sections (step 4) ── */
+    .form-section { margin-bottom: 24px; }
+    .section-title {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--ink-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 14px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--canvas-input);
+    }
+    .field-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .field-grid .full { grid-column: 1 / -1; }
+
+    /* ── Buttons ── */
+    .btn-primary {
+      width: 100%;
+      height: 50px;
+      background: linear-gradient(90deg, #ff5500 0%, #8B5CF6 100%);
+      border: none;
+      border-radius: var(--radius-pill);
+      font-family: inherit;
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--on-dark);
+      cursor: pointer;
+      margin-top: 8px;
+      transition: opacity 0.12s, transform 0.12s;
+    }
+    .btn-primary:hover { opacity: 0.92; }
+    .btn-primary:active { transform: scale(0.97); }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .btn-link {
+      display: block;
+      width: 100%;
+      text-align: center;
+      background: none;
+      border: none;
+      font-family: inherit;
+      font-size: 14px;
+      color: var(--primary);
+      cursor: pointer;
+      margin-top: 12px;
+      padding: 6px;
+    }
+    .btn-link:hover { opacity: 0.75; }
+
+    /* ── Error / info messages ── */
+    .msg-err {
+      padding: 10px 14px;
+      background: rgba(255,59,48,0.08);
+      border-radius: 10px;
+      font-size: 14px;
+      color: #c0392b;
+      margin-bottom: 8px;
+      margin-top: 4px;
+    }
+
+    /* ── Success screen ── */
+    .success-wrap {
+      text-align: center;
+      padding: 20px 0 10px;
+    }
+    .success-circle {
+      width: 80px; height: 80px;
+      border-radius: 50%;
+      background: rgba(52,199,89,0.12);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 24px;
+    }
+    .success-circle svg { width: 40px; height: 40px; color: var(--success); }
+    .success-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: var(--ink);
+      letter-spacing: -0.374px;
+      margin-bottom: 10px;
+    }
+    .success-desc {
+      font-size: 15px;
+      color: var(--ink-muted);
+      line-height: 1.6;
+      max-width: 340px;
+      margin: 0 auto;
+    }
+
+    .hidden { display: none !important; }
+
+    @media (max-width: 600px) {
+      body { padding: 20px 12px 40px; }
+      .cad-card { padding: 28px 20px; }
+      .field-grid { grid-template-columns: 1fr; }
+      .otp-inp { width: 42px; height: 50px; font-size: 20px; }
+      .step-lbl { display: none; }
+    }
+  </style>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Fatal error overlay -->
+  <div id="fatal-overlay" class="fatal-overlay hidden">
+    <div class="fatal-box">
+      <div class="fatal-icon">⚠️</div>
+      <h2 class="fatal-title">Link inválido</h2>
+      <p id="fatal-msg" class="fatal-desc"></p>
+    </div>
+  </div>
+
+  <!-- Church header -->
+  <header class="church-header">
+    <img id="church-logo" src="" alt="" class="church-logo hidden">
+    <span id="church-name" class="church-name">Carregando…</span>
+  </header>
+
+  <!-- Card -->
+  <div class="cad-card">
+
+    <!-- Stepper -->
+    <div class="stepper" id="stepper">
+      <div class="step-item" id="si-1">
+        <div class="step-dot" id="sd-1">1</div>
+        <span class="step-lbl">Cadastro</span>
+      </div>
+      <div class="step-line" id="sl-1"></div>
+      <div class="step-item" id="si-2">
+        <div class="step-dot" id="sd-2">2</div>
+        <span class="step-lbl">Código</span>
+      </div>
+      <div class="step-line" id="sl-2"></div>
+      <div class="step-item" id="si-3">
+        <div class="step-dot" id="sd-3">3</div>
+        <span class="step-lbl">Senha</span>
+      </div>
+      <div class="step-line" id="sl-3"></div>
+      <div class="step-item" id="si-4">
+        <div class="step-dot" id="sd-4">4</div>
+        <span class="step-lbl">Perfil</span>
+      </div>
+    </div>
+
+    <!-- Step 1: Email -->
+    <div id="step-1" class="step-panel active">
+      <h2 class="step-title">Criar conta</h2>
+      <p class="step-desc">Informe seu e-mail para começar</p>
+
+      <button class="btn-google" id="btn-google" onclick="handleGoogle()">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+          <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+          <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+          <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+        </svg>
+        Continuar com Google
+      </button>
+
+      <div class="divider"><span>ou</span></div>
+
+      <div class="field">
+        <label for="inp-email">E-mail</label>
+        <input type="email" id="inp-email" placeholder="seu@email.com" autocomplete="email"
+          onkeydown="if(event.key==='Enter') step1Submit()">
+      </div>
+
+      <div id="msg-1" class="msg-err hidden"></div>
+
+      <button class="btn-primary" id="btn-1" onclick="step1Submit()">Continuar</button>
+    </div>
+
+    <!-- Step 2: OTP -->
+    <div id="step-2" class="step-panel">
+      <h2 class="step-title">Verificar e-mail</h2>
+      <p class="step-desc">Digite o código de 6 dígitos enviado para <strong id="email-display"></strong></p>
+
+      <div class="otp-row">
+        <input class="otp-inp" id="otp-0" type="text" inputmode="numeric" maxlength="1" autocomplete="one-time-code">
+        <input class="otp-inp" id="otp-1" type="text" inputmode="numeric" maxlength="1">
+        <input class="otp-inp" id="otp-2" type="text" inputmode="numeric" maxlength="1">
+        <input class="otp-inp" id="otp-3" type="text" inputmode="numeric" maxlength="1">
+        <input class="otp-inp" id="otp-4" type="text" inputmode="numeric" maxlength="1">
+        <input class="otp-inp" id="otp-5" type="text" inputmode="numeric" maxlength="1">
+      </div>
+
+      <div id="msg-2" class="msg-err hidden"></div>
+
+      <button class="btn-primary" id="btn-2" onclick="step2Submit()">Verificar código</button>
+      <button class="btn-link" onclick="resendOtp()">Reenviar código</button>
+    </div>
+
+    <!-- Step 3: Senha -->
+    <div id="step-3" class="step-panel">
+      <h2 class="step-title">Criar senha</h2>
+      <p class="step-desc">Escolha uma senha segura para sua conta</p>
+
+      <div class="field">
+        <label for="inp-senha">Senha</label>
+        <div class="input-wrap">
+          <input type="password" id="inp-senha" class="input-pw" placeholder="Mínimo 6 caracteres"
+            autocomplete="new-password" onkeydown="if(event.key==='Enter') step3Submit()">
+          <button type="button" class="toggle-pw" onclick="togglePw('inp-senha','eye-1')">
+            <svg id="eye-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="inp-confirm">Confirmar senha</label>
+        <div class="input-wrap">
+          <input type="password" id="inp-confirm" class="input-pw" placeholder="Repita a senha"
+            autocomplete="new-password" onkeydown="if(event.key==='Enter') step3Submit()">
+          <button type="button" class="toggle-pw" onclick="togglePw('inp-confirm','eye-2')">
+            <svg id="eye-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div id="msg-3" class="msg-err hidden"></div>
+
+      <button class="btn-primary" id="btn-3" onclick="step3Submit()">Continuar</button>
+    </div>
+
+    <!-- Step 4: Perfil -->
+    <div id="step-4" class="step-panel">
+      <h2 class="step-title">Seu perfil</h2>
+      <p class="step-desc">Complete as informações abaixo para finalizar o cadastro</p>
+
+      <!-- Foto -->
+      <div class="photo-upload-row">
+        <div class="photo-circle" id="photoCircle" onclick="document.getElementById('inp-foto').click()" title="Adicionar foto">
+          <div class="photo-placeholder" id="photoPlaceholder">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          </div>
+          <img id="photoPreviewImg" src="" alt="" style="display:none; width:100%; height:100%; object-fit:cover; border-radius:50%;">
+        </div>
+        <div class="photo-upload-info">
+          <div class="photo-upload-label">Foto de perfil</div>
+          <div class="photo-upload-hint">Opcional · Clique no círculo para selecionar</div>
+        </div>
+        <input type="file" id="inp-foto" accept="image/*" style="display:none" onchange="handleFotoChange(this)">
+      </div>
+
+      <!-- Dados pessoais -->
+      <div class="form-section">
+        <div class="section-title">Dados pessoais</div>
+
+        <div class="field">
+          <label for="inp-nome">Nome completo *</label>
+          <input type="text" id="inp-nome" placeholder="Seu nome completo" autocomplete="name">
+        </div>
+
+        <div class="field-grid">
+          <div class="field">
+            <label for="inp-apelido">Apelido</label>
+            <input type="text" id="inp-apelido" placeholder="Como prefere ser chamado">
+          </div>
+          <div class="field">
+            <label for="inp-whatsapp">WhatsApp *</label>
+            <input type="tel" id="inp-whatsapp" placeholder="(00) 00000-0000" autocomplete="tel">
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="inp-email-ro">E-mail</label>
+          <input type="email" id="inp-email-ro" readonly class="readonly">
+        </div>
+
+        <div class="field-grid">
+          <div class="field">
+            <label for="inp-nascimento">Data de nascimento</label>
+            <input type="date" id="inp-nascimento">
+          </div>
+          <div class="field">
+            <label for="sel-genero">Gênero</label>
+            <select id="sel-genero">
+              <option value="">Selecionar</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field" style="max-width:50%">
+          <label for="sel-estado-civil">Estado civil</label>
+          <select id="sel-estado-civil">
+            <option value="">Selecionar</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Endereço -->
+      <div class="form-section">
+        <div class="section-title">Endereço</div>
+
+        <div class="field" style="max-width:50%">
+          <label for="inp-cep">CEP</label>
+          <input type="text" id="inp-cep" placeholder="00000-000" maxlength="9" inputmode="numeric">
+        </div>
+
+        <div class="field-grid" style="grid-template-columns:2fr 1fr">
+          <div class="field">
+            <label for="inp-logradouro">Logradouro</label>
+            <input type="text" id="inp-logradouro" placeholder="Rua, Avenida…">
+          </div>
+          <div class="field">
+            <label for="inp-numero">Número</label>
+            <input type="text" id="inp-numero" placeholder="123">
+          </div>
+        </div>
+
+        <div class="field-grid">
+          <div class="field">
+            <label for="inp-complemento">Complemento</label>
+            <input type="text" id="inp-complemento" placeholder="Apto, Bloco…">
+          </div>
+          <div class="field">
+            <label for="inp-bairro">Bairro</label>
+            <input type="text" id="inp-bairro" placeholder="Bairro">
+          </div>
+        </div>
+
+        <div class="field-grid" style="grid-template-columns:1fr 90px">
+          <div class="field">
+            <label for="inp-cidade">Cidade</label>
+            <input type="text" id="inp-cidade" placeholder="Cidade">
+          </div>
+          <div class="field">
+            <label for="inp-estado">UF</label>
+            <select id="inp-estado">
+              <option value="">UF</option>
+              <option>AC</option><option>AL</option><option>AP</option><option>AM</option>
+              <option>BA</option><option>CE</option><option>DF</option><option>ES</option>
+              <option>GO</option><option>MA</option><option>MT</option><option>MS</option>
+              <option>MG</option><option>PA</option><option>PB</option><option>PR</option>
+              <option>PE</option><option>PI</option><option>RJ</option><option>RN</option>
+              <option>RS</option><option>RO</option><option>RR</option><option>SC</option>
+              <option>SP</option><option>SE</option><option>TO</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Contato de emergência -->
+      <div class="form-section">
+        <div class="section-title">Contato de emergência</div>
+        <div class="field-grid">
+          <div class="field">
+            <label for="inp-emg-nome">Nome</label>
+            <input type="text" id="inp-emg-nome" placeholder="Nome do contato">
+          </div>
+          <div class="field">
+            <label for="inp-emg-tel">Telefone</label>
+            <input type="tel" id="inp-emg-tel" placeholder="(00) 00000-0000">
+          </div>
+        </div>
+      </div>
+
+      <div id="msg-4" class="msg-err hidden"></div>
+
+      <button class="btn-primary" id="btn-4" onclick="step4Submit()">Finalizar cadastro</button>
+    </div>
+
+    <!-- Sucesso -->
+    <div id="success" class="step-panel">
+      <div class="success-wrap">
+        <div class="success-circle">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+        </div>
+        <h2 class="success-title">Cadastro enviado com sucesso!</h2>
+        <p class="success-desc">Aguarde a aprovação. Informe ao seu líder que já fez o cadastro.</p>
+      </div>
+    </div>
+
+  </div><!-- /cad-card -->
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    // ── Estado ──
+    const params     = new URLSearchParams(location.search)
+    const churchSlug = params.get('church') || ''
+    let emailValue  = ''
+    let authUserId  = ''
+    let senhaValue  = ''
+    let isGoogleFlow = false
+    let fotoBase64 = null
+    let supabaseClient = null
+    let currentStep = 1
+
+    // ── Init ──
+    async function init() {
+      if (!churchSlug) {
+        showFatal('Link inválido. Acesse via link fornecido pelo seu líder.')
+        return
+      }
+      await Promise.all([loadChurchInfo(), initSupabase(), loadGeneros(), loadEstadosCivis()])
+      setupOtpInputs()
+      setupMasks()
+      const isGoogleReturn = await checkOAuthCallback()
+      if (!isGoogleReturn) goToStep(1)
+    }
+
+    async function loadChurchInfo() {
+      try {
+        const r = await fetch(`/api/church/public?slug=${encodeURIComponent(churchSlug)}`)
+        if (!r.ok) { showFatal('Igreja não encontrada ou inativa.'); return }
+        const { name, logo_url } = await r.json()
+        document.getElementById('church-name').textContent = name
+        document.title = `Cadastro — ${name}`
+        if (logo_url) {
+          const logo = document.getElementById('church-logo')
+          logo.src = logo_url
+          logo.classList.remove('hidden')
+        }
+      } catch { showFatal('Não foi possível carregar as informações da igreja.') }
+    }
+
+    async function initSupabase() {
+      try {
+        const r = await fetch('/api/auth/config')
+        const cfg = await r.json()
+        if (cfg.url && cfg.anon_key && window.supabase) {
+          supabaseClient = window.supabase.createClient(cfg.url, cfg.anon_key)
+        }
+      } catch (e) { console.warn('Supabase client init failed', e) }
+    }
+
+    async function loadGeneros() {
+      try {
+        const r  = await fetch('/api/auth/generos')
+        const { generos } = await r.json()
+        const sel = document.getElementById('sel-genero')
+        generos.forEach(g => {
+          const o = document.createElement('option')
+          o.value = g.id; o.textContent = g.name
+          sel.appendChild(o)
+        })
+      } catch {}
+    }
+
+    async function loadEstadosCivis() {
+      try {
+        const r = await fetch('/api/auth/estados-civis')
+        const { estados } = await r.json()
+        const sel = document.getElementById('sel-estado-civil')
+        estados.forEach(e => {
+          const o = document.createElement('option')
+          o.value = e.id; o.textContent = e.name
+          sel.appendChild(o)
+        })
+      } catch {}
+    }
+
+    // Retorna true se entrou no fluxo Google e foi para o passo 4
+    async function checkOAuthCallback() {
+      if (!supabaseClient) return false
+      if (params.get('step') !== '4') return false
+
+      // Supabase v2 PKCE: o cliente troca o ?code= automaticamente ao chamar getSession()
+      const { data: { session } } = await supabaseClient.auth.getSession()
+      if (!session?.user) return false
+
+      isGoogleFlow = true
+      authUserId   = session.user.id
+      emailValue   = session.user.email
+
+      const meta     = session.user.user_metadata || {}
+      const fullName = meta.full_name || meta.name || ''
+      if (fullName) document.getElementById('inp-nome').value = fullName
+      document.getElementById('inp-email-ro').value = emailValue
+
+      // Limpa ?code= e ?step= da URL sem recarregar
+      history.replaceState(null, '', `${location.pathname}?church=${churchSlug}`)
+      goToStep(4)
+      return true
+    }
+
+    // ── Google OAuth ──
+    async function handleGoogle() {
+      if (!supabaseClient) {
+        showMsg(1, 'Autenticação com Google não disponível no momento.')
+        return
+      }
+      await supabaseClient.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${location.origin}/cadastro?church=${churchSlug}&step=4`
+        }
+      })
+    }
+
+    // ── Step 1: enviar OTP ──
+    async function step1Submit() {
+      emailValue = document.getElementById('inp-email').value.trim()
+      if (!emailValue || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailValue)) {
+        return showMsg(1, 'Informe um e-mail válido.')
+      }
+      setLoading('btn-1', true)
+      try {
+        const r = await fetch('/api/auth/otp/send', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: emailValue, church_slug: churchSlug })
+        })
+        const json = await r.json()
+        if (!r.ok) return showMsg(1, json.error)
+        clearMsg(1)
+        document.getElementById('email-display').textContent = emailValue
+        goToStep(2)
+        document.getElementById('otp-0').focus()
+      } catch { showMsg(1, 'Erro de conexão. Tente novamente.') }
+      finally { setLoading('btn-1', false) }
+    }
+
+    // ── Step 2: verificar OTP ──
+    async function step2Submit() {
+      const token = getOtpValue()
+      if (token.length !== 6) return showMsg(2, 'Digite todos os 6 dígitos do código.')
+      setLoading('btn-2', true)
+      try {
+        const r = await fetch('/api/auth/otp/verify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: emailValue, token })
+        })
+        const json = await r.json()
+        if (!r.ok) return showMsg(2, json.error || 'Código inválido ou expirado.')
+        clearMsg(2)
+        authUserId = json.user_id
+        goToStep(3)
+        document.getElementById('inp-senha').focus()
+      } catch { showMsg(2, 'Erro de conexão. Tente novamente.') }
+      finally { setLoading('btn-2', false) }
+    }
+
+    async function resendOtp() {
+      if (!emailValue) return
+      try {
+        await fetch('/api/auth/otp/send', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: emailValue, church_slug: churchSlug })
+        })
+        showMsg(2, 'Código reenviado! Verifique seu e-mail.')
+      } catch {}
+    }
+
+    // ── Step 3: senha ──
+    function step3Submit() {
+      senhaValue = document.getElementById('inp-senha').value
+      const confirm = document.getElementById('inp-confirm').value
+      if (senhaValue.length < 6) return showMsg(3, 'A senha deve ter pelo menos 6 caracteres.')
+      if (senhaValue !== confirm) return showMsg(3, 'As senhas não conferem.')
+      clearMsg(3)
+      document.getElementById('inp-email-ro').value = emailValue
+      goToStep(4)
+      document.getElementById('inp-nome').focus()
+    }
+
+    // ── Foto de perfil ──
+    function handleFotoChange(input) {
+      const file = input.files[0]
+      if (!file) return
+      const reader = new FileReader()
+      reader.onload = e => {
+        fotoBase64 = e.target.result
+        const img = document.getElementById('photoPreviewImg')
+        const placeholder = document.getElementById('photoPlaceholder')
+        img.src = fotoBase64
+        img.style.display = 'block'
+        placeholder.style.display = 'none'
+        document.getElementById('photoCircle').style.border = '2px solid var(--primary)'
+      }
+      reader.readAsDataURL(file)
+    }
+
+    // ── Step 4: submeter ──
+    async function step4Submit() {
+      const full_name = document.getElementById('inp-nome').value.trim()
+      const whatsapp  = document.getElementById('inp-whatsapp').value.trim()
+      if (!full_name) return showMsg(4, 'Nome completo é obrigatório.')
+      if (!whatsapp)  return showMsg(4, 'WhatsApp é obrigatório.')
+
+      const payload = {
+        church_slug: churchSlug,
+        auth_user_id: authUserId || undefined,
+        email:        emailValue,
+        senha:        isGoogleFlow ? undefined : senhaValue,
+        full_name,
+        apelido:                 document.getElementById('inp-apelido').value.trim() || null,
+        whatsapp,
+        birth_date:              document.getElementById('inp-nascimento').value || null,
+        genero_id:               document.getElementById('sel-genero').value || null,
+        status_civil_id:         document.getElementById('sel-estado-civil').value || null,
+        zip_code:                document.getElementById('inp-cep').value.replace(/\D/g,'') || null,
+        address:                 document.getElementById('inp-logradouro').value.trim() || null,
+        number:                  document.getElementById('inp-numero').value.trim() || null,
+        complement:              document.getElementById('inp-complemento').value.trim() || null,
+        neighborhood:            document.getElementById('inp-bairro').value.trim() || null,
+        city:                    document.getElementById('inp-cidade').value.trim() || null,
+        state:                   document.getElementById('inp-estado').value || null,
+        emergency_contact_name:  document.getElementById('inp-emg-nome').value.trim() || null,
+        emergency_contact_phone: document.getElementById('inp-emg-tel').value.trim() || null,
+        photo_base64:            fotoBase64 || undefined,
+      }
+
+      setLoading('btn-4', true)
+      try {
+        const r = await fetch('/api/auth/cadastro', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        })
+        const json = await r.json()
+        if (!r.ok) return showMsg(4, json.error)
+        goToStep('success')
+      } catch { showMsg(4, 'Erro de conexão. Tente novamente.') }
+      finally { setLoading('btn-4', false) }
+    }
+
+    // ── Navegação ──
+    const CHECK_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+      stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`
+
+    function goToStep(n) {
+      document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'))
+
+      if (n === 'success') {
+        document.getElementById('success').classList.add('active')
+        document.getElementById('stepper').classList.add('hidden')
+        return
+      }
+
+      document.getElementById(`step-${n}`).classList.add('active')
+      currentStep = n
+
+      for (let i = 1; i <= 4; i++) {
+        const item = document.getElementById(`si-${i}`)
+        const dot  = document.getElementById(`sd-${i}`)
+        item.classList.remove('active', 'done')
+        if (i < n)      { item.classList.add('done');   dot.innerHTML = CHECK_SVG }
+        else if (i === n) { item.classList.add('active'); dot.textContent = i }
+        else            { dot.textContent = i }
+      }
+      for (let i = 1; i <= 3; i++) {
+        const line = document.getElementById(`sl-${i}`)
+        line.classList.toggle('done', i < n)
+      }
+    }
+
+    // ── OTP inputs ──
+    function setupOtpInputs() {
+      const inputs = document.querySelectorAll('.otp-inp')
+      inputs.forEach((inp, i) => {
+        inp.addEventListener('input', e => {
+          const v = e.target.value.replace(/\D/g, '')
+          e.target.value = v.slice(-1)
+          if (v && i < 5) inputs[i + 1].focus()
+          if (getOtpValue().length === 6) step2Submit()
+        })
+        inp.addEventListener('keydown', e => {
+          if (e.key === 'Backspace' && !inp.value && i > 0) inputs[i - 1].focus()
+          if (e.key === 'Enter') step2Submit()
+        })
+        inp.addEventListener('paste', e => {
+          e.preventDefault()
+          const pasted = (e.clipboardData || window.clipboardData).getData('text')
+            .replace(/\D/g, '').slice(0, 6)
+          pasted.split('').forEach((c, j) => { if (inputs[j]) inputs[j].value = c })
+          const last = Math.min(pasted.length, 5)
+          inputs[last].focus()
+          if (pasted.length === 6) step2Submit()
+        })
+      })
+    }
+
+    function getOtpValue() {
+      return [...document.querySelectorAll('.otp-inp')].map(i => i.value).join('')
+    }
+
+    // ── Masks ──
+    function setupMasks() {
+      maskPhone(document.getElementById('inp-whatsapp'))
+      maskPhone(document.getElementById('inp-emg-tel'))
+      maskCep(document.getElementById('inp-cep'))
+    }
+
+    function maskPhone(inp) {
+      inp.addEventListener('input', e => {
+        let v = e.target.value.replace(/\D/g, '').slice(0, 11)
+        if (v.length > 10) v = `(${v.slice(0,2)}) ${v.slice(2,7)}-${v.slice(7)}`
+        else if (v.length > 6) v = `(${v.slice(0,2)}) ${v.slice(2,6)}-${v.slice(6)}`
+        else if (v.length > 2) v = `(${v.slice(0,2)}) ${v.slice(2)}`
+        e.target.value = v
+      })
+    }
+
+    function maskCep(inp) {
+      inp.addEventListener('input', e => {
+        let v = e.target.value.replace(/\D/g, '').slice(0, 8)
+        e.target.value = v.length > 5 ? `${v.slice(0,5)}-${v.slice(5)}` : v
+      })
+      inp.addEventListener('blur', async e => {
+        const cep = e.target.value.replace(/\D/g, '')
+        if (cep.length !== 8) return
+        try {
+          const r = await fetch(`https://viacep.com.br/ws/${cep}/json/`)
+          const d = await r.json()
+          if (d.erro) return
+          document.getElementById('inp-logradouro').value = d.logradouro || ''
+          document.getElementById('inp-bairro').value     = d.bairro || ''
+          document.getElementById('inp-cidade').value     = d.localidade || ''
+          const uf = document.getElementById('inp-estado')
+          if (d.uf) uf.value = d.uf
+        } catch {}
+      })
+    }
+
+    // ── Toggle senha ──
+    function togglePw(inputId, eyeId) {
+      const inp = document.getElementById(inputId)
+      const eye = document.getElementById(eyeId)
+      const show = inp.type === 'password'
+      inp.type = show ? 'text' : 'password'
+      eye.innerHTML = show
+        ? '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>'
+        : '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>'
+    }
+
+    // ── UI helpers ──
+    function showMsg(step, msg) {
+      const el = document.getElementById(`msg-${step}`)
+      if (!el) return
+      el.textContent = msg
+      el.classList.remove('hidden')
+    }
+    function clearMsg(step) {
+      const el = document.getElementById(`msg-${step}`)
+      if (el) el.classList.add('hidden')
+    }
+    function setLoading(btnId, loading) {
+      const btn = document.getElementById(btnId)
+      if (!btn) return
+      btn.disabled = loading
+      if (loading) btn.dataset.orig = btn.textContent
+      btn.textContent = loading ? 'Aguarde…' : (btn.dataset.orig || btn.textContent)
+    }
+    function showFatal(msg) {
+      document.getElementById('fatal-msg').textContent = msg
+      document.getElementById('fatal-overlay').classList.remove('hidden')
+    }
+
+    init()
+  </script>
+</body>
+</html>

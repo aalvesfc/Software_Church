@@ -4,21 +4,26 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Hug Software — Ministérios</title>
+  <script src="/js/auth-check.js"></script>
+  <script src="/js/page-loader.js"></script>
+  <script src="/js/cache.js"></script>
   <link rel="icon" type="image/png" href="/IMG/logo.png">
   <style>
+    * { font-family: 'Plus Jakarta Sans', sans-serif !important; }
+
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --primary:         #235347;
-      --primary-light:   #8eb69b;
-      --primary-focus:   #235347;
-      --primary-dark:    #0b2b26;
-      --accent-green:    #8eb69b;
+      --primary:         #8B5CF6;
+      --primary-light:   #DDD6FE;
+      --primary-focus:   #8B5CF6;
+      --primary-dark:    #7C3AED;
+      --accent-green:    #DDD6FE;
       --ink:             #1d1d1f;
       --ink-muted:       #6e6e73;
       --ink-subtle:      #aeaeb2;
       --canvas:          #ffffff;
-      --canvas-page:     #f0f6f2;
+      --canvas-page: #ECE9E7;
       --canvas-input:    #f2f2f7;
       --hairline:        #e0e0e0;
       --on-dark:         #ffffff;
@@ -34,7 +39,7 @@
     body {
       min-height: 100vh;
       background: var(--canvas-page);
-      font-family: "SF Pro Text", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-family: sans-serif;
       -webkit-font-smoothing: antialiased;
       display: flex;
     }
@@ -42,15 +47,15 @@
     /* ─────────────────── SIDEBAR ─────────────────── */
     .sidebar {
       width: var(--sidebar-w);
-      min-height: 100vh;
-      background: linear-gradient(180deg, #051f20 0%, #0b2b26 55%, #163832 100%);
+      min-height: unset;
+      background: #1c1c1c;
       display: flex;
       flex-direction: column;
       flex-shrink: 0;
       position: fixed;
       top: 0; left: 0; bottom: 0;
       z-index: 100;
-      overflow: hidden;
+      overflow: visible;
       transition: width 0.22s cubic-bezier(.4,0,.2,1);
     }
 
@@ -70,7 +75,7 @@
     }
 
     .logo-text {
-      font-family: "SF Pro Display", system-ui, -apple-system, sans-serif;
+      font-family: sans-serif;
       font-size: 15px;
       font-weight: 700;
       color: var(--on-dark);
@@ -123,6 +128,50 @@
     body.sidebar-collapsed .main { margin-left: 64px; }
     body.sidebar-collapsed #collapseBtn svg { transform: rotate(180deg); }
 
+    /* ── Tooltip sidebar ── */
+    .nav-item {
+      position: relative;
+    }
+    .nav-item::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      left: calc(100% + 12px);
+      top: 50%;
+      transform: translateY(-50%) translateX(-6px);
+      background: #1a1a1a;
+      color: #FFFFFF;
+      font-size: 12px;
+      font-weight: 500;
+      padding: 6px 12px;
+      border-radius: 8px;
+      white-space: nowrap;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.15s ease, transform 0.15s ease;
+      z-index: 9999;
+      letter-spacing: 0.1px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.28);
+    }
+    .nav-item::before {
+      content: '';
+      position: absolute;
+      left: calc(100% + 6px);
+      top: 50%;
+      transform: translateY(-50%) translateX(-6px);
+      border: 5px solid transparent;
+      border-right-color: #1a1a1a;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.15s ease, transform 0.15s ease;
+      z-index: 9999;
+    }
+    .nav-item:hover::after,
+    .nav-item:hover::before {
+      opacity: 1;
+      transform: translateY(-50%) translateX(0);
+    }
+
+
     /* ─────────────────── MAIN AREA ─────────────────── */
     .main {
       margin-left: var(--sidebar-w);
@@ -133,54 +182,91 @@
       transition: margin-left 0.22s cubic-bezier(.4,0,.2,1);
     }
 
-    /* ─────────────────── TOPBAR ─────────────────── */
+        /* ─────────────────── TOPBAR ─────────────────── */
     .topbar {
-      height: var(--topbar-h);
-      background: var(--canvas);
-      border-bottom: 1px solid var(--hairline);
+      height: 72px;
       display: flex;
       align-items: center;
-      gap: 12px;
-      padding: 0 24px;
+      justify-content: flex-end;
+      padding: 0 28px;
       position: sticky;
       top: 0;
       z-index: 50;
+      background: linear-gradient(135deg, #ECE9E700 0%, #ECE9E7 100%);
+      backdrop-filter: blur(1px);
+      -webkit-backdrop-filter: blur(1px);
     }
 
+    /* Search pill + botão */
     .search-wrap {
-      flex: 1;
-      max-width: 420px;
-      position: relative;
-    }
-    .search-wrap svg {
-      position: absolute;
-      left: 12px; top: 50%;
-      transform: translateY(-50%);
-      width: 15px; height: 15px;
-      color: var(--ink-subtle);
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
     .search-wrap input {
-      width: 100%;
-      height: 40px;
-      background: var(--canvas-input);
-      border: 1px solid transparent;
+      width: 300px;
+      height: 42px;
+      background: #FFFFFF;
+      border: 1.5px solid #EEEEEE;
       border-radius: var(--radius-pill);
-      padding: 0 16px 0 40px;
+      padding: 0 18px;
       font-size: 14px;
       font-family: inherit;
-      color: var(--ink);
+      color: #1A1A1A;
       outline: none;
-      letter-spacing: -0.224px;
-      transition: border-color 0.15s;
+      transition: border-color 0.15s, box-shadow 0.15s;
     }
-    .search-wrap input::placeholder { color: var(--ink-subtle); }
-    .search-wrap input:focus { border-color: var(--primary-focus); background: var(--canvas); }
+    .search-wrap input::placeholder { color: #AAAAAA; }
+    .search-wrap input:focus {
+      border-color: #CCCCCC;
+      box-shadow: 0 0 0 3px rgba(0,0,0,0.05);
+    }
+    .search-btn {
+      width: 42px; height: 42px;
+      border-radius: 50%;
+      border: none;
+      background: #8B5CF6;
+      color: #FFFFFF;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: background 0.15s;
+    }
+    .search-btn:hover { background: #7C3AED; }
+    .search-btn svg { width: 18px; height: 18px; }
 
+    /* Ícones do topbar */
     .topbar-actions {
       display: flex;
       align-items: center;
-      gap: 4px;
-      margin-left: auto;
+      gap: 8px;
+    }
+    .topbar-actions .icon-btn {
+      width: 42px; height: 42px;
+      background: #FFFFFF;
+      border: 1.5px solid #EEEEEE;
+      border-radius: 50%;
+      color: #555555;
+    }
+    .topbar-actions .icon-btn:hover {
+      background: #F5F5F5;
+      border-color: #DDDDDD;
+      color: #1A1A1A;
+    }
+
+    /* Badge de notificação */
+    .notif-wrap {
+      position: relative;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .notif-badge {
+      position: absolute;
+      top: 6px; right: 6px;
+      width: 9px; height: 9px;
+      background: #EF4444;
+      border-radius: 50%;
+      border: 2px solid var(--canvas-page);
+      pointer-events: none;
     }
 
     .icon-btn {
@@ -268,72 +354,48 @@
     }
 
     /* ─────────────────── HERO ─────────────────── */
-    .hero {
-      background: linear-gradient(135deg, #051f20 0%, #163832 55%, #235347 100%);
-      border-radius: var(--radius-lg);
-      padding: 36px 44px;
-      position: relative;
-      overflow: hidden;
-      margin-bottom: 24px;
+    /* ─────────────────── PAGE GREETING ─────────────────── */
+    .page-greeting {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 28px;
+      gap: 16px;
     }
-    .hero::after {
-      content: "";
-      position: absolute;
-      width: 320px; height: 320px;
-      border-radius: 50%;
-      border: 56px solid rgba(255,255,255,0.07);
-      right: -60px; top: -90px;
-      pointer-events: none;
-    }
-    .hero::before {
-      content: "";
-      position: absolute;
-      width: 180px; height: 180px;
-      border-radius: 50%;
-      border: 32px solid rgba(255,255,255,0.05);
-      right: 140px; bottom: -60px;
-      pointer-events: none;
-    }
-
-    .hero-title {
-      font-family: "SF Pro Display", system-ui, -apple-system, sans-serif;
-      font-size: 32px;
+    .pg-title {
+      font-size: 30px;
       font-weight: 700;
-      color: var(--on-dark);
-      letter-spacing: -0.374px;
-      line-height: 1.14;
-      margin-bottom: 8px;
+      color: var(--primary);
+      line-height: 1.2;
+      margin-bottom: 4px;
     }
-    .hero-desc {
-      font-size: 15px;
-      font-weight: 400;
-      color: var(--on-dark-muted);
-      letter-spacing: -0.224px;
-      line-height: 1.5;
-      margin-bottom: 24px;
+    .pg-sub {
+      font-size: 16px;
+      color: #8A8A8A;
+      font-style: italic;
     }
-    .hero-btn {
+    .btn-primary {
       display: inline-flex;
       align-items: center;
-      gap: 7px;
-      height: 42px;
-      padding: 0 22px;
-      background: var(--canvas);
+      gap: 8px;
+      height: 40px;
+      padding: 0 20px;
+      background: var(--primary);
       border: none;
       border-radius: var(--radius-pill);
       font-family: inherit;
       font-size: 14px;
       font-weight: 600;
-      color: var(--primary-dark);
+      color: #fff;
       letter-spacing: -0.224px;
       cursor: pointer;
       text-decoration: none;
-      transition: background 0.15s, transform 0.1s;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+      transition: background 0.15s;
+      white-space: nowrap;
+      flex-shrink: 0;
     }
-    .hero-btn:hover { background: #f0f6f2; }
-    .hero-btn:active { transform: scale(0.97); }
-    .hero-btn svg { width: 16px; height: 16px; }
+    .btn-primary:hover { background: var(--primary-dark); }
+    .btn-primary svg { width: 16px; height: 16px; }
 
     /* ─────────────────── STATS ROW ─────────────────── */
     .stats-row {
@@ -356,13 +418,13 @@
       user-select: none;
     }
     .stat-card:hover {
-      box-shadow: 0 4px 16px rgba(35,83,71,0.10);
-      border-color: rgba(35,83,71,0.25);
+      box-shadow: 0 4px 16px rgba(151,71,255,0.10);
+      border-color: rgba(151,71,255,0.25);
     }
     .stat-card:active { transform: scale(0.98); }
     .stat-card.active-filter {
       border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(35,83,71,0.10);
+      box-shadow: 0 0 0 3px rgba(151,71,255,0.10);
     }
     .stat-card.active-filter .stat-value { color: var(--primary); }
 
@@ -373,12 +435,12 @@
       flex-shrink: 0;
     }
     .stat-icon svg { width: 26px; height: 26px; }
-    .stat-icon.dark-teal  { background: #8eb69b; color: #fff; }
-    .stat-icon.mid-teal   { background: rgba(35,83,71,0.15); color: var(--primary); }
-    .stat-icon.light-green { background: rgba(142,182,155,0.14); color: #235347; }
+    .stat-icon.dark-teal  { background: #DDD6FE; color: #fff; }
+    .stat-icon.mid-teal   { background: rgba(151,71,255,0.15); color: var(--primary); }
+    .stat-icon.light-green { background: rgba(142,182,155,0.14); color: #8B5CF6; }
 
     .stat-value {
-      font-family: "SF Pro Display", system-ui, -apple-system, sans-serif;
+      font-family: sans-serif;
       font-size: 28px;
       font-weight: 600;
       color: var(--ink);
@@ -397,25 +459,41 @@
     .list-card {
       background: var(--canvas);
       border: 1px solid var(--hairline);
-      border-radius: var(--radius-lg);
+      border-radius: 20px;
       overflow: hidden;
+    }
+    .list-card:hover {
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06) !important;
+      transform: none !important;
     }
 
     .list-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 20px 24px;
-      border-bottom: 1px solid var(--hairline);
+      padding: 18px 24px;
+      border-bottom: 1px solid #F0EEFF;
       gap: 16px;
+      flex-wrap: wrap;
+      background: #FAFAFE;
+      border-radius: 20px 20px 0 0;
     }
 
     .list-title {
-      font-family: "SF Pro Display", system-ui, -apple-system, sans-serif;
-      font-size: 18px;
-      font-weight: 600;
-      color: var(--ink);
-      letter-spacing: -0.374px;
+      font-size: 16px;
+      font-weight: 700;
+      color: #8B5CF6;
+      letter-spacing: -0.2px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .list-title::before {
+      content: '';
+      display: inline-block;
+      width: 4px; height: 18px;
+      background: #8B5CF6;
+      border-radius: 99px;
     }
 
     .list-controls {
@@ -585,7 +663,7 @@
     }
     .mc-stat + .mc-stat { border-left: 1px solid var(--hairline); }
     .mc-stat-value {
-      font-family: "SF Pro Display", system-ui, -apple-system, sans-serif;
+      font-family: sans-serif;
       font-size: 22px;
       font-weight: 600;
       color: var(--primary);
@@ -706,14 +784,14 @@
     .btn-desarquivar {
       display: flex; align-items: center; gap: 6px;
       height: 34px; padding: 0 14px;
-      background: rgba(35,83,71,0.08);
-      border: 1.5px solid rgba(35,83,71,0.20);
+      background: rgba(151,71,255,0.08);
+      border: 1.5px solid rgba(151,71,255,0.20);
       border-radius: var(--radius-pill);
       font-size: 13px; font-weight: 500;
       color: var(--primary); font-family: inherit;
       cursor: pointer; transition: background 0.12s;
     }
-    .btn-desarquivar:hover { background: rgba(35,83,71,0.14); }
+    .btn-desarquivar:hover { background: rgba(151,71,255,0.14); }
     .btn-desarquivar svg { width: 14px; height: 14px; }
 
     /* Table view */
@@ -769,7 +847,7 @@
 
     /* Drawer header — gradiente teal */
     .drawer-header {
-      background: linear-gradient(135deg, #051f20 0%, #163832 60%, #235347 100%);
+      background: linear-gradient(135deg, #0a0a0a 0%, #8B5CF6 60%, #DDD6FE 100%);
       padding: 28px 32px 24px;
       display: flex;
       align-items: flex-start;
@@ -778,7 +856,7 @@
     }
     .drawer-header-text {}
     .drawer-title {
-      font-family: "SF Pro Display", system-ui, -apple-system, sans-serif;
+      font-family: sans-serif;
       font-size: 22px;
       font-weight: 700;
       color: #fff;
@@ -795,7 +873,7 @@
     .drawer-close {
       width: 36px; height: 36px;
       border: none;
-      background: #8eb69b;
+      background: #DDD6FE;
       border-radius: var(--radius-pill);
       cursor: pointer;
       display: flex; align-items: center; justify-content: center;
@@ -842,7 +920,7 @@
     .field-input::placeholder { color: var(--ink-subtle); }
     .field-input:focus {
       border-color: var(--primary-focus);
-      box-shadow: 0 0 0 3px rgba(35,83,71,0.10);
+      box-shadow: 0 0 0 3px rgba(151,71,255,0.10);
     }
     .field-input.error { border-color: #ff3b30; }
     .field-textarea {
@@ -911,7 +989,7 @@
       text-align: center;
     }
     .confirm-title {
-      font-family: "SF Pro Display", system-ui, -apple-system, sans-serif;
+      font-family: sans-serif;
       font-size: 17px;
       font-weight: 600;
       color: var(--ink);
@@ -980,14 +1058,14 @@
     .success-icon {
       width: 72px; height: 72px;
       border-radius: 50%;
-      background: rgba(35,83,71,0.10);
+      background: rgba(151,71,255,0.10);
       display: flex; align-items: center; justify-content: center;
       margin-bottom: 8px;
     }
     .success-icon svg { width: 34px; height: 34px; color: var(--primary); }
 
     .success-title {
-      font-family: "SF Pro Display", system-ui, -apple-system, sans-serif;
+      font-family: sans-serif;
       font-size: 20px;
       font-weight: 600;
       color: var(--ink);
@@ -1020,7 +1098,7 @@
       letter-spacing: -0.224px;
       transition: background 0.12s;
     }
-    .btn-success-continue:hover { background: rgba(35,83,71,0.06); }
+    .btn-success-continue:hover { background: rgba(151,71,255,0.06); }
     .btn-success-done {
       height: 50px;
       width: 100%;
@@ -1078,97 +1156,449 @@
     }
     .btn-drawer-save:hover { background: var(--primary-dark); }
     .btn-drawer-save:active { transform: scale(0.97); }
-  </style>
+  
+    
+    /* ══════════════════════════════════════════════════════
+       DESIGN UPDATE — Tokens minimalistas (todas as páginas)
+       ══════════════════════════════════════════════════════ */
+
+    /* ── Fundo da página ── */
+    :root { --canvas-page: #ECE9E7; }
+    body  { background: #ECE9E7; }
+
+    /* ── Stat cards ── */
+    .stat-card {
+      background: #FFFFFF !important;
+      border: 1px solid #EEEEEE !important;
+      border-radius: 20px !important;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04) !important;
+      transition: box-shadow 0.22s, transform 0.18s, border-color 0.22s !important;
+    }
+    .stat-card:hover {
+      box-shadow: 0 6px 24px rgba(139,92,246,0.22) !important;
+      border-color: rgba(139,92,246,0.30) !important;
+      transform: translateY(-2px) !important;
+    }
+    .stat-value {
+      font-size: 2rem !important;
+      font-weight: 700 !important;
+      color: #8B5CF6 !important;
+      letter-spacing: -0.5px !important;
+      line-height: 1 !important;
+    }
+    .stat-icon.dark-teal  { background: #EDE9FE !important; color: #8B5CF6 !important; }
+    .stat-icon.mid-teal   { background: #EDE9FE !important; color: #8B5CF6 !important; }
+    .stat-icon.light-green { background: #EDE9FE !important; color: #8B5CF6 !important; }
+    .stat-label {
+      font-size: 12px !important;
+      font-weight: 500 !important;
+      color: #8A8A8A !important;
+      text-transform: uppercase !important;
+      letter-spacing: 0.5px !important;
+      margin-top: 6px !important;
+    }
+
+    /* ── Títulos de seção ── */
+    .section-title, .page-title {
+      font-size: 18px !important;
+      font-weight: 700 !important;
+      color: #1A1A1A !important;
+      letter-spacing: -0.3px !important;
+    }
+    .card-title {
+      font-size: 15px !important;
+      font-weight: 700 !important;
+      color: #1A1A1A !important;
+    }
+
+    /* ── Cards de conteúdo (detalhe) ── */
+    .detail-card, .content-card, .section-card, .review-info-card,
+    .profile-card, .aside-card, .pontuacao-card, .setting-card,
+    .accordion-card, .summary-card, .card-link-block {
+      background: #FFFFFF !important;
+      border: 1px solid #EEEEEE !important;
+      border-radius: 20px !important;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04) !important;
+    }
+
+    /* ── Cards de lista / item (com hover) ── */
+    .list-card, .ministry-card, .dept-card, .func-card,
+    .template-card, .bloco-card, .dispon-card, .type-card,
+    .ev-card, .lds-card, .option-card, .check-card,
+    .pending-card-click {
+      background: #FFFFFF !important;
+      border: 1px solid #EEEEEE !important;
+      border-radius: 20px !important;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04) !important;
+      transition: box-shadow 0.2s, transform 0.2s !important;
+    }
+    .list-card:hover, .ministry-card:hover, .dept-card:hover, .func-card:hover,
+    .template-card:hover, .bloco-card:hover, .dispon-card:hover, .type-card:hover,
+    .ev-card:hover, .lds-card:hover, .option-card:hover, .check-card:hover,
+    .pending-card-click:hover {
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08) !important;
+      transform: translateY(-2px) !important;
+    }
+
+    /* ── Cabeçalho de card ── */
+    .card-header {
+      border-bottom: 1px solid #EEEEEE !important;
+    }
+
+    /* ── Escalação: cards de departamento ── */
+    .dept-card-header {
+      background: #ECE9E7 !important;
+      border-bottom: 1px solid #EEEEEE !important;
+      border-radius: 20px 20px 0 0 !important;
+    }
+
+    /* ── Badges de data ── */
+    .event-date-badge, .ev-card-day, .ev-card-badge {
+      background: #7C3AED !important;
+      border-radius: 12px !important;
+    }
+
+    /* ── ministry-card: visual igual ao dept-card ── */
+    .ministry-card {
+      background: #FFFFFF !important;
+      border: 1px solid #EEEEEE !important;
+      border-top: 3px solid #8B5CF6 !important;
+      border-radius: 20px !important;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04) !important;
+      transition: box-shadow 0.22s, transform 0.18s, border-color 0.22s !important;
+      overflow: hidden !important;
+      cursor: pointer;
+    }
+    .ministry-card:hover {
+      box-shadow: 0 8px 30px rgba(139,92,246,0.20) !important;
+      border-color: rgba(139,92,246,0.35) !important;
+      transform: translateY(-3px) !important;
+    }
+    .ministry-card.archived { border-top-color: #C4B5FD !important; opacity: 0.72 !important; }
+    .mc-top { padding: 16px 18px 14px !important; }
+    .mc-icon {
+      width: 46px !important; height: 46px !important;
+      border-radius: 12px !important;
+      background: #EDE9FE !important;
+      color: #8B5CF6 !important;
+    }
+    .mc-icon svg { color: #8B5CF6 !important; stroke: #8B5CF6 !important; }
+    .mc-name { font-size: 15px !important; font-weight: 700 !important; color: #8B5CF6 !important; }
+    .mc-status {
+      display: inline-flex !important; align-items: center !important;
+      background: rgba(139,92,246,0.10) !important; color: #8B5CF6 !important;
+      border-radius: 99px !important; padding: 0 9px !important;
+      font-size: 10px !important; font-weight: 700 !important; height: 20px !important; letter-spacing: 0.5px !important;
+    }
+    .mc-stats {
+      display: flex !important;
+      background: #ffffff !important;
+      border-top: 1px solid #F0EEFF !important;
+      border-bottom: none !important;
+    }
+    .mc-stat {
+      flex: 1 !important; display: flex !important; flex-direction: column !important;
+      align-items: center !important; justify-content: center !important; padding: 12px 8px !important;
+    }
+    .mc-stat + .mc-stat { border-left: 1px solid #aeaeb2 !important; }
+    .mc-stat-value { font-size: 13px !important; font-weight: 600 !important; color: #8B5CF6 !important; line-height: 1 !important; }
+    .mc-stat-label { font-size: 13px !important; font-weight: 600 !important; color: #8A8A8A !important; text-transform: uppercase !important; letter-spacing: 0.5px !important; margin-top: 0 !important; }
+    .mc-leader-name { font-size: 13px !important; font-weight: 600 !important; color: #8B5CF6 !important; }
+    .mc-leader-tag { font-size: 13px !important; font-weight: 600 !important; color: #AAAAAA !important; text-transform: uppercase !important; letter-spacing: 0.5px !important; margin: 0 !important; }
+
+    /* ── Tabelas ── */
+    .table-wrap, .table-container {
+      background: #FFFFFF !important;
+      border: 1px solid #EEEEEE !important;
+      border-radius: 20px !important;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04) !important;
+      overflow: hidden !important;
+    }
+    thead th {
+      font-size: 11px !important;
+      font-weight: 600 !important;
+      color: #8A8A8A !important;
+      text-transform: uppercase !important;
+      letter-spacing: 0.5px !important;
+      background: #ECE9E7 !important;
+    }
+
+    /* ── Painel lateral (detalhe) ── */
+    .right-panel {
+      background: #FFFFFF !important;
+      border-left: 1px solid #EEEEEE !important;
+    }
+
+    /* ══════════════════════════════════════════════════════
+       FIM DESIGN UPDATE
+       ══════════════════════════════════════════════════════ */
+    /* ══════════════════════════════════════════════════════
+       SIDEBAR REDESIGN — Floating pill dark
+       ══════════════════════════════════════════════════════ */
+    :root { --sidebar-w: 60px; }
+
+    /* ── Estrutura base ── */
+    .sidebar {
+      width: 60px !important;
+      background: #1c1c1c !important;
+      border-radius: 24px !important;
+      top: 16px !important;
+      bottom: 16px !important;
+      left: 12px !important;
+      min-height: unset !important;
+      height: auto !important;
+      padding: 16px 8px !important;
+      align-items: center !important;
+      overflow: visible !important;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.18) !important;
+      border-right: none !important;
+    }
+
+    /* ── Logo ── */
+    .sidebar-logo { display: none !important; }
+    .logo-text    { display: none !important; }
+
+    /* ── Nav ── */
+    .sidebar-nav {
+      padding: 0 !important;
+      align-items: center !important;
+      gap: 4px !important;
+      overflow: visible !important;
+      flex-direction: column !important;
+    }
+    .nav-item {
+      width: 44px !important; height: 44px !important;
+      min-height: 44px !important;
+      padding: 10px !important;
+      border-radius: 14px !important;
+      color: rgba(255,255,255,0.5) !important;
+      justify-content: center !important;
+      gap: 0 !important;
+      background: none !important;
+      letter-spacing: 0 !important;
+    }
+    .nav-item span { display: none !important; }
+    .nav-item svg {
+      width: 20px !important; height: 20px !important;
+      opacity: 1 !important; flex-shrink: 0 !important;
+    }
+    .nav-item:hover {
+      background: rgba(255,255,255,0.1) !important;
+      color: rgba(255,255,255,0.9) !important;
+    }
+    .nav-item.active {
+      background: #FFFFFF !important;
+      color: #1A1A1A !important;
+    }
+    .nav-item.active svg { opacity: 1 !important; }
+
+    /* ── Transição suave ── */
+    .sidebar { transition: transform 0.25s cubic-bezier(.4,0,.2,1), opacity 0.25s !important; }
+    .main    { transition: margin-left 0.25s cubic-bezier(.4,0,.2,1) !important; }
+
+    /* ── Collapsed: sidebar sai pela esquerda ── */
+    body.sidebar-collapsed .sidebar {
+      transform: translateX(calc(-100% - 20px)) !important;
+      opacity: 0 !important;
+      pointer-events: none !important;
+    }
+    body.sidebar-collapsed .main { margin-left: 16px !important; }
+    /* ── Quando collapsed: empurra conteúdo à direita do botão restaurar ── */
+    body.sidebar-collapsed .content {
+      padding-left: 60px !important;
+    }
+    body.sidebar-collapsed .topbar {
+      padding-left: 64px !important;
+    }
+
+
+    /* ── Botão flutuante para restaurar sidebar ── */
+    .sidebar-restore-btn {
+      display: none;
+      position: fixed;
+      top: 20px; left: 16px;
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      background: #1c1c1c;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      align-items: center; justify-content: center;
+      z-index: 200;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      transition: background 0.15s;
+    }
+    .sidebar-restore-btn:hover { background: #333; }
+    .sidebar-restore-btn svg { width: 18px; height: 18px; }
+    body.sidebar-collapsed .sidebar-restore-btn { display: flex; }
+
+    /* ── Main area offset ── */
+    .main { margin-left: 84px !important; }
+
+    /* ── Rodapé da sidebar ── */
+    .sidebar > div:last-child, .sidebar-footer {
+      border-top: none !important;
+      background: none !important;
+      padding: 0 !important;
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      justify-content: center !important;
+      gap: 8px !important;
+      margin-top: auto !important;
+      width: 100% !important;
+    }
+    .sidebar .icon-btn {
+      width: 40px !important; height: 40px !important;
+      border-radius: 50% !important;
+      color: rgba(255,255,255,0.7) !important;
+      background: rgba(255,255,255,0.08) !important;
+      border: none !important;
+      flex-shrink: 0 !important;
+    }
+    .sidebar .icon-btn:hover {
+      background: rgba(255,255,255,0.16) !important;
+      color: #FFFFFF !important;
+    }
+    /* ══════════════════════════════════════════════════════ */
+
+    /* ── Avatar no rodapé da sidebar ── */
+    .sidebar-footer {
+      padding-top: 8px !important;
+      border-top: 1px solid rgba(255,255,255,0.08) !important;
+    }
+    .sidebar .avatar-menu-wrap {
+      position: relative !important;
+      margin: 0 !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+    }
+    .sidebar .avatar {
+      width: 40px !important; height: 40px !important;
+      border-radius: 50% !important;
+      font-size: 13px !important;
+      margin-left: 0 !important;
+      cursor: pointer !important;
+      box-shadow: 0 0 0 2px rgba(255,255,255,0.15) !important;
+    }
+    .sidebar .avatar-dropdown {
+      position: fixed !important;
+      left: 84px !important;
+      bottom: 16px !important;
+      top: auto !important;
+      right: auto !important;
+      transform: translateX(-8px) !important;
+      transition: opacity 0.15s, transform 0.15s !important;
+    }
+    .sidebar .avatar-dropdown.open {
+      transform: translateX(0) !important;
+      opacity: 1 !important;
+      pointer-events: auto !important;
+    }
+  
+    /* ── Notif Dropdown ── */
+    .notif-badge{position:absolute;top:-4px;right:-4px;background:#E85D6A;color:#fff;border-radius:50%;width:18px;height:18px;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;pointer-events:none;}
+    .notif-dropdown{position:absolute;top:48px;right:0;width:360px;background:#fff;border-radius:16px;border:1px solid #E8E5E2;box-shadow:0 8px 32px rgba(0,0,0,0.12);z-index:300;display:none;overflow:hidden;}
+    .notif-dropdown.open{display:block;}
+    .notif-header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid #F5F3F0;}
+    .notif-list{max-height:360px;overflow-y:auto;}
+    .notif-item{padding:12px 16px;border-bottom:1px solid #F5F3F0;cursor:pointer;display:flex;gap:12px;align-items:flex-start;transition:background 0.1s;}
+    .notif-item:hover{background:#F5F3F0;}
+    .notif-item.unread{background:rgba(145,86,241,0.06);}
+    .notif-icon{width:36px;height:36px;border-radius:50%;background:#EDE5FF;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#9156F1;}
+    .notif-content{flex:1;min-width:0;}
+    .notif-title{font-weight:600;font-size:13px;color:#1C1C1C;margin-bottom:2px;}
+    .notif-body{font-size:12px;color:#5C5955;line-height:1.4;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .notif-time{font-size:11px;color:#9E9B96;}
+    .notif-footer{padding:10px 16px;border-top:1px solid #F5F3F0;text-align:center;}
+    </style>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/responsive.css">
 </head>
 <body>
 <script>if(localStorage.getItem('sidebar-collapsed')==='1')document.body.classList.add('sidebar-collapsed')</script>
 
   <!-- ── Sidebar ── -->
   <aside class="sidebar">
-    <div class="sidebar-logo">
-      <div class="logo-mark">
-        <img src="/IMG/logo.png" alt="Logo" style="width:52px;height:52px;object-fit:contain;">
-      </div>
-      <div class="logo-text" id="churchName"></div>
-    </div>
 
     <nav class="sidebar-nav">
-      <a class="nav-item" href="/dashboard">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-        <span>Dashboard</span>
-      </a>
-      <a class="nav-item active" href="/ministerios">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-        <span>Ministérios</span>
-      </a>
-      <a class="nav-item" href="/departamentos">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-        <span>Departamentos</span>
-      </a>
-      <a class="nav-item" href="#">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-        <span>Templates</span>
-      </a>
-      <a class="nav-item" href="#">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-        <span>Eventos</span>
-      </a>
-      <a class="nav-item" href="#">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-        <span>Escalação</span>
-      </a>
-      <a class="nav-item" href="#">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
-        <span>Músicas</span>
-      </a>
-      <a class="nav-item" href="#">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-        <span>Voluntários</span>
-      </a>
-      <a class="nav-item" href="#">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-        <span>Líderes</span>
-      </a>
-      <a class="nav-item" href="#">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <span>Triagem</span>
-      </a>
-      <a class="nav-item" href="#">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-        <span>Presença</span>
-      </a>
-      <a class="nav-item" href="#">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-        <span>Gamificação</span>
-      </a>
-      <a class="nav-item" href="#">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-        <span>Relatórios</span>
-      </a>
-      <a class="nav-item" href="/configuracoes">
+      <a class="nav-item" href="/configuracoes" data-tooltip="Configurações" data-menu="configuracoes">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
         <span>Configurações</span>
       </a>
-    </nav>
+      <a class="nav-item" data-tooltip="Dashboard" data-menu="dashboard" href="/dashboard">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        <span>Dashboard</span>
+      </a>
+      <a class="nav-item" href="/departamentos" data-tooltip="Departamentos" data-menu="departamentos">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><path d="M2 12h20"/></svg>
+        <span>Departamentos</span>
+      </a>
+      <a class="nav-item" href="/escalacoes" data-tooltip="Escalações" data-menu="escalacao">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></svg>
+        <span>Escalação</span>
+      </a>
+      <a class="nav-item" href="/eventos" data-tooltip="Eventos" data-menu="eventos">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <span>Eventos</span>
+      </a>
+      <a class="nav-item" href="/indisponibilidade" data-tooltip="Indisponibilidade" data-menu="indisponibilidade">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M10 14l4 4"/><path d="M14 14l-4 4"/></svg>
+        <span>Indisponibilidade</span>
+      </a>
+      <a class="nav-item active" href="/ministerios" data-tooltip="Ministérios" data-menu="ministerios">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4"/><path d="M10 4h4"/><path d="M3 11l9-7 9 7"/><rect x="5" y="11" width="14" height="10" rx="1"/><path d="M10 21v-5h4v5"/></svg>
+        <span>Ministérios</span>
+      </a>
+      <a class="nav-item" href="/musicas" data-tooltip="Músicas" data-menu="musicas">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+        <span>Músicas</span>
+      </a>
+      <a class="nav-item" href="/templates" data-tooltip="Templates" data-menu="templates">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+        <span>Templates</span>
+      </a>      <a class="nav-item" href="/voluntarios" data-tooltip="Voluntários" data-menu="voluntarios">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span>Voluntários</span>
+      </a>      <a class="nav-item" href="/notificacoes" data-tooltip="Notificações" data-menu="notificacoes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span>Notificações</span></a>
+</nav>
   </aside>
 
   <!-- ── Main ── -->
   <div class="main">
 
+
     <!-- Topbar -->
     <header class="topbar">
-      <div class="search-wrap">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input type="text" placeholder="Buscar eventos, voluntários..." />
-      </div>
 
+      <!-- Direita: search + ícones -->
       <div class="topbar-actions">
-        <button class="icon-btn" title="Notificações">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-        </button>
-        <button class="icon-btn" title="Configurações" onclick="window.location.href='/configuracoes'">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-        </button>
+        <!-- Search pill + botão -->
+        <div class="search-wrap">
+          <input type="text" placeholder="Search..." id="topSearch" />
+          <button class="search-btn" title="Buscar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          </button>
+        </div>
+
+        <!-- Notificações -->
+        <div class="notif-wrapper" style="position:relative;">
+          <button class="icon-btn notif-btn" id="notifBtn" title="Notificações">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            <span class="notif-badge" id="notifBadge" style="display:none">0</span>
+          </button>
+          <div class="notif-dropdown" id="notifDropdown">
+            <div class="notif-header">
+              <span style="font-weight:600;font-size:14px">Notificações</span>
+              <button id="markAllRead" style="font-size:12px;color:#9156F1;background:none;border:none;cursor:pointer;font-family:inherit">Marcar todas como lidas</button>
+            </div>
+            <div class="notif-list" id="notifList"></div>
+            <div class="notif-footer"><a href="/notificacoes" style="font-size:13px;color:#9156F1;text-decoration:none">Ver todas</a></div>
+          </div>
+        </div>
+
+        <!-- Collapse + avatar movidos pelo sidebar-ui.js -->
         <button class="icon-btn" id="collapseBtn" title="Recolher menu">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="transition:transform 0.22s"><polyline points="11 17 6 12 11 7"/><polyline points="18 17 13 12 18 7"/></svg>
         </button>
@@ -1183,12 +1613,12 @@
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
               Editar Perfil
             </a>
-            <a class="dropdown-item" href="/configuracoes">
+            <a class="dropdown-item" href="/configuracoes" data-menu-dropdown="configuracoes">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
               Configurações
             </a>
             <div class="dropdown-divider"></div>
-            <a class="dropdown-item danger" href="#" id="logoutBtn">
+            <a class="dropdown-item danger" href="#" onclick="fazerLogout(event)">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
               Sair
             </a>
@@ -1200,11 +1630,13 @@
     <!-- Content -->
     <main class="content">
 
-      <!-- Hero -->
-      <div class="hero">
-        <div class="hero-title">Ministérios</div>
-        <div class="hero-desc">Gerencie os ministérios da sua igreja.</div>
-        <button class="hero-btn" id="btnNovoMinisterio">
+      <!-- Page Greeting -->
+      <div class="page-greeting">
+        <div>
+          <div class="pg-title">Ministérios</div>
+          <div class="pg-sub">Gerencie os ministérios da sua igreja.</div>
+        </div>
+        <button class="btn-primary" id="btnNovoMinisterio">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           Novo Ministério
         </button>
@@ -1212,16 +1644,7 @@
 
       <!-- Stats -->
       <div class="stats-row">
-        <div class="stat-card active-filter" id="cardTodos" onclick="setFiltro('todos')">
-          <div class="stat-icon dark-teal">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-          </div>
-          <div>
-            <div class="stat-value" id="statMinisterios">0</div>
-            <div class="stat-label">Total de Ministérios</div>
-          </div>
-        </div>
-        <div class="stat-card" id="cardAtivos" onclick="setFiltro('ativos')">
+        <div class="stat-card active-filter" id="cardAtivos" onclick="setFiltro('ativos')">
           <div class="stat-icon mid-teal">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
           </div>
@@ -1274,7 +1697,7 @@
 
         <!-- Empty state (padrão quando não há ministérios) -->
         <div class="list-empty" id="emptyState">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4"/><path d="M10 4h4"/><path d="M3 11l9-7 9 7"/><rect x="5" y="11" width="14" height="10" rx="1"/><path d="M10 21v-5h4v5"/></svg>
           <div class="list-empty-text">Nenhum ministério encontrado</div>
         </div>
 
@@ -1363,7 +1786,7 @@
   <div class="confirm-overlay" id="archiveOverlay">
     <div class="confirm-modal">
       <div class="confirm-icon-wrap">
-        <div class="confirm-icon" style="background:#f0f6f2">
+        <div class="confirm-icon" style="background:#ECE9E7">
           <svg viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8v13H3V8"/><path d="M1 3h22v5H1z"/><path d="M10 12h4"/></svg>
         </div>
       </div>
@@ -1398,9 +1821,18 @@
   </div>
 
   <script src="/js/auth-fetch.js"></script>
+  <script src="/js/sidebar-permissions.js"></script>
+    <script src="/js/sidebar-ui.js"></script>
   <script>
     const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
     const igreja  = JSON.parse(localStorage.getItem('igreja')  || '{}');
+    const isLiderDept = (usuario.perfil_slug || localStorage.getItem('perfil_slug') || '') === 'lider_departamento';
+
+    // ── Restrição imediata para lider_departamento ──
+    if (isLiderDept) {
+      const btn = document.getElementById('btnNovoMinisterio');
+      if (btn) btn.style.display = 'none';
+    }
 
     // Church name na sidebar
     const churchNameEl = document.getElementById('churchName');
@@ -1412,6 +1844,7 @@
     }
     if (usuario.nome) {
       document.getElementById('avatarBtn').textContent     = getInitial(usuario.nome);
+      ;(function(){ var _u=JSON.parse(localStorage.getItem('usuario')||'{}'); if(_u && _u.avatar){ var _el=document.getElementById('avatarBtn'); if(_el) _el.innerHTML='<img src="'+_u.avatar+'" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%">'; } })();
       document.getElementById('dropdownName').textContent  = usuario.nome;
       document.getElementById('dropdownEmail').textContent = usuario.email || '';
     }
@@ -1420,7 +1853,7 @@
     if (localStorage.getItem('sidebar-collapsed') === '1') {
       document.body.classList.add('sidebar-collapsed');
     }
-    document.getElementById('collapseBtn').addEventListener('click', () => {
+    (document.getElementById('collapseBtn')||{addEventListener:()=>{}}).addEventListener('click', () => {
       document.body.classList.toggle('sidebar-collapsed');
       localStorage.setItem('sidebar-collapsed', document.body.classList.contains('sidebar-collapsed') ? '1' : '0');
     });
@@ -1432,20 +1865,16 @@
     document.addEventListener('click', () => avatarDropdown.classList.remove('open'));
 
     // Logout
-    document.getElementById('logoutBtn').addEventListener('click', async e => {
+    const _lBtn = document.getElementById('logoutBtn'); if (_lBtn) _lBtn.addEventListener('click', e => {
       e.preventDefault();
-      try { await authFetch('/api/auth/logout', { method: 'POST' }); } catch (_) {}
-      localStorage.clear();
-      window.location.href = '/';
+      clearSession();
     });
 
     // ── Filtro ──
-    let filtroAtivo = 'todos';
+    let filtroAtivo = 'ativos';
 
     function setFiltro(f) {
       filtroAtivo = f;
-      // stat cards
-      document.getElementById('cardTodos').classList.toggle('active-filter',      f === 'todos');
       document.getElementById('cardAtivos').classList.toggle('active-filter',     f === 'ativos');
       document.getElementById('cardArquivados').classList.toggle('active-filter', f === 'arquivados');
       renderLista(document.getElementById('searchMinisterios').value);
@@ -1478,7 +1907,6 @@
     function renderStats() {
       const arquivados = ministerios.filter(m => m.is_active === false).length;
       const ativos     = ministerios.length - arquivados;
-      document.getElementById('statMinisterios').textContent = ministerios.length;
       document.getElementById('statAtivos').textContent      = ativos;
       document.getElementById('statArquivados').textContent  = arquivados;
     }
@@ -1501,71 +1929,45 @@
 
       // Grid
       gridView.innerHTML = lista.map(m => {
-        const iconColor  = m.color || '#8eb69b';
+        const iconColor  = m.color || '#DDD6FE';
         const lider      = m.leader_name || m.lider || '';
         const initial    = lider ? lider[0].toUpperCase() : '';
         const arquivado  = m.is_active === false;
         const deptCount  = _departments.filter(d => d.ministry_id === m.id && d.is_active !== false).length;
         return `
-        <div class="ministry-card${arquivado ? ' archived' : ''}">
-          <div class="mc-clickable" onclick="window.location.href='/ministerio/${m.id}'">
-            <div class="mc-top">
-              <div class="mc-icon" style="background:${iconColor}">
-                <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-              </div>
-              <div class="mc-info">
-                <div class="mc-name" style="display:flex;align-items:center;gap:8px">
-                  ${m.name}
-                  ${arquivado ? '<span class="archived-badge">Arquivado</span>' : ''}
-                </div>
-                ${m.description ? `<div class="mc-desc">${m.description}</div>` : ''}
-              </div>
+        <div class="ministry-card${arquivado ? ' archived' : ''}" onclick="window.location.href='/ministerio/${m.id}'">
+          <div class="mc-top">
+            <div class="mc-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4"/><path d="M10 4h4"/><path d="M3 11l9-7 9 7"/><rect x="5" y="11" width="14" height="10" rx="1"/><path d="M10 21v-5h4v5"/></svg>
             </div>
-            <div class="mc-stats">
-              <div class="mc-stat">
-                <div class="mc-stat-value">${deptCount}</div>
-                <div class="mc-stat-label">Departamentos</div>
-              </div>
-            </div>
-            <div class="mc-leader">
-              <div class="mc-leader-avatar" style="background:${lider ? iconColor : 'var(--canvas-input)'}; color:${lider ? '#fff' : 'var(--ink-subtle)'}">
-                ${lider ? initial : '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>'}
-              </div>
-              <div>
-                <div class="mc-leader-tag">Líder</div>
-                <div class="mc-leader-name" style="${!lider ? 'color:var(--ink-subtle);font-weight:400' : ''}">${lider || 'Não definido'}</div>
-              </div>
+            <div class="mc-info">
+              <div class="mc-name">${m.name}</div>
+              ${arquivado ? '<span class="archived-badge">Arquivado</span>' : '<span class="mc-status">Ativo</span>'}
             </div>
           </div>
-          <div class="mc-footer" onclick="event.stopPropagation()">
-            ${arquivado
-              ? `<button class="btn-desarquivar" onclick="desarquivarMinisterio('${m.id}', this)">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8v13H3V8"/><path d="M1 3h22v5H1z"/><path d="M10 12h4"/></svg>
-                  Restaurar
-                </button>`
-              : `<button class="btn-arquivar" onclick="abrirArquivar('${m.id}', this)">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8v13H3V8"/><path d="M1 3h22v5H1z"/><path d="M10 12h4"/></svg>
-                  Arquivar
-                </button>`
-            }
-            <button class="btn-excluir" onclick="excluirMinisterio('${m.id}', this)">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
-              Excluir
-            </button>
+          <div class="mc-stats">
+            <div class="mc-stat">
+              <div class="mc-stat-value">${deptCount}</div>
+              <div class="mc-stat-label">Departamentos</div>
+            </div>
+            <div class="mc-stat">
+              <div class="mc-leader-name" style="${!lider ? 'color:var(--ink-subtle)!important;font-weight:400!important' : ''}">${lider || 'Não definido'}</div>
+              <div class="mc-leader-tag">Líder</div>
+            </div>
           </div>
         </div>`;
       }).join('');
 
       // Table
       document.getElementById('tableBody').innerHTML = lista.map(m => {
-        const iconColor = m.color || '#8eb69b';
+        const iconColor = m.color || '#DDD6FE';
         const lider     = m.leader_name || m.lider || '';
         return `
         <tr>
           <td>
             <div style="display:flex;align-items:center;gap:12px">
               <div style="width:40px;height:40px;border-radius:10px;background:${iconColor};display:flex;align-items:center;justify-content:center;flex-shrink:0">
-                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4"/><path d="M10 4h4"/><path d="M3 11l9-7 9 7"/><rect x="5" y="11" width="14" height="10" rx="1"/><path d="M10 21v-5h4v5"/></svg>
               </div>
               <span style="font-weight:600;color:var(--ink)">${m.name}</span>
             </div>
@@ -1574,15 +1976,15 @@
             <span style="display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${m.description || '—'}</span>
           </td>
           <td>
-            <span style="display:inline-flex;align-items:center;justify-content:center;min-width:32px;height:28px;padding:0 10px;background:rgba(35,83,71,0.10);border-radius:9999px;font-size:13px;font-weight:600;color:var(--primary)">0</span>
+            <span style="display:inline-flex;align-items:center;justify-content:center;min-width:32px;height:28px;padding:0 10px;background:rgba(151,71,255,0.10);border-radius:9999px;font-size:13px;font-weight:600;color:var(--primary)">0</span>
           </td>
           <td style="color:var(--ink)">${lider || '<span style="color:var(--ink-subtle)">—</span>'}</td>
           <td>
             <div style="display:flex;align-items:center;gap:8px">
               <button style="height:32px;padding:0 14px;background:var(--canvas-input);border:none;border-radius:9999px;font-size:13px;font-weight:500;color:var(--ink);font-family:inherit;cursor:pointer;letter-spacing:-0.12px">Ver</button>
-              <button class="btn-excluir" style="height:32px;width:32px;padding:0;display:flex;align-items:center;justify-content:center" onclick="excluirMinisterio('${m.id}', this)">
+              ${isLiderDept ? '' : `<button class="btn-excluir" style="height:32px;width:32px;padding:0;display:flex;align-items:center;justify-content:center" onclick="excluirMinisterio('${m.id}', this)">
                 <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
-              </button>
+              </button>`}
             </div>
           </td>
         </tr>`;
@@ -1598,13 +2000,25 @@
 
     // ── Carregar ministérios da API ──
     async function carregarMinisterios() {
+      if (!await checkAuth()) return
       try {
+        const cachedMin  = CacheManager.get('ministerios')
+        const cachedDept = CacheManager.get('departamentos')
+        if (cachedMin && cachedDept) {
+          ministerios  = cachedMin
+          _departments = cachedDept
+          renderStats();
+          renderLista(document.getElementById('searchMinisterios').value);
+          return;
+        }
         const [mRes, dRes] = await Promise.all([
           authFetch('/api/ministry').then(r => r.json()),
           authFetch('/api/department').then(r => r.json()).catch(() => ({ departments: [] }))
         ]);
         ministerios   = mRes.ministries   || [];
         _departments  = dRes.departments  || [];
+        CacheManager.set('ministerios', ministerios)
+        CacheManager.set('departamentos', _departments)
         renderStats();
         renderLista(document.getElementById('searchMinisterios').value);
       } catch (err) {
@@ -1717,6 +2131,7 @@
           res  = await authFetch(`/api/ministry/${_editingId}`, { method: 'PUT', body: JSON.stringify(payload) });
           json = await res.json();
           if (!res.ok) throw new Error(json.error || 'Erro ao salvar');
+          CacheManager.invalidate('ministerios')
           const idx = ministerios.findIndex(m => m.id === _editingId);
           if (idx !== -1) ministerios[idx] = { ...ministerios[idx], ...json.ministry };
           renderStats();
@@ -1726,6 +2141,7 @@
           res  = await authFetch('/api/ministry', { method: 'POST', body: JSON.stringify(payload) });
           json = await res.json();
           if (!res.ok) throw new Error(json.error || 'Erro ao salvar');
+          CacheManager.invalidate('ministerios')
           ministerios.push(json.ministry);
           renderStats();
           renderLista(document.getElementById('searchMinisterios').value);
@@ -1787,6 +2203,7 @@
           if (btn) btn.disabled = false;
           return;
         }
+        CacheManager.invalidate('ministerios')
         window.location.reload();
       } catch (err) {
         fecharConfirm();
@@ -1832,6 +2249,7 @@
         });
         const json = await res.json();
         if (!res.ok) { mostrarToast(json.error || 'Erro ao arquivar'); return; }
+        CacheManager.invalidate('ministerios')
         const idx = ministerios.findIndex(m => m.id === id);
         if (idx !== -1) ministerios[idx].is_active = false;
         renderStats();
@@ -1855,6 +2273,7 @@
         });
         const json = await res.json();
         if (!res.ok) { mostrarToast(json.error || 'Erro ao restaurar'); btn.disabled = false; return; }
+        CacheManager.invalidate('ministerios')
         const idx = ministerios.findIndex(m => m.id === id);
         if (idx !== -1) ministerios[idx].is_active = true;
         renderStats();
@@ -1866,7 +2285,10 @@
     }
 
     // ── Init ──
-    carregarMinisterios();
+    carregarMinisterios().finally(() => window.hideLoader());
   </script>
+  <script src="/js/top-search.js"></script>
+  <script src="/js/mobile-sidebar.js"></script>
+<script src="/js/notif-ui.js"></script>
 </body>
 </html>

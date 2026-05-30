@@ -1,0 +1,1528 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hug Software — Cronograma</title>
+  <script src="/js/auth-check.js"></script>
+  <script src="/js/page-loader.js"></script>
+  <script src="/js/cache.js"></script>
+  <link rel="icon" type="image/png" href="/IMG/logo.png">
+  <style>
+    * { font-family: 'Plus Jakarta Sans', sans-serif !important; }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --primary:       #8B5CF6;
+      --primary-light: #DDD6FE;
+      --primary-dark:  #7C3AED;
+      --accent-green:  #34c759;
+      --accent-red:    #ff3b30;
+      --accent-blue:   #007aff;
+      --accent-yellow: #ff5500;
+      --ink:           #1d1d1f;
+      --ink-muted:     #6e6e73;
+      --ink-subtle:    #aeaeb2;
+      --canvas:        #ffffff;
+      --canvas-page: #ECE9E7;
+      --canvas-input:  #f2f2f7;
+      --hairline:      #e0e0e0;
+      --on-dark:       #ffffff;
+      --on-dark-muted: rgba(255,255,255,0.65);
+      --sidebar-w:     220px;
+      --topbar-h:      64px;
+      --radius-sm:     8px;
+      --radius-md:     12px;
+      --radius-lg:     18px;
+      --radius-pill:   9999px;
+    }
+    body {
+      min-height: 100vh; background: var(--canvas-page);
+      font-family: sans-serif;
+      -webkit-font-smoothing: antialiased; display: flex;
+    }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width: var(--sidebar-w); min-height: unset;
+      background: #1c1c1c;
+      display: flex; flex-direction: column; flex-shrink: 0;
+      position: fixed; top: 0; left: 0; bottom: 0;
+      z-index: 100; overflow: visible;
+      transition: width 0.22s cubic-bezier(.4,0,.2,1);
+    }
+    .sidebar-logo { display: flex; align-items: center; gap: 12px; padding: 24px 20px 28px; border-bottom: 1px solid rgba(255,255,255,0.08); transition: padding 0.22s, gap 0.22s; }
+    .logo-mark { width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .logo-text { font-family: sans-serif; font-size: 15px; font-weight: 700; color: var(--on-dark); letter-spacing: 0.6px; line-height: 1; white-space: nowrap; overflow: hidden; opacity: 1; transition: opacity 0.15s, width 0.22s; }
+    .logo-text span { color: var(--primary-light); }
+    .sidebar-nav { flex: 1; padding: 14px 0; overflow-y: auto; scrollbar-width: none; }
+    .sidebar-nav::-webkit-scrollbar { display: none; }
+    .nav-item { display: flex; align-items: center; gap: 12px; padding: 11px 20px; font-size: 14px; font-weight: 400; color: var(--on-dark-muted); text-decoration: none; letter-spacing: -0.224px; cursor: pointer; white-space: nowrap; transition: background 0.12s ease, color 0.12s ease, padding 0.22s; }
+    .nav-item:hover { color: var(--on-dark); background: rgba(255,255,255,0.07); }
+    .nav-item.active { color: var(--on-dark); background: rgba(255,255,255,0.13); font-weight: 600; }
+    .nav-item svg { width: 18px; height: 18px; flex-shrink: 0; opacity: 0.85; }
+    .nav-item.active svg { opacity: 1; }
+    .nav-item span { overflow: hidden; opacity: 1; transition: opacity 0.15s; }
+    body.sidebar-collapsed .sidebar { width: 64px; }
+    body.sidebar-collapsed .sidebar-logo { padding: 24px 11px 28px; gap: 0; justify-content: center; }
+    body.sidebar-collapsed .logo-text { opacity: 0; width: 0; }
+    body.sidebar-collapsed .nav-item { padding: 11px 0; justify-content: center; gap: 0; }
+    body.sidebar-collapsed .nav-item span { opacity: 0; width: 0; }
+    body.sidebar-collapsed .main { margin-left: 64px; }
+    body.sidebar-collapsed #collapseBtn svg { transform: rotate(180deg); }
+
+    /* ── Tooltip sidebar ── */
+    .nav-item {
+      position: relative;
+    }
+    .nav-item::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      left: calc(100% + 12px);
+      top: 50%;
+      transform: translateY(-50%) translateX(-6px);
+      background: #1a1a1a;
+      color: #FFFFFF;
+      font-size: 12px;
+      font-weight: 500;
+      padding: 6px 12px;
+      border-radius: 8px;
+      white-space: nowrap;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.15s ease, transform 0.15s ease;
+      z-index: 9999;
+      letter-spacing: 0.1px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.28);
+    }
+    .nav-item::before {
+      content: '';
+      position: absolute;
+      left: calc(100% + 6px);
+      top: 50%;
+      transform: translateY(-50%) translateX(-6px);
+      border: 5px solid transparent;
+      border-right-color: #1a1a1a;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.15s ease, transform 0.15s ease;
+      z-index: 9999;
+    }
+    .nav-item:hover::after,
+    .nav-item:hover::before {
+      opacity: 1;
+      transform: translateY(-50%) translateX(0);
+    }
+
+
+    /* ── MAIN ── */
+    .main { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; min-height: 100vh; transition: margin-left 0.22s cubic-bezier(.4,0,.2,1); }
+
+        /* ─────────────────── TOPBAR ─────────────────── */
+    .topbar {
+      height: 72px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding: 0 28px;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: linear-gradient(135deg, #ECE9E700 0%, #ECE9E7 100%);
+      backdrop-filter: blur(1px);
+      -webkit-backdrop-filter: blur(1px);
+    }
+
+    /* Search pill + botão */
+    .search-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .search-wrap input {
+      width: 300px;
+      height: 42px;
+      background: #FFFFFF;
+      border: 1.5px solid #EEEEEE;
+      border-radius: var(--radius-pill);
+      padding: 0 18px;
+      font-size: 14px;
+      font-family: inherit;
+      color: #1A1A1A;
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .search-wrap input::placeholder { color: #AAAAAA; }
+    .search-wrap input:focus {
+      border-color: #CCCCCC;
+      box-shadow: 0 0 0 3px rgba(0,0,0,0.05);
+    }
+    .search-btn {
+      width: 42px; height: 42px;
+      border-radius: 50%;
+      border: none;
+      background: #8B5CF6;
+      color: #FFFFFF;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: background 0.15s;
+    }
+    .search-btn:hover { background: #7C3AED; }
+    .search-btn svg { width: 18px; height: 18px; }
+
+    /* Ícones do topbar */
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .topbar-actions .icon-btn {
+      width: 42px; height: 42px;
+      background: #FFFFFF;
+      border: 1.5px solid #EEEEEE;
+      border-radius: 50%;
+      color: #555555;
+    }
+    .topbar-actions .icon-btn:hover {
+      background: #F5F5F5;
+      border-color: #DDDDDD;
+      color: #1A1A1A;
+    }
+
+    /* Badge de notificação */
+    .notif-wrap {
+      position: relative;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .notif-badge {
+      position: absolute;
+      top: 6px; right: 6px;
+      width: 9px; height: 9px;
+      background: #EF4444;
+      border-radius: 50%;
+      border: 2px solid var(--canvas-page);
+      pointer-events: none;
+    }
+    .icon-btn { width: 40px; height: 40px; border-radius: var(--radius-pill); border: none; background: none; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--ink-muted); transition: background 0.12s, color 0.12s; }
+    .icon-btn:hover { background: var(--canvas-input); color: var(--ink); }
+    .icon-btn svg { width: 20px; height: 20px; }
+    .avatar { width: 40px; height: 40px; border-radius: var(--radius-pill); background: #e8612a; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 600; color: #fff; cursor: pointer; margin-left: 4px; user-select: none; }
+    .avatar-menu-wrap { position: relative; }
+    .avatar-dropdown { position: absolute; top: calc(100% + 8px); right: 0; width: 220px; background: var(--canvas); border: 1px solid var(--hairline); border-radius: var(--radius-md); box-shadow: 0 8px 24px rgba(0,0,0,0.10); padding: 6px; z-index: 200; opacity: 0; pointer-events: none; transform: translateY(-6px); transition: opacity 0.15s, transform 0.15s; }
+    .avatar-dropdown.open { opacity: 1; pointer-events: auto; transform: translateY(0); }
+    .dropdown-header { padding: 10px 12px 12px; border-bottom: 1px solid var(--hairline); margin-bottom: 6px; }
+    .dropdown-name { font-size: 14px; font-weight: 600; color: var(--ink); }
+    .dropdown-email { font-size: 12px; color: var(--ink-subtle); margin-top: 2px; }
+    .dropdown-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; font-size: 14px; color: var(--ink); border-radius: var(--radius-sm); text-decoration: none; cursor: pointer; transition: background 0.12s; }
+    .dropdown-item:hover { background: var(--canvas-page); }
+    .dropdown-item svg { width: 16px; height: 16px; color: var(--ink-muted); }
+    .dropdown-item.danger { color: #ff3b30; }
+    .dropdown-item.danger svg { color: #ff3b30; }
+    .dropdown-item.danger:hover { background: rgba(255,59,48,0.06); }
+    .dropdown-divider { height: 1px; background: var(--hairline); margin: 6px 0; }
+
+    /* ── CONTENT ── */
+    .content { padding: 28px 32px; flex: 1; }
+
+    /* ── BACK LINK ── */
+    .back-link { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 500; color: var(--primary); text-decoration: none; letter-spacing: -0.224px; margin-bottom: 20px; transition: opacity 0.12s; }
+    .back-link:hover { opacity: 0.75; }
+    .back-link svg { width: 16px; height: 16px; }
+
+    /* ── PAGE HEADER ── */
+    .page-header {
+      background: linear-gradient(135deg, #0a0a0a 0%, #8B5CF6 60%, #DDD6FE 100%);
+      border-radius: var(--radius-lg); padding: 24px 28px;
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 20px; position: relative; overflow: hidden;
+    }
+    .page-header::after { content: ""; position: absolute; width: 200px; height: 200px; border-radius: 50%; border: 40px solid rgba(255,255,255,0.06); right: -20px; top: -60px; pointer-events: none; }
+    .ph-info {}
+    .ph-sub { font-size: 12px; color: rgba(255,255,255,0.55); font-weight: 500; letter-spacing: 0.3px; margin-bottom: 4px; text-transform: uppercase; }
+    .ph-title { font-family: sans-serif; font-size: 22px; font-weight: 700; color: #fff; letter-spacing: -0.374px; }
+    .ph-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+    .ph-duration {
+      background: rgba(255,255,255,0.12); border-radius: var(--radius-md);
+      padding: 8px 16px; text-align: center;
+    }
+    .ph-duration-val { font-family: sans-serif; font-size: 20px; font-weight: 700; color: #fff; line-height: 1; }
+    .ph-duration-label { font-size: 10px; color: rgba(255,255,255,0.55); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
+    .btn-reutilizar {
+      height: 36px; padding: 0 16px; border-radius: var(--radius-pill);
+      border: 1.5px solid rgba(255,255,255,0.25); background: rgba(255,255,255,0.1);
+      color: #fff; font-size: 13px; font-weight: 600; font-family: inherit;
+      cursor: pointer; display: flex; align-items: center; gap: 6px;
+      transition: background 0.13s;
+    }
+    .btn-reutilizar:hover { background: rgba(255,255,255,0.18); }
+    .btn-reutilizar svg { width: 14px; height: 14px; }
+
+    /* ── TOOLBAR ── */
+    .toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    .toolbar-left { display: flex; align-items: center; gap: 8px; }
+    .item-count { font-size: 13px; color: var(--ink-muted); }
+    .btn-add {
+      height: 38px; padding: 0 18px; border-radius: var(--radius-pill);
+      background: var(--primary); border: none; color: #fff;
+      font-size: 13px; font-weight: 600; font-family: inherit; cursor: pointer;
+      display: flex; align-items: center; gap: 6px; transition: background 0.13s;
+    }
+    .btn-add:hover { background: var(--primary-dark); }
+    .btn-add svg { width: 14px; height: 14px; }
+
+    /* ── LISTA ── */
+    .cronograma-list { display: flex; flex-direction: column; gap: 6px; }
+
+    /* ── ITEM ── */
+    .cron-item {
+      background: var(--canvas); border: 1px solid var(--hairline);
+      border-radius: var(--radius-md); display: flex; align-items: center;
+      gap: 12px; padding: 12px 16px;
+      transition: box-shadow 0.13s, border-color 0.13s;
+      cursor: default;
+    }
+    .cron-item:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+    .cron-item.dragging { opacity: 0.45; border-color: var(--primary); }
+    .cron-item.drag-over { border-color: var(--primary); border-style: dashed; background: rgba(151,71,255,0.03); }
+
+    /* Secao */
+    .cron-item.secao {
+      background: rgba(151,71,255,0.06); border-color: transparent;
+      border-left: 3px solid var(--primary);
+    }
+    .cron-item.secao .cron-title { font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--primary); }
+
+    .drag-handle { cursor: grab; color: var(--ink-subtle); flex-shrink: 0; padding: 0 2px; }
+    .drag-handle:active { cursor: grabbing; }
+    .drag-handle svg { width: 16px; height: 16px; }
+
+    .cron-type-icon {
+      width: 36px; height: 36px; border-radius: var(--radius-sm); flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .cron-type-icon svg { width: 16px; height: 16px; }
+    .cron-type-icon.antes    { background: rgba(124,58,237,0.10); color: #7c3aed; }
+    .cron-type-icon.tarefa   { background: rgba(0,122,255,0.10); color: var(--accent-blue); }
+    .cron-type-icon.musica   { background: rgba(255,85,0,0.12); color: var(--accent-yellow); }
+    .cron-type-icon.secao    { display: none; }
+
+    /* Antes do evento — não conta na duração */
+    .cron-item.antes { border-left: 3px solid #7c3aed; }
+    .cron-item.antes .cron-duration { color: var(--ink-subtle); }
+    .antes-badge { font-size: 10px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; color: #7c3aed; background: rgba(124,58,237,0.10); padding: 1px 7px; border-radius: var(--radius-pill); white-space: nowrap; }
+
+    .cron-body { flex: 1; min-width: 0; }
+    .cron-title { font-size: 14px; font-weight: 600; color: var(--ink); letter-spacing: -0.224px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .cron-meta { display: flex; align-items: center; gap: 10px; margin-top: 2px; }
+    .cron-desc { font-size: 12px; color: var(--ink-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 320px; }
+    .cron-artist { font-size: 12px; color: var(--ink-muted); }
+    .cron-tom { font-size: 11px; font-weight: 600; padding: 1px 7px; border-radius: var(--radius-pill); background: rgba(151,71,255,0.09); color: var(--primary); }
+
+    .cron-duration { font-size: 13px; font-weight: 600; color: var(--ink-muted); font-variant-numeric: tabular-nums; white-space: nowrap; flex-shrink: 0; min-width: 44px; text-align: right; }
+
+    .cron-actions { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+    .cron-btn { width: 30px; height: 30px; border-radius: var(--radius-sm); border: none; background: none; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--ink-subtle); transition: background 0.12s, color 0.12s; }
+    .cron-btn:hover { background: var(--canvas-input); color: var(--ink); }
+    .cron-btn.danger:hover { background: rgba(255,59,48,0.08); color: var(--accent-red); }
+    .cron-btn svg { width: 15px; height: 15px; }
+
+    /* ── EMPTY ── */
+    .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 64px 32px; gap: 12px; border: 1.5px dashed var(--hairline); border-radius: var(--radius-lg); background: var(--canvas); }
+    .empty-state svg { width: 40px; height: 40px; color: var(--ink-subtle); opacity: 0.35; }
+    .empty-state h3 { font-size: 16px; font-weight: 600; color: var(--ink); letter-spacing: -0.374px; }
+    .empty-state p { font-size: 14px; color: var(--ink-muted); text-align: center; max-width: 280px; }
+
+    /* ── MODAL ── */
+    .modal-backdrop {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.35);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 300; opacity: 0; pointer-events: none; transition: opacity 0.18s;
+    }
+    .modal-backdrop.open { opacity: 1; pointer-events: auto; }
+    .modal-box {
+      background: var(--canvas); border-radius: var(--radius-lg);
+      width: 100%; max-width: 480px; max-height: 90vh; overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.18);
+      transform: scale(0.96) translateY(8px); transition: transform 0.18s;
+    }
+    .modal-backdrop.open .modal-box { transform: scale(1) translateY(0); }
+    .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px 0; }
+    .modal-title { font-family: sans-serif; font-size: 18px; font-weight: 700; color: var(--ink); letter-spacing: -0.374px; }
+    .modal-close { width: 32px; height: 32px; border-radius: 50%; border: none; background: var(--canvas-input); cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--ink-muted); font-size: 18px; transition: background 0.12s; }
+    .modal-close:hover { background: var(--hairline); }
+    .modal-body { padding: 20px 24px 24px; display: flex; flex-direction: column; gap: 16px; }
+
+    /* Type selector */
+    .type-selector { display: grid; grid-template-columns: repeat(2,1fr); gap: 8px; }
+    .type-btn {
+      padding: 12px 8px; border-radius: var(--radius-md);
+      border: 1.5px solid var(--hairline); background: var(--canvas);
+      cursor: pointer; text-align: center; transition: all 0.13s; font-family: inherit;
+    }
+    .type-btn:hover { border-color: var(--primary); background: rgba(151,71,255,0.04); }
+    .type-btn.active { border-color: var(--primary); background: rgba(151,71,255,0.08); }
+    .type-btn-icon { width: 32px; height: 32px; border-radius: var(--radius-sm); margin: 0 auto 6px; display: flex; align-items: center; justify-content: center; }
+    .type-btn-icon svg { width: 16px; height: 16px; }
+    .type-btn-icon.antes  { background: rgba(124,58,237,0.10); color: #7c3aed; }
+    .type-btn-icon.secao  { background: rgba(151,71,255,0.10); color: var(--primary); }
+    .type-btn-icon.tarefa { background: rgba(0,122,255,0.10); color: var(--accent-blue); }
+    .type-btn-icon.musica { background: rgba(255,85,0,0.12); color: var(--accent-yellow); }
+    .type-btn-label { font-size: 12px; font-weight: 600; color: var(--ink); }
+
+    /* Form fields */
+    .field { display: flex; flex-direction: column; gap: 6px; }
+    .field label { font-size: 11px; font-weight: 600; color: var(--ink-subtle); letter-spacing: 0.5px; text-transform: uppercase; }
+    .field input, .field textarea {
+      width: 100%; background: var(--canvas-input); border: 1.5px solid transparent;
+      border-radius: var(--radius-sm); padding: 0 14px; height: 42px;
+      font-size: 14px; font-family: inherit; color: var(--ink);
+      outline: none; letter-spacing: -0.224px;
+      transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+    }
+    .field textarea { height: 70px; padding: 10px 14px; resize: vertical; line-height: 1.5; }
+    .field input:focus, .field textarea:focus { background: var(--canvas); border-color: var(--primary); box-shadow: 0 0 0 3px rgba(151,71,255,0.10); }
+
+    /* Music search */
+    .music-search-wrap { position: relative; }
+    .music-results { position: absolute; top: calc(100% + 4px); left: 0; right: 0; background: var(--canvas); border: 1.5px solid var(--primary); border-radius: var(--radius-md); box-shadow: 0 8px 24px rgba(0,0,0,0.13); z-index: 10; max-height: 280px; overflow-y: auto; display: none; }
+    .music-results.open { display: block; }
+    .music-result-item { padding: 10px 14px; cursor: pointer; transition: background 0.1s; border-bottom: 1px solid var(--hairline); display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .music-result-item:last-child { border-bottom: none; }
+    .music-result-item:hover { background: rgba(151,71,255,0.06); }
+    .music-result-info { min-width: 0; flex: 1; }
+    .music-result-title { font-size: 13px; font-weight: 600; color: var(--ink); }
+    .music-result-sub { font-size: 12px; color: var(--ink-muted); margin-top: 1px; }
+    .music-result-badge { font-size: 9px; font-weight: 800; padding: 2px 5px; border-radius: 3px; flex-shrink: 0; background: #00c7f2; color: #fff; letter-spacing: 0.3px; }
+    .music-result-section-label { padding: 5px 14px 4px; font-size: 10px; font-weight: 700; letter-spacing: 0.6px; text-transform: uppercase; color: var(--ink-subtle); background: var(--canvas-page); border-bottom: 1px solid var(--hairline); border-top: 1px solid var(--hairline); }
+    .music-result-section-label:first-child { border-top: none; }
+    .music-result-searching { padding: 12px 14px; font-size: 13px; color: var(--ink-muted); text-align: center; }
+    .music-selected { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: rgba(151,71,255,0.07); border-radius: var(--radius-sm); border: 1.5px solid rgba(151,71,255,0.2); }
+    .music-selected-info { flex: 1; }
+    .music-selected-title { font-size: 13px; font-weight: 600; color: var(--ink); }
+    .music-selected-sub { font-size: 12px; color: var(--ink-muted); }
+    .music-selected-clear { background: none; border: none; cursor: pointer; color: var(--ink-muted); font-size: 16px; transition: color 0.12s; }
+    .music-selected-clear:hover { color: var(--accent-red); }
+
+    /* Modal actions */
+    .modal-actions { display: flex; gap: 8px; justify-content: flex-end; padding-top: 4px; border-top: 1px solid var(--hairline); }
+    .btn-cancel { height: 38px; padding: 0 18px; background: var(--canvas-input); border: none; border-radius: var(--radius-pill); font-size: 14px; font-weight: 500; color: var(--ink-muted); font-family: inherit; cursor: pointer; transition: background 0.12s; }
+    .btn-cancel:hover { background: var(--hairline); }
+    .btn-confirm { height: 38px; padding: 0 22px; background: var(--primary); border: none; border-radius: var(--radius-pill); font-size: 14px; font-weight: 600; color: #fff; font-family: inherit; cursor: pointer; transition: background 0.12s; }
+    .btn-confirm:hover { background: var(--primary-dark); }
+    .btn-confirm:disabled { opacity: 0.5; cursor: default; }
+
+    /* Reutilizar modal */
+    .event-list { display: flex; flex-direction: column; gap: 6px; max-height: 300px; overflow-y: auto; }
+    .event-option { padding: 12px 14px; border-radius: var(--radius-sm); border: 1.5px solid var(--hairline); cursor: pointer; transition: all 0.13s; }
+    .event-option:hover { border-color: var(--primary); background: rgba(151,71,255,0.04); }
+    .event-option.selected { border-color: var(--primary); background: rgba(151,71,255,0.09); }
+    .event-option-name { font-size: 14px; font-weight: 600; color: var(--ink); }
+    .event-option-date { font-size: 12px; color: var(--ink-muted); margin-top: 2px; }
+
+    /* ── TOAST ── */
+    #toast { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(12px); background: #1d1d1f; color: #fff; border-radius: var(--radius-pill); padding: 10px 20px; font-size: 14px; font-weight: 500; opacity: 0; pointer-events: none; transition: opacity 0.2s, transform 0.2s; z-index: 999; }
+    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .hidden { display: none !important; }
+  
+    
+    /* ══════════════════════════════════════════════════════
+       DESIGN UPDATE — Tokens minimalistas (todas as páginas)
+       ══════════════════════════════════════════════════════ */
+
+    /* ── Fundo da página ── */
+    :root { --canvas-page: #ECE9E7; }
+    body  { background: #ECE9E7; }
+
+    /* ── Hero banner ── */
+    .hero {
+      background: linear-gradient(135deg, #1A1A1A 0%, #7C3AED 55%, #8B5CF6 100%) !important;
+      border-radius: 20px !important;
+    }
+
+    /* ── Stat cards ── */
+    .stat-card {
+      background: #FFFFFF !important;
+      border: 1px solid #EEEEEE !important;
+      border-radius: 20px !important;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04) !important;
+      transition: box-shadow 0.2s, transform 0.2s !important;
+    }
+    .stat-card:hover {
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08) !important;
+      transform: translateY(-2px) !important;
+    }
+    .stat-value {
+      font-size: 2rem !important;
+      font-weight: 700 !important;
+      color: #1A1A1A !important;
+      letter-spacing: -0.5px !important;
+      line-height: 1 !important;
+    }
+    .stat-label {
+      font-size: 12px !important;
+      font-weight: 500 !important;
+      color: #8A8A8A !important;
+      text-transform: uppercase !important;
+      letter-spacing: 0.5px !important;
+      margin-top: 6px !important;
+    }
+
+    /* ── Títulos de seção ── */
+    .section-title, .page-title {
+      font-size: 18px !important;
+      font-weight: 700 !important;
+      color: #1A1A1A !important;
+      letter-spacing: -0.3px !important;
+    }
+    .card-title {
+      font-size: 15px !important;
+      font-weight: 700 !important;
+      color: #1A1A1A !important;
+    }
+
+    /* ── Cards de conteúdo (detalhe) ── */
+    .detail-card, .content-card, .section-card, .review-info-card,
+    .profile-card, .aside-card, .pontuacao-card, .setting-card,
+    .accordion-card, .summary-card, .card-link-block {
+      background: #FFFFFF !important;
+      border: 1px solid #EEEEEE !important;
+      border-radius: 20px !important;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04) !important;
+    }
+
+    /* ── Cards de lista / item (com hover) ── */
+    .list-card, .ministry-card, .dept-card, .func-card,
+    .template-card, .bloco-card, .dispon-card, .type-card,
+    .ev-card, .lds-card, .option-card, .check-card,
+    .pending-card-click {
+      background: #FFFFFF !important;
+      border: 1px solid #EEEEEE !important;
+      border-radius: 20px !important;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04) !important;
+      transition: box-shadow 0.2s, transform 0.2s !important;
+    }
+    .list-card:hover, .ministry-card:hover, .dept-card:hover, .func-card:hover,
+    .template-card:hover, .bloco-card:hover, .dispon-card:hover, .type-card:hover,
+    .ev-card:hover, .lds-card:hover, .option-card:hover, .check-card:hover,
+    .pending-card-click:hover {
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08) !important;
+      transform: translateY(-2px) !important;
+    }
+
+    /* ── Cabeçalho de card ── */
+    .card-header {
+      border-bottom: 1px solid #EEEEEE !important;
+    }
+
+    /* ── Escalação: cards de departamento ── */
+    .dept-card-header {
+      background: #ECE9E7 !important;
+      border-bottom: 1px solid #EEEEEE !important;
+      border-radius: 20px 20px 0 0 !important;
+    }
+
+    /* ── Badges de data ── */
+    .event-date-badge, .ev-card-day, .ev-card-badge {
+      background: #7C3AED !important;
+      border-radius: 12px !important;
+    }
+
+    /* ── Tabelas ── */
+    .table-wrap, .table-container {
+      background: #FFFFFF !important;
+      border: 1px solid #EEEEEE !important;
+      border-radius: 20px !important;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04) !important;
+      overflow: hidden !important;
+    }
+    thead th {
+      font-size: 11px !important;
+      font-weight: 600 !important;
+      color: #8A8A8A !important;
+      text-transform: uppercase !important;
+      letter-spacing: 0.5px !important;
+      background: #ECE9E7 !important;
+    }
+
+    /* ── Painel lateral (detalhe) ── */
+    .right-panel {
+      background: #FFFFFF !important;
+      border-left: 1px solid #EEEEEE !important;
+    }
+
+    /* ══════════════════════════════════════════════════════
+       FIM DESIGN UPDATE
+       ══════════════════════════════════════════════════════ */
+    /* ══════════════════════════════════════════════════════
+       SIDEBAR REDESIGN — Floating pill dark
+       ══════════════════════════════════════════════════════ */
+    :root { --sidebar-w: 60px; }
+
+    /* ── Estrutura base ── */
+    .sidebar {
+      width: 60px !important;
+      background: #1c1c1c !important;
+      border-radius: 24px !important;
+      top: 16px !important;
+      bottom: 16px !important;
+      left: 12px !important;
+      min-height: unset !important;
+      height: auto !important;
+      padding: 16px 8px !important;
+      align-items: center !important;
+      overflow: visible !important;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.18) !important;
+      border-right: none !important;
+    }
+
+    /* ── Logo ── */
+    .sidebar-logo { display: none !important; }
+    .logo-text    { display: none !important; }
+
+    /* ── Nav ── */
+    .sidebar-nav {
+      padding: 0 !important;
+      align-items: center !important;
+      gap: 4px !important;
+      overflow: visible !important;
+      flex-direction: column !important;
+    }
+    .nav-item {
+      width: 44px !important; height: 44px !important;
+      min-height: 44px !important;
+      padding: 10px !important;
+      border-radius: 14px !important;
+      color: rgba(255,255,255,0.5) !important;
+      justify-content: center !important;
+      gap: 0 !important;
+      background: none !important;
+      letter-spacing: 0 !important;
+    }
+    .nav-item span { display: none !important; }
+    .nav-item svg {
+      width: 20px !important; height: 20px !important;
+      opacity: 1 !important; flex-shrink: 0 !important;
+    }
+    .nav-item:hover {
+      background: rgba(255,255,255,0.1) !important;
+      color: rgba(255,255,255,0.9) !important;
+    }
+    .nav-item.active {
+      background: #FFFFFF !important;
+      color: #1A1A1A !important;
+    }
+    .nav-item.active svg { opacity: 1 !important; }
+
+    /* ── Transição suave ── */
+    .sidebar { transition: transform 0.25s cubic-bezier(.4,0,.2,1), opacity 0.25s !important; }
+    .main    { transition: margin-left 0.25s cubic-bezier(.4,0,.2,1) !important; }
+
+    /* ── Collapsed: sidebar sai pela esquerda ── */
+    body.sidebar-collapsed .sidebar {
+      transform: translateX(calc(-100% - 20px)) !important;
+      opacity: 0 !important;
+      pointer-events: none !important;
+    }
+    body.sidebar-collapsed .main { margin-left: 16px !important; }
+    /* ── Quando collapsed: empurra conteúdo à direita do botão restaurar ── */
+    body.sidebar-collapsed .content {
+      padding-left: 60px !important;
+    }
+    body.sidebar-collapsed .topbar {
+      padding-left: 64px !important;
+    }
+
+
+    /* ── Botão flutuante para restaurar sidebar ── */
+    .sidebar-restore-btn {
+      display: none;
+      position: fixed;
+      top: 20px; left: 16px;
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      background: #1c1c1c;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      align-items: center; justify-content: center;
+      z-index: 200;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      transition: background 0.15s;
+    }
+    .sidebar-restore-btn:hover { background: #333; }
+    .sidebar-restore-btn svg { width: 18px; height: 18px; }
+    body.sidebar-collapsed .sidebar-restore-btn { display: flex; }
+
+    /* ── Main area offset ── */
+    .main { margin-left: 84px !important; }
+
+    /* ── Rodapé da sidebar ── */
+    .sidebar > div:last-child, .sidebar-footer {
+      border-top: none !important;
+      background: none !important;
+      padding: 0 !important;
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      justify-content: center !important;
+      gap: 8px !important;
+      margin-top: auto !important;
+      width: 100% !important;
+    }
+    .sidebar .icon-btn {
+      width: 40px !important; height: 40px !important;
+      border-radius: 50% !important;
+      color: rgba(255,255,255,0.7) !important;
+      background: rgba(255,255,255,0.08) !important;
+      border: none !important;
+      flex-shrink: 0 !important;
+    }
+    .sidebar .icon-btn:hover {
+      background: rgba(255,255,255,0.16) !important;
+      color: #FFFFFF !important;
+    }
+    /* ══════════════════════════════════════════════════════ */
+
+    /* ── Avatar no rodapé da sidebar ── */
+    .sidebar-footer {
+      padding-top: 8px !important;
+      border-top: 1px solid rgba(255,255,255,0.08) !important;
+    }
+    .sidebar .avatar-menu-wrap {
+      position: relative !important;
+      margin: 0 !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+    }
+    .sidebar .avatar {
+      width: 40px !important; height: 40px !important;
+      border-radius: 50% !important;
+      font-size: 13px !important;
+      margin-left: 0 !important;
+      cursor: pointer !important;
+      box-shadow: 0 0 0 2px rgba(255,255,255,0.15) !important;
+    }
+    .sidebar .avatar-dropdown {
+      position: fixed !important;
+      left: 84px !important;
+      bottom: 16px !important;
+      top: auto !important;
+      right: auto !important;
+      transform: translateX(-8px) !important;
+      transition: opacity 0.15s, transform 0.15s !important;
+    }
+    .sidebar .avatar-dropdown.open {
+      transform: translateX(0) !important;
+      opacity: 1 !important;
+      pointer-events: auto !important;
+    }
+  
+    /* ── Notif Dropdown ── */
+    .notif-badge{position:absolute;top:-4px;right:-4px;background:#E85D6A;color:#fff;border-radius:50%;width:18px;height:18px;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;pointer-events:none;}
+    .notif-dropdown{position:absolute;top:48px;right:0;width:360px;background:#fff;border-radius:16px;border:1px solid #E8E5E2;box-shadow:0 8px 32px rgba(0,0,0,0.12);z-index:300;display:none;overflow:hidden;}
+    .notif-dropdown.open{display:block;}
+    .notif-header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid #F5F3F0;}
+    .notif-list{max-height:360px;overflow-y:auto;}
+    .notif-item{padding:12px 16px;border-bottom:1px solid #F5F3F0;cursor:pointer;display:flex;gap:12px;align-items:flex-start;transition:background 0.1s;}
+    .notif-item:hover{background:#F5F3F0;}
+    .notif-item.unread{background:rgba(145,86,241,0.06);}
+    .notif-icon{width:36px;height:36px;border-radius:50%;background:#EDE5FF;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#9156F1;}
+    .notif-content{flex:1;min-width:0;}
+    .notif-title{font-weight:600;font-size:13px;color:#1C1C1C;margin-bottom:2px;}
+    .notif-body{font-size:12px;color:#5C5955;line-height:1.4;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .notif-time{font-size:11px;color:#9E9B96;}
+    .notif-footer{padding:10px 16px;border-top:1px solid #F5F3F0;text-align:center;}
+    </style>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/responsive.css">
+</head>
+<body>
+<script>if(localStorage.getItem('sidebar-collapsed')==='1')document.body.classList.add('sidebar-collapsed')</script>
+
+  <!-- ── Sidebar ── -->
+  <aside class="sidebar">
+    <nav class="sidebar-nav">
+      <a class="nav-item" href="/configuracoes" data-tooltip="Configurações" data-menu="configuracoes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg><span>Configurações</span></a>      <a class="nav-item" data-tooltip="Dashboard" data-menu="dashboard" href="/dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg><span>Dashboard</span></a>      <a class="nav-item" href="/departamentos" data-tooltip="Departamentos" data-menu="departamentos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><path d="M2 12h20"/></svg><span>Departamentos</span></a>      <a class="nav-item" href="/escalacoes" data-tooltip="Escalações" data-menu="escalacao"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></svg><span>Escalação</span></a>      <a class="nav-item active" href="/eventos" data-tooltip="Eventos" data-menu="eventos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span>Eventos</span></a>      <a class="nav-item" href="/indisponibilidade" data-tooltip="Indisponibilidade" data-menu="indisponibilidade"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M10 14l4 4"/><path d="M14 14l-4 4"/></svg><span>Indisponibilidade</span></a>      <a class="nav-item" href="/ministerios" data-tooltip="Ministérios" data-menu="ministerios"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4"/><path d="M10 4h4"/><path d="M3 11l9-7 9 7"/><rect x="5" y="11" width="14" height="10" rx="1"/><path d="M10 21v-5h4v5"/></svg><span>Ministérios</span></a>      <a class="nav-item" href="/musicas" data-tooltip="Músicas" data-menu="musicas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg><span>Músicas</span></a>      <a class="nav-item" href="/templates" data-tooltip="Templates" data-menu="templates"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg><span>Templates</span></a>      <a class="nav-item" href="/voluntarios" data-tooltip="Voluntários" data-menu="voluntarios"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Voluntários</span></a>      <a class="nav-item" href="/notificacoes" data-tooltip="Notificações" data-menu="notificacoes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span>Notificações</span></a></nav>
+  </aside>
+
+  <!-- ── Main ── -->
+  <div class="main">
+
+    <!-- Topbar -->
+    <header class="topbar">
+
+      <!-- Direita: search + ícones -->
+      <div class="topbar-actions">
+        <!-- Search pill + botão -->
+        <div class="search-wrap">
+          <input type="text" placeholder="Search..." id="topSearch" />
+          <button class="search-btn" title="Buscar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          </button>
+        </div>
+
+        <!-- Notificações -->
+        <div class="notif-wrapper" style="position:relative;">
+          <button class="icon-btn notif-btn" id="notifBtn" title="Notificações">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            <span class="notif-badge" id="notifBadge" style="display:none">0</span>
+          </button>
+          <div class="notif-dropdown" id="notifDropdown">
+            <div class="notif-header">
+              <span style="font-weight:600;font-size:14px">Notificações</span>
+              <button id="markAllRead" style="font-size:12px;color:#9156F1;background:none;border:none;cursor:pointer;font-family:inherit">Marcar todas como lidas</button>
+            </div>
+            <div class="notif-list" id="notifList"></div>
+            <div class="notif-footer"><a href="/notificacoes" style="font-size:13px;color:#9156F1;text-decoration:none">Ver todas</a></div>
+          </div>
+        </div>
+
+        <!-- Collapse + avatar movidos pelo sidebar-ui.js -->
+        <button class="icon-btn" id="collapseBtn" title="Recolher menu">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="transition:transform 0.22s"><polyline points="11 17 6 12 11 7"/><polyline points="18 17 13 12 18 7"/></svg>
+        </button>
+        <div class="avatar-menu-wrap">
+          <div class="avatar" id="avatarBtn">A</div>
+          <div class="avatar-dropdown" id="avatarDropdown">
+            <div class="dropdown-header">
+              <div class="dropdown-name" id="dropdownName">—</div>
+              <div class="dropdown-email" id="dropdownEmail">—</div>
+            </div>
+            <a class="dropdown-item" href="/editar-perfil">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              Editar Perfil
+            </a>
+            <a class="dropdown-item" href="/configuracoes" data-menu-dropdown="configuracoes">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+              Configurações
+            </a>
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item danger" href="#" onclick="fazerLogout(event)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+              Sair
+            </a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="content">
+      <a class="back-link" id="backLink" href="javascript:history.back()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        Voltar para o Evento
+      </a>
+
+      <!-- Header da página -->
+      <div class="page-header">
+        <div class="ph-info">
+          <div class="ph-sub">Cronograma</div>
+          <div class="ph-title" id="phTitle">Carregando...</div>
+        </div>
+        <div class="ph-right">
+          <div class="ph-duration">
+            <div class="ph-duration-val" id="phDuration">00:00</div>
+            <div class="ph-duration-label">Duração total</div>
+          </div>
+          <button class="btn-reutilizar" onclick="abrirReutilizar()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+            Reutilizar cronograma
+          </button>
+        </div>
+      </div>
+
+      <!-- Toolbar -->
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <span class="item-count" id="itemCount">0 itens</span>
+        </div>
+        <button class="btn-add" onclick="abrirModal()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Adicionar item
+        </button>
+      </div>
+
+      <!-- Lista -->
+      <div class="cronograma-list" id="cronogramaList"></div>
+
+    </main>
+  </div>
+
+  <!-- ── Modal Adicionar/Editar ── -->
+  <div class="modal-backdrop" id="modalItem" onclick="if(event.target===this)fecharModal()">
+    <div class="modal-box">
+      <div class="modal-header">
+        <span class="modal-title" id="modalTitle">Novo Item</span>
+        <button class="modal-close" onclick="fecharModal()">×</button>
+      </div>
+      <div class="modal-body">
+
+        <!-- Tipo -->
+        <div class="field" id="fieldTipo">
+          <label>Tipo</label>
+          <div class="type-selector">
+            <button class="type-btn" data-type="antes" onclick="selecionarTipo('antes')">
+              <div class="type-btn-icon antes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+              <div class="type-btn-label">Antes do evento</div>
+            </button>
+            <button class="type-btn" data-type="secao" onclick="selecionarTipo('secao')">
+              <div class="type-btn-icon secao"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></div>
+              <div class="type-btn-label">Seção</div>
+            </button>
+            <button class="type-btn" data-type="tarefa" onclick="selecionarTipo('tarefa')">
+              <div class="type-btn-icon tarefa"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
+              <div class="type-btn-label">Tarefa</div>
+            </button>
+            <button class="type-btn" data-type="musica" onclick="selecionarTipo('musica')">
+              <div class="type-btn-icon musica"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></div>
+              <div class="type-btn-label">Música</div>
+            </button>
+          </div>
+        </div>
+
+        <!-- Campos por tipo -->
+        <div id="camposTarefa" class="hidden" style="display:flex;flex-direction:column;gap:14px">
+          <div class="field"><label>Título *</label><input id="fTitle" type="text" placeholder="Ex: Oração de abertura"></div>
+          <div class="field"><label>Descrição</label><textarea id="fDesc" placeholder="Detalhes opcionais..."></textarea></div>
+          <div class="field"><label>Duração (mm:ss)</label><input id="fDuration" type="text" placeholder="05:00" maxlength="5"></div>
+        </div>
+
+        <div id="camposSecao" class="hidden" style="display:flex;flex-direction:column;gap:14px">
+          <div class="field"><label>Título *</label><input id="fSecaoTitle" type="text" placeholder="Ex: PRÉ CULTO"></div>
+        </div>
+
+        <div id="camposMusica" class="hidden" style="display:flex;flex-direction:column;gap:14px">
+          <!-- Busca / seleção de música -->
+          <div class="field">
+            <label>Música *</label>
+            <div id="musicaSelectedWrap" class="hidden">
+              <div class="music-selected">
+                <div class="music-selected-info">
+                  <div class="music-selected-title" id="musicaSelectedTitle">—</div>
+                  <div class="music-selected-sub" id="musicaSelectedSub">—</div>
+                </div>
+                <button class="music-selected-clear" onclick="limparMusica()" type="button">×</button>
+              </div>
+            </div>
+            <div id="musicaSearchWrap" class="music-search-wrap">
+              <input id="fMusicaSearch" type="text" placeholder="Buscar por título ou artista..." autocomplete="off">
+              <div class="music-results" id="musicaResults"></div>
+            </div>
+          </div>
+          <div class="field"><label>Duração (mm:ss)</label><input id="fMusicaDuration" type="text" placeholder="04:30" maxlength="5"></div>
+          <div class="field"><label>Observação</label><textarea id="fMusicaDesc" placeholder="Tom, notas, etc..."></textarea></div>
+        </div>
+
+        <div class="modal-actions">
+          <button class="btn-cancel" onclick="fecharModal()">Cancelar</button>
+          <button class="btn-confirm" id="btnModalConfirm" onclick="salvarItem()">Salvar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Modal Reutilizar ── -->
+  <div class="modal-backdrop" id="modalReutilizar" onclick="if(event.target===this)fecharReutilizar()">
+    <div class="modal-box">
+      <div class="modal-header">
+        <span class="modal-title">Reutilizar Cronograma</span>
+        <button class="modal-close" onclick="fecharReutilizar()">×</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:14px;color:var(--ink-muted)">Selecione um evento para copiar o cronograma:</p>
+        <div class="event-list" id="eventList"></div>
+        <div class="modal-actions">
+          <button class="btn-cancel" onclick="fecharReutilizar()">Cancelar</button>
+          <button class="btn-confirm" id="btnReutilizarConfirm" onclick="confirmarReutilizar()" disabled>Copiar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast"></div>
+
+  <script src="/js/auth-fetch.js"></script>
+  <script src="/js/sidebar-permissions.js"></script>
+    <script src="/js/sidebar-ui.js"></script>
+  <script>
+    const cronogramaId = location.pathname.split('/').pop()
+    let _cronograma = null
+    let _itens = []
+    let _editId = null
+    let _tipoAtual = 'tarefa'
+    let _musicaSelecionada = null
+    let _cronogramaReutilizar = null
+    let _musicas = []
+    let _dragSrc = null
+    let _buscarTimer = null
+
+    const MESES = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez']
+
+    // ── Utilitários ──────────────────────────────────────
+    function showToast(msg, ms = 2400) {
+      const t = document.getElementById('toast')
+      t.textContent = msg
+      t.classList.add('show')
+      setTimeout(() => t.classList.remove('show'), ms)
+    }
+
+    // Converte interval do Postgres (HH:MM:SS) ou mm:ss → mm:ss para exibição
+    function fmtDuration(d) {
+      if (!d) return ''
+      const parts = String(d).split(':')
+      if (parts.length === 3) {
+        const h = parseInt(parts[0]), m = parseInt(parts[1]), s = parseInt(parts[2])
+        const totalMin = h * 60 + m
+        return `${String(totalMin).padStart(2,'0')}:${String(s).padStart(2,'0')}`
+      }
+      return d
+    }
+
+    // Converte mm:ss → segundos
+    function parseSec(str) {
+      if (!str) return 0
+      const clean = String(str).replace(/[^0-9:]/g, '')
+      const parts = clean.split(':')
+      if (parts.length >= 2) return parseInt(parts[0] || 0) * 60 + parseInt(parts[1] || 0)
+      return parseInt(clean) || 0
+    }
+
+    // Segundos → mm:ss
+    function secToStr(sec) {
+      const m = Math.floor(sec / 60), s = sec % 60
+      return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`
+    }
+
+    // mm:ss → formato interval Postgres
+    function toInterval(str) {
+      if (!str) return null
+      const sec = parseSec(str)
+      if (!sec) return null
+      const m = Math.floor(sec / 60), s = sec % 60
+      return `00:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`
+    }
+
+    function calcTotal() {
+      let sec = 0
+      _itens.forEach(i => { if (i.duration && i.type !== 'antes') sec += parseSec(fmtDuration(i.duration)) })
+      document.getElementById('phDuration').textContent = secToStr(sec)
+    }
+
+    // ── Init ─────────────────────────────────────────────
+    async function init() {
+      if (!await checkAuth()) return
+      console.log('[cronograma] init() cronogramaId=', cronogramaId)
+      (document.getElementById('collapseBtn')||{addEventListener:()=>{}}).addEventListener('click', () => {
+        const c = document.body.classList.toggle('sidebar-collapsed')
+        localStorage.setItem('sidebar-collapsed', c ? '1' : '0')
+      })
+      document.getElementById('avatarBtn').addEventListener('click', e => {
+        e.stopPropagation()
+        document.getElementById('avatarDropdown').classList.toggle('open')
+      })
+      document.addEventListener('click', () => document.getElementById('avatarDropdown').classList.remove('open'))
+      const _lBtn = document.getElementById('logoutBtn'); if (_lBtn) _lBtn.addEventListener('click', e => {
+        e.preventDefault()
+        clearSession()
+      });
+
+      // Máscara mm:ss
+      ['fDuration','fMusicaDuration'].forEach(id => applyDurMask(document.getElementById(id)))
+
+      // Busca de música
+      document.getElementById('fMusicaSearch').addEventListener('input', e => buscarMusica(e.target.value))
+      document.getElementById('fMusicaSearch').addEventListener('blur', () => setTimeout(() => document.getElementById('musicaResults').classList.remove('open'), 180))
+
+      try {
+        const r = await authFetch('/api/church')
+        if (r.ok) { const d = await r.json(); const _cnel = document.getElementById('churchName'); if (_cnel) _cnel.textContent = d.church?.name || '' };
+      } catch {}
+      try {
+        console.log('[cronograma] chamando /api/auth/me...')
+        const r = await authFetch('/api/auth/me')
+        console.log('[cronograma] /api/auth/me status=%d ok=%s', r.status, r.ok)
+        if (r.ok) {
+          const d = await r.json()
+          console.log('[cronograma] usuario=', JSON.stringify(d.usuario))
+          const name = d.usuario?.nome || d.usuario?.nickname || d.usuario?.email || '?'
+          document.getElementById('avatarBtn').textContent = name.charAt(0).toUpperCase()
+          ;(function(){ var _u=JSON.parse(localStorage.getItem('usuario')||'{}'); if(_u && _u.avatar){ var _el=document.getElementById('avatarBtn'); if(_el) _el.innerHTML='<img src="'+_u.avatar+'" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%">'; } })();
+          document.getElementById('dropdownName').textContent  = name
+          document.getElementById('dropdownEmail').textContent = d.usuario?.email || ''
+        } else {
+          console.error('[cronograma] /api/auth/me falhou status=%d', r.status)
+        }
+      } catch (e) { console.error('[cronograma] /api/auth/me erro:', e) }
+
+      await carregarCronograma()
+    }
+
+    // ── Máscara mm:ss ─────────────────────────────────────
+    function applyDurMask(input) {
+      input.addEventListener('keydown', e => {
+        if (['Backspace','Delete','Tab','ArrowLeft','ArrowRight'].includes(e.key)) return
+        if (!/^\d$/.test(e.key)) e.preventDefault()
+      })
+      input.addEventListener('input', () => {
+        let v = input.value.replace(/\D/g, '').slice(0, 4)
+        if (v.length >= 3) v = v.slice(0,2) + ':' + v.slice(2)
+        input.value = v
+      })
+    }
+
+    // ── Dados ─────────────────────────────────────────────
+    async function carregarCronograma() {
+      try {
+        console.log('[cronograma] carregarCronograma() id=', cronogramaId)
+
+        // Tenta carregar como cronograma ID
+        let r = await authFetch(`/api/cronograma/${cronogramaId}/itens`)
+        console.log('[cronograma] /itens status=', r.status)
+
+        // Se não achou, tenta como event ID (URL legada) — carrega direto sem redirect
+        if (r.status === 404) {
+          console.log('[cronograma] 404 em /itens, tentando como eventId...')
+          const re = await authFetch(`/api/cronograma/${cronogramaId}`)
+          if (re.ok) {
+            const { cronograma: cron } = await re.json()
+            console.log('[cronograma] lookup por eventId =>', cron?.id)
+            if (cron?.id) {
+              // Atualiza URL sem reload
+              window.history.replaceState(null, '', `/cronograma/${cron.id}`)
+              // Carrega itens direto com o ID real
+              r = await authFetch(`/api/cronograma/${cron.id}/itens`)
+              console.log('[cronograma] /itens (id real) status=', r.status)
+            }
+          }
+          if (!r.ok) {
+            showToast('Cronograma não encontrado')
+            return
+          }
+        }
+
+        if (!r.ok) {
+          const err = await r.json().catch(() => ({}))
+          console.error('[cronograma] /itens falhou status=%d error=%s', r.status, err.error)
+          showToast('Erro ao carregar cronograma')
+          return
+        }
+
+        const { cronograma, itens } = await r.json()
+        _cronograma = cronograma
+        _itens = itens || []
+        document.getElementById('phTitle').textContent = cronograma?.name || '—'
+        if (cronograma?.event_id) document.getElementById('backLink').href = `/evento/${cronograma.event_id}`
+        document.title = `Cronograma — ${cronograma?.name || ''}`
+        renderLista()
+      } catch (e) {
+        console.error('[cronograma] carregarCronograma erro:', e)
+        showToast('Erro ao carregar cronograma')
+      }
+    }
+
+    // ── Render ────────────────────────────────────────────
+    function renderLista() {
+      const el = document.getElementById('cronogramaList')
+      document.getElementById('itemCount').textContent = `${_itens.length} ${_itens.length === 1 ? 'item' : 'itens'}`
+      calcTotal()
+
+      if (!_itens.length) {
+        el.innerHTML = `
+          <div class="empty-state">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            <h3>Cronograma vazio</h3>
+            <p>Adicione seções, tarefas e músicas para montar o cronograma do evento.</p>
+          </div>`
+        return
+      }
+
+      el.innerHTML = _itens.map((item, idx) => renderItem(item, idx)).join('')
+      initDrag()
+    }
+
+    function renderItem(item, idx) {
+      const dur = fmtDuration(item.duration)
+      const isSecao  = item.type === 'secao'
+      const isMusica = item.type === 'musica'
+      const isAntes  = item.type === 'antes'
+
+      let typeIcon = ''
+      if (!isSecao) {
+        if (isAntes)
+          typeIcon = `<div class="cron-type-icon antes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>`
+        else if (isMusica)
+          typeIcon = `<div class="cron-type-icon musica"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></div>`
+        else
+          typeIcon = `<div class="cron-type-icon tarefa"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>`
+      }
+
+      let meta = ''
+      if (!isSecao) {
+        const badge  = isAntes ? `<span class="antes-badge">Pré-evento</span>` : ''
+        const desc   = item.description ? `<span class="cron-desc">${item.description}</span>` : ''
+        const artist = item.musica?.artist ? `<span class="cron-artist">${item.musica.artist}</span>` : ''
+        const tom    = item.musica?.tom ? `<span class="cron-tom">${item.musica.tom}</span>` : ''
+        if (badge || desc || artist || tom) meta = `<div class="cron-meta">${badge}${artist}${tom}${desc}</div>`
+      }
+
+      return `
+        <div class="cron-item ${item.type}" data-id="${item.id}" data-idx="${idx}" draggable="true">
+          <div class="drag-handle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/></svg></div>
+          ${typeIcon}
+          <div class="cron-body">
+            <div class="cron-title">${item.title || '—'}</div>
+            ${meta}
+          </div>
+          ${!isSecao && dur ? `<div class="cron-duration">${dur}</div>` : ''}
+          <div class="cron-actions">
+            <button class="cron-btn" onclick="editarItem('${item.id}')" title="Editar">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </button>
+            <button class="cron-btn danger" onclick="excluirItem('${item.id}')" title="Excluir">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+            </button>
+          </div>
+        </div>`
+    }
+
+    // ── Drag & Drop ───────────────────────────────────────
+    function initDrag() {
+      document.querySelectorAll('.cron-item').forEach(el => {
+        el.addEventListener('dragstart', e => {
+          _dragSrc = el
+          el.classList.add('dragging')
+          e.dataTransfer.effectAllowed = 'move'
+        })
+        el.addEventListener('dragend', () => {
+          el.classList.remove('dragging')
+          document.querySelectorAll('.cron-item').forEach(i => i.classList.remove('drag-over'))
+          salvarOrdem()
+        })
+        el.addEventListener('dragover', e => {
+          e.preventDefault()
+          if (_dragSrc && _dragSrc !== el) {
+            document.querySelectorAll('.cron-item').forEach(i => i.classList.remove('drag-over'))
+            el.classList.add('drag-over')
+            const list = document.getElementById('cronogramaList')
+            const items = [...list.querySelectorAll('.cron-item')]
+            const srcIdx = items.indexOf(_dragSrc)
+            const tgtIdx = items.indexOf(el)
+            if (srcIdx < tgtIdx) list.insertBefore(_dragSrc, el.nextSibling)
+            else list.insertBefore(_dragSrc, el)
+          }
+        })
+      })
+    }
+
+    async function salvarOrdem() {
+      const items = [...document.querySelectorAll('.cron-item')]
+      const ordem = items.map((el, i) => ({ id: el.dataset.id, ordem: i }))
+      // Atualiza local
+      const map = {}
+      _itens.forEach(it => map[it.id] = it)
+      _itens = ordem.map(o => map[o.id]).filter(Boolean)
+      calcTotal()
+      try {
+        await authFetch(`/api/cronograma/${cronogramaId}/reorder`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ordem }),
+        })
+      } catch {}
+    }
+
+    // ── Modal Item ────────────────────────────────────────
+    function abrirModal(item = null) {
+      _editId = item?.id || null
+      _musicaSelecionada = item?.musica || (item?.musica_id ? { id: item.musica_id } : null)
+
+      document.getElementById('modalTitle').textContent = item ? 'Editar Item' : 'Novo Item'
+      document.getElementById('fieldTipo').style.display = item ? 'none' : ''
+
+      const tipo = item?.type || 'tarefa'
+      selecionarTipo(tipo)
+
+      if (item) {
+        if (tipo === 'secao') {
+          document.getElementById('fSecaoTitle').value = item.title || ''
+        } else if (tipo === 'musica') {
+          if (item.musica) {
+            definirMusica(item.musica)
+          }
+          document.getElementById('fMusicaDuration').value = fmtDuration(item.duration)
+          document.getElementById('fMusicaDesc').value = item.description || ''
+        } else {
+          document.getElementById('fTitle').value    = item.title || ''
+          document.getElementById('fDesc').value     = item.description || ''
+          document.getElementById('fDuration').value = fmtDuration(item.duration)
+        }
+      } else {
+        document.getElementById('fSecaoTitle').value = ''
+        document.getElementById('fTitle').value = ''
+        document.getElementById('fDesc').value  = ''
+        document.getElementById('fDuration').value = ''
+        document.getElementById('fMusicaDuration').value = ''
+        document.getElementById('fMusicaDesc').value = ''
+        document.getElementById('fMusicaSearch').value = ''
+        limparMusica()
+      }
+
+      document.getElementById('modalItem').classList.add('open')
+    }
+
+    function fecharModal() {
+      document.getElementById('modalItem').classList.remove('open')
+      document.getElementById('musicaResults').classList.remove('open')
+      clearTimeout(_buscarTimer)
+    }
+
+    function selecionarTipo(tipo) {
+      _tipoAtual = tipo
+      document.querySelectorAll('.type-btn').forEach(b => b.classList.toggle('active', b.dataset.type === tipo))
+      document.getElementById('camposSecao').classList.toggle('hidden', tipo !== 'secao')
+      document.getElementById('camposTarefa').classList.toggle('hidden', tipo !== 'tarefa' && tipo !== 'antes')
+      document.getElementById('camposMusica').classList.toggle('hidden', tipo !== 'musica')
+    }
+
+    // ── Música ────────────────────────────────────────────
+    async function buscarMusica(q) {
+      const res = document.getElementById('musicaResults')
+      clearTimeout(_buscarTimer)
+      if (!q.trim() || q.trim().length < 2) { res.classList.remove('open'); return }
+      res.innerHTML = '<div class="music-result-searching">Buscando...</div>'
+      res.classList.add('open')
+
+      _buscarTimer = setTimeout(async () => {
+        try {
+          const [libResp, dzResp] = await Promise.all([
+            authFetch(`/api/musica?q=${encodeURIComponent(q)}`),
+            authFetch(`/api/musica/buscar?q=${encodeURIComponent(q)}`)
+          ])
+          const libMusicas   = libResp.ok  ? (await libResp.json()).musicas    || [] : []
+          const deezerItens  = dzResp.ok   ? (await dzResp.json()).resultados  || [] : []
+
+          const libTitles = new Set(libMusicas.map(m => m.title.toLowerCase()))
+          const deezerFiltrado = deezerItens.filter(d => !libTitles.has(d.title.toLowerCase()))
+
+          if (!libMusicas.length && !deezerFiltrado.length) {
+            res.innerHTML = '<div class="music-result-searching">Nenhum resultado</div>'
+            return
+          }
+
+          let html = ''
+          const escJson = obj => JSON.stringify(obj).replace(/"/g, '&quot;')
+
+          if (libMusicas.length) {
+            if (deezerFiltrado.length) html += `<div class="music-result-section-label">Biblioteca</div>`
+            html += libMusicas.slice(0, 5).map(m => `
+              <div class="music-result-item" onmousedown="event.preventDefault()" onclick="definirMusica(${escJson(m)})">
+                <div class="music-result-info">
+                  <div class="music-result-title">${m.title}</div>
+                  <div class="music-result-sub">${[m.artist, m.tom].filter(Boolean).join(' • ')}</div>
+                </div>
+              </div>`).join('')
+          }
+
+          if (deezerFiltrado.length) {
+            html += `<div class="music-result-section-label">Adicionar do Deezer</div>`
+            html += deezerFiltrado.slice(0, 5).map(d => `
+              <div class="music-result-item" onmousedown="event.preventDefault()" onclick="definirMusica(${escJson(d)})">
+                <div class="music-result-info">
+                  <div class="music-result-title">${d.title}</div>
+                  <div class="music-result-sub">${[d.artist, d.album].filter(Boolean).join(' · ')}</div>
+                </div>
+                <span class="music-result-badge">DZ</span>
+              </div>`).join('')
+          }
+
+          res.innerHTML = html
+          res.classList.add('open')
+        } catch(e) {
+          console.error('[buscarMusica]', e)
+          res.classList.remove('open')
+        }
+      }, 350)
+    }
+
+    async function definirMusica(m) {
+      // Se veio do Deezer (sem id), cria na biblioteca primeiro
+      if (!m.id) {
+        showToast('Adicionando à biblioteca...')
+        try {
+          let durationInterval = null
+          if (m.duration) {
+            const sec = parseInt(m.duration)
+            const mins = Math.floor(sec / 60), secs = sec % 60
+            durationInterval = `00:${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`
+          }
+          const r = await authFetch('/api/musica', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              title:      m.title,
+              artist:     m.artist     || null,
+              duration:   durationInterval,
+              deezer_url: m.deezer_url || null,
+            })
+          })
+          const data = await r.json()
+          if (!r.ok) throw new Error(data.error)
+          m = data.musica
+          showToast('Música adicionada à biblioteca')
+        } catch(e) {
+          showToast('Erro ao salvar música: ' + e.message)
+          return
+        }
+      }
+
+      _musicaSelecionada = m
+      document.getElementById('musicaSelectedTitle').textContent = m.title || '—'
+      document.getElementById('musicaSelectedSub').textContent  = [m.artist, m.tom].filter(Boolean).join(' • ') || '—'
+      document.getElementById('musicaSelectedWrap').classList.remove('hidden')
+      document.getElementById('musicaSearchWrap').classList.add('hidden')
+      document.getElementById('musicaResults').classList.remove('open')
+      if (m.duration && !document.getElementById('fMusicaDuration').value) {
+        document.getElementById('fMusicaDuration').value = fmtDuration(m.duration)
+      }
+    }
+
+    function limparMusica() {
+      _musicaSelecionada = null
+      document.getElementById('musicaSelectedWrap').classList.add('hidden')
+      document.getElementById('musicaSearchWrap').classList.remove('hidden')
+      document.getElementById('fMusicaSearch').value = ''
+    }
+
+    // ── Salvar item ───────────────────────────────────────
+    async function salvarItem() {
+      const btn = document.getElementById('btnModalConfirm')
+      btn.disabled = true
+
+      let body = { type: _tipoAtual }
+
+      if (_tipoAtual === 'secao') {
+        const t = document.getElementById('fSecaoTitle').value.trim()
+        if (!t) { showToast('Título obrigatório'); btn.disabled = false; return }
+        body.title = t
+      } else if (_tipoAtual === 'antes' || _tipoAtual === 'tarefa') {
+        const t = document.getElementById('fTitle').value.trim()
+        if (!t) { showToast('Título obrigatório'); btn.disabled = false; return }
+        body.title       = t
+        body.description = document.getElementById('fDesc').value.trim() || null
+        body.duration    = toInterval(document.getElementById('fDuration').value)
+      } else if (_tipoAtual === 'musica') {
+        if (!_musicaSelecionada?.id) { showToast('Selecione uma música'); btn.disabled = false; return }
+        body.title       = _musicaSelecionada.title
+        body.musica_id   = _musicaSelecionada.id
+        body.duration    = toInterval(document.getElementById('fMusicaDuration').value)
+        body.description = document.getElementById('fMusicaDesc').value.trim() || null
+      }
+
+      try {
+        let r, data
+        if (_editId) {
+          r    = await authFetch(`/api/cronograma/${cronogramaId}/itens/${_editId}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+          data = await r.json()
+          if (!r.ok) throw new Error(data.error)
+          _itens = _itens.map(i => i.id === _editId ? data.item : i)
+        } else {
+          r    = await authFetch(`/api/cronograma/${cronogramaId}/itens`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+          data = await r.json()
+          if (!r.ok) throw new Error(data.error)
+          _itens.push(data.item)
+        }
+        renderLista()
+        fecharModal()
+        showToast(_editId ? 'Item atualizado' : 'Item adicionado')
+      } catch (e) {
+        showToast('Erro: ' + e.message)
+      } finally {
+        btn.disabled = false
+      }
+    }
+
+    // ── Editar / Excluir ──────────────────────────────────
+    function editarItem(id) {
+      const item = _itens.find(i => i.id === id)
+      if (item) abrirModal(item)
+    }
+
+    async function excluirItem(id) {
+      if (!confirm('Remover este item do cronograma?')) return
+      try {
+        const r = await authFetch(`/api/cronograma/${cronogramaId}/itens/${id}`, { method: 'DELETE' })
+        if (!r.ok) throw new Error((await r.json()).error)
+        _itens = _itens.filter(i => i.id !== id)
+        renderLista()
+        showToast('Item removido')
+      } catch (e) { showToast('Erro: ' + e.message) }
+    }
+
+    // ── Reutilizar ────────────────────────────────────────
+    async function abrirReutilizar() {
+      _cronogramaReutilizar = null
+      document.getElementById('btnReutilizarConfirm').disabled = true
+      document.getElementById('modalReutilizar').classList.add('open')
+
+      try {
+        const r = await authFetch('/api/cronograma')
+        if (!r.ok) return
+        const { cronogramas } = await r.json()
+        const outros = (cronogramas || []).filter(c => c.id !== cronogramaId)
+        if (!outros.length) {
+          document.getElementById('eventList').innerHTML = '<p style="font-size:13px;color:var(--ink-muted);padding:8px 0">Nenhum outro cronograma encontrado.</p>'
+          return
+        }
+        document.getElementById('eventList').innerHTML = outros.map(c => {
+          const d = c.evento?.start_date ? new Date(c.evento.start_date + 'T12:00:00') : null
+          const dateStr = d ? `${d.getDate()} ${MESES[d.getMonth()]} ${d.getFullYear()}` : ''
+          return `
+            <div class="event-option" data-id="${c.id}" onclick="selecionarCronogramaReutilizar('${c.id}', this)">
+              <div class="event-option-name">${c.name || '—'}</div>
+              ${c.evento?.name || dateStr ? `<div class="event-option-date">${[c.evento?.name, dateStr].filter(Boolean).join(' · ')}</div>` : ''}
+            </div>`
+        }).join('')
+      } catch {}
+    }
+
+    function selecionarCronogramaReutilizar(id, el) {
+      _cronogramaReutilizar = id
+      document.querySelectorAll('.event-option').forEach(e => e.classList.remove('selected'))
+      el.classList.add('selected')
+      document.getElementById('btnReutilizarConfirm').disabled = false
+    }
+
+    function fecharReutilizar() {
+      document.getElementById('modalReutilizar').classList.remove('open')
+    }
+
+    async function confirmarReutilizar() {
+      if (!_cronogramaReutilizar) return
+      const btn = document.getElementById('btnReutilizarConfirm')
+      btn.disabled = true
+      try {
+        const r = await authFetch(`/api/cronograma/${cronogramaId}/reutilizar`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ source_cronograma_id: _cronogramaReutilizar }),
+        })
+        const data = await r.json()
+        if (!r.ok) throw new Error(data.error)
+        _itens = [..._itens, ...(data.itens || [])]
+        renderLista()
+        fecharReutilizar()
+        showToast('Cronograma copiado com sucesso')
+      } catch (e) {
+        showToast('Erro: ' + e.message)
+        btn.disabled = false
+      }
+    }
+
+    init().finally(() => window.hideLoader())
+  </script>
+  <script src="/js/top-search.js"></script>
+  <script src="/js/mobile-sidebar.js"></script>
+<script src="/js/notif-ui.js"></script>
+</body>
+</html>

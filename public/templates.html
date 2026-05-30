@@ -1,0 +1,1558 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hug Software — Templates</title>
+  <script src="/js/auth-check.js"></script>
+  <script src="/js/page-loader.js"></script>
+  <script src="/js/cache.js"></script>
+  <link rel="icon" type="image/png" href="/IMG/logo.png">
+  <style>
+    * { font-family: 'Plus Jakarta Sans', sans-serif !important; }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary:        #8B5CF6;
+      --primary-light:  #DDD6FE;
+      --primary-dark:   #7C3AED;
+      --primary-focus:  rgba(151,71,255,0.4);
+      --ink:            #1d1d1f;
+      --ink-muted:      #6e6e73;
+      --ink-subtle:     #aeaeb2;
+      --canvas:         #ffffff;
+      --canvas-page: #ECE9E7;
+      --canvas-input:   #f2f2f7;
+      --hairline:       #e0e0e0;
+      --on-dark:        #ffffff;
+      --on-dark-muted:  rgba(255,255,255,0.65);
+      --sidebar-w:      220px;
+      --topbar-h:       64px;
+      --radius-sm:      8px;
+      --radius-md:      12px;
+      --radius-lg:      18px;
+      --radius-pill:    9999px;
+    }
+
+    body {
+      min-height: 100vh;
+      background: var(--canvas-page);
+      font-family: sans-serif;
+      -webkit-font-smoothing: antialiased;
+      display: flex;
+    }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width: var(--sidebar-w); min-height: unset;
+      background: #1c1c1c;
+      display: flex; flex-direction: column; flex-shrink: 0;
+      position: fixed; top: 0; left: 0; bottom: 0;
+      z-index: 100; overflow: visible;
+      transition: width 0.22s cubic-bezier(.4,0,.2,1);
+    }
+    .sidebar-logo {
+      display: flex; align-items: center; gap: 12px;
+      padding: 24px 20px 28px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      transition: padding 0.22s, gap 0.22s;
+    }
+    .logo-mark { width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .logo-text {
+      font-family: sans-serif;
+      font-size: 15px; font-weight: 700; color: var(--on-dark);
+      letter-spacing: 0.6px; line-height: 1; white-space: nowrap;
+      overflow: hidden; opacity: 1; transition: opacity 0.15s, width 0.22s;
+    }
+    .logo-text span { color: var(--primary-light); }
+    .sidebar-nav { flex: 1; padding: 14px 0; overflow-y: auto; scrollbar-width: none; }
+    .sidebar-nav::-webkit-scrollbar { display: none; }
+    .nav-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 11px 20px; font-size: 14px; font-weight: 400;
+      color: var(--on-dark-muted); text-decoration: none;
+      letter-spacing: -0.224px; cursor: pointer; white-space: nowrap;
+      transition: background 0.12s, color 0.12s, padding 0.22s;
+    }
+    .nav-item:hover { color: var(--on-dark); background: rgba(255,255,255,0.07); }
+    .nav-item.active { color: var(--on-dark); background: rgba(255,255,255,0.13); font-weight: 600; }
+    .nav-item svg { width: 18px; height: 18px; flex-shrink: 0; opacity: 0.85; }
+    .nav-item.active svg { opacity: 1; }
+    .nav-item span { overflow: hidden; opacity: 1; transition: opacity 0.15s; }
+
+    body.sidebar-collapsed .sidebar { width: 64px; }
+    body.sidebar-collapsed .sidebar-logo { padding: 24px 11px 28px; gap: 0; justify-content: center; }
+    body.sidebar-collapsed .logo-text { opacity: 0; width: 0; }
+    body.sidebar-collapsed .nav-item { padding: 11px 0; justify-content: center; gap: 0; }
+    body.sidebar-collapsed .nav-item span { opacity: 0; width: 0; }
+    body.sidebar-collapsed .main { margin-left: 64px; }
+    body.sidebar-collapsed #collapseBtn svg { transform: rotate(180deg); }
+
+    /* ── Tooltip sidebar ── */
+    .nav-item {
+      position: relative;
+    }
+    .nav-item::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      left: calc(100% + 12px);
+      top: 50%;
+      transform: translateY(-50%) translateX(-6px);
+      background: #1a1a1a;
+      color: #FFFFFF;
+      font-size: 12px;
+      font-weight: 500;
+      padding: 6px 12px;
+      border-radius: 8px;
+      white-space: nowrap;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.15s ease, transform 0.15s ease;
+      z-index: 9999;
+      letter-spacing: 0.1px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.28);
+    }
+    .nav-item::before {
+      content: '';
+      position: absolute;
+      left: calc(100% + 6px);
+      top: 50%;
+      transform: translateY(-50%) translateX(-6px);
+      border: 5px solid transparent;
+      border-right-color: #1a1a1a;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.15s ease, transform 0.15s ease;
+      z-index: 9999;
+    }
+    .nav-item:hover::after,
+    .nav-item:hover::before {
+      opacity: 1;
+      transform: translateY(-50%) translateX(0);
+    }
+
+
+    /* ── MAIN ── */
+    .main { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; min-height: 100vh; transition: margin-left 0.22s cubic-bezier(.4,0,.2,1); }
+
+        /* ─────────────────── TOPBAR ─────────────────── */
+    .topbar {
+      height: 72px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding: 0 28px;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: linear-gradient(135deg, #ECE9E700 0%, #ECE9E7 100%);
+      backdrop-filter: blur(1px);
+      -webkit-backdrop-filter: blur(1px);
+    }
+
+    /* Search pill + botão */
+    .search-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .search-wrap input {
+      width: 300px;
+      height: 42px;
+      background: #FFFFFF;
+      border: 1.5px solid #EEEEEE;
+      border-radius: var(--radius-pill);
+      padding: 0 18px;
+      font-size: 14px;
+      font-family: inherit;
+      color: #1A1A1A;
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .search-wrap input::placeholder { color: #AAAAAA; }
+    .search-wrap input:focus {
+      border-color: #CCCCCC;
+      box-shadow: 0 0 0 3px rgba(0,0,0,0.05);
+    }
+    .search-btn {
+      width: 42px; height: 42px;
+      border-radius: 50%;
+      border: none;
+      background: #8B5CF6;
+      color: #FFFFFF;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: background 0.15s;
+    }
+    .search-btn:hover { background: #7C3AED; }
+    .search-btn svg { width: 18px; height: 18px; }
+
+    /* Ícones do topbar */
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .topbar-actions .icon-btn {
+      width: 42px; height: 42px;
+      background: #FFFFFF;
+      border: 1.5px solid #EEEEEE;
+      border-radius: 50%;
+      color: #555555;
+    }
+    .topbar-actions .icon-btn:hover {
+      background: #F5F5F5;
+      border-color: #DDDDDD;
+      color: #1A1A1A;
+    }
+
+    /* Badge de notificação */
+    .notif-wrap {
+      position: relative;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .notif-badge { position:absolute; top:-4px; right:-4px; background:#E85D6A; color:#fff; border-radius:50%; width:18px; height:18px; font-size:10px; font-weight:700; display:flex; align-items:center; justify-content:center; pointer-events:none; }
+    .notif-dropdown { position:absolute; top:48px; right:0; width:360px; background:#fff; border-radius:16px; border:1px solid #E8E5E2; box-shadow:0 8px 32px rgba(0,0,0,0.12); z-index:300; display:none; overflow:hidden; }
+    .notif-dropdown.open { display:block; }
+    .notif-header { display:flex; align-items:center; justify-content:space-between; padding:14px 16px; border-bottom:1px solid #F5F3F0; }
+    .notif-list { max-height:360px; overflow-y:auto; }
+    .notif-item { padding:12px 16px; border-bottom:1px solid #F5F3F0; cursor:pointer; display:flex; gap:12px; align-items:flex-start; transition:background 0.1s; }
+    .notif-item:hover { background:#F5F3F0; }
+    .notif-item.unread { background:rgba(145,86,241,0.06); }
+    .notif-icon { width:36px; height:36px; border-radius:50%; background:#EDE5FF; display:flex; align-items:center; justify-content:center; flex-shrink:0; color:#9156F1; }
+    .notif-content { flex:1; min-width:0; }
+    .notif-title { font-weight:600; font-size:13px; color:#1C1C1C; margin-bottom:2px; }
+    .notif-body { font-size:12px; color:#5C5955; line-height:1.4; margin-bottom:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .notif-time { font-size:11px; color:#9E9B96; }
+    .notif-footer { padding:10px 16px; border-top:1px solid #F5F3F0; text-align:center; }
+    .icon-btn {
+      width: 38px; height: 38px; border: none; background: none; border-radius: var(--radius-sm);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--ink-muted); cursor: pointer; transition: background 0.12s, color 0.12s;
+    }
+    .icon-btn:hover { background: var(--canvas-input); color: var(--ink); }
+    .icon-btn svg { width: 18px; height: 18px; }
+    .avatar-menu-wrap { position: relative; }
+    .avatar {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: #e8734a; color: #fff;
+      font-size: 14px; font-weight: 700; letter-spacing: -0.5px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; user-select: none; transition: opacity 0.12s;
+    }
+    .avatar:hover { opacity: 0.9; }
+    .avatar-dropdown {
+      position: absolute; top: calc(100% + 8px); right: 0;
+      background: var(--canvas); border: 1px solid var(--hairline);
+      border-radius: var(--radius-md); width: 220px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.12); z-index: 200;
+      display: none; overflow: hidden;
+    }
+    .avatar-dropdown.open { display: block; }
+    .dropdown-header { padding: 14px 16px 12px; border-bottom: 1px solid var(--hairline); }
+    .dropdown-name { font-size: 14px; font-weight: 600; color: var(--ink); }
+    .dropdown-email { font-size: 12px; color: var(--ink-muted); margin-top: 2px; }
+    .dropdown-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 16px; font-size: 13px; color: var(--ink);
+      text-decoration: none; transition: background 0.1s;
+    }
+    .dropdown-item:hover { background: var(--canvas-page); }
+    .dropdown-item svg { width: 15px; height: 15px; color: var(--ink-muted); }
+    .dropdown-item.danger { color: #e53935; }
+    .dropdown-item.danger svg { color: #e53935; }
+    .dropdown-divider { height: 1px; background: var(--hairline); }
+
+    /* ── PAGE CONTENT ── */
+    .page-content { padding: 32px; min-width: 0; flex: 1; }
+
+    /* ── HERO ── */
+    .hero {
+      background: linear-gradient(135deg, #0a0a0a 0%, #8B5CF6 45%, #DDD6FE 80%, #ff5500 100%);
+      border-radius: var(--radius-lg);
+      padding: 28px 36px;
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+    .hero::after {
+      content: "";
+      position: absolute;
+      width: 300px; height: 300px;
+      border-radius: 50%;
+      border: 56px solid rgba(255,255,255,0.06);
+      right: -60px; top: -100px;
+      pointer-events: none;
+    }
+    .hero::before {
+      content: "";
+      position: absolute;
+      width: 180px; height: 180px;
+      border-radius: 50%;
+      border: 32px solid rgba(255,255,255,0.04);
+      right: 140px; bottom: -60px;
+      pointer-events: none;
+    }
+    .hero-icon {
+      width: 52px; height: 52px;
+      background: rgba(255,255,255,0.12);
+      border-radius: var(--radius-md);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      backdrop-filter: blur(1px);
+    }
+    .hero-icon svg { width: 26px; height: 26px; color: #fff; }
+    .hero-text { flex: 1; }
+    .hero-title {
+      font-family: sans-serif;
+      font-size: 28px;
+      font-weight: 600;
+      color: var(--on-dark);
+      letter-spacing: -0.374px;
+      line-height: 1.14;
+    }
+    .hero-desc {
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--on-dark-muted);
+      letter-spacing: -0.224px;
+      margin-top: 4px;
+    }
+    .hero-action {
+      margin-left: auto;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      position: relative;
+      z-index: 1;
+    }
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      height: 40px;
+      padding: 0 20px;
+      background: rgba(255,255,255,0.18);
+      border: 1.5px solid rgba(255,255,255,0.55);
+      border-radius: var(--radius-pill);
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--on-dark);
+      letter-spacing: -0.224px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.15s, border-color 0.15s;
+      white-space: nowrap;
+    }
+    .btn-primary:hover { background: rgba(255,255,255,0.28); border-color: rgba(255,255,255,0.8); }
+    .btn-primary svg { width: 16px; height: 16px; }
+
+    /* ── STATS ── */
+    .stats-row { display: flex; gap: 16px; margin-bottom: 24px; }
+    .stat-card {
+      flex: 1; background: var(--canvas); border: 1px solid var(--hairline);
+      border-radius: var(--radius-md); padding: 18px 20px;
+      display: flex; align-items: center; gap: 16px;
+    }
+    .stat-icon {
+      width: 46px; height: 46px; border-radius: var(--radius-sm);
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .stat-icon svg { width: 22px; height: 22px; }
+    .stat-icon.teal { background: rgba(151,71,255,0.10); color: var(--primary); }
+    .stat-icon.blue { background: rgba(0,102,204,0.10); color: #0066cc; }
+    .stat-icon.dark { background: rgba(29,29,31,0.08); color: var(--ink); }
+    .stat-value { font-size: 28px; font-weight: 700; color: var(--ink); letter-spacing: -0.5px; line-height: 1; }
+    .stat-label { font-size: 13px; color: var(--ink-muted); margin-top: 4px; letter-spacing: -0.1px; }
+
+    /* ── CONTENT CARD HEADER ── */
+    .list-controls { display: flex; align-items: center; gap: 10px; }
+    .view-toggle { display: flex; background: var(--canvas-input); border-radius: var(--radius-pill); padding: 3px; }
+    .view-btn {
+      height: 32px; padding: 0 14px; border: none; border-radius: var(--radius-pill);
+      font-family: inherit; font-size: 13px; font-weight: 500;
+      color: var(--ink-muted); cursor: pointer; background: none;
+      display: flex; align-items: center; gap: 6px;
+      transition: background 0.12s, color 0.12s; white-space: nowrap;
+    }
+    .view-btn svg { width: 14px; height: 14px; }
+    .view-btn.active { background: var(--canvas); color: var(--ink); font-weight: 600; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+    .list-search {
+      position: relative; display: flex; align-items: center;
+      height: 36px; background: var(--canvas);
+      border: 1px solid var(--hairline); border-radius: var(--radius-pill);
+      padding: 0 14px 0 32px; transition: border-color 0.12s;
+    }
+    .list-search:focus-within { border-color: var(--primary); }
+    .list-search svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 13px; height: 13px; color: var(--ink-muted); pointer-events: none; }
+    .list-search input { height: 100%; width: 160px; background: none; border: none; outline: none; font-size: 13px; font-family: inherit; color: var(--ink); transition: width 0.2s; }
+    .list-search input::placeholder { color: var(--ink-muted); }
+    .list-search input:focus { width: 200px; }
+
+    /* ── CONTENT AREA ── */
+    .content-card {
+      background: var(--canvas); border: 1px solid var(--hairline);
+      border-radius: var(--radius-md); min-height: 320px;
+      display: flex; flex-direction: column;
+    }
+    .content-count {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 20px; border-bottom: 1px solid var(--hairline);
+    }
+    .content-count-title {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 15px; font-weight: 700; color: #9156F1; letter-spacing: -0.224px;
+      border-left: 3px solid #9156F1; padding-left: 10px;
+    }
+    .content-badge {
+      display: inline-flex; align-items: center; justify-content: center;
+      background: var(--canvas-page); color: var(--ink-muted);
+      border-radius: var(--radius-pill);
+      font-size: 12px; font-weight: 600;
+      min-width: 26px; height: 22px; padding: 0 8px;
+    }
+
+    /* ── GRID ── */
+    .template-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; padding: 20px; }
+    .template-card {
+      border: 1px solid var(--hairline); border-radius: var(--radius-md);
+      padding: 20px; cursor: pointer; transition: box-shadow 0.15s, border-color 0.15s;
+      background: var(--canvas);
+    }
+    .template-card:hover { box-shadow: 0 4px 16px rgba(151,71,255,0.10); border-color: var(--primary-light); }
+    .template-card-icon {
+      width: 44px; height: 44px; border-radius: var(--radius-sm);
+      display: flex; align-items: center; justify-content: center; margin-bottom: 14px;
+    }
+    .template-card-icon svg { width: 22px; height: 22px; }
+    .template-card-icon.evento { background: rgba(151,71,255,0.10); color: var(--primary); }
+    .template-card-icon.cronograma { background: rgba(0,102,204,0.10); color: #0066cc; }
+    .template-card-name { font-size: 15px; font-weight: 600; color: var(--ink); letter-spacing: -0.224px; margin-bottom: 6px; }
+    .template-card-desc { font-size: 13px; color: var(--ink-muted); line-height: 1.5; margin-bottom: 14px; }
+    .template-card-footer { display: flex; align-items: center; justify-content: space-between; }
+    .template-card-meta { font-size: 12px; color: var(--ink-subtle); }
+    .template-card-badge {
+      font-size: 11px; font-weight: 600; padding: 2px 8px;
+      border-radius: var(--radius-pill); text-transform: uppercase; letter-spacing: 0.3px;
+    }
+    .template-card-badge.evento { background: rgba(151,71,255,0.10); color: var(--primary); }
+    .template-card-badge.cronograma { background: rgba(0,102,204,0.10); color: #0066cc; }
+
+    /* ── EMPTY STATE ── */
+    .empty-state {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 64px 24px; text-align: center;
+    }
+    .empty-icon {
+      width: 64px; height: 64px; border-radius: var(--radius-md);
+      background: var(--canvas-page);
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 20px;
+    }
+    .empty-icon svg { width: 32px; height: 32px; color: var(--primary-light); }
+    .empty-title { font-size: 16px; font-weight: 600; color: var(--ink); margin-bottom: 6px; letter-spacing: -0.224px; }
+    .empty-sub { font-size: 13px; color: var(--ink-muted); line-height: 1.5; max-width: 280px; }
+
+    /* ── DRAWER WIZARD ── */
+    .drawer-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.38);
+      z-index: 500;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.22s;
+    }
+    .drawer-overlay.open { opacity: 1; pointer-events: auto; }
+    .drawer {
+      position: fixed; top: 0; right: 0; bottom: 0;
+      width: 52vw; max-width: 780px; min-width: 440px;
+      background: var(--canvas);
+      box-shadow: -8px 0 48px rgba(0,0,0,0.18);
+      display: flex; flex-direction: column;
+      transform: translateX(100%);
+      transition: transform 0.26s cubic-bezier(.4,0,.2,1);
+      z-index: 501; overflow: hidden;
+    }
+    .drawer-overlay.open .drawer { transform: translateX(0); }
+    /* header */
+    .wiz-header {
+      background: linear-gradient(135deg, #0a0a0a 0%, #8B5CF6 55%, #DDD6FE 100%);
+      padding: 28px 32px 24px;
+      display: flex; align-items: flex-start; justify-content: space-between;
+      flex-shrink: 0; position: relative;
+    }
+    .wiz-header::after {
+      content: ""; position: absolute;
+      width: 240px; height: 240px; border-radius: 50%;
+      border: 44px solid rgba(255,255,255,0.06);
+      right: -40px; top: -70px; pointer-events: none;
+    }
+    .wiz-title { font-family: sans-serif; font-size: 22px; font-weight: 700; color: var(--on-dark); letter-spacing: -0.374px; margin-bottom: 4px; }
+    .wiz-subtitle { font-size: 13px; color: var(--on-dark-muted); }
+    .wiz-close {
+      width: 36px; height: 36px; border: none;
+      background: #DDD6FE; border-radius: var(--radius-pill);
+      color: #fff; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; margin-left: 16px;
+      transition: background 0.12s; z-index: 1;
+    }
+    .wiz-close:hover { background: rgba(255,255,255,0.28); }
+    .wiz-close svg { width: 18px; height: 18px; }
+    /* stepper */
+    .wiz-stepper {
+      display: flex; align-items: center; padding: 20px 32px;
+      border-bottom: 1px solid var(--hairline); flex-shrink: 0; background: var(--canvas);
+    }
+    .step-item { display: flex; align-items: center; gap: 10px; }
+    .step-circle {
+      width: 32px; height: 32px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 700; flex-shrink: 0;
+      background: var(--canvas-page); color: var(--ink-muted);
+      border: 2px solid var(--hairline); transition: all 0.2s;
+    }
+    .step-circle.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+    .step-circle.done { background: var(--primary); color: #fff; border-color: var(--primary); }
+    .step-label { font-size: 13px; font-weight: 500; color: var(--ink-muted); white-space: nowrap; transition: color 0.2s; }
+    .step-label.active { color: var(--ink); font-weight: 700; }
+    .step-label.done { color: var(--ink-muted); }
+    .step-line { flex: 1; height: 2px; background: var(--hairline); margin: 0 12px; border-radius: 2px; transition: background 0.3s; }
+    .step-line.done { background: var(--primary); }
+    /* body */
+    .wiz-body { flex: 1; overflow-y: auto; padding: 28px 32px; }
+    .wiz-body::-webkit-scrollbar { width: 4px; }
+    .wiz-body::-webkit-scrollbar-thumb { background: var(--hairline); border-radius: 4px; }
+    /* footer */
+    .wiz-footer {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 32px 22px; border-top: 1px solid var(--hairline);
+      flex-shrink: 0; background: var(--canvas);
+    }
+    /* fields */
+    .wiz-field { margin-bottom: 22px; }
+    .wiz-label { font-size: 14px; font-weight: 700; color: var(--ink); margin-bottom: 8px; display: block; }
+    .wiz-label span { color: #e53935; }
+    .wiz-sublabel { font-size: 12px; color: var(--ink-muted); margin-bottom: 8px; }
+    .wiz-input {
+      width: 100%; height: 46px; background: var(--canvas); border: 1.5px solid var(--hairline);
+      border-radius: var(--radius-sm); padding: 0 16px;
+      font-size: 15px; font-family: inherit; color: var(--ink); outline: none;
+      letter-spacing: -0.224px; transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .wiz-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(151,71,255,0.10); }
+    /* tags */
+    .tag-row { display: flex; gap: 8px; }
+    .tag-row .wiz-input { border-radius: var(--radius-sm) 0 0 var(--radius-sm); }
+    .btn-tag-add {
+      height: 46px; padding: 0 18px; background: rgba(151,71,255,0.08); border: 1.5px solid var(--primary-light);
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0; font-size: 13px; font-weight: 600;
+      color: var(--primary); font-family: inherit; cursor: pointer; transition: background 0.12s; white-space: nowrap;
+    }
+    .btn-tag-add:hover { background: rgba(151,71,255,0.14); }
+    .tags-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+    .tag-chip {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: rgba(151,71,255,0.08); color: var(--primary);
+      border-radius: var(--radius-pill); padding: 4px 10px;
+      font-size: 12px; font-weight: 500;
+    }
+    .tag-chip button { background: none; border: none; cursor: pointer; color: var(--primary); font-size: 13px; line-height: 1; padding: 0; opacity: 0.7; }
+    .tag-chip button:hover { opacity: 1; }
+    /* accordion depts */
+    .ministry-block { border: 1px solid var(--hairline); border-radius: var(--radius-md); margin-bottom: 10px; overflow: hidden; }
+    .ministry-head {
+      display: flex; align-items: center; gap: 10px;
+      padding: 14px 18px; cursor: pointer;
+      background: var(--canvas-page); transition: background 0.12s;
+    }
+    .ministry-head:hover { background: #e8f0eb; }
+    .ministry-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .ministry-name { font-size: 14px; font-weight: 700; color: var(--ink); flex: 1; }
+    .ministry-count { font-size: 12px; color: var(--ink-muted); }
+    .ministry-chevron { width: 16px; height: 16px; color: var(--ink-muted); transition: transform 0.2s; flex-shrink: 0; }
+    .ministry-block.open .ministry-chevron { transform: rotate(180deg); }
+    .ministry-depts { display: none; padding: 8px 18px 12px; }
+    .ministry-block.open .ministry-depts { display: block; }
+    .dept-check-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--hairline); }
+    .dept-check-row:last-child { border-bottom: none; }
+    .dept-check-row input[type=checkbox] { width: 16px; height: 16px; accent-color: var(--primary); cursor: pointer; flex-shrink: 0; }
+    .dept-check-label { font-size: 14px; color: var(--ink); cursor: pointer; }
+    /* review */
+    .review-info-card { background: var(--canvas-page); border-radius: var(--radius-md); padding: 18px 20px; margin-bottom: 22px; }
+    .review-info-row { margin-bottom: 14px; }
+    .review-info-row:last-child { margin-bottom: 0; }
+    .review-info-key { font-size: 11px; font-weight: 700; color: var(--ink-muted); letter-spacing: 0.8px; text-transform: uppercase; margin-bottom: 6px; }
+    .review-info-val { font-size: 15px; font-weight: 600; color: var(--ink); }
+    .review-section-title { font-size: 15px; font-weight: 700; color: var(--ink); margin-bottom: 12px; letter-spacing: -0.224px; }
+    .review-dept-block { border: 1px solid var(--hairline); border-radius: var(--radius-md); overflow: hidden; margin-bottom: 10px; }
+    .review-dept-head { display: flex; align-items: center; gap: 10px; padding: 13px 16px; background: var(--canvas-page); }
+    .review-dept-name { font-size: 14px; font-weight: 700; color: var(--ink); }
+    .review-dept-body { padding: 12px 16px; }
+    .review-func-row { font-size: 13px; color: var(--ink-muted); padding: 3px 0; }
+    /* nav buttons */
+    .btn-wiz-cancel { height: 50px; padding: 0 22px; background: transparent; border: 1px solid var(--hairline); border-radius: var(--radius-pill); font-size: 14px; font-weight: 400; color: var(--ink-muted); font-family: inherit; cursor: pointer; display: flex; align-items: center; gap: 6px; letter-spacing: -0.224px; transition: background 0.12s; }
+    .btn-wiz-cancel:hover { background: var(--canvas-input); }
+    .btn-wiz-next { height: 50px; padding: 0 26px; background: var(--primary); border: none; border-radius: var(--radius-pill); font-size: 14px; font-weight: 600; color: #fff; font-family: inherit; cursor: pointer; display: flex; align-items: center; gap: 8px; letter-spacing: -0.224px; transition: background 0.12s, transform 0.1s; }
+    .btn-wiz-next:hover { background: var(--primary-dark); }
+    .btn-wiz-next:active { transform: scale(0.97); }
+    .btn-wiz-next:disabled { opacity: 0.55; cursor: not-allowed; }
+    .step-desc-text { font-size: 14px; color: var(--ink-muted); margin-bottom: 18px; }
+
+    /* ── PAGE GREETING ── */
+    .page-greeting { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+    .pg-left  { display: flex; flex-direction: column; gap: 4px; }
+    .pg-title { font-size: 30px; font-weight: 700; color: #1A1A1A; letter-spacing: -0.5px; line-height: 1.2; }
+    .pg-sup   { font-size: 16px; font-style: italic; color: var(--ink-muted); }
+    .btn-toolbar-add { display: inline-flex; align-items: center; gap: 7px; height: 38px; padding: 0 18px; background: #9156F1; border: none; border-radius: var(--radius-pill); font-family: inherit; font-size: 14px; font-weight: 600; color: #fff; cursor: pointer; transition: background 0.15s; white-space: nowrap; }
+    .btn-toolbar-add:hover { background: #7340D4; }
+    .btn-toolbar-add svg { width: 15px; height: 15px; }
+
+    /* ── TOAST ── */
+    .toast-container { position: fixed; bottom: 24px; right: 24px; display: flex; flex-direction: column; gap: 10px; z-index: 600; }
+    .toast { padding: 12px 18px; border-radius: var(--radius-md); font-size: 13px; font-weight: 500; color: #fff; box-shadow: 0 4px 16px rgba(0,0,0,0.15); animation: slideUp 0.2s ease; max-width: 320px; }
+    .toast.success { background: var(--primary); }
+    .toast.error { background: #e53935; }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  
+    
+    /* ══════════════════════════════════════════════════════
+       DESIGN UPDATE — Tokens minimalistas (todas as páginas)
+       ══════════════════════════════════════════════════════ */
+
+    /* ── Fundo da página ── */
+    :root { --canvas-page: #ECE9E7; }
+    body  { background: #ECE9E7; }
+
+    /* ── Hero banner ── */
+    .hero {
+      background: linear-gradient(135deg, #1A1A1A 0%, #7C3AED 55%, #8B5CF6 100%) !important;
+      border-radius: 20px !important;
+    }
+
+    /* ── Stat cards ── */
+    .stat-card {
+      background: #FFFFFF !important;
+      border: 1px solid #EEEEEE !important;
+      border-radius: 20px !important;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04) !important;
+      transition: box-shadow 0.2s, transform 0.2s !important;
+    }
+    .stat-card:hover {
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08) !important;
+      transform: translateY(-2px) !important;
+    }
+    .stat-value {
+      font-size: 2rem !important;
+      font-weight: 700 !important;
+      color: #1A1A1A !important;
+      letter-spacing: -0.5px !important;
+      line-height: 1 !important;
+    }
+    .stat-label {
+      font-size: 12px !important;
+      font-weight: 500 !important;
+      color: #8A8A8A !important;
+      text-transform: uppercase !important;
+      letter-spacing: 0.5px !important;
+      margin-top: 6px !important;
+    }
+
+    /* ── Títulos de seção ── */
+    .section-title, .page-title {
+      font-size: 18px !important;
+      font-weight: 700 !important;
+      color: #1A1A1A !important;
+      letter-spacing: -0.3px !important;
+    }
+    .card-title {
+      font-size: 15px !important;
+      font-weight: 700 !important;
+      color: #1A1A1A !important;
+    }
+
+    /* ── Cards de conteúdo (detalhe) ── */
+    .detail-card, .content-card, .section-card, .review-info-card,
+    .profile-card, .aside-card, .pontuacao-card, .setting-card,
+    .accordion-card, .summary-card, .card-link-block {
+      background: #FFFFFF !important;
+      border: 1px solid #EEEEEE !important;
+      border-radius: 20px !important;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04) !important;
+    }
+
+    /* ── Cards de lista / item (com hover) ── */
+    .list-card, .ministry-card, .dept-card, .func-card,
+    .template-card, .bloco-card, .dispon-card, .type-card,
+    .ev-card, .lds-card, .option-card, .check-card,
+    .pending-card-click {
+      background: #FFFFFF !important;
+      border: 1px solid #EEEEEE !important;
+      border-radius: 20px !important;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04) !important;
+      transition: box-shadow 0.2s, transform 0.2s !important;
+    }
+    .list-card:hover, .ministry-card:hover, .dept-card:hover, .func-card:hover,
+    .template-card:hover, .bloco-card:hover, .dispon-card:hover, .type-card:hover,
+    .ev-card:hover, .lds-card:hover, .option-card:hover, .check-card:hover,
+    .pending-card-click:hover {
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08) !important;
+      transform: translateY(-2px) !important;
+    }
+
+    /* ── Cabeçalho de card ── */
+    .card-header {
+      border-bottom: 1px solid #EEEEEE !important;
+    }
+
+    /* ── Escalação: cards de departamento ── */
+    .dept-card-header {
+      background: #ECE9E7 !important;
+      border-bottom: 1px solid #EEEEEE !important;
+      border-radius: 20px 20px 0 0 !important;
+    }
+
+    /* ── Badges de data ── */
+    .event-date-badge, .ev-card-day, .ev-card-badge {
+      background: #7C3AED !important;
+      border-radius: 12px !important;
+    }
+
+    /* ── Tabelas ── */
+    .table-wrap, .table-container {
+      background: #FFFFFF !important;
+      border: 1px solid #EEEEEE !important;
+      border-radius: 20px !important;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04) !important;
+      overflow: hidden !important;
+    }
+    thead th {
+      font-size: 11px !important;
+      font-weight: 600 !important;
+      color: #8A8A8A !important;
+      text-transform: uppercase !important;
+      letter-spacing: 0.5px !important;
+      background: #ECE9E7 !important;
+    }
+
+    /* ── Painel lateral (detalhe) ── */
+    .right-panel {
+      background: #FFFFFF !important;
+      border-left: 1px solid #EEEEEE !important;
+    }
+
+    /* ══════════════════════════════════════════════════════
+       FIM DESIGN UPDATE
+       ══════════════════════════════════════════════════════ */
+    /* ══════════════════════════════════════════════════════
+       SIDEBAR REDESIGN — Floating pill dark
+       ══════════════════════════════════════════════════════ */
+    :root { --sidebar-w: 60px; }
+
+    /* ── Estrutura base ── */
+    .sidebar {
+      width: 60px !important;
+      background: #1c1c1c !important;
+      border-radius: 24px !important;
+      top: 16px !important;
+      bottom: 16px !important;
+      left: 12px !important;
+      min-height: unset !important;
+      height: auto !important;
+      padding: 16px 8px !important;
+      align-items: center !important;
+      overflow: visible !important;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.18) !important;
+      border-right: none !important;
+    }
+
+    /* ── Logo ── */
+    .sidebar-logo { display: none !important; }
+    .logo-text    { display: none !important; }
+
+    /* ── Nav ── */
+    .sidebar-nav {
+      padding: 0 !important;
+      align-items: center !important;
+      gap: 4px !important;
+      overflow: visible !important;
+      flex-direction: column !important;
+    }
+    .nav-item {
+      width: 44px !important; height: 44px !important;
+      min-height: 44px !important;
+      padding: 10px !important;
+      border-radius: 14px !important;
+      color: rgba(255,255,255,0.5) !important;
+      justify-content: center !important;
+      gap: 0 !important;
+      background: none !important;
+      letter-spacing: 0 !important;
+    }
+    .nav-item span { display: none !important; }
+    .nav-item svg {
+      width: 20px !important; height: 20px !important;
+      opacity: 1 !important; flex-shrink: 0 !important;
+    }
+    .nav-item:hover {
+      background: rgba(255,255,255,0.1) !important;
+      color: rgba(255,255,255,0.9) !important;
+    }
+    .nav-item.active {
+      background: #FFFFFF !important;
+      color: #1A1A1A !important;
+    }
+    .nav-item.active svg { opacity: 1 !important; }
+
+    /* ── Transição suave ── */
+    .sidebar { transition: transform 0.25s cubic-bezier(.4,0,.2,1), opacity 0.25s !important; }
+    .main    { transition: margin-left 0.25s cubic-bezier(.4,0,.2,1) !important; }
+
+    /* ── Collapsed: sidebar sai pela esquerda ── */
+    body.sidebar-collapsed .sidebar {
+      transform: translateX(calc(-100% - 20px)) !important;
+      opacity: 0 !important;
+      pointer-events: none !important;
+    }
+    body.sidebar-collapsed .main { margin-left: 16px !important; }
+    /* ── Quando collapsed: empurra conteúdo à direita do botão restaurar ── */
+    body.sidebar-collapsed .content {
+      padding-left: 60px !important;
+    }
+    body.sidebar-collapsed .topbar {
+      padding-left: 64px !important;
+    }
+
+
+    /* ── Botão flutuante para restaurar sidebar ── */
+    .sidebar-restore-btn {
+      display: none;
+      position: fixed;
+      top: 20px; left: 16px;
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      background: #1c1c1c;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      align-items: center; justify-content: center;
+      z-index: 200;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      transition: background 0.15s;
+    }
+    .sidebar-restore-btn:hover { background: #333; }
+    .sidebar-restore-btn svg { width: 18px; height: 18px; }
+    body.sidebar-collapsed .sidebar-restore-btn { display: flex; }
+
+    /* ── Main area offset ── */
+    .main { margin-left: 84px !important; }
+
+    /* ── Rodapé da sidebar ── */
+    .sidebar > div:last-child, .sidebar-footer {
+      border-top: none !important;
+      background: none !important;
+      padding: 0 !important;
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      justify-content: center !important;
+      gap: 8px !important;
+      margin-top: auto !important;
+      width: 100% !important;
+    }
+    .sidebar .icon-btn {
+      width: 40px !important; height: 40px !important;
+      border-radius: 50% !important;
+      color: rgba(255,255,255,0.7) !important;
+      background: rgba(255,255,255,0.08) !important;
+      border: none !important;
+      flex-shrink: 0 !important;
+    }
+    .sidebar .icon-btn:hover {
+      background: rgba(255,255,255,0.16) !important;
+      color: #FFFFFF !important;
+    }
+    /* ══════════════════════════════════════════════════════ */
+
+    /* ── Avatar no rodapé da sidebar ── */
+    .sidebar-footer {
+      padding-top: 8px !important;
+      border-top: 1px solid rgba(255,255,255,0.08) !important;
+    }
+    .sidebar .avatar-menu-wrap {
+      position: relative !important;
+      margin: 0 !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+    }
+    .sidebar .avatar {
+      width: 40px !important; height: 40px !important;
+      border-radius: 50% !important;
+      font-size: 13px !important;
+      margin-left: 0 !important;
+      cursor: pointer !important;
+      box-shadow: 0 0 0 2px rgba(255,255,255,0.15) !important;
+    }
+    .sidebar .avatar-dropdown {
+      position: fixed !important;
+      left: 84px !important;
+      bottom: 16px !important;
+      top: auto !important;
+      right: auto !important;
+      transform: translateX(-8px) !important;
+      transition: opacity 0.15s, transform 0.15s !important;
+    }
+    .sidebar .avatar-dropdown.open {
+      transform: translateX(0) !important;
+      opacity: 1 !important;
+      pointer-events: auto !important;
+    }
+  </style>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/responsive.css">
+</head>
+<body>
+<script>if(localStorage.getItem('sidebar-collapsed')==='1')document.body.classList.add('sidebar-collapsed')</script>
+
+  <!-- ── Sidebar ── -->
+  <aside class="sidebar">
+    <nav class="sidebar-nav">
+      <a class="nav-item" href="/configuracoes" data-tooltip="Configurações" data-menu="configuracoes">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        <span>Configurações</span>
+      </a>      <a class="nav-item" data-tooltip="Dashboard" data-menu="dashboard" href="/dashboard">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        <span>Dashboard</span>
+      </a>      <a class="nav-item" href="/departamentos" data-tooltip="Departamentos" data-menu="departamentos">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><path d="M2 12h20"/></svg>
+        <span>Departamentos</span>
+      </a>      <a class="nav-item" href="/escalacoes" data-tooltip="Escalações" data-menu="escalacao">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></svg>
+        <span>Escalação</span>
+      </a>      <a class="nav-item" href="/eventos" data-tooltip="Eventos" data-menu="eventos">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <span>Eventos</span>
+      </a>      <a class="nav-item" href="/indisponibilidade" data-tooltip="Indisponibilidade" data-menu="indisponibilidade">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M10 14l4 4"/><path d="M14 14l-4 4"/></svg>
+        <span>Indisponibilidade</span>
+      </a>      <a class="nav-item" href="/ministerios" data-tooltip="Ministérios" data-menu="ministerios">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4"/><path d="M10 4h4"/><path d="M3 11l9-7 9 7"/><rect x="5" y="11" width="14" height="10" rx="1"/><path d="M10 21v-5h4v5"/></svg>
+        <span>Ministérios</span>
+      </a>      <a class="nav-item" href="/musicas" data-tooltip="Músicas" data-menu="musicas">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+        <span>Músicas</span>
+      </a>      <a class="nav-item active" href="/templates" data-tooltip="Templates" data-menu="templates">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+        <span>Templates</span>
+      </a>      <a class="nav-item" href="/voluntarios" data-tooltip="Voluntários" data-menu="voluntarios">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span>Voluntários</span>
+      </a>      <a class="nav-item" href="/notificacoes" data-tooltip="Notificações" data-menu="notificacoes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span>Notificações</span></a></nav>
+  </aside>
+
+  <!-- ── Main ── -->
+  <div class="main">
+
+    <!-- Topbar -->
+    <header class="topbar">
+
+      <!-- Direita: search + ícones -->
+      <div class="topbar-actions">
+        <!-- Search pill + botão -->
+        <div class="search-wrap">
+          <input type="text" placeholder="Search..." id="topSearch" />
+          <button class="search-btn" title="Buscar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          </button>
+        </div>
+
+        <!-- Notificações -->
+        <div class="notif-wrapper" style="position:relative;">
+          <button class="icon-btn notif-btn" id="notifBtn" title="Notificações">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            <span class="notif-badge" id="notifBadge" style="display:none">0</span>
+          </button>
+          <div class="notif-dropdown" id="notifDropdown">
+            <div class="notif-header">
+              <span style="font-weight:600;font-size:14px">Notificações</span>
+              <button id="markAllRead" style="font-size:12px;color:#9156F1;background:none;border:none;cursor:pointer;font-family:inherit">Marcar todas como lidas</button>
+            </div>
+            <div class="notif-list" id="notifList"></div>
+            <div class="notif-footer">
+              <a href="/notificacoes" style="font-size:13px;color:#9156F1;text-decoration:none">Ver todas</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Collapse + avatar movidos pelo sidebar-ui.js -->
+        <button class="icon-btn" id="collapseBtn" title="Recolher menu">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="transition:transform 0.22s"><polyline points="11 17 6 12 11 7"/><polyline points="18 17 13 12 18 7"/></svg>
+        </button>
+        <div class="avatar-menu-wrap">
+          <div class="avatar" id="avatarBtn">A</div>
+          <div class="avatar-dropdown" id="avatarDropdown">
+            <div class="dropdown-header">
+              <div class="dropdown-name" id="dropdownName">—</div>
+              <div class="dropdown-email" id="dropdownEmail">—</div>
+            </div>
+            <a class="dropdown-item" href="/editar-perfil">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              Editar Perfil
+            </a>
+            <a class="dropdown-item" href="/configuracoes" data-menu-dropdown="configuracoes">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+              Configurações
+            </a>
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item danger" href="#" onclick="fazerLogout(event)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+              Sair
+            </a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="page-content">
+
+      <!-- Page Greeting -->
+      <div class="page-greeting">
+        <div class="pg-left">
+          <h1 class="pg-title"><span style="color:#9156F1">Templates</span></h1>
+          <p class="pg-sup">Gerencie os templates de eventos.</p>
+        </div>
+        <button class="btn-toolbar-add" onclick="abrirModal()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Novo Template
+        </button>
+      </div>
+
+      <!-- Stats -->
+
+      <!-- Content card -->
+      <div class="content-card">
+        <div class="content-count">
+          <div class="content-count-title">
+            <span>Lista de templates</span>
+          </div>
+          <div class="list-controls">
+            <div class="view-toggle">
+              <button class="view-btn active" id="btnGrade" onclick="setView('grade')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+                Blocos
+              </button>
+              <button class="view-btn" id="btnLista" onclick="setView('lista')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+                Tabela
+              </button>
+            </div>
+            <div class="list-search">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input type="text" id="searchInput" placeholder="Buscar templates..." oninput="renderAll()" />
+            </div>
+          </div>
+        </div>
+        <div id="contentArea"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Drawer wizard novo template -->
+  <div class="drawer-overlay" id="drawerOverlay">
+    <div class="drawer">
+      <div class="wiz-header">
+        <div>
+          <div class="wiz-title" id="wizTitle">Novo Template de Evento</div>
+          <div class="wiz-subtitle" id="wizSubtitle">Configure as informações, departamentos e revisão</div>
+        </div>
+        <button class="wiz-close" id="drawerClose">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="wiz-stepper" id="wizStepper"></div>
+      <div class="wiz-body" id="wizBody"></div>
+      <div class="wiz-footer" id="wizFooter"></div>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="/js/auth-fetch.js"></script>
+  <script src="/js/sidebar-permissions.js"></script>
+    <script src="/js/sidebar-ui.js"></script>
+  <script>
+    const usuario = JSON.parse(localStorage.getItem('usuario') || '{}')
+    const igreja  = JSON.parse(localStorage.getItem('igreja')  || '{}')
+    const isLiderDept = (usuario.perfil_slug || localStorage.getItem('perfil_slug') || '') === 'lider_departamento'
+
+    // Restrição imediata para lider_departamento
+    if (isLiderDept) {
+      document.querySelectorAll('.btn-primary').forEach(btn => { btn.style.display = 'none' })
+    }
+
+    const churchNameEl = document.getElementById('churchName')
+    if (churchNameEl && igreja.nome) churchNameEl.textContent = igreja.nome
+
+    if (usuario.nome) {
+      const initial = (usuario.nome || '?')[0].toUpperCase()
+      document.getElementById('avatarBtn').textContent    = initial
+      ;(function(){ var _u=JSON.parse(localStorage.getItem('usuario')||'{}'); if(_u && _u.avatar){ var _el=document.getElementById('avatarBtn'); if(_el) _el.innerHTML='<img src="'+_u.avatar+'" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%">'; } })();
+      document.getElementById('dropdownName').textContent  = usuario.nome
+      document.getElementById('dropdownEmail').textContent = usuario.email || ''
+    }
+
+    async function fazerLogout(e) {
+      e.preventDefault()
+      clearSession()
+    }
+
+    if (localStorage.getItem('sidebar-collapsed') === '1') document.body.classList.add('sidebar-collapsed')
+    ;(document.getElementById('collapseBtn')||{addEventListener:()=>{}}).addEventListener('click', () => {
+      document.body.classList.toggle('sidebar-collapsed')
+      localStorage.setItem('sidebar-collapsed', document.body.classList.contains('sidebar-collapsed') ? '1' : '0')
+    })
+    const avatarBtn = document.getElementById('avatarBtn')
+    const avatarDropdown = document.getElementById('avatarDropdown')
+    avatarBtn.addEventListener('click', e => { e.stopPropagation(); avatarDropdown.classList.toggle('open') })
+    document.addEventListener('click', () => avatarDropdown.classList.remove('open'))
+
+    /* ── State ── */
+    let _templates = []
+    let _view = 'grade'
+
+    /* ── Toast ── */
+    function showToast(msg, type = 'success') {
+      const t = document.createElement('div')
+      t.className = `toast ${type}`
+      t.textContent = msg
+      document.getElementById('toastContainer').appendChild(t)
+      setTimeout(() => t.remove(), 3200)
+    }
+
+    /* ── View ── */
+    function setView(v) {
+      _view = v
+      document.getElementById('btnGrade').classList.toggle('active', v === 'grade')
+      document.getElementById('btnLista').classList.toggle('active', v === 'lista')
+      renderAll()
+    }
+
+    /* ── Stats ── */
+    function atualizarStats() {
+      // stats-row removido
+    }
+
+    /* ── Render ── */
+    function renderAll() {
+      const q = document.getElementById('searchInput').value.toLowerCase().trim()
+      let filtered = q
+        ? _templates.filter(t => t.nome.toLowerCase().includes(q) || (t.descricao || '').toLowerCase().includes(q))
+        : [..._templates]
+
+
+      const area = document.getElementById('contentArea')
+      if (!filtered.length) {
+        area.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+              </svg>
+            </div>
+            <div class="empty-title">Nenhum template encontrado</div>
+            <div class="empty-sub">Crie seu primeiro template clicando no botão acima</div>
+          </div>`
+        return
+      }
+
+      if (_view === 'grade') {
+        area.innerHTML = `<div class="template-grid">${filtered.map(t => cardHTML(t)).join('')}</div>`
+      } else {
+        area.innerHTML = `<div style="padding:8px 0">${filtered.map(t => rowHTML(t)).join('')}</div>`
+      }
+    }
+
+    function cardHTML(t) {
+      const data = t.criadoEm ? new Date(t.criadoEm).toLocaleDateString('pt-BR') : '—'
+      return `
+        <div class="template-card" onclick="location.href='/template/${t.id}'" title="Editar template">
+          <div class="template-card-icon ${t.tipo}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              ${t.tipo === 'evento'
+                ? '<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>'
+                : '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/>'}
+            </svg>
+          </div>
+          <div class="template-card-name">${t.nome}</div>
+          <div class="template-card-desc">${t.descricao || 'Sem descrição'}</div>
+          <div class="template-card-footer">
+            <span class="template-card-meta">${data}</span>
+            <span class="template-card-badge ${t.tipo}">${t.tipo === 'evento' ? 'Evento' : 'Cronograma'}</span>
+          </div>
+        </div>`
+    }
+
+    function rowHTML(t) {
+      const data = t.criadoEm ? new Date(t.criadoEm).toLocaleDateString('pt-BR') : '—'
+      return `
+        <div style="display:flex;align-items:center;gap:14px;padding:14px 20px;border-bottom:1px solid var(--hairline);cursor:pointer;" onclick="location.href='/template/${t.id}'" title="Editar template">
+          <div class="template-card-icon ${t.tipo}" style="width:36px;height:36px;flex-shrink:0;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px">
+              ${t.tipo === 'evento'
+                ? '<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>'
+                : '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/>'}
+            </svg>
+          </div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:14px;font-weight:600;color:var(--ink);letter-spacing:-0.224px;">${t.nome}</div>
+            <div style="font-size:12px;color:var(--ink-muted);margin-top:2px;">${t.descricao || 'Sem descrição'}</div>
+          </div>
+          <span class="template-card-badge ${t.tipo}" style="flex-shrink:0;">${t.tipo === 'evento' ? 'Evento' : 'Cronograma'}</span>
+          <span style="font-size:12px;color:var(--ink-subtle);flex-shrink:0;min-width:72px;text-align:right;">${data}</span>
+        </div>`
+    }
+
+    /* ── Wizard State ── */
+    let _wizStep = 1
+    let _wizMode = 'create'     // 'create' | 'edit'
+    let _wizTemplateId = null
+    let _wizNome = ''
+    let _wizTags = []
+    let _wizDepts = new Set()
+    let _ministerios = []
+    let _departamentos = []
+    let _funcoes = []
+    const _COLORS = ['#e8734a','#8B5CF6','#0066cc','#9c27b0','#ff9800','#00838f','#e91e63','#795548']
+
+    const drawerOverlay = document.getElementById('drawerOverlay')
+
+    function abrirModal() {
+      _wizMode = 'create'; _wizTemplateId = null
+      _wizStep = 1; _wizNome = ''; _wizTags = []; _wizDepts = new Set()
+      document.getElementById('wizTitle').textContent    = 'Novo Template de Evento'
+      document.getElementById('wizSubtitle').textContent = 'Configure as informações, departamentos e revisão'
+      drawerOverlay.classList.add('open')
+      renderWizard()
+      carregarDadosWizard()
+    }
+
+    async function editarTemplate(id) {
+      _wizMode = 'edit'; _wizTemplateId = id
+      _wizStep = 1; _wizNome = ''; _wizTags = []; _wizDepts = new Set()
+      document.getElementById('wizTitle').textContent    = 'Editar Template'
+      document.getElementById('wizSubtitle').textContent = 'Atualize as informações do template'
+      drawerOverlay.classList.add('open')
+      renderWizard()
+
+      try {
+        const [tmplRes, minRes, deptRes, funcRes] = await Promise.all([
+          authFetch('/api/template/' + id),
+          authFetch('/api/ministry'),
+          authFetch('/api/department'),
+          authFetch('/api/funcao')
+        ])
+        _ministerios   = minRes.ok  ? (await minRes.json()).ministries   || [] : []
+        _departamentos = deptRes.ok ? (await deptRes.json()).departments || [] : []
+        _funcoes       = funcRes.ok ? (await funcRes.json()).funcoes      || [] : []
+        if (tmplRes.ok) {
+          const { template } = await tmplRes.json()
+          _wizNome  = template.name || ''
+          _wizTags  = template.tags || []
+          _wizDepts = new Set((template.depts || []).map(d => d.department_id))
+        }
+      } catch {}
+
+      renderWizard()
+    }
+
+    function fecharModal() { drawerOverlay.classList.remove('open') }
+
+    document.getElementById('drawerClose').addEventListener('click', fecharModal)
+    drawerOverlay.addEventListener('click', e => { if (e.target === drawerOverlay) fecharModal() })
+
+    async function carregarDadosWizard() {
+      try {
+        const [minRes, deptRes, funcRes] = await Promise.all([
+          authFetch('/api/ministry'),
+          authFetch('/api/department'),
+          authFetch('/api/funcao')
+        ])
+        _ministerios   = minRes.ok  ? (await minRes.json()).ministries   || [] : []
+        _departamentos = deptRes.ok ? (await deptRes.json()).departments || [] : []
+        _funcoes       = funcRes.ok ? (await funcRes.json()).funcoes      || [] : []
+      } catch { _ministerios = []; _departamentos = []; _funcoes = [] }
+      if (_wizStep === 2) renderWizard()
+    }
+
+    function irParaStep(n) { _wizStep = n; renderWizard() }
+
+    function renderWizard() {
+      renderStepper()
+      renderWizBody()
+      renderWizFooter()
+    }
+
+    function renderStepper() {
+      const labels = ['Informações', 'Departamentos', 'Revisão']
+      document.getElementById('wizStepper').innerHTML = labels.map((label, i) => {
+        const n = i + 1
+        const isDone   = n < _wizStep
+        const isActive = n === _wizStep
+        const checkSVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><polyline points="20 6 9 17 4 12"/></svg>'
+        return `
+          ${i > 0 ? `<div class="step-line${isDone ? ' done' : ''}"></div>` : ''}
+          <div class="step-item">
+            <div class="step-circle${isActive ? ' active' : isDone ? ' done' : ''}">${isDone ? checkSVG : n}</div>
+            <span class="step-label${isActive ? ' active' : isDone ? ' done' : ''}">${label}</span>
+          </div>`
+      }).join('')
+    }
+
+    function renderWizBody() {
+      const el = document.getElementById('wizBody')
+      if      (_wizStep === 1) el.innerHTML = step1HTML()
+      else if (_wizStep === 2) el.innerHTML = step2HTML()
+      else                     el.innerHTML = step3HTML()
+      if (_wizStep === 1) setTimeout(() => document.getElementById('wizNome')?.focus(), 60)
+    }
+
+    function renderWizFooter() {
+      const el = document.getElementById('wizFooter')
+      const next = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><polyline points="9 18 15 12 9 6"/></svg>`
+      const prev = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><polyline points="15 18 9 12 15 6"/></svg>`
+      if (_wizStep === 1) {
+        el.innerHTML = `
+          <button class="btn-wiz-cancel" onclick="fecharModal()">Cancelar</button>
+          <button class="btn-wiz-next" onclick="avancarStep1()">Próximo ${next}</button>`
+      } else if (_wizStep === 2) {
+        el.innerHTML = `
+          <button class="btn-wiz-cancel" onclick="irParaStep(1)">${prev} Voltar</button>
+          <button class="btn-wiz-next" onclick="irParaStep(3)">Próximo ${next}</button>`
+      } else {
+        const btnLabel = _wizMode === 'edit' ? 'Salvar Alterações' : 'Criar Template'
+        el.innerHTML = `
+          <button class="btn-wiz-cancel" onclick="irParaStep(2)">${prev} Voltar</button>
+          <button class="btn-wiz-next" id="btnCriar" onclick="criarTemplate()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><polyline points="20 6 9 17 4 12"/></svg>
+            ${btnLabel}
+          </button>`
+      }
+    }
+
+    /* ── Step 1 ── */
+    function step1HTML() {
+      const tagsHTML = _wizTags.map(t => tagChipHTML(t)).join('')
+      return `
+        <div class="wiz-field">
+          <label class="wiz-label" for="wizNome">Nome <span>*</span></label>
+          <input class="wiz-input" type="text" id="wizNome" placeholder="Ex: Culto de Domingo" value="${_wizNome.replace(/"/g,'&quot;')}" />
+        </div>
+        <div class="wiz-field">
+          <label class="wiz-label">Tags</label>
+          <div class="tag-row">
+            <input class="wiz-input" type="text" id="wizTagInput" placeholder="Ex: Louvor, Pregação..." onkeydown="if(event.key==='Enter'){event.preventDefault();adicionarTag()}" />
+            <button class="btn-tag-add" type="button" onclick="adicionarTag()">+ Adicionar</button>
+          </div>
+          <div class="tags-list" id="tagsList">${tagsHTML}</div>
+        </div>`
+    }
+
+    function tagChipHTML(t) {
+      const esc = t.replace(/\\/g,'\\\\').replace(/'/g,"\\'")
+      return `<span class="tag-chip">${t}<button type="button" onclick="removerTag('${esc}')">✕</button></span>`
+    }
+
+    function avancarStep1() {
+      _wizNome = (document.getElementById('wizNome')?.value || '').trim()
+      if (!_wizNome) { showToast('Informe o nome do template', 'error'); return }
+      irParaStep(2)
+    }
+
+    function adicionarTag() {
+      const inp = document.getElementById('wizTagInput')
+      const val = (inp?.value || '').trim()
+      if (!val || _wizTags.includes(val)) { if (inp) inp.value = ''; return }
+      _wizTags.push(val)
+      if (inp) inp.value = ''
+      const list = document.getElementById('tagsList')
+      if (list) list.innerHTML = _wizTags.map(t => tagChipHTML(t)).join('')
+    }
+
+    function removerTag(t) {
+      _wizTags = _wizTags.filter(x => x !== t)
+      const list = document.getElementById('tagsList')
+      if (list) list.innerHTML = _wizTags.map(tt => tagChipHTML(tt)).join('')
+    }
+
+    /* ── Step 2 ── */
+    function step2HTML() {
+      if (!_ministerios.length) return '<div class="step-desc-text">Carregando ministérios...</div>'
+      const blocks = _ministerios.map((m, i) => {
+        const depts = _departamentos.filter(d => d.ministry_id === m.id)
+        if (!depts.length) return ''
+        const color = _COLORS[i % _COLORS.length]
+        const checked = depts.filter(d => _wizDepts.has(d.id)).length
+        return `
+          <div class="ministry-block" id="minBlock_${m.id}">
+            <div class="ministry-head" onclick="toggleMinistryBlock('${m.id}')">
+              <div class="ministry-dot" style="background:${color}"></div>
+              <span class="ministry-name">${m.name}</span>
+              <span class="ministry-count" id="minCount_${m.id}">${checked}/${depts.length} selecionados</span>
+              <svg class="ministry-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="ministry-depts">
+              ${depts.map(d => `
+                <div class="dept-check-row">
+                  <input type="checkbox" id="dept_${d.id}" ${_wizDepts.has(d.id) ? 'checked' : ''} onchange="toggleDept('${d.id}','${m.id}',this.checked)" />
+                  <label class="dept-check-label" for="dept_${d.id}">${d.name}</label>
+                </div>`).join('')}
+            </div>
+          </div>`
+      }).filter(Boolean).join('')
+      return blocks || '<div class="step-desc-text">Nenhum departamento encontrado.</div>'
+    }
+
+    function toggleMinistryBlock(mId) {
+      document.getElementById('minBlock_' + mId)?.classList.toggle('open')
+    }
+
+    function toggleDept(deptId, mId, checked) {
+      if (checked) _wizDepts.add(deptId); else _wizDepts.delete(deptId)
+      const depts = _departamentos.filter(d => d.ministry_id == mId)
+      const cnt   = depts.filter(d => _wizDepts.has(d.id)).length
+      const el = document.getElementById('minCount_' + mId)
+      if (el) el.textContent = `${cnt}/${depts.length} selecionados`
+    }
+
+    /* ── Step 3 ── */
+    function step3HTML() {
+      const selDepts = _departamentos.filter(d => _wizDepts.has(d.id))
+      const tagsSection = _wizTags.length
+        ? `<div class="review-info-row">
+            <div class="review-info-key">Tags</div>
+            <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;">${_wizTags.map(t => `<span class="tag-chip">${t}</span>`).join('')}</div>
+           </div>` : ''
+
+      const deptBlocks = selDepts.map(d => {
+        const m     = _ministerios.find(x => x.id == d.ministry_id)
+        const funcs = _funcoes.filter(f => f.department_id === d.id)
+        const mIdx  = m ? _ministerios.indexOf(m) : 0
+        const color = _COLORS[mIdx % _COLORS.length]
+        return `
+          <div class="review-dept-block">
+            <div class="review-dept-head">
+              <div style="width:8px;height:8px;border-radius:50%;background:${color};flex-shrink:0"></div>
+              <span class="review-dept-name">${d.name}</span>
+              <span style="font-size:12px;color:var(--ink-muted);margin-left:auto;">${m ? m.name : ''}</span>
+            </div>
+            <div class="review-dept-body">
+              ${funcs.length
+                ? funcs.map(f => `<div class="review-func-row">• ${f.name}</div>`).join('')
+                : '<div class="review-func-row" style="color:var(--ink-subtle)">Sem funções cadastradas</div>'}
+            </div>
+          </div>`
+      }).join('')
+
+      return `
+        <div class="review-info-card">
+          <div class="review-info-row">
+            <div class="review-info-key">Nome</div>
+            <div class="review-info-val">${_wizNome}</div>
+          </div>
+          ${tagsSection}
+        </div>
+        ${selDepts.length
+          ? `<div class="review-section-title">Configuração de Voluntários por Função</div>${deptBlocks}`
+          : '<div class="step-desc-text">Nenhum departamento selecionado.</div>'}`
+    }
+
+    /* ── Criar / Salvar Template ── */
+    async function criarTemplate() {
+      const btn = document.getElementById('btnCriar')
+      const loadingLabel = _wizMode === 'edit' ? 'Salvando...' : 'Criando...'
+      const errorLabel   = _wizMode === 'edit' ? 'Salvar Alterações' : 'Criar Template'
+      if (btn) { btn.disabled = true; btn.textContent = loadingLabel }
+
+      const deptsPayload = [..._wizDepts].map(deptId => {
+        const funcs = _funcoes.filter(f => f.department_id === deptId)
+        return { department_id: deptId, funcoes: funcs.map(f => ({ funcao_id: f.id, vagas: 1 })) }
+      })
+
+      const url    = _wizMode === 'edit' ? `/api/template/${_wizTemplateId}` : '/api/template'
+      const method = _wizMode === 'edit' ? 'PUT' : 'POST'
+
+      try {
+        const res = await authFetch(url, {
+          method,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: _wizNome, tags: _wizTags, depts: deptsPayload })
+        })
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}))
+          showToast(err.error || 'Erro ao salvar template', 'error')
+          if (btn) { btn.disabled = false; btn.textContent = errorLabel }
+          return
+        }
+        fecharModal()
+        CacheManager.invalidate('templates')
+        showToast(_wizMode === 'edit' ? 'Template atualizado!' : 'Template criado com sucesso!')
+        await carregarTemplates()
+      } catch {
+        showToast('Erro de conexão', 'error')
+        if (btn) { btn.disabled = false; btn.textContent = errorLabel }
+      }
+    }
+
+    /* ── Carregar templates da API ── */
+    async function carregarTemplates() {
+      if (!await checkAuth()) return
+      const cached = CacheManager.get('templates')
+      if (cached) {
+        _templates = cached
+        atualizarStats()
+        renderAll()
+        return
+      }
+      try {
+        const res = await authFetch('/api/template')
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}))
+          console.error('[templates]', res.status, err)
+          showToast(err.error || 'Erro ao carregar templates', 'error')
+        } else {
+          const { templates } = await res.json()
+          _templates = (templates || []).map(t => ({
+            id:       t.id,
+            tipo:     'evento',
+            nome:     t.name,
+            descricao: (t.tags || []).join(', '),
+            tags:     t.tags || [],
+            criadoEm: t.created_at
+          }))
+          CacheManager.set('templates', _templates)
+        }
+      } catch (e) {
+        console.error('[templates]', e)
+        _templates = []
+      }
+      atualizarStats()
+      renderAll()
+    }
+
+    /* ── Init ── */
+    carregarTemplates().finally(() => window.hideLoader())
+  </script>
+  <script src="/js/top-search.js"></script>
+  <script src="/js/mobile-sidebar.js"></script>
+  <script src="/js/notif-ui.js"></script>
+</body>
+</html>

@@ -1,0 +1,2569 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hug Software — Voluntários</title>
+  <script src="/js/auth-check.js"></script>
+  <script src="/js/page-loader.js"></script>
+  <script src="/js/cache.js"></script>
+  <link rel="icon" type="image/png" href="/IMG/logo.png">
+  <style>
+    * { font-family: 'Plus Jakarta Sans', sans-serif !important; }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary:        #8B5CF6;
+      --primary-light:  #DDD6FE;
+      --primary-dark:   #7C3AED;
+      --primary-focus:  rgba(151,71,255,0.4);
+      --ink:            #1d1d1f;
+      --ink-muted:      #6e6e73;
+      --ink-subtle:     #aeaeb2;
+      --canvas:         #ffffff;
+      --canvas-page: #ECE9E7;
+      --canvas-input:   #f2f2f7;
+      --hairline:       #e0e0e0;
+      --on-dark:        #ffffff;
+      --on-dark-muted:  rgba(255,255,255,0.65);
+      --sidebar-w:      220px;
+      --topbar-h:       64px;
+      --radius-sm:      8px;
+      --radius-md:      12px;
+      --radius-lg:      18px;
+      --radius-pill:    9999px;
+    }
+
+    body {
+      min-height: 100vh;
+      background: var(--canvas-page);
+      font-family: sans-serif;
+      -webkit-font-smoothing: antialiased;
+      display: flex;
+    }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width: var(--sidebar-w); min-height: unset;
+      background: #1c1c1c;
+      display: flex; flex-direction: column; flex-shrink: 0;
+      position: fixed; top: 0; left: 0; bottom: 0;
+      z-index: 100; overflow: visible;
+      transition: width 0.22s cubic-bezier(.4,0,.2,1);
+    }
+    .sidebar-logo {
+      display: flex; align-items: center; gap: 12px;
+      padding: 24px 20px 28px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      transition: padding 0.22s, gap 0.22s;
+    }
+    .logo-mark { width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .logo-text {
+      font-family: sans-serif;
+      font-size: 15px; font-weight: 700; color: var(--on-dark);
+      letter-spacing: 0.6px; line-height: 1; white-space: nowrap;
+      overflow: hidden; opacity: 1; transition: opacity 0.15s, width 0.22s;
+    }
+    .logo-text span { color: var(--primary-light); }
+    .sidebar-nav { flex: 1; padding: 14px 0; overflow-y: auto; scrollbar-width: none; }
+    .sidebar-nav::-webkit-scrollbar { display: none; }
+    .nav-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 11px 20px; font-size: 14px; font-weight: 400;
+      color: var(--on-dark-muted); text-decoration: none;
+      letter-spacing: -0.224px; cursor: pointer; white-space: nowrap;
+      transition: background 0.12s, color 0.12s, padding 0.22s;
+    }
+    .nav-item:hover { color: var(--on-dark); background: rgba(255,255,255,0.07); }
+    .nav-item.active { color: var(--on-dark); background: rgba(255,255,255,0.13); font-weight: 600; }
+    .nav-item svg { width: 18px; height: 18px; flex-shrink: 0; opacity: 0.85; }
+    .nav-item.active svg { opacity: 1; }
+    .nav-item span { overflow: hidden; opacity: 1; transition: opacity 0.15s; }
+
+    body.sidebar-collapsed .sidebar { width: 64px; }
+    body.sidebar-collapsed .sidebar-logo { padding: 24px 11px 28px; gap: 0; justify-content: center; }
+    body.sidebar-collapsed .logo-text { opacity: 0; width: 0; }
+    body.sidebar-collapsed .nav-item { padding: 11px 0; justify-content: center; gap: 0; }
+    body.sidebar-collapsed .nav-item span { opacity: 0; width: 0; }
+    body.sidebar-collapsed .main { margin-left: 64px; }
+    body.sidebar-collapsed #collapseBtn svg { transform: rotate(180deg); }
+
+    /* ── Tooltip sidebar ── */
+    .nav-item {
+      position: relative;
+    }
+    .nav-item::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      left: calc(100% + 12px);
+      top: 50%;
+      transform: translateY(-50%) translateX(-6px);
+      background: #1a1a1a;
+      color: #FFFFFF;
+      font-size: 12px;
+      font-weight: 500;
+      padding: 6px 12px;
+      border-radius: 8px;
+      white-space: nowrap;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.15s ease, transform 0.15s ease;
+      z-index: 9999;
+      letter-spacing: 0.1px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.28);
+    }
+    .nav-item::before {
+      content: '';
+      position: absolute;
+      left: calc(100% + 6px);
+      top: 50%;
+      transform: translateY(-50%) translateX(-6px);
+      border: 5px solid transparent;
+      border-right-color: #1a1a1a;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.15s ease, transform 0.15s ease;
+      z-index: 9999;
+    }
+    .nav-item:hover::after,
+    .nav-item:hover::before {
+      opacity: 1;
+      transform: translateY(-50%) translateX(0);
+    }
+
+
+    /* ── MAIN ── */
+    .main { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; min-height: 100vh; transition: margin-left 0.22s cubic-bezier(.4,0,.2,1); }
+
+        /* ─────────────────── TOPBAR ─────────────────── */
+    .topbar {
+      height: 72px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding: 0 28px;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: linear-gradient(135deg, #ECE9E700 0%, #ECE9E7 100%);
+      backdrop-filter: blur(1px);
+      -webkit-backdrop-filter: blur(1px);
+    }
+
+    /* Search pill + botão */
+    .search-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .search-wrap input {
+      width: 300px;
+      height: 42px;
+      background: #FFFFFF;
+      border: 1.5px solid #EEEEEE;
+      border-radius: var(--radius-pill);
+      padding: 0 18px;
+      font-size: 14px;
+      font-family: inherit;
+      color: #1A1A1A;
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .search-wrap input::placeholder { color: #AAAAAA; }
+    .search-wrap input:focus {
+      border-color: #CCCCCC;
+      box-shadow: 0 0 0 3px rgba(0,0,0,0.05);
+    }
+    .search-btn {
+      width: 42px; height: 42px;
+      border-radius: 50%;
+      border: none;
+      background: #8B5CF6;
+      color: #FFFFFF;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: background 0.15s;
+    }
+    .search-btn:hover { background: #7C3AED; }
+    .search-btn svg { width: 18px; height: 18px; }
+
+    /* Ícones do topbar */
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .topbar-actions .icon-btn {
+      width: 42px; height: 42px;
+      background: #FFFFFF;
+      border: 1.5px solid #EEEEEE;
+      border-radius: 50%;
+      color: #555555;
+    }
+    .topbar-actions .icon-btn:hover {
+      background: #F5F5F5;
+      border-color: #DDDDDD;
+      color: #1A1A1A;
+    }
+
+    /* Badge de notificação */
+    .notif-wrap {
+      position: relative;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .notif-badge { position:absolute; top:-4px; right:-4px; background:#E85D6A; color:#fff; border-radius:50%; width:18px; height:18px; font-size:10px; font-weight:700; display:flex; align-items:center; justify-content:center; pointer-events:none; }
+    .notif-dropdown { position:absolute; top:48px; right:0; width:360px; background:#fff; border-radius:16px; border:1px solid #E8E5E2; box-shadow:0 8px 32px rgba(0,0,0,0.12); z-index:300; display:none; overflow:hidden; }
+    .notif-dropdown.open { display:block; }
+    .notif-header { display:flex; align-items:center; justify-content:space-between; padding:14px 16px; border-bottom:1px solid #F5F3F0; }
+    .notif-list { max-height:360px; overflow-y:auto; }
+    .notif-item { padding:12px 16px; border-bottom:1px solid #F5F3F0; cursor:pointer; display:flex; gap:12px; align-items:flex-start; transition:background 0.1s; }
+    .notif-item:hover { background:#F5F3F0; }
+    .notif-item.unread { background:rgba(145,86,241,0.06); }
+    .notif-icon { width:36px; height:36px; border-radius:50%; background:#EDE5FF; display:flex; align-items:center; justify-content:center; flex-shrink:0; color:#9156F1; }
+    .notif-content { flex:1; min-width:0; }
+    .notif-title { font-weight:600; font-size:13px; color:#1C1C1C; margin-bottom:2px; }
+    .notif-body { font-size:12px; color:#5C5955; line-height:1.4; margin-bottom:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .notif-time { font-size:11px; color:#9E9B96; }
+    .notif-footer { padding:10px 16px; border-top:1px solid #F5F3F0; text-align:center; }
+    .icon-btn {
+      width: 40px; height: 40px; border-radius: var(--radius-pill);
+      border: none; background: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--ink-muted); transition: background 0.12s, color 0.12s;
+    }
+    .icon-btn:hover { background: var(--canvas-input); color: var(--ink); }
+    .icon-btn svg { width: 20px; height: 20px; }
+    .avatar {
+      width: 40px; height: 40px; border-radius: var(--radius-pill);
+      background: #e8612a; display: flex; align-items: center; justify-content: center;
+      font-size: 16px; font-weight: 600; color: #fff;
+      cursor: pointer; margin-left: 4px; user-select: none;
+    }
+    .avatar-menu-wrap { position: relative; }
+    .avatar-dropdown {
+      position: absolute; top: calc(100% + 8px); right: 0; width: 220px;
+      background: var(--canvas); border: 1px solid var(--hairline);
+      border-radius: var(--radius-md); box-shadow: 0 8px 24px rgba(0,0,0,0.10);
+      padding: 6px; z-index: 200;
+      opacity: 0; pointer-events: none; transform: translateY(-6px);
+      transition: opacity 0.15s, transform 0.15s;
+    }
+    .avatar-dropdown.open { opacity: 1; pointer-events: auto; transform: translateY(0); }
+    .dropdown-header { padding: 10px 12px 12px; border-bottom: 1px solid var(--hairline); margin-bottom: 6px; }
+    .dropdown-name { font-size: 14px; font-weight: 600; color: var(--ink); }
+    .dropdown-email { font-size: 12px; color: var(--ink-subtle); margin-top: 2px; }
+    .dropdown-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 12px; font-size: 14px; color: var(--ink);
+      border-radius: var(--radius-sm); text-decoration: none; cursor: pointer;
+      transition: background 0.12s;
+    }
+    .dropdown-item:hover { background: var(--canvas-page); }
+    .dropdown-item svg { width: 16px; height: 16px; color: var(--ink-muted); }
+    .dropdown-item.danger { color: #ff3b30; }
+    .dropdown-item.danger svg { color: #ff3b30; }
+    .dropdown-item.danger:hover { background: rgba(255,59,48,0.06); }
+    .dropdown-divider { height: 1px; background: var(--hairline); margin: 6px 0; }
+
+    /* ── CONTENT ── */
+    .content { padding: 32px; min-width: 0; flex: 1; }
+
+    /* ── HERO ── */
+
+    /* ── STATS ROW ── */
+    .stats-row {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+    .stat-card {
+      background: var(--canvas);
+      border: 1px solid var(--hairline);
+      border-radius: var(--radius-md);
+      padding: 20px 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex: 1;
+      cursor: pointer;
+      transition: box-shadow 0.14s, border-color 0.14s, transform 0.1s;
+      user-select: none;
+    }
+    .stat-card:hover { box-shadow: 0 4px 16px rgba(151,71,255,0.10); border-color: rgba(151,71,255,0.25); }
+    .stat-card:active { transform: scale(0.98); }
+    .stat-card.active-filter { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(151,71,255,0.10); }
+    .stat-card.active-filter .stat-value { color: var(--primary); }
+    .stat-icon {
+      width: 52px; height: 52px;
+      border-radius: var(--radius-sm);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .stat-icon svg { width: 26px; height: 26px; }
+    .stat-icon.dark-teal   { background: #DDD6FE; color: #fff; }
+    .stat-icon.mid-teal    { background: rgba(151,71,255,0.15); color: var(--primary); }
+    .stat-icon.light-green { background: rgba(142,182,155,0.14); color: #8B5CF6; }
+    .stat-icon.warm-red    { background: rgba(255,59,48,0.08); color: #e53935; }
+    .stat-icon.warm-yellow { background: rgba(255,193,7,0.13); color: #c47d00; }
+    .stat-value {
+      font-family: sans-serif;
+      font-size: 28px;
+      font-weight: 600;
+      color: var(--ink);
+      letter-spacing: -0.374px;
+      line-height: 1;
+    }
+    .stat-label {
+      font-size: 13px;
+      font-weight: 400;
+      color: var(--ink-muted);
+      letter-spacing: -0.224px;
+      margin-top: 4px;
+    }
+
+    /* ── LIST CARD ── */
+    .list-card {
+      background: var(--canvas);
+      border: 1px solid var(--hairline);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+    .list-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--hairline);
+      gap: 16px;
+    }
+    .list-title {
+      font-family: sans-serif;
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--ink);
+      letter-spacing: -0.374px;
+    }
+    .list-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .view-toggle {
+      display: flex;
+      background: var(--canvas-input);
+      border-radius: var(--radius-sm);
+      padding: 3px;
+      gap: 2px;
+    }
+    .view-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      height: 32px;
+      padding: 0 12px;
+      border: none;
+      background: none;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 400;
+      font-family: inherit;
+      color: var(--ink-muted);
+      cursor: pointer;
+      letter-spacing: -0.12px;
+      transition: background 0.12s, color 0.12s;
+      white-space: nowrap;
+    }
+    .view-btn svg { width: 14px; height: 14px; flex-shrink: 0; }
+    .view-btn.active {
+      background: var(--canvas);
+      color: var(--ink);
+      font-weight: 500;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+    .list-search {
+      position: relative; display: flex; align-items: center;
+      height: 36px; background: var(--canvas);
+      border: 1px solid var(--hairline); border-radius: var(--radius-pill);
+      padding: 0 14px 0 32px;
+      transition: border-color 0.12s;
+    }
+    .list-search:focus-within { border-color: var(--primary); }
+    .list-search svg {
+      position: absolute; left: 12px; top: 50%;
+      transform: translateY(-50%);
+      width: 13px; height: 13px;
+      color: var(--ink-muted); pointer-events: none;
+    }
+    .list-search input {
+      height: 100%; width: 160px;
+      background: none; border: none; outline: none;
+      font-size: 13px; font-family: inherit;
+      color: var(--ink); letter-spacing: -0.12px;
+      transition: width 0.2s;
+    }
+    .list-search input::placeholder { color: var(--ink-muted); }
+    .list-search input:focus { width: 200px; }
+
+    /* ── COMBOBOX ── */
+    .combo-wrap { position: relative; min-width: 200px; }
+    .list-controls .combo-wrap { min-width: 160px; }
+    .combo-box { display: flex; align-items: center; height: 36px; background: var(--canvas); border: 1px solid var(--hairline); border-radius: var(--radius-pill); padding: 0 10px 0 34px; gap: 4px; transition: border-color 0.12s; cursor: text; }
+    .combo-box:focus-within { border-color: var(--primary); }
+    .combo-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 14px; height: 14px; color: var(--ink-muted); pointer-events: none; }
+    .combo-input { flex: 1; border: none; background: none; font-size: 13px; font-family: inherit; color: var(--ink); outline: none; min-width: 0; }
+    .combo-input::placeholder { color: var(--ink-muted); }
+    .combo-clear { width: 16px; height: 16px; border: none; background: var(--hairline); border-radius: 50%; cursor: pointer; display: none; align-items: center; justify-content: center; font-size: 11px; color: var(--ink-muted); flex-shrink: 0; line-height: 1; }
+    .combo-clear:hover { background: var(--ink-subtle); color: #fff; }
+    .combo-arrow { width: 12px; height: 12px; color: var(--ink-subtle); flex-shrink: 0; pointer-events: none; transition: transform 0.15s; }
+    .combo-wrap.open .combo-arrow { transform: rotate(180deg); }
+    .combo-dropdown { position: absolute; top: calc(100% + 4px); left: 0; right: 0; background: var(--canvas); border: 1px solid var(--hairline); border-radius: var(--radius-md); box-shadow: 0 8px 24px rgba(0,0,0,0.10); z-index: 300; max-height: 220px; overflow-y: auto; display: none; }
+    .combo-wrap.open .combo-dropdown { display: block; }
+    .combo-option { padding: 9px 14px; font-size: 13px; color: var(--ink); cursor: pointer; transition: background 0.1s; }
+    .combo-option:hover { background: var(--canvas-page); }
+    .combo-option.selected { background: rgba(151,71,255,0.06); color: var(--primary); font-weight: 600; }
+    .combo-option.placeholder { color: var(--ink-muted); }
+
+    /* ── LIST EMPTY ── */
+    .list-empty {
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 72px 24px; gap: 12px;
+      color: var(--ink-subtle);
+    }
+    .list-empty svg { width: 40px; height: 40px; opacity: 0.35; }
+    .list-empty-text {
+      font-size: 14px; font-weight: 400;
+      color: var(--ink-subtle); letter-spacing: -0.224px;
+    }
+
+    /* ── VOLUNTEER GRID ── */
+    .ministry-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 16px;
+      padding: 24px;
+    }
+    .ministry-grid.hidden { display: none; }
+
+    /* ── VOLUNTEER CARD ── */
+    .ministry-card {
+      background: var(--canvas);
+      border: 1px solid var(--hairline);
+      border-radius: var(--radius-md);
+      display: flex; flex-direction: column;
+      overflow: hidden;
+      transition: box-shadow 0.14s;
+    }
+    .ministry-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+    .ministry-card.archived { opacity: 0.65; }
+
+    .mc-clickable { cursor: pointer; display: flex; flex-direction: column; }
+    .mc-clickable:hover .mc-top { background: #f5faf6; }
+
+    .mc-top {
+      display: flex; align-items: flex-start;
+      gap: 14px; padding: 20px 20px 16px;
+    }
+    .mc-icon {
+      width: 52px; height: 52px;
+      border-radius: var(--radius-sm);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .mc-icon svg { width: 26px; height: 26px; }
+    .mc-info { flex: 1; min-width: 0; }
+    .mc-name {
+      font-size: 16px; font-weight: 700;
+      color: var(--ink); letter-spacing: -0.224px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .mc-desc {
+      font-size: 13px; color: var(--ink-muted);
+      letter-spacing: -0.12px; line-height: 1.4; margin-top: 3px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+
+    .mc-leader {
+      display: flex; align-items: center;
+      gap: 10px; padding: 14px 20px;
+      border-top: 1px solid var(--hairline);
+    }
+    .mc-leader-avatar {
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 600; color: #fff;
+      flex-shrink: 0; letter-spacing: -0.12px;
+    }
+    .mc-leader-avatar svg { width: 16px; height: 16px; }
+    .mc-leader-tag {
+      font-size: 10px; font-weight: 600;
+      letter-spacing: 0.6px; text-transform: uppercase;
+      color: var(--ink-subtle);
+    }
+    .mc-leader-name {
+      font-size: 13px; font-weight: 600;
+      color: var(--ink); letter-spacing: -0.12px;
+    }
+
+    /* Status badge on card */
+    .vol-badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      height: 22px; padding: 0 9px; border-radius: var(--radius-pill);
+      font-size: 11px; font-weight: 600; letter-spacing: 0.1px; flex-shrink: 0;
+    }
+    .vol-badge.ativo    { background: rgba(142,182,155,0.12); color: #008a50; }
+    .vol-badge.inativo  { background: rgba(0,0,0,0.06); color: var(--ink-muted); }
+    .vol-badge.pendente { background: rgba(255,193,7,0.14); color: #c47d00; }
+    .vol-badge svg { width: 6px; height: 6px; }
+
+    .archived-badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      height: 22px; padding: 0 10px;
+      background: rgba(0,0,0,0.06); border-radius: var(--radius-pill);
+      font-size: 11px; font-weight: 600; color: var(--ink-muted); letter-spacing: 0.2px;
+    }
+
+    .mc-footer {
+      display: flex; justify-content: space-between;
+      align-items: center; padding: 12px 20px;
+    }
+    .btn-excluir {
+      display: flex; align-items: center; gap: 6px;
+      height: 34px; padding: 0 14px;
+      background: transparent; border: 1.5px solid #ffcdd2;
+      border-radius: var(--radius-pill);
+      font-size: 13px; font-weight: 500; color: #e53935;
+      font-family: inherit; cursor: pointer;
+      transition: background 0.12s, border-color 0.12s;
+    }
+    .btn-excluir:hover { background: #fff5f5; border-color: #e53935; }
+    .btn-excluir svg { width: 14px; height: 14px; }
+    .btn-arquivar {
+      display: flex; align-items: center; gap: 6px;
+      height: 34px; padding: 0 14px;
+      background: transparent; border: 1.5px solid var(--hairline);
+      border-radius: var(--radius-pill);
+      font-size: 13px; font-weight: 500; color: var(--ink-muted);
+      font-family: inherit; cursor: pointer;
+      transition: background 0.12s, border-color 0.12s, color 0.12s;
+    }
+    .btn-arquivar:hover { background: var(--canvas-input); border-color: var(--ink-subtle); color: var(--ink); }
+    .btn-arquivar svg { width: 14px; height: 14px; }
+    .btn-desarquivar {
+      display: flex; align-items: center; gap: 6px;
+      height: 34px; padding: 0 14px;
+      background: rgba(151,71,255,0.08); border: 1.5px solid rgba(151,71,255,0.20);
+      border-radius: var(--radius-pill);
+      font-size: 13px; font-weight: 500; color: var(--primary);
+      font-family: inherit; cursor: pointer; transition: background 0.12s;
+    }
+    .btn-desarquivar:hover { background: rgba(151,71,255,0.14); }
+    .btn-desarquivar svg { width: 14px; height: 14px; }
+    .btn-aprovar {
+      display: flex; align-items: center; gap: 6px;
+      height: 34px; padding: 0 14px;
+      background: rgba(0,138,80,0.08); border: 1.5px solid rgba(0,138,80,0.25);
+      border-radius: var(--radius-pill);
+      font-size: 13px; font-weight: 500; color: #008a50;
+      font-family: inherit; cursor: pointer; transition: background 0.12s;
+    }
+    .btn-aprovar:hover { background: rgba(0,138,80,0.15); }
+    .btn-aprovar svg { width: 14px; height: 14px; }
+    .btn-rejeitar {
+      display: flex; align-items: center; gap: 6px;
+      height: 34px; padding: 0 14px;
+      background: transparent; border: 1.5px solid #ffcdd2;
+      border-radius: var(--radius-pill);
+      font-size: 13px; font-weight: 500; color: #e53935;
+      font-family: inherit; cursor: pointer; transition: background 0.12s, border-color 0.12s;
+    }
+    .btn-rejeitar:hover { background: #fff5f5; border-color: #e53935; }
+    .btn-rejeitar svg { width: 14px; height: 14px; }
+    .pending-card-click { cursor: pointer; }
+    .pending-card-click:hover { box-shadow: 0 4px 20px rgba(151,71,255,0.13); border-color: var(--primary-light) !important; }
+
+    /* ── TABLE VIEW ── */
+    .ministry-table { width: 100%; border-collapse: collapse; }
+    .ministry-table.hidden { display: none; }
+    .ministry-table th {
+      padding: 12px 24px;
+      font-size: 12px; font-weight: 600;
+      color: var(--ink-muted); text-align: left;
+      letter-spacing: 0.4px; text-transform: uppercase;
+      border-bottom: 1px solid var(--hairline);
+      background: var(--canvas-page);
+    }
+    .ministry-table td {
+      padding: 14px 24px;
+      font-size: 14px; color: var(--ink);
+      letter-spacing: -0.224px;
+      border-bottom: 1px solid var(--hairline);
+      vertical-align: middle;
+    }
+    .ministry-table tr:last-child td { border-bottom: none; }
+    .ministry-table tr:hover td { background: #f5faf6; }
+    .ministry-table th:last-child { text-align: right; }
+    .ministry-table td:last-child { text-align: right; }
+
+    .td-vol-name { display: flex; align-items: center; gap: 10px; }
+    .td-avatar {
+      width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 700; color: #fff;
+    }
+    .td-name { font-weight: 500; letter-spacing: -0.12px; }
+    .td-muted { color: var(--ink-muted); }
+
+    .tbl-actions { display: inline-flex; gap: 6px; }
+    .btn-tbl {
+      width: 30px; height: 30px; border-radius: var(--radius-sm);
+      border: none; background: var(--canvas-input);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; color: var(--ink-muted);
+      transition: background 0.12s, color 0.12s;
+    }
+    .btn-tbl:hover { background: var(--hairline); color: var(--ink); }
+    .btn-tbl.danger:hover { background: #fff5f5; color: #e53935; }
+    .btn-tbl svg { width: 13px; height: 13px; }
+
+    /* ── DRAWER ── */
+    .drawer-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.38);
+      z-index: 500; opacity: 0; pointer-events: none;
+      transition: opacity 0.22s;
+    }
+    .drawer-overlay.open { opacity: 1; pointer-events: auto; }
+    .drawer {
+      position: fixed; top: 0; right: 0; bottom: 0;
+      width: 52vw; max-width: 780px; min-width: 400px;
+      background: var(--canvas);
+      box-shadow: -8px 0 48px rgba(0,0,0,0.18);
+      display: flex; flex-direction: column;
+      transform: translateX(100%);
+      transition: transform 0.26s cubic-bezier(.4,0,.2,1);
+      z-index: 501; overflow: hidden;
+    }
+    .drawer-overlay.open .drawer { transform: translateX(0); }
+    .drawer-header {
+      background: linear-gradient(135deg, #0a0a0a 0%, #8B5CF6 60%, #DDD6FE 100%);
+      padding: 28px 32px 24px;
+      display: flex; align-items: flex-start; justify-content: space-between; flex-shrink: 0;
+    }
+    .drawer-title { font-size: 22px; font-weight: 700; color: #fff; letter-spacing: -0.374px; margin-bottom: 6px; }
+    .drawer-subtitle { font-size: 14px; color: rgba(255,255,255,0.72); letter-spacing: -0.12px; }
+    .drawer-close {
+      width: 36px; height: 36px; border: none;
+      background: #DDD6FE; border-radius: var(--radius-pill);
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      color: #fff; flex-shrink: 0; margin-left: 16px; transition: background 0.12s;
+    }
+    .drawer-close:hover { background: rgba(255,255,255,0.28); }
+    .drawer-close svg { width: 18px; height: 18px; }
+    .drawer-body { flex: 1; overflow-y: auto; padding: 28px 32px; display: flex; flex-direction: column; gap: 22px; }
+    .drawer-footer {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 16px 32px 22px; border-top: 1px solid var(--hairline);
+      flex-shrink: 0; gap: 10px;
+    }
+    .btn-cancel {
+      height: 50px; padding: 0 18px; border-radius: var(--radius-pill);
+      background: transparent; border: 1px solid var(--hairline);
+      font-size: 14px; font-weight: 400; color: var(--ink-muted);
+      font-family: inherit; cursor: pointer; letter-spacing: -0.224px;
+      transition: background 0.12s;
+    }
+    .btn-cancel:hover { background: var(--canvas-input); }
+    .btn-save {
+      flex: 1; height: 50px; padding: 0 22px; border-radius: var(--radius-pill);
+      background: var(--primary); border: none;
+      font-size: 14px; font-weight: 600; color: #fff;
+      font-family: inherit; cursor: pointer; letter-spacing: -0.224px;
+      transition: background 0.12s, transform 0.1s;
+    }
+    .btn-save:hover { background: var(--primary-dark); }
+    .btn-save:active { transform: scale(0.97); }
+    .field-group { display: flex; flex-direction: column; gap: 8px; }
+    .field-label {
+      font-size: 14px; font-weight: 500; color: var(--ink);
+      letter-spacing: -0.12px;
+    }
+    .req { color: #e53935; margin-left: 2px; }
+    .field-input {
+      width: 100%; height: 46px;
+      background: var(--canvas); border: 1.5px solid var(--hairline);
+      border-radius: var(--radius-sm);
+      padding: 0 16px; font-size: 15px; font-family: inherit; color: var(--ink);
+      outline: none; letter-spacing: -0.224px;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .field-input::placeholder { color: var(--ink-subtle); }
+    .field-input:focus { border-color: var(--primary-focus); box-shadow: 0 0 0 3px rgba(151,71,255,0.10); }
+    .field-input.error { border-color: #ff3b30; }
+    .field-select {
+      width: 100%; height: 46px;
+      background: var(--canvas); border: 1.5px solid var(--hairline);
+      border-radius: var(--radius-sm);
+      padding: 0 36px 0 16px; font-size: 15px; font-family: inherit; color: var(--ink);
+      outline: none; cursor: pointer; appearance: none; -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236e6e73' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 14px center;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .field-select:focus { border-color: var(--primary-focus); box-shadow: 0 0 0 3px rgba(151,71,255,0.10); }
+    .drawer-section-title {
+      font-size: 13px; font-weight: 600; color: var(--ink-muted);
+      letter-spacing: -0.12px;
+      padding-bottom: 12px; border-bottom: 1px solid var(--hairline);
+      margin-bottom: 4px;
+    }
+
+    /* ── CONFIRM MODAL ── */
+    .confirm-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.35);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 600; opacity: 0; pointer-events: none; transition: opacity 0.18s;
+    }
+    .confirm-overlay.open { opacity: 1; pointer-events: auto; }
+    .confirm-modal {
+      background: var(--canvas); border-radius: var(--radius-lg);
+      padding: 28px 28px 22px; width: 340px;
+      box-shadow: 0 16px 48px rgba(0,0,0,0.18);
+      transform: translateY(10px); transition: transform 0.18s;
+    }
+    .confirm-overlay.open .confirm-modal { transform: translateY(0); }
+    .confirm-title {
+      font-family: sans-serif;
+      font-size: 17px; font-weight: 700; color: var(--ink);
+      letter-spacing: -0.374px; margin-bottom: 6px;
+    }
+    .confirm-desc { font-size: 13px; color: var(--ink-muted); line-height: 1.5; margin-bottom: 20px; }
+    .confirm-actions { display: flex; flex-direction: column; gap: 8px; }
+    .btn-confirm-danger {
+      width: 100%; height: 44px; border-radius: var(--radius-pill);
+      background: #e53935; border: none;
+      font-size: 14px; font-weight: 600; color: #fff;
+      font-family: inherit; cursor: pointer; transition: background 0.12s;
+    }
+    .btn-confirm-danger:hover { background: #c62828; }
+    .btn-confirm-cancel {
+      width: 100%; height: 36px; margin-top: 2px;
+      background: none; border: none;
+      font-size: 13px; color: var(--ink-muted);
+      font-family: inherit; cursor: pointer; transition: color 0.12s;
+    }
+    .btn-confirm-cancel:hover { color: var(--ink); }
+
+    /* ── PAGE GREETING ── */
+    .page-greeting { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+    .pg-left  { display: flex; flex-direction: column; gap: 4px; }
+    .pg-title { font-size: 30px; font-weight: 700; color: #1A1A1A; letter-spacing: -0.5px; line-height: 1.2; }
+    .pg-sup   { font-size: 16px; font-style: italic; color: var(--ink-muted); }
+    .btn-toolbar-add { display: inline-flex; align-items: center; gap: 7px; height: 38px; padding: 0 18px; background: #9156F1; border: none; border-radius: var(--radius-pill); font-family: inherit; font-size: 14px; font-weight: 600; color: #fff; cursor: pointer; transition: background 0.15s; white-space: nowrap; }
+    .btn-toolbar-add:hover { background: #7340D4; }
+    .btn-toolbar-add svg { width: 15px; height: 15px; }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(20px);
+      background: #1d1d1f; color: #fff;
+      padding: 12px 22px; border-radius: var(--radius-pill);
+      font-size: 14px; font-weight: 500; letter-spacing: -0.224px;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.22s, transform 0.22s; z-index: 9999; white-space: nowrap;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .toast.error { background: #ff3b30; }
+    .toast.success { background: #008a50; }
+
+    .hidden { display: none !important; }
+
+    /* ── PHOTO PICKER ── */
+    .photo-picker {
+      display: flex; flex-direction: column; align-items: center; gap: 12px;
+      padding: 8px 0 4px;
+    }
+    .photo-circle {
+      width: 88px; height: 88px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 30px; font-weight: 700; color: #fff;
+      cursor: pointer; position: relative; overflow: hidden;
+      border: 3px solid var(--hairline);
+      transition: border-color 0.15s;
+    }
+    .photo-circle:hover { border-color: var(--primary-light); }
+    .photo-circle img { width: 100%; height: 100%; object-fit: cover; }
+    .photo-overlay {
+      position: absolute; inset: 0; background: rgba(0,0,0,0.35);
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; transition: opacity 0.15s;
+    }
+    .photo-circle:hover .photo-overlay { opacity: 1; }
+    .photo-overlay svg { width: 22px; height: 22px; color: #fff; }
+    .photo-hint { font-size: 12px; color: var(--ink-muted); }
+
+    /* ── DATE INPUT ── */
+    input[type="date"].field-input { color: var(--ink); }
+    input[type="date"].field-input::-webkit-calendar-picker-indicator { cursor: pointer; opacity: 0.55; }
+
+    /* ── TWO-COL FIELDS ── */
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+    /* ── WIZARD STEPS BAR ── */
+    .steps-bar {
+      display: flex; align-items: flex-start;
+      padding: 20px 32px 4px; flex-shrink: 0;
+    }
+    .step-item {
+      display: flex; flex-direction: column; align-items: center;
+      flex: 1; position: relative;
+    }
+    .step-circle {
+      width: 36px; height: 36px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; font-weight: 700;
+      border: 2px solid #d0d0d0; background: #fff; color: #c0c0c0;
+      transition: all 0.2s; position: relative; z-index: 1;
+    }
+    .step-item.done .step-circle,
+    .step-item.active .step-circle { background: var(--primary-dark); border-color: var(--primary-dark); color: #fff; }
+    .step-lbl {
+      font-size: 11px; font-weight: 500; margin-top: 6px; text-align: center;
+      color: #c0c0c0; letter-spacing: -0.1px; white-space: nowrap;
+    }
+    .step-item.active .step-lbl { color: var(--primary-dark); font-weight: 700; }
+    .step-item.done .step-lbl { color: var(--primary); }
+    .step-connector {
+      flex: 1; height: 2px; margin-top: 17px; flex-shrink: 0;
+      background: #e0e0e0; transition: background 0.2s;
+    }
+    .step-connector.done { background: var(--primary-dark); }
+
+    /* ── STEP PANELS ── */
+    .step-panel { display: none; flex-direction: column; gap: 18px; }
+    .step-panel.active { display: flex; }
+
+    /* ── STEP SECTION HEADER ── */
+    .step-sh {
+      display: flex; align-items: center; gap: 12px;
+      padding-bottom: 14px; border-bottom: 1px solid var(--hairline);
+    }
+    .step-sh-icon {
+      width: 38px; height: 38px; border-radius: var(--radius-sm);
+      background: rgba(151,71,255,0.10); color: var(--primary);
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .step-sh-icon svg { width: 18px; height: 18px; }
+    .step-sh-title { font-size: 16px; font-weight: 700; color: var(--primary-dark); letter-spacing: -0.224px; }
+    .step-sh-sub { font-size: 13px; color: var(--ink-muted); margin-top: 2px; letter-spacing: -0.12px; }
+
+    /* ── SUMMARY CARDS ── */
+    .summary-plain-card {
+      background: var(--canvas-page); border: 1px solid var(--hairline);
+      border-radius: var(--radius-md); padding: 16px 20px;
+    }
+    .summary-card-title {
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.6px; color: var(--ink-muted); margin-bottom: 12px;
+    }
+    .summary-row { display: flex; gap: 8px; margin-bottom: 8px; align-items: baseline; }
+    .summary-row:last-child { margin-bottom: 0; }
+    .summary-key { font-size: 13px; color: var(--ink-muted); min-width: 110px; flex-shrink: 0; }
+    .summary-val { font-size: 13px; font-weight: 500; color: var(--ink); }
+
+    .summary-highlight-card {
+      background: rgba(151,71,255,0.04); border: 1.5px solid rgba(151,71,255,0.18);
+      border-radius: var(--radius-md); padding: 16px 20px;
+    }
+    .summary-highlight-card .summary-card-title { color: var(--primary); }
+    .summary-highlight-card .summary-key { color: var(--primary); opacity: 0.8; }
+    .summary-highlight-card .summary-val { color: var(--primary-dark); font-weight: 600; }
+
+    .notice-box {
+      background: rgba(255,193,7,0.08); border: 1px solid rgba(255,193,7,0.35);
+      border-radius: var(--radius-md); padding: 14px 16px;
+      display: flex; gap: 12px; align-items: flex-start;
+    }
+    .notice-box svg { width: 18px; height: 18px; color: #d4900a; flex-shrink: 0; margin-top: 1px; }
+    .notice-box-text { font-size: 13px; color: #7a5800; line-height: 1.5; letter-spacing: -0.12px; }
+
+    /* ── DEPT SEARCH ── */
+    .dept-search { position: relative; margin-bottom: 10px; }
+    .dept-search svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 14px; height: 14px; color: var(--ink-subtle); pointer-events: none; }
+    .dept-search input {
+      width: 100%; height: 40px;
+      background: var(--canvas-input); border: 1.5px solid var(--hairline);
+      border-radius: var(--radius-pill); padding: 0 14px 0 36px;
+      font-size: 14px; font-family: inherit; color: var(--ink); outline: none; letter-spacing: -0.12px;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .dept-search input:focus { border-color: var(--primary-focus); background: var(--canvas); box-shadow: 0 0 0 3px rgba(151,71,255,0.08); }
+    .dept-search input::placeholder { color: var(--ink-subtle); }
+
+    /* ── DEPT CHIPS ── */
+    .dept-group { display: flex; flex-direction: column; gap: 6px; }
+    .dept-group + .dept-group { margin-top: 10px; }
+    .dept-group-title {
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.6px; color: var(--ink-muted); padding: 2px 2px 4px;
+    }
+    .dept-chips-grid { display: flex; flex-direction: column; gap: 0; }
+    .dept-group-chips { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .dept-chip-name { font-size: 13px; font-weight: 500; color: var(--ink); letter-spacing: -0.12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .dept-chip {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 13px 16px; border-radius: var(--radius-md);
+      border: 1.5px solid var(--hairline); background: var(--canvas);
+      cursor: pointer; transition: border-color 0.15s, background 0.15s; user-select: none;
+    }
+    .dept-chip:hover { border-color: rgba(151,71,255,0.3); background: #f9fdfb; }
+    .dept-chip.selected { border-color: var(--primary); background: rgba(151,71,255,0.04); }
+    .dept-chip.selected .dept-chip-name { color: var(--primary-dark); }
+    .dept-chip-check {
+      width: 20px; height: 20px; border-radius: 50%;
+      border: 2px solid var(--hairline); background: var(--canvas);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; transition: all 0.15s;
+    }
+    .dept-chip.selected .dept-chip-check { background: var(--primary); border-color: var(--primary); }
+    .dept-chip-check svg { width: 11px; height: 11px; color: #fff; opacity: 0; transition: opacity 0.1s; }
+    .dept-chip.selected .dept-chip-check svg { opacity: 1; }
+    .dept-chips-empty { font-size: 13px; color: var(--ink-subtle); padding: 8px 0; }
+
+    /* ── EMERGENCY CONTACT BOX ── */
+    .emergency-box {
+      background: rgba(255,193,7,0.08); border: 1.5px solid rgba(255,193,7,0.40);
+      border-radius: var(--radius-md); padding: 16px 18px; display: flex; flex-direction: column; gap: 14px;
+    }
+    .emergency-box-title { font-size: 13px; font-weight: 700; color: #c47d00; letter-spacing: -0.12px; }
+
+    /* ── WIZARD NAV ── */
+    .drawer-nav {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 16px 32px 22px; border-top: 1px solid var(--hairline);
+      flex-shrink: 0; gap: 10px;
+    }
+    .btn-voltar {
+      height: 44px; padding: 0 20px; border-radius: var(--radius-pill);
+      background: transparent; border: 1.5px solid var(--hairline);
+      font-size: 14px; font-weight: 500; color: var(--ink-muted);
+      font-family: inherit; cursor: pointer; letter-spacing: -0.224px;
+      transition: background 0.12s, border-color 0.12s, color 0.12s;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .btn-voltar:hover { background: var(--canvas-input); border-color: var(--ink-subtle); color: var(--ink); }
+    .btn-voltar:disabled { opacity: 0.3; pointer-events: none; }
+    .btn-voltar svg { width: 15px; height: 15px; }
+    .btn-proximo {
+      height: 44px; padding: 0 28px; border-radius: var(--radius-pill);
+      background: var(--primary-dark); border: none;
+      font-size: 14px; font-weight: 600; color: #fff;
+      font-family: inherit; cursor: pointer; letter-spacing: -0.224px;
+      transition: background 0.12s, transform 0.1s;
+      display: flex; align-items: center; gap: 7px;
+    }
+    .btn-proximo:hover { background: var(--primary); }
+    .btn-proximo:active { transform: scale(0.97); }
+    .btn-proximo:disabled { opacity: 0.5; pointer-events: none; }
+    .btn-proximo svg { width: 15px; height: 15px; }
+
+  
+    
+    /* ══════════════════════════════════════════════════════
+       DESIGN UPDATE — Tokens minimalistas (todas as páginas)
+       ══════════════════════════════════════════════════════ */
+
+    /* ── Fundo da página ── */
+    :root { --canvas-page: #ECE9E7; }
+    body  { background: #ECE9E7; }
+
+    /* ── Hero banner ── */
+    /* ── Stat cards ── */
+    .stat-card {
+      background: #FFFFFF !important;
+      border: 1px solid #EEEEEE !important;
+      border-radius: 20px !important;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04) !important;
+      transition: box-shadow 0.2s, transform 0.2s !important;
+    }
+    .stat-card:hover {
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08) !important;
+      transform: translateY(-2px) !important;
+    }
+    .stat-value {
+      font-size: 2rem !important;
+      font-weight: 700 !important;
+      color: #1A1A1A !important;
+      letter-spacing: -0.5px !important;
+      line-height: 1 !important;
+    }
+    .stat-label {
+      font-size: 12px !important;
+      font-weight: 500 !important;
+      color: #8A8A8A !important;
+      text-transform: uppercase !important;
+      letter-spacing: 0.5px !important;
+      margin-top: 6px !important;
+    }
+
+    /* ── Títulos de seção ── */
+    .section-title, .page-title {
+      font-size: 18px !important;
+      font-weight: 700 !important;
+      color: #1A1A1A !important;
+      letter-spacing: -0.3px !important;
+    }
+    .card-title {
+      font-size: 15px !important;
+      font-weight: 700 !important;
+      color: #1A1A1A !important;
+    }
+
+    /* ── Cards de conteúdo (detalhe) ── */
+    .detail-card, .content-card, .section-card, .review-info-card,
+    .profile-card, .aside-card, .pontuacao-card, .setting-card,
+    .accordion-card, .summary-card, .card-link-block {
+      background: #FFFFFF !important;
+      border: 1px solid #EEEEEE !important;
+      border-radius: 20px !important;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04) !important;
+    }
+
+    /* ── Cards de lista / item (com hover) ── */
+    .list-card, .ministry-card, .dept-card, .func-card,
+    .template-card, .bloco-card, .dispon-card, .type-card,
+    .ev-card, .lds-card, .option-card, .check-card,
+    .pending-card-click {
+      background: #FFFFFF !important;
+      border: 1px solid #EEEEEE !important;
+      border-radius: 20px !important;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04) !important;
+      transition: box-shadow 0.2s, transform 0.2s !important;
+    }
+    .list-card:hover, .ministry-card:hover, .dept-card:hover, .func-card:hover,
+    .template-card:hover, .bloco-card:hover, .dispon-card:hover, .type-card:hover,
+    .ev-card:hover, .lds-card:hover, .option-card:hover, .check-card:hover,
+    .pending-card-click:hover {
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08) !important;
+      transform: translateY(-2px) !important;
+    }
+
+    /* ── Cabeçalho de card ── */
+    .card-header {
+      border-bottom: 1px solid #EEEEEE !important;
+    }
+
+    /* ── Escalação: cards de departamento ── */
+    .dept-card-header {
+      background: #ECE9E7 !important;
+      border-bottom: 1px solid #EEEEEE !important;
+      border-radius: 20px 20px 0 0 !important;
+    }
+
+    /* ── Badges de data ── */
+    .event-date-badge, .ev-card-day, .ev-card-badge {
+      background: #7C3AED !important;
+      border-radius: 12px !important;
+    }
+
+    /* ── Tabelas ── */
+    .table-wrap, .table-container {
+      background: #FFFFFF !important;
+      border: 1px solid #EEEEEE !important;
+      border-radius: 20px !important;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04) !important;
+      overflow: hidden !important;
+    }
+    thead th {
+      font-size: 11px !important;
+      font-weight: 600 !important;
+      color: #8A8A8A !important;
+      text-transform: uppercase !important;
+      letter-spacing: 0.5px !important;
+      background: #ECE9E7 !important;
+    }
+
+    /* ── Painel lateral (detalhe) ── */
+    .right-panel {
+      background: #FFFFFF !important;
+      border-left: 1px solid #EEEEEE !important;
+    }
+
+    /* ══════════════════════════════════════════════════════
+       FIM DESIGN UPDATE
+       ══════════════════════════════════════════════════════ */
+    /* ══════════════════════════════════════════════════════
+       SIDEBAR REDESIGN — Floating pill dark
+       ══════════════════════════════════════════════════════ */
+    :root { --sidebar-w: 60px; }
+
+    /* ── Estrutura base ── */
+    .sidebar {
+      width: 60px !important;
+      background: #1c1c1c !important;
+      border-radius: 24px !important;
+      top: 16px !important;
+      bottom: 16px !important;
+      left: 12px !important;
+      min-height: unset !important;
+      height: auto !important;
+      padding: 16px 8px !important;
+      align-items: center !important;
+      overflow: visible !important;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.18) !important;
+      border-right: none !important;
+    }
+
+    /* ── Logo ── */
+    .sidebar-logo { display: none !important; }
+    .logo-text    { display: none !important; }
+
+    /* ── Nav ── */
+    .sidebar-nav {
+      padding: 0 !important;
+      align-items: center !important;
+      gap: 4px !important;
+      overflow: visible !important;
+      flex-direction: column !important;
+    }
+    .nav-item {
+      width: 44px !important; height: 44px !important;
+      min-height: 44px !important;
+      padding: 10px !important;
+      border-radius: 14px !important;
+      color: rgba(255,255,255,0.5) !important;
+      justify-content: center !important;
+      gap: 0 !important;
+      background: none !important;
+      letter-spacing: 0 !important;
+    }
+    .nav-item span { display: none !important; }
+    .nav-item svg {
+      width: 20px !important; height: 20px !important;
+      opacity: 1 !important; flex-shrink: 0 !important;
+    }
+    .nav-item:hover {
+      background: rgba(255,255,255,0.1) !important;
+      color: rgba(255,255,255,0.9) !important;
+    }
+    .nav-item.active {
+      background: #FFFFFF !important;
+      color: #1A1A1A !important;
+    }
+    .nav-item.active svg { opacity: 1 !important; }
+
+    /* ── Transição suave ── */
+    .sidebar { transition: transform 0.25s cubic-bezier(.4,0,.2,1), opacity 0.25s !important; }
+    .main    { transition: margin-left 0.25s cubic-bezier(.4,0,.2,1) !important; }
+
+    /* ── Collapsed: sidebar sai pela esquerda ── */
+    body.sidebar-collapsed .sidebar {
+      transform: translateX(calc(-100% - 20px)) !important;
+      opacity: 0 !important;
+      pointer-events: none !important;
+    }
+    body.sidebar-collapsed .main { margin-left: 16px !important; }
+    /* ── Quando collapsed: empurra conteúdo à direita do botão restaurar ── */
+    body.sidebar-collapsed .content {
+      padding-left: 60px !important;
+    }
+    body.sidebar-collapsed .topbar {
+      padding-left: 64px !important;
+    }
+
+
+    /* ── Botão flutuante para restaurar sidebar ── */
+    .sidebar-restore-btn {
+      display: none;
+      position: fixed;
+      top: 20px; left: 16px;
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      background: #1c1c1c;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      align-items: center; justify-content: center;
+      z-index: 200;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      transition: background 0.15s;
+    }
+    .sidebar-restore-btn:hover { background: #333; }
+    .sidebar-restore-btn svg { width: 18px; height: 18px; }
+    body.sidebar-collapsed .sidebar-restore-btn { display: flex; }
+
+    /* ── Main area offset ── */
+    .main { margin-left: 84px !important; }
+
+    /* ── Rodapé da sidebar ── */
+    .sidebar > div:last-child, .sidebar-footer {
+      border-top: none !important;
+      background: none !important;
+      padding: 0 !important;
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      justify-content: center !important;
+      gap: 8px !important;
+      margin-top: auto !important;
+      width: 100% !important;
+    }
+    .sidebar .icon-btn {
+      width: 40px !important; height: 40px !important;
+      border-radius: 50% !important;
+      color: rgba(255,255,255,0.7) !important;
+      background: rgba(255,255,255,0.08) !important;
+      border: none !important;
+      flex-shrink: 0 !important;
+    }
+    .sidebar .icon-btn:hover {
+      background: rgba(255,255,255,0.16) !important;
+      color: #FFFFFF !important;
+    }
+    /* ══════════════════════════════════════════════════════ */
+
+    /* ── Avatar no rodapé da sidebar ── */
+    .sidebar-footer {
+      padding-top: 8px !important;
+      border-top: 1px solid rgba(255,255,255,0.08) !important;
+    }
+    .sidebar .avatar-menu-wrap {
+      position: relative !important;
+      margin: 0 !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+    }
+    .sidebar .avatar {
+      width: 40px !important; height: 40px !important;
+      border-radius: 50% !important;
+      font-size: 13px !important;
+      margin-left: 0 !important;
+      cursor: pointer !important;
+      box-shadow: 0 0 0 2px rgba(255,255,255,0.15) !important;
+    }
+    .sidebar .avatar-dropdown {
+      position: fixed !important;
+      left: 84px !important;
+      bottom: 16px !important;
+      top: auto !important;
+      right: auto !important;
+      transform: translateX(-8px) !important;
+      transition: opacity 0.15s, transform 0.15s !important;
+    }
+    .sidebar .avatar-dropdown.open {
+      transform: translateX(0) !important;
+      opacity: 1 !important;
+      pointer-events: auto !important;
+    }
+  </style>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/responsive.css">
+</head>
+<body>
+<script>if(localStorage.getItem('sidebar-collapsed')==='1')document.body.classList.add('sidebar-collapsed')</script>
+
+  <!-- ── Sidebar ── -->
+  <aside class="sidebar">
+    <nav class="sidebar-nav">
+      <a class="nav-item" href="/configuracoes" data-tooltip="Configurações" data-menu="configuracoes">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        <span>Configurações</span>
+      </a>      <a class="nav-item" data-tooltip="Dashboard" data-menu="dashboard" href="/dashboard">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        <span>Dashboard</span>
+      </a>      <a class="nav-item" href="/departamentos" data-tooltip="Departamentos" data-menu="departamentos">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><path d="M2 12h20"/></svg>
+        <span>Departamentos</span>
+      </a>      <a class="nav-item" href="/escalacoes" data-tooltip="Escalações" data-menu="escalacao">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></svg>
+        <span>Escalação</span>
+      </a>      <a class="nav-item" href="/eventos" data-tooltip="Eventos" data-menu="eventos">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <span>Eventos</span>
+      </a>      <a class="nav-item" href="/indisponibilidade" data-tooltip="Indisponibilidade" data-menu="indisponibilidade">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M10 14l4 4"/><path d="M14 14l-4 4"/></svg>
+        <span>Indisponibilidade</span>
+      </a>      <a class="nav-item" href="/ministerios" data-tooltip="Ministérios" data-menu="ministerios">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4"/><path d="M10 4h4"/><path d="M3 11l9-7 9 7"/><rect x="5" y="11" width="14" height="10" rx="1"/><path d="M10 21v-5h4v5"/></svg>
+        <span>Ministérios</span>
+      </a>      <a class="nav-item" href="/musicas" data-tooltip="Músicas" data-menu="musicas">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+        <span>Músicas</span>
+      </a>      <a class="nav-item" href="/templates" data-tooltip="Templates" data-menu="templates">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+        <span>Templates</span>
+      </a>      <a class="nav-item active" href="/voluntarios" data-tooltip="Voluntários" data-menu="voluntarios">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span>Voluntários</span>
+      </a>      <a class="nav-item" href="/notificacoes" data-tooltip="Notificações" data-menu="notificacoes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span>Notificações</span></a></nav>
+  </aside>
+
+  <!-- ── Main ── -->
+  <div class="main">
+
+    <!-- Topbar -->
+    <header class="topbar">
+
+      <!-- Direita: search + ícones -->
+      <div class="topbar-actions">
+        <!-- Search pill + botão -->
+        <div class="search-wrap">
+          <input type="text" placeholder="Search..." id="topSearch" />
+          <button class="search-btn" title="Buscar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          </button>
+        </div>
+
+        <!-- Notificações -->
+        <div class="notif-wrapper" style="position:relative;">
+          <button class="icon-btn notif-btn" id="notifBtn" title="Notificações">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            <span class="notif-badge" id="notifBadge" style="display:none">0</span>
+          </button>
+          <div class="notif-dropdown" id="notifDropdown">
+            <div class="notif-header">
+              <span style="font-weight:600;font-size:14px">Notificações</span>
+              <button id="markAllRead" style="font-size:12px;color:#9156F1;background:none;border:none;cursor:pointer;font-family:inherit">Marcar todas como lidas</button>
+            </div>
+            <div class="notif-list" id="notifList"></div>
+            <div class="notif-footer">
+              <a href="/notificacoes" style="font-size:13px;color:#9156F1;text-decoration:none">Ver todas</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Collapse + avatar movidos pelo sidebar-ui.js -->
+        <button class="icon-btn" id="collapseBtn" title="Recolher menu">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="transition:transform 0.22s"><polyline points="11 17 6 12 11 7"/><polyline points="18 17 13 12 18 7"/></svg>
+        </button>
+        <div class="avatar-menu-wrap">
+          <div class="avatar" id="avatarBtn">A</div>
+          <div class="avatar-dropdown" id="avatarDropdown">
+            <div class="dropdown-header">
+              <div class="dropdown-name" id="dropdownName">—</div>
+              <div class="dropdown-email" id="dropdownEmail">—</div>
+            </div>
+            <a class="dropdown-item" href="/editar-perfil">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              Editar Perfil
+            </a>
+            <a class="dropdown-item" href="/configuracoes" data-menu-dropdown="configuracoes">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+              Configurações
+            </a>
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item danger" href="#" onclick="fazerLogout(event)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+              Sair
+            </a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="content">
+
+      <!-- Page Greeting -->
+      <div class="page-greeting">
+        <div class="pg-left">
+          <h1 class="pg-title"><span style="color:#9156F1">Voluntários</span></h1>
+          <p class="pg-sup">Gerencie os voluntários da sua igreja.</p>
+        </div>
+        <button class="btn-toolbar-add" id="btnNovo">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Novo Voluntário
+        </button>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-row">
+        <div class="stat-card active-filter" id="cardAtivos" onclick="setFiltro('ativos')">
+          <div class="stat-icon" style="background:#F0FAE8;color:#5A9E2F;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div>
+            <div class="stat-value" id="statAtivos">0</div>
+            <div class="stat-label">Ativos</div>
+          </div>
+        </div>
+        <div class="stat-card" id="cardArquivados" onclick="setFiltro('arquivados')">
+          <div class="stat-icon" style="background:#F5F3F0;color:#5C5955;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+          </div>
+          <div>
+            <div class="stat-value" id="statArquivados">0</div>
+            <div class="stat-label">Arquivados</div>
+          </div>
+        </div>
+        <div class="stat-card" id="cardSemFuncao" onclick="setFiltro('semfuncao')">
+          <div class="stat-icon" style="background:#FEE8EA;color:#C0394A;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          </div>
+          <div>
+            <div class="stat-value" id="statSemFuncao">0</div>
+            <div class="stat-label">Sem Função</div>
+          </div>
+        </div>
+        <div class="stat-card" id="cardPendentes" onclick="setFiltro('pendentes')">
+          <div class="stat-icon" style="background:#FEF9C3;color:#B45309;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
+          <div>
+            <div class="stat-value" id="statPendentes">0</div>
+            <div class="stat-label">Aguardando Aprovação</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Lista -->
+      <div class="list-card">
+        <div class="list-header">
+          <div class="list-title">Lista de Voluntários</div>
+          <div class="list-controls">
+            <div class="view-toggle">
+              <button class="view-btn active" id="btnBlocos">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+                Blocos
+              </button>
+              <button class="view-btn" id="btnTabela">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+                Tabela
+              </button>
+            </div>
+            <!-- Dept ComboBox -->
+            <div class="combo-wrap" id="comboDeptWrap">
+              <svg class="combo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4"/><path d="M10 4h4"/><path d="M3 11l9-7 9 7"/><rect x="5" y="11" width="14" height="10" rx="1"/><path d="M10 21v-5h4v5"/></svg>
+              <div class="combo-box" id="comboDeptBox">
+                <input class="combo-input" id="comboDeptInput" placeholder="Todos os Departamentos" autocomplete="off" readonly />
+                <button class="combo-clear" id="comboDeptClear" type="button" tabindex="-1">✕</button>
+                <svg class="combo-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+              </div>
+              <div class="combo-dropdown" id="comboDeptDropdown"></div>
+            </div>
+            <!-- Func ComboBox -->
+            <div class="combo-wrap" id="comboFuncWrap">
+              <svg class="combo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+              <div class="combo-box" id="comboFuncBox">
+                <input class="combo-input" id="comboFuncInput" placeholder="Todas as Funções" autocomplete="off" readonly />
+                <button class="combo-clear" id="comboFuncClear" type="button" tabindex="-1">✕</button>
+                <svg class="combo-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+              </div>
+              <div class="combo-dropdown" id="comboFuncDropdown"></div>
+            </div>
+            <div class="list-search">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input type="text" placeholder="Buscar voluntários..." id="searchInput" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Empty state -->
+        <div class="list-empty hidden" id="emptyState">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <div class="list-empty-text">Nenhum voluntário encontrado</div>
+        </div>
+
+        <!-- Grid view -->
+        <div class="ministry-grid" id="gridView"></div>
+
+        <!-- Table view -->
+        <table class="ministry-table hidden" id="tableView">
+          <thead>
+            <tr>
+              <th>Voluntário</th>
+              <th>Departamentos</th>
+              <th>WhatsApp</th>
+              <th>Status</th>
+              <th>Status</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- Drawer -->
+  <div class="drawer-overlay" id="drawerOverlay">
+    <div class="drawer">
+      <div class="drawer-header">
+        <div>
+          <div class="drawer-title" id="drawerTitle">Novo Voluntário</div>
+          <div class="drawer-subtitle" id="drawerSubtitle">Preencha os dados do voluntário</div>
+        </div>
+        <button class="drawer-close" id="drawerClose">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <!-- Steps bar -->
+      <div class="steps-bar" id="stepsBar">
+        <div class="step-item active" id="si1">
+          <div class="step-circle">1</div>
+          <div class="step-lbl">Dados Pessoais</div>
+        </div>
+        <div class="step-connector" id="sc1"></div>
+        <div class="step-item" id="si2">
+          <div class="step-circle">2</div>
+          <div class="step-lbl">Departamento</div>
+        </div>
+        <div class="step-connector" id="sc2"></div>
+        <div class="step-item" id="si3">
+          <div class="step-circle">3</div>
+          <div class="step-lbl">Resumo</div>
+        </div>
+      </div>
+
+      <div class="drawer-body">
+
+        <!-- ── Step 1: Dados Pessoais ── -->
+        <div class="step-panel active" id="step1">
+          <div class="step-sh">
+            <div class="step-sh-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </div>
+            <div>
+              <div class="step-sh-title">Dados Pessoais</div>
+              <div class="step-sh-sub">Informações básicas do voluntário</div>
+            </div>
+          </div>
+
+          <div class="photo-picker">
+            <div class="photo-circle" id="photoCircle" onclick="document.getElementById('fieldFoto').click()">
+              <span id="photoInitials" style="font-size:30px;font-weight:700;color:#fff">?</span>
+              <img id="photoImg" src="" alt="" style="display:none;position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:50%">
+              <div class="photo-overlay">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+              </div>
+            </div>
+            <input type="file" id="fieldFoto" accept="image/*" style="display:none">
+            <span class="photo-hint">Clique para adicionar foto</span>
+          </div>
+
+          <div class="field-group">
+            <label class="field-label">Nome Completo <span class="req">*</span></label>
+            <input class="field-input" type="text" id="fieldNome" placeholder="Ex: João da Silva" />
+          </div>
+          <div class="field-group">
+            <label class="field-label">Apelido</label>
+            <input class="field-input" type="text" id="fieldApelido" placeholder="Como prefere ser chamado(a)" />
+          </div>
+          <div class="field-row">
+            <div class="field-group">
+              <label class="field-label">WhatsApp <span class="req">*</span></label>
+              <input class="field-input" type="tel" id="fieldWhatsapp" placeholder="(00) 00000-0000" />
+            </div>
+            <div class="field-group">
+              <label class="field-label">E-mail</label>
+              <input class="field-input" type="email" id="fieldEmail" placeholder="email@exemplo.com" />
+            </div>
+          </div>
+          <div class="field-group">
+            <label class="field-label">Data de Nascimento <span class="req">*</span></label>
+            <input class="field-input" type="date" id="fieldNascimento" />
+          </div>
+          <div class="field-row">
+            <div class="field-group">
+              <label class="field-label">Gênero <span class="req">*</span></label>
+              <select class="field-select" id="fieldGenero">
+                <option value="">Selecione</option>
+              </select>
+            </div>
+            <div class="field-group">
+              <label class="field-label">Estado Civil</label>
+              <select class="field-select" id="fieldEstadoCivil">
+                <option value="">Selecione</option>
+              </select>
+            </div>
+          </div>
+          <div class="field-group">
+            <label class="field-label">Endereço</label>
+            <input class="field-input" type="text" id="fieldEndereco" placeholder="Rua, número, bairro, cidade" />
+          </div>
+          <div class="emergency-box">
+            <div class="emergency-box-title">Contato de Emergência</div>
+            <div class="field-row">
+              <div class="field-group">
+                <input class="field-input" type="text" id="fieldEmergNome" placeholder="Nome" />
+              </div>
+              <div class="field-group">
+                <input class="field-input" type="tel" id="fieldEmergTelefone" placeholder="Telefone" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── Step 2: Departamento ── -->
+        <div class="step-panel" id="step2">
+          <div class="step-sh">
+            <div class="step-sh-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><path d="M2 12h20"/></svg>
+            </div>
+            <div>
+              <div class="step-sh-title">Selecione onde deseja servir</div>
+              <div class="step-sh-sub">Selecione ao menos um departamento <strong style="color:#e53935">*</strong></div>
+            </div>
+          </div>
+
+          <div class="field-group">
+            <div class="dept-search">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input type="text" id="deptSearch" placeholder="Buscar departamento..." oninput="filterDeptChips(this.value)" autocomplete="off" />
+            </div>
+            <div class="dept-chips-grid" id="deptChipsGrid"></div>
+          </div>
+
+          <div class="field-group" id="fieldStatusGroup" style="display:none">
+            <label class="field-label">Status</label>
+            <select class="field-select" id="fieldStatus">
+              <option value="true">Ativo</option>
+              <option value="false">Arquivado</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- ── Step 3: Resumo ── -->
+        <div class="step-panel" id="step3">
+          <div class="step-sh">
+            <div class="step-sh-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            </div>
+            <div>
+              <div class="step-sh-title">Resumo da Solicitação</div>
+              <div class="step-sh-sub">Confira os dados antes de salvar</div>
+            </div>
+          </div>
+
+          <div class="summary-plain-card" id="summaryPessoais"></div>
+          <div class="summary-highlight-card" id="summaryDept"></div>
+
+          <div class="notice-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <div class="notice-box-text">Ao salvar, o voluntário será cadastrado no sistema e aparecerá na lista de voluntários. As informações poderão ser editadas a qualquer momento.</div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Wizard nav -->
+      <div class="drawer-nav">
+        <button class="btn-voltar" id="btnVoltar" disabled>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          Voltar
+        </button>
+        <button class="btn-proximo" id="btnProximo">
+          Próximo
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confirm delete -->
+  <div class="confirm-overlay" id="confirmOverlay">
+    <div class="confirm-modal">
+      <div class="confirm-title">Excluir voluntário</div>
+      <div class="confirm-desc">Deseja excluir este voluntário? Esta ação não poderá ser desfeita.</div>
+      <div class="confirm-actions">
+        <button class="btn-confirm-danger" id="btnConfirmDelete">Excluir</button>
+        <button class="btn-confirm-cancel" onclick="document.getElementById('confirmOverlay').classList.remove('open')">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script src="/js/auth-fetch.js"></script>
+  <script src="/js/sidebar-permissions.js"></script>
+    <script src="/js/sidebar-ui.js"></script>
+  <script>
+    const AVATAR_COLORS = ['#8B5CF6','#7C3AED','#DDD6FE','#1c0050','#e8612a','#5c7a6e','#2d6a4f','#40916c']
+    function avatarColor(name) { let h = 0; for (const c of name) h = (h * 31 + c.charCodeAt(0)) % AVATAR_COLORS.length; return AVATAR_COLORS[h] }
+    function initials(name) { return name.trim().split(/\s+/).map(w => w[0]).slice(0,2).join('').toUpperCase() }
+    function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') }
+
+    function resizeImageToBase64(file, maxSize = 600) {
+      return new Promise(resolve => {
+        const img = new Image()
+        const url = URL.createObjectURL(file)
+        img.onload = () => {
+          let w = img.width, h = img.height
+          if (w > maxSize || h > maxSize) {
+            if (w > h) { h = Math.round(h * maxSize / w); w = maxSize }
+            else { w = Math.round(w * maxSize / h); h = maxSize }
+          }
+          const canvas = document.createElement('canvas')
+          canvas.width = w; canvas.height = h
+          canvas.getContext('2d').drawImage(img, 0, 0, w, h)
+          URL.revokeObjectURL(url)
+          resolve(canvas.toDataURL('image/jpeg', 0.88))
+        }
+        img.onerror = () => { URL.revokeObjectURL(url); resolve(null) }
+        img.src = url
+      })
+    }
+
+    function setDrawerPhoto(src, ini, color) {
+      const circle  = document.getElementById('photoCircle')
+      const imgEl   = document.getElementById('photoImg')
+      const initEl  = document.getElementById('photoInitials')
+      if (src) {
+        imgEl.src = src; imgEl.style.display = ''
+        initEl.style.display = 'none'
+        circle.style.background = '#e0e0e0'
+      } else {
+        imgEl.src = ''; imgEl.style.display = 'none'
+        initEl.textContent = ini || '?'; initEl.style.display = ''
+        circle.style.background = color || '#8B5CF6'
+      }
+    }
+
+    let _voluntarios   = []
+    let _pendentes     = []
+    let _departments   = []
+    let _meuDeptId     = null   // preenchido para lider_departamento
+    let _funcoes       = []
+    let _generos       = []
+    let _statusCivis   = []
+    let _viewMode      = 'blocos'
+    let _filtroStatus  = 'ativos'
+    let _filterDept    = ''
+    let _filterFunc    = ''
+    let _search        = ''
+    let _editingId     = null
+    let _pendingDelete  = null
+    let _photoBase64    = null
+    let _selectedDepts  = []
+    let _deptSearch     = ''
+    let _currentStep    = 1
+    const TOTAL_STEPS  = 3
+
+    function goToStep(n) {
+      for (let i = 1; i <= TOTAL_STEPS; i++) {
+        document.getElementById('step' + i).classList.toggle('active', i === n)
+        const si = document.getElementById('si' + i)
+        si.classList.remove('active', 'done')
+        if (i < n)  si.classList.add('done')
+        if (i === n) si.classList.add('active')
+        if (i < TOTAL_STEPS) {
+          document.getElementById('sc' + i).classList.toggle('done', i < n)
+        }
+      }
+      _currentStep = n
+
+      const btnVoltar  = document.getElementById('btnVoltar')
+      const btnProximo = document.getElementById('btnProximo')
+      btnVoltar.disabled = n === 1
+
+      if (n === TOTAL_STEPS) {
+        btnProximo.innerHTML = `Salvar <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px"><polyline points="20 6 9 17 4 12"/></svg>`
+        renderSummary()
+      } else {
+        btnProximo.innerHTML = `Próximo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px"><polyline points="9 18 15 12 9 6"/></svg>`
+      }
+      document.querySelector('.drawer-body').scrollTop = 0
+    }
+
+    function validateStep(n) {
+      if (n === 1) {
+        const checks = [
+          ['fieldNome',      document.getElementById('fieldNome').value.trim()],
+          ['fieldWhatsapp',  document.getElementById('fieldWhatsapp').value.trim()],
+          ['fieldNascimento',document.getElementById('fieldNascimento').value],
+          ['fieldGenero',    document.getElementById('fieldGenero').value],
+        ]
+        let ok = true
+        checks.forEach(([id, val]) => {
+          const el = document.getElementById(id)
+          if (!val) { el.classList.add('error'); ok = false } else el.classList.remove('error')
+        })
+        if (!ok) showToast('Preencha os campos obrigatórios', 'error')
+        return ok
+      }
+      if (n === 2) {
+        if (_selectedDepts.length === 0) {
+          showToast('Selecione ao menos um departamento', 'error')
+          return false
+        }
+        return true
+      }
+      return true
+    }
+
+    function renderSummary() {
+      const nome   = document.getElementById('fieldNome').value.trim()
+      const nickname= document.getElementById('fieldApelido').value.trim()
+      const wa     = document.getElementById('fieldWhatsapp').value.trim()
+      const email  = document.getElementById('fieldEmail').value.trim()
+      const nasc   = document.getElementById('fieldNascimento').value
+      const generoSel = document.getElementById('fieldGenero')
+      const genero = generoSel.options[generoSel.selectedIndex]?.textContent || ''
+      const civilSel = document.getElementById('fieldEstadoCivil')
+      const civil = civilSel.options[civilSel.selectedIndex]?.textContent || ''
+      const endereco = document.getElementById('fieldEndereco').value.trim()
+      const emergNome= document.getElementById('fieldEmergNome').value.trim()
+      const emergTel = document.getElementById('fieldEmergTelefone').value.trim()
+      const deptNames = _selectedDepts.map(id => _departments.find(d => d.id === id)?.name).filter(Boolean)
+      const row = (k, v) => v ? `<div class="summary-row"><span class="summary-key">${k}</span><span class="summary-val">${esc(v)}</span></div>` : ''
+
+      document.getElementById('summaryPessoais').innerHTML =
+        `<div class="summary-card-title">Dados Pessoais</div>` +
+        row('Nome', nome) + row('Apelido', nickname) + row('WhatsApp', wa) +
+        row('E-mail', email) + row('Nascimento', nasc) + row('Gênero', genero) + row('Estado Civil', civil) +
+        row('Endereço', endereco) +
+        (emergNome || emergTel ? `<div class="summary-row" style="margin-top:8px;padding-top:8px;border-top:1px solid var(--hairline)"><span class="summary-key" style="font-weight:600;color:#c47d00">Emergência</span><span class="summary-val">${esc([emergNome, emergTel].filter(Boolean).join(' · '))}</span></div>` : '')
+
+      document.getElementById('summaryDept').innerHTML =
+        `<div class="summary-card-title">Área de Interesse</div>` +
+        (deptNames.length
+          ? deptNames.map((n, i) => row(i === 0 ? 'Departamento' : '', n)).join('')
+          : row('Departamento', '—'))
+    }
+
+    const _approvalChannel = new BroadcastChannel('hug-approvals')
+    _approvalChannel.onmessage = () => {
+      Promise.all([loadVoluntarios(), loadPendentes()])
+    }
+
+    async function init() {
+      if (!await checkAuth()) return
+      const meData = await authFetch('/api/auth/me').then(r => r.json()).catch(() => ({}))
+      const { usuario, igreja } = meData
+      if (!usuario) { window.location.href = '/'; return }
+
+      document.getElementById('avatarBtn').textContent     = (usuario.nickname || usuario.email || 'U').charAt(0).toUpperCase()
+      ;(function(){ var _u=JSON.parse(localStorage.getItem('usuario')||'{}'); if(_u && _u.avatar){ var _el=document.getElementById('avatarBtn'); if(_el) _el.innerHTML='<img src="'+_u.avatar+'" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%">'; } })();
+      document.getElementById('dropdownName').textContent  = usuario.nickname || '—'
+      document.getElementById('dropdownEmail').textContent = usuario.email    || '—'
+      const _cnel = document.getElementById('churchName'); if (_cnel) _cnel.textContent = igreja?.nome || 'Igreja';
+
+      await Promise.all([loadDepartments(), loadVoluntarios(), loadPendentes(), loadGeneros(), loadStatusCivis()])
+
+      // Para lider_departamento: determina o dept que ele lidera e restringe UI
+      if (usuario.perfil_slug === 'lider_departamento') {
+        document.getElementById('btnNovo').style.display = 'none'
+        const meuDept = _departments.find(d => d.leader_id === usuario.id)
+        _meuDeptId = meuDept?.id || null
+      }
+
+      // Aplica filtro de status via URL query param (?filtro=pendentes)
+      const filtroParam = new URLSearchParams(window.location.search).get('filtro')
+      if (filtroParam && ['todos','ativos','arquivados','semfuncao','pendentes'].includes(filtroParam)) {
+        setFiltro(filtroParam)
+      }
+    }
+
+    async function loadDepartments() {
+      const cachedDept = CacheManager.get('departamentos')
+      if (cachedDept) {
+        _departments = cachedDept.filter(d => d.is_active !== false)
+        const fRes = await authFetch('/api/funcao').then(r => r.json()).catch(() => ({ funcoes: [] }))
+        _funcoes = fRes.funcoes || []
+        populateDeptFilter()
+        populateFuncFilter()
+        return
+      }
+      const [dRes, fRes] = await Promise.all([
+        authFetch('/api/department').then(r => r.json()).catch(() => ({ departments: [] })),
+        authFetch('/api/funcao').then(r => r.json()).catch(() => ({ funcoes: [] })),
+      ])
+      _departments = (dRes.departments || []).filter(d => d.is_active !== false)
+      _funcoes     = fRes.funcoes || []
+      CacheManager.set('departamentos', dRes.departments || [])
+      populateDeptFilter()
+      populateFuncFilter()
+    }
+
+    async function loadVoluntarios() {
+      const cached = CacheManager.get('voluntarios')
+      if (cached) {
+        _voluntarios = cached
+        renderAll()
+        return
+      }
+      const res = await authFetch('/api/voluntario').then(r => r.json()).catch(() => ({ voluntarios: [] }))
+      _voluntarios = res.voluntarios || []
+      CacheManager.set('voluntarios', _voluntarios)
+      renderAll()
+    }
+
+    async function loadPendentes() {
+      try {
+        const r    = await authFetch('/api/voluntario/pendentes')
+        const json = await r.json()
+        if (!r.ok) {
+          console.error('[loadPendentes] API error:', json.error)
+          showToast('Erro ao carregar pendentes: ' + (json.error || r.status), 'error')
+          return
+        }
+        _pendentes = json.pendentes || []
+      } catch (e) {
+        console.error('[loadPendentes] fetch error:', e)
+      }
+      renderAll()
+    }
+
+    async function loadGeneros() {
+      const data = await authFetch('/api/user/generos').then(r => r.json()).catch(() => [])
+      _generos = Array.isArray(data) ? data : []
+      const sel = document.getElementById('fieldGenero')
+      _generos.forEach(g => {
+        const o = document.createElement('option')
+        o.value = g.id
+        o.textContent = g.name
+        sel.appendChild(o)
+      })
+    }
+
+    async function loadStatusCivis() {
+      const data = await authFetch('/api/user/estados-civis').then(r => r.json()).catch(() => [])
+      _statusCivis = Array.isArray(data) ? data : []
+      const sel = document.getElementById('fieldEstadoCivil')
+      _statusCivis.forEach(s => {
+        const o = document.createElement('option')
+        o.value = s.id
+        o.textContent = s.name
+        sel.appendChild(o)
+      })
+    }
+
+    function populateDeptFilter() {
+      const items = [{ id: '', label: 'Todos os Departamentos' }, ..._departments.map(d => ({ id: d.id, label: d.name }))]
+      cbDept.setItems(items)
+      renderDeptChips()
+      // Aplica filtro via URL query param (?dept=<id>)
+      const deptParam = new URLSearchParams(window.location.search).get('dept')
+      if (deptParam) {
+        cbDept.setValue(deptParam)
+      } else if (_meuDeptId) {
+        cbDept.setValue(_meuDeptId)
+        _filterDept = _meuDeptId
+        populateFuncFilter(_meuDeptId)
+      }
+    }
+
+    function populateFuncFilter(deptId = '') {
+      const allFuncs = deptId ? _funcoes.filter(f => f.department_id === deptId) : _funcoes
+      const items = [{ id: '', label: 'Todas as Funções' }, ...allFuncs.map(f => ({ id: f.id, label: f.name }))]
+      cbFunc.setItems(items)
+    }
+
+    function filterDeptChips(q) {
+      _deptSearch = q.toLowerCase().trim()
+      renderDeptChips()
+    }
+
+    function renderDeptChips() {
+      const grid = document.getElementById('deptChipsGrid')
+      if (!grid) return
+      const chk = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`
+
+      const filtered = _deptSearch
+        ? _departments.filter(d =>
+            d.name.toLowerCase().includes(_deptSearch) ||
+            (d.db_ministry?.name || '').toLowerCase().includes(_deptSearch))
+        : _departments
+
+      if (!filtered.length) {
+        grid.innerHTML = `<div class="dept-chips-empty">${_departments.length ? 'Nenhum resultado para a busca' : 'Nenhum departamento cadastrado'}</div>`
+        return
+      }
+
+      // Group by ministry
+      const groupMap = new Map()
+      filtered.forEach(d => {
+        const minId   = d.db_ministry?.id   || '__none__'
+        const minName = d.db_ministry?.name || 'Sem Ministério'
+        if (!groupMap.has(minId)) groupMap.set(minId, { name: minName, depts: [] })
+        groupMap.get(minId).depts.push(d)
+      })
+
+      grid.innerHTML = [...groupMap.values()].map(g => `
+        <div class="dept-group">
+          <div class="dept-group-title">${esc(g.name)}</div>
+          <div class="dept-group-chips">
+            ${g.depts.map(d => {
+              const sel = _selectedDepts.includes(d.id)
+              return `<div class="dept-chip${sel ? ' selected' : ''}" onclick="toggleDeptChip('${d.id}')">
+                <span class="dept-chip-name">${esc(d.name)}</span>
+                <div class="dept-chip-check">${chk}</div>
+              </div>`
+            }).join('')}
+          </div>
+        </div>`).join('')
+    }
+
+    function toggleDeptChip(id) {
+      const idx = _selectedDepts.indexOf(id)
+      if (idx === -1) _selectedDepts.push(id)
+      else _selectedDepts.splice(idx, 1)
+      renderDeptChips()
+    }
+
+    function setFiltro(f) {
+      _filtroStatus = f
+      document.querySelectorAll('.stat-card').forEach(c => c.classList.remove('active-filter'))
+      const map = { ativos: 'cardAtivos', arquivados: 'cardArquivados', semfuncao: 'cardSemFuncao', pendentes: 'cardPendentes' }
+      document.getElementById(map[f])?.classList.add('active-filter')
+      renderAll()
+    }
+
+    function renderAll() {
+      const pendingEmails = new Set(_pendentes.map(p => p.email).filter(Boolean))
+      const approved = _voluntarios.filter(v => !pendingEmails.has(v.email))
+
+      const total      = approved.length
+      const ativos     = approved.filter(v => v.is_active !== false).length
+      const arquivados = approved.filter(v => v.is_active === false).length
+      const semFuncao  = approved.filter(v => v.is_active !== false && !(v.db_member_dept || []).some(r => r.funcao_id)).length
+
+      // Voluntários já aprovados mas com algum departamento pendente de aprovação
+      // lider_departamento só vê pendentes do seu próprio departamento
+      const deptPendentes = approved.filter(v => (v.db_member_dept || []).some(r =>
+        r.status === 'pendente' && (_meuDeptId === null || r.department_id === _meuDeptId)
+      ))
+
+      document.getElementById('statAtivos').textContent     = ativos
+      document.getElementById('statArquivados').textContent = arquivados
+      document.getElementById('statSemFuncao').textContent  = semFuncao
+      document.getElementById('statPendentes').textContent  = _pendentes.length + deptPendentes.length
+
+      if (_filtroStatus === 'pendentes') {
+        renderPending(_pendentes, deptPendentes)
+        return
+      }
+
+      let filtered = approved
+      if (_filtroStatus === 'ativos')     filtered = filtered.filter(v =>
+        v.is_active !== false &&
+        (!_meuDeptId || (v.db_member_dept || []).some(r => r.department_id === _meuDeptId))
+      )
+      if (_filtroStatus === 'arquivados') filtered = filtered.filter(v => v.is_active === false)
+      if (_filtroStatus === 'semfuncao')  filtered = filtered.filter(v =>
+        v.is_active !== false &&
+        !(v.db_member_dept || []).some(r => r.funcao_id) &&
+        (!_meuDeptId || (v.db_member_dept || []).some(r => r.department_id === _meuDeptId))
+      )
+      if (_filterDept)  filtered = filtered.filter(v => (v.db_member_dept || []).some(r => r.department_id === _filterDept))
+      if (_filterFunc)  filtered = filtered.filter(v => (v.db_member_dept || []).some(r => r.funcao_id     === _filterFunc))
+      if (_search) {
+        const q = _search.toLowerCase()
+        filtered = filtered.filter(v =>
+          (v.full_name || '').toLowerCase().includes(q) ||
+          (v.email || '').toLowerCase().includes(q) ||
+          (v.db_department?.name || '').toLowerCase().includes(q) ||
+          (v.db_funcao_dept?.name || '').toLowerCase().includes(q)
+        )
+      }
+
+      const empty = document.getElementById('emptyState')
+      const grid  = document.getElementById('gridView')
+      const table = document.getElementById('tableView')
+
+      if (!filtered.length) {
+        empty.classList.remove('hidden')
+        grid.classList.add('hidden')
+        table.classList.add('hidden')
+        return
+      }
+      empty.classList.add('hidden')
+
+      if (_viewMode === 'blocos') {
+        grid.classList.remove('hidden'); table.classList.add('hidden')
+        renderGrid(filtered)
+      } else {
+        table.classList.remove('hidden'); grid.classList.add('hidden')
+        renderTable(filtered)
+      }
+    }
+
+    function renderPending(list, deptPendList = []) {
+      const empty = document.getElementById('emptyState')
+      const grid  = document.getElementById('gridView')
+      const table = document.getElementById('tableView')
+      table.classList.add('hidden')
+
+      if (!list.length && !deptPendList.length) {
+        empty.classList.remove('hidden')
+        grid.classList.add('hidden')
+        return
+      }
+      empty.classList.add('hidden')
+      grid.classList.remove('hidden')
+
+      const checkSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`
+      const xSvg     = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`
+      const deptSvg  = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><path d="M2 12h20"/></svg>`
+
+      // ── Grupo A: novos cadastros aguardando aprovação como voluntário ──
+      const typeAHtml = list.map(p => {
+        const color = avatarColor(p.full_name)
+        const ini   = initials(p.full_name)
+        const avatarHtml = p.photo_url
+          ? `<div class="mc-icon" style="border-radius:50%;overflow:hidden;padding:0"><img src="${esc(p.photo_url)}" style="width:100%;height:100%;object-fit:cover"></div>`
+          : `<div class="mc-icon" style="background:${color};border-radius:50%"><span style="font-size:19px;font-weight:700;color:#fff;letter-spacing:-0.5px">${esc(ini)}</span></div>`
+        const date = p.created_at ? new Date(p.created_at).toLocaleDateString('pt-BR') : '—'
+        const clickable = p.member_id
+          ? `class="ministry-card pending-card-click" onclick="window.open('/voluntario/${p.member_id}?pendente=1&uid=${p.user_id}','_blank')"`
+          : `class="ministry-card"`
+        return `
+        <div ${clickable}>
+          <div class="mc-top">
+            ${avatarHtml}
+            <div class="mc-info">
+              <div class="mc-name">${esc(p.full_name)}</div>
+              <div class="mc-desc">${esc(p.email || '—')}</div>
+            </div>
+            <span class="vol-badge pendente">
+              <svg viewBox="0 0 10 10" fill="currentColor"><circle cx="5" cy="5" r="5"/></svg>
+              Pendente
+            </span>
+          </div>
+          <div class="mc-leader">
+            <div style="font-size:12px;color:var(--ink-muted)">Cadastrou em ${date}${p.phone ? ' · ' + esc(p.phone) : ''}</div>
+          </div>
+        </div>`
+      }).join('')
+
+      // ── Grupo B: voluntários ativos com departamento pendente de aprovação ──
+      const typeBHtml = deptPendList.map(v => {
+        const color = avatarColor(v.full_name)
+        const ini   = initials(v.full_name)
+        const avatarHtml = v.photo_url
+          ? `<div class="mc-icon" style="border-radius:50%;overflow:hidden;padding:0"><img src="${esc(v.photo_url)}" style="width:100%;height:100%;object-fit:cover"></div>`
+          : `<div class="mc-icon" style="background:${color};border-radius:50%"><span style="font-size:19px;font-weight:700;color:#fff;letter-spacing:-0.5px">${esc(ini)}</span></div>`
+        // Departamentos pendentes
+        const deptsPend = (v.db_member_dept || []).filter(r => r.status === 'pendente').map(r => r.db_department?.name || '?')
+        const deptsLabel = deptsPend.join(', ')
+        // link IDs dos depts pendentes para o botão Ativar — lider_departamento só vê o seu
+        const pendLinks = (v.db_member_dept || []).filter(r =>
+          r.status === 'pendente' && (_meuDeptId === null || r.department_id === _meuDeptId)
+        )
+        const ativarBtns = pendLinks.map(r =>
+          `<button onclick="event.stopPropagation(); ativarDeptMembro('${r.id}', '${v.id}')" style="height:28px;padding:0 12px;border-radius:9999px;border:1.5px solid #008a50;background:rgba(0,138,80,0.08);color:#008a50;font-size:11px;font-weight:700;font-family:inherit;cursor:pointer;display:inline-flex;align-items:center;gap:4px;transition:background 0.12s" onmouseover="this.style.background='rgba(0,138,80,0.16)'" onmouseout="this.style.background='rgba(0,138,80,0.08)'">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px"><polyline points="20 6 9 17 4 12"/></svg>
+            Ativar em ${esc(r.db_department?.name || '?')}
+          </button>`
+        ).join('')
+        return `
+        <div class="ministry-card" onclick="abrirEditar('${v.id}')" style="cursor:pointer">
+          <div class="mc-top">
+            ${avatarHtml}
+            <div class="mc-info">
+              <div class="mc-name">${esc(v.full_name)}</div>
+              <div class="mc-desc">${esc(deptsLabel)}</div>
+            </div>
+            <span class="vol-badge pendente">
+              <svg viewBox="0 0 10 10" fill="currentColor"><circle cx="5" cy="5" r="5"/></svg>
+              Aguardando
+            </span>
+          </div>
+          <div class="mc-leader">
+            <div class="mc-leader-avatar" style="background:rgba(255,193,7,0.14);color:#c47d00">${deptSvg}</div>
+            <div>
+              <div class="mc-leader-tag">Dept. pendente de aprovação</div>
+              <div class="mc-leader-name">${esc(deptsLabel)}</div>
+            </div>
+          </div>
+          ${ativarBtns ? `<div style="padding-top:4px;display:flex;flex-wrap:wrap;gap:6px">${ativarBtns}</div>` : ''}
+        </div>`
+      }).join('')
+
+      document.getElementById('gridView').innerHTML = typeAHtml + typeBHtml
+    }
+
+    async function ativarDeptMembro(linkId, memberId) {
+      try {
+        const res = await authFetch(`/api/voluntario/dept-ativar/${linkId}`, { method: 'PATCH' })
+        if (!res.ok) { const j = await res.json().catch(() => ({})); showToast(j.error || 'Erro ao ativar', 'error'); return }
+        // Atualiza o status localmente para não precisar recarregar tudo
+        _voluntarios.forEach(v => {
+          if (v.id === memberId) {
+            (v.db_member_dept || []).forEach(r => { if (r.id === linkId) r.status = 'ativo' })
+          }
+        })
+        CacheManager.invalidate('voluntarios')
+        showToast('Voluntário ativado no departamento!', 'success')
+        renderAll()
+      } catch { showToast('Erro ao ativar', 'error') }
+    }
+
+    async function aprovar(userId) {
+      const res = await authFetch(`/api/voluntario/${userId}/aprovar`, { method: 'PUT' })
+      if (!res.ok) { showToast('Erro ao aprovar voluntário', 'error'); return }
+      CacheManager.invalidate('voluntarios')
+      _pendentes = _pendentes.filter(p => p.user_id !== userId)
+      showToast('Voluntário aprovado!', 'success')
+      renderAll()
+    }
+
+    async function rejeitar(userId) {
+      if (!confirm('Deseja rejeitar e remover este cadastro? Esta ação não pode ser desfeita.')) return
+      const res = await authFetch(`/api/voluntario/${userId}/rejeitar`, { method: 'PUT' })
+      if (!res.ok) { showToast('Erro ao rejeitar cadastro', 'error'); return }
+      CacheManager.invalidate('voluntarios')
+      _pendentes = _pendentes.filter(p => p.user_id !== userId)
+      showToast('Cadastro rejeitado', 'success')
+      renderAll()
+    }
+
+    function renderGrid(list) {
+      const archSvg   = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>`
+      const restoreSvg= `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.93"/></svg>`
+      const delSvg    = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>`
+      const deptSvg   = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><path d="M2 12h20"/></svg>`
+
+      document.getElementById('gridView').innerHTML = list.map(v => {
+        const ativo  = v.is_active !== false
+        const dept   = [...new Set((v.db_member_dept || []).filter(r => r.status === 'ativo').map(r => r.db_department?.name).filter(Boolean))].join(', ') || '—'
+        const funcao = dept
+        const color  = avatarColor(v.full_name)
+        const ini    = initials(v.full_name)
+        const avatarHtml = v.photo_url
+          ? `<div class="mc-icon" style="border-radius:50%;overflow:hidden;padding:0"><img src="${esc(v.photo_url)}" style="width:100%;height:100%;object-fit:cover"></div>`
+          : `<div class="mc-icon" style="background:${color};border-radius:50%"><span style="font-size:19px;font-weight:700;color:#fff;letter-spacing:-0.5px">${esc(ini)}</span></div>`
+        return `
+        <div class="ministry-card${ativo ? '' : ' archived'}">
+          <div class="mc-clickable" onclick="abrirEditar('${v.id}')">
+            <div class="mc-top">
+              ${avatarHtml}
+              <div class="mc-info">
+                <div class="mc-name">${esc(v.full_name)}</div>
+                <div class="mc-desc">${esc(funcao === '—' ? 'Sem função definida' : funcao)}</div>
+              </div>
+              <span class="vol-badge ${ativo ? 'ativo' : 'inativo'}">
+                <svg viewBox="0 0 10 10" fill="currentColor"><circle cx="5" cy="5" r="5"/></svg>
+                ${ativo ? 'Ativo' : 'Arquivado'}
+              </span>
+            </div>
+            <div class="mc-leader">
+              <div class="mc-leader-avatar" style="background:rgba(151,71,255,0.12);color:var(--primary)">${deptSvg}</div>
+              <div>
+                <div class="mc-leader-tag">Departamento</div>
+                <div class="mc-leader-name">${esc(dept)}</div>
+              </div>
+            </div>
+          </div>
+          <div class="mc-footer">
+            <button class="${ativo ? 'btn-arquivar' : 'btn-desarquivar'}" onclick="toggleStatus('${v.id}', ${!ativo})">
+              ${ativo ? archSvg + ' Arquivar' : restoreSvg + ' Restaurar'}
+            </button>
+            ${!_meuDeptId ? `<button class="btn-excluir" onclick="confirmarExcluir('${v.id}')">${delSvg} Excluir</button>` : ''}
+          </div>
+        </div>`
+      }).join('')
+    }
+
+    function renderTable(list) {
+      const editSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`
+      const delSvg  = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>`
+      document.getElementById('tableBody').innerHTML = list.map(v => {
+        const ativo = v.is_active !== false
+        const color = avatarColor(v.full_name)
+        const ini   = initials(v.full_name)
+        const tdAvatar = v.photo_url
+          ? `<div class="td-avatar" style="background:#e0e0e0;overflow:hidden;padding:0"><img src="${esc(v.photo_url)}" style="width:100%;height:100%;object-fit:cover"></div>`
+          : `<div class="td-avatar" style="background:${color}">${esc(ini)}</div>`
+        return `<tr>
+          <td><div class="td-vol-name">${tdAvatar}<div><div class="td-name">${esc(v.full_name)}</div>${v.nickname ? `<div class="td-muted" style="font-size:11px">${esc(v.nickname)}</div>` : ''}</div></div></td>
+          <td class="td-muted">${esc([...new Set((v.db_member_dept || []).filter(r => r.status === 'ativo').map(r => r.db_department?.name).filter(Boolean))].join(', ') || '—')}</td>
+          <td class="td-muted">${esc(v.whatsapp || '—')}</td>
+          <td><span style="display:inline-flex;align-items:center;gap:4px;height:22px;padding:0 9px;border-radius:9999px;font-size:11px;font-weight:600;background:${ativo ? 'rgba(142,182,155,0.12)' : 'rgba(0,0,0,0.06)'};color:${ativo ? '#008a50' : 'var(--ink-muted)'}">${ativo ? 'Ativo' : 'Arquivado'}</span></td>
+          <td><div class="tbl-actions">
+            <button class="btn-tbl" title="Editar" onclick="abrirEditar('${v.id}')">${editSvg}</button>
+            ${!_meuDeptId ? `<button class="btn-tbl danger" title="Excluir" onclick="confirmarExcluir('${v.id}')">${delSvg}</button>` : ''}
+          </div></td>
+        </tr>`
+      }).join('')
+    }
+
+    /* ── Drawer ── */
+    function resetDrawerFields() {
+      _photoBase64 = null
+      document.getElementById('fieldFoto').value        = ''
+      document.getElementById('fieldNome').value        = ''
+      document.getElementById('fieldApelido').value     = ''
+      document.getElementById('fieldWhatsapp').value    = ''
+      document.getElementById('fieldEmail').value       = ''
+      document.getElementById('fieldNascimento').value  = ''
+      document.getElementById('fieldGenero').value        = ''
+      document.getElementById('fieldEstadoCivil').value  = ''
+      document.getElementById('fieldEndereco').value      = ''
+      document.getElementById('fieldEmergNome').value     = ''
+      document.getElementById('fieldEmergTelefone').value = ''
+      document.getElementById('fieldStatus').value        = 'true'
+      document.getElementById('fieldStatusGroup').style.display = 'none'
+      _selectedDepts = []; _deptSearch = ''
+      const dsi = document.getElementById('deptSearch'); if (dsi) dsi.value = ''
+      renderDeptChips()
+      ;['fieldNome','fieldWhatsapp','fieldNascimento','fieldGenero'].forEach(id => document.getElementById(id).classList.remove('error'))
+      goToStep(1)
+    }
+
+    function abrirNovo() {
+      _editingId = null
+      document.getElementById('drawerTitle').textContent    = 'Novo Voluntário'
+      document.getElementById('drawerSubtitle').textContent = 'Preencha os dados do voluntário'
+      resetDrawerFields()
+      setDrawerPhoto(null, '?', '#8B5CF6')
+      document.getElementById('drawerOverlay').classList.add('open')
+      setTimeout(() => document.getElementById('fieldNome').focus(), 120)
+    }
+
+    function abrirEditar(id) {
+      window.location.href = `/voluntario/${id}`
+    }
+
+    function abrirEditarDrawer(id) {
+      const v = _voluntarios.find(x => x.id === id)
+      if (!v) return
+      _editingId = id
+      document.getElementById('drawerTitle').textContent    = 'Editar Voluntário'
+      document.getElementById('drawerSubtitle').textContent = v.full_name
+      resetDrawerFields()
+
+      document.getElementById('fieldNome').value        = v.full_name    || ''
+      document.getElementById('fieldApelido').value     = v.nickname      || ''
+      document.getElementById('fieldWhatsapp').value    = v.whatsapp        || ''
+      document.getElementById('fieldEmail').value       = v.email        || ''
+      document.getElementById('fieldNascimento').value  = v.birth_date   || ''
+      document.getElementById('fieldGenero').value         = v.genero_id      || ''
+      document.getElementById('fieldEstadoCivil').value   = v.status_civil_id || ''
+      document.getElementById('fieldEndereco').value      = v.address        || ''
+      document.getElementById('fieldEmergNome').value     = v.emergency_contact_name  || ''
+      document.getElementById('fieldEmergTelefone').value = v.emergency_contact_phone || ''
+      document.getElementById('fieldStatus').value        = v.is_active === false ? 'false' : 'true'
+      document.getElementById('fieldStatusGroup').style.display = ''
+
+      _selectedDepts = (v.db_member_dept || []).map(r => r.department_id)
+      renderDeptChips()
+
+      if (v.photo_url) {
+        setDrawerPhoto(v.photo_url, null, null)
+      } else {
+        setDrawerPhoto(null, initials(v.full_name), avatarColor(v.full_name))
+      }
+
+      goToStep(1)
+      document.getElementById('drawerOverlay').classList.add('open')
+      setTimeout(() => document.getElementById('fieldNome').focus(), 120)
+    }
+
+    function fecharDrawer() { document.getElementById('drawerOverlay').classList.remove('open') }
+
+    document.getElementById('fieldFoto').addEventListener('change', async e => {
+      const file = e.target.files[0]
+      if (!file) return
+      const b64 = await resizeImageToBase64(file)
+      if (b64) {
+        _photoBase64 = b64
+        setDrawerPhoto(b64, null, null)
+      }
+    })
+
+    async function salvarVoluntario() {
+      const btn = document.getElementById('btnProximo')
+      btn.disabled = true
+      btn.innerHTML = `Salvando... <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px"><polyline points="20 6 9 17 4 12"/></svg>`
+
+      const body = {
+        name:          document.getElementById('fieldNome').value.trim(),
+        nickname:       document.getElementById('fieldApelido').value.trim()    || null,
+        whatsapp:      document.getElementById('fieldWhatsapp').value.trim()   || null,
+        email:         document.getElementById('fieldEmail').value.trim()      || null,
+        birth_date:    document.getElementById('fieldNascimento').value        || null,
+        gender:        document.getElementById('fieldGenero').value            || null,
+        status_civil_id: document.getElementById('fieldEstadoCivil').value       || null,
+        address:        document.getElementById('fieldEndereco').value.trim()  || null,
+        emergency_contact_name: document.getElementById('fieldEmergNome').value.trim() || null,
+        emergency_contact_phone: document.getElementById('fieldEmergTelefone').value.trim() || null,
+        department_ids:  _selectedDepts,
+        is_active:       document.getElementById('fieldStatus').value === 'true',
+      }
+      if (_photoBase64) body.photo_base64 = _photoBase64
+
+      try {
+        let res, json
+        if (_editingId) {
+          res  = await authFetch(`/api/voluntario/${_editingId}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+          json = await res.json()
+          if (!res.ok) throw new Error(json.error || 'Erro ao salvar')
+          CacheManager.invalidate('voluntarios')
+          const idx = _voluntarios.findIndex(x => x.id === _editingId)
+          if (idx !== -1) _voluntarios[idx] = json.voluntario
+          showToast('Voluntário atualizado!', 'success')
+        } else {
+          res  = await authFetch('/api/voluntario', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+          json = await res.json()
+          if (!res.ok) throw new Error(json.error || 'Erro ao criar')
+          CacheManager.invalidate('voluntarios')
+          _voluntarios.push(json.voluntario)
+          showToast('Voluntário criado!', 'success')
+        }
+        renderAll()
+        fecharDrawer()
+      } catch (err) {
+        showToast('Erro: ' + err.message, 'error')
+        btn.disabled = false
+        btn.innerHTML = `Salvar <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px"><polyline points="20 6 9 17 4 12"/></svg>`
+      }
+    }
+
+    document.getElementById('btnProximo').addEventListener('click', async () => {
+      if (_currentStep < TOTAL_STEPS) {
+        if (!validateStep(_currentStep)) return
+        goToStep(_currentStep + 1)
+      } else {
+        await salvarVoluntario()
+      }
+    })
+
+    document.getElementById('btnVoltar').addEventListener('click', () => {
+      if (_currentStep > 1) goToStep(_currentStep - 1)
+    })
+
+    /* ── Status toggle ── */
+    async function toggleStatus(id, isActive) {
+      try {
+        const res  = await authFetch(`/api/voluntario/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ is_active: isActive }) })
+        const json = await res.json()
+        if (!res.ok) throw new Error(json.error || 'Erro')
+        CacheManager.invalidate('voluntarios')
+        const idx = _voluntarios.findIndex(x => x.id === id)
+        if (idx !== -1) _voluntarios[idx] = json.voluntario
+        renderAll()
+        showToast(isActive ? 'Voluntário restaurado' : 'Voluntário arquivado', 'success')
+      } catch (err) { showToast('Erro: ' + err.message, 'error') }
+    }
+
+    /* ── Delete ── */
+    function confirmarExcluir(id) {
+      _pendingDelete = id
+      document.getElementById('confirmOverlay').classList.add('open')
+    }
+
+    document.getElementById('btnConfirmDelete').addEventListener('click', async () => {
+      const id = _pendingDelete
+      document.getElementById('confirmOverlay').classList.remove('open')
+      if (!id) return
+      try {
+        const res = await authFetch(`/api/voluntario/${id}`, { method: 'DELETE' })
+        if (!res.ok) { const j = await res.json(); throw new Error(j.error || 'Erro') }
+        CacheManager.invalidate('voluntarios')
+        _voluntarios = _voluntarios.filter(x => x.id !== id)
+        renderAll()
+        showToast('Voluntário excluído')
+      } catch (err) { showToast('Erro: ' + err.message, 'error') }
+      finally { _pendingDelete = null }
+    })
+
+    /* ── ComboBox factory ── */
+    function makeComboBox(wrapId, inputId, clearId, dropdownId, placeholder) {
+      const wrap     = document.getElementById(wrapId)
+      const input    = document.getElementById(inputId)
+      const clearBtn = document.getElementById(clearId)
+      const dropdown = document.getElementById(dropdownId)
+      let items    = []
+      let selected = { id: '', label: '' }
+      let query    = ''
+
+      function render() {
+        const q = query.toLowerCase()
+        const visible = q ? items.filter(i => i.label.toLowerCase().includes(q)) : items
+        dropdown.innerHTML = ''
+        visible.forEach(item => {
+          const el = document.createElement('div')
+          el.className = 'combo-option' + (item.id === selected.id ? ' selected' : '')
+          el.textContent = item.label
+          el.addEventListener('mousedown', e => { e.preventDefault(); select(item) })
+          dropdown.appendChild(el)
+        })
+      }
+
+      function select(item) {
+        selected = item
+        input.value = item.id ? item.label : ''
+        input.placeholder = item.id ? '' : placeholder
+        clearBtn.style.display = item.id ? 'flex' : 'none'
+        query = ''
+        close()
+        wrap.dispatchEvent(new CustomEvent('combo-change', { detail: item.id }))
+      }
+
+      function open() {
+        query = ''
+        input.readOnly = false
+        render()
+        wrap.classList.add('open')
+      }
+
+      function close() {
+        wrap.classList.remove('open')
+        input.readOnly = true
+        if (!selected.id) input.value = ''
+      }
+
+      input.addEventListener('focus', open)
+      input.addEventListener('input', e => { query = e.target.value; render() })
+      input.addEventListener('blur', () => setTimeout(close, 150))
+      clearBtn.addEventListener('click', () => { select({ id: '', label: '' }); input.placeholder = placeholder })
+      document.getElementById(wrapId.replace('Wrap', 'Box')).addEventListener('click', () => { if (document.activeElement !== input) input.focus() })
+
+      return {
+        setItems(newItems) { items = newItems; selected = { id: '', label: '' }; input.value = ''; input.placeholder = placeholder; clearBtn.style.display = 'none'; query = '' },
+        getValue() { return selected.id },
+        setValue(id) { const item = items.find(i => i.id === id) || { id: '', label: '' }; select(item) }
+      }
+    }
+
+    const cbDept = makeComboBox('comboDeptWrap', 'comboDeptInput', 'comboDeptClear', 'comboDeptDropdown', 'Todos os Departamentos')
+    const cbFunc = makeComboBox('comboFuncWrap', 'comboFuncInput', 'comboFuncClear', 'comboFuncDropdown', 'Todas as Funções')
+
+    /* ── Filters & search ── */
+    document.getElementById('comboDeptWrap').addEventListener('combo-change', e => {
+      _filterDept = e.detail
+      populateFuncFilter(e.detail)
+      _filterFunc = ''
+      cbFunc.setValue('')
+      renderAll()
+    })
+    document.getElementById('comboFuncWrap').addEventListener('combo-change', e => { _filterFunc = e.detail; renderAll() })
+    document.getElementById('searchInput').addEventListener('input', e => { _search = e.target.value.trim(); renderAll() })
+
+    /* ── View toggle ── */
+    document.getElementById('btnBlocos').addEventListener('click', () => { _viewMode = 'blocos'; document.getElementById('btnBlocos').classList.add('active'); document.getElementById('btnTabela').classList.remove('active'); renderAll() })
+    document.getElementById('btnTabela').addEventListener('click', () => { _viewMode = 'tabela'; document.getElementById('btnTabela').classList.add('active'); document.getElementById('btnBlocos').classList.remove('active'); renderAll() })
+
+    /* ── Drawer open/close ── */
+    document.getElementById('btnNovo').addEventListener('click', abrirNovo)
+    document.getElementById('drawerClose').addEventListener('click', fecharDrawer)
+    document.getElementById('drawerOverlay').addEventListener('click', e => { if (e.target === document.getElementById('drawerOverlay')) fecharDrawer() })
+    document.getElementById('confirmOverlay').addEventListener('click', e => { if (e.target === document.getElementById('confirmOverlay')) document.getElementById('confirmOverlay').classList.remove('open') })
+
+    /* ── Sidebar & avatar ── */
+    ;(document.getElementById('collapseBtn')||{addEventListener:()=>{}}).addEventListener('click', () => { document.body.classList.toggle('sidebar-collapsed'); localStorage.setItem('sidebar-collapsed', document.body.classList.contains('sidebar-collapsed') ? '1' : '0') })
+    const avatarBtn = document.getElementById('avatarBtn'); const avatarDD = document.getElementById('avatarDropdown')
+    avatarBtn.addEventListener('click', e => { e.stopPropagation(); avatarDD.classList.toggle('open') })
+    document.addEventListener('click', () => avatarDD.classList.remove('open'))
+    const _lBtn = document.getElementById('logoutBtn'); if (_lBtn) _lBtn.addEventListener('click', e => { e.preventDefault(); clearSession() })
+
+    function showToast(msg, type = '') {
+      const t = document.getElementById('toast')
+      t.textContent = msg; t.className = 'toast' + (type ? ' ' + type : ''); t.classList.add('show')
+      setTimeout(() => t.classList.remove('show'), 3000)
+    }
+
+    init().finally(() => window.hideLoader())
+  </script>
+  <script src="/js/top-search.js"></script>
+  <script src="/js/mobile-sidebar.js"></script>
+  <script src="/js/notif-ui.js"></script>
+</body>
+</html>

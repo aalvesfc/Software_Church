@@ -1,21 +1,12 @@
 const router = require('express').Router()
 const { supabaseAdmin } = require('../lib/supabase')
 const authMiddleware = require('../middleware/auth')
+const checkPermissao = require('../middleware/checkPermissao')
 
-// Resolve church_id do usuário logado
-async function getChurchId(userId) {
-  const { data, error } = await supabaseAdmin
-    .from('db_user')
-    .select('church_id')
-    .eq('user_id', userId)
-    .single()
-  if (error || !data?.church_id) return null
-  return data.church_id
-}
 
 // GET /api/ministry/:id — busca ministério único
-router.get('/:id', authMiddleware, async (req, res) => {
-  const churchId = await getChurchId(req.authUser.id)
+router.get('/:id', authMiddleware, checkPermissao('ministerio', 'ver'), async (req, res) => {
+  const churchId = req.churchId
   if (!churchId) return res.status(404).json({ error: 'Igreja não encontrada' })
 
   const { data, error } = await supabaseAdmin
@@ -30,8 +21,8 @@ router.get('/:id', authMiddleware, async (req, res) => {
 })
 
 // GET /api/ministry — lista ministérios da igreja
-router.get('/', authMiddleware, async (req, res) => {
-  const churchId = await getChurchId(req.authUser.id)
+router.get('/', authMiddleware, checkPermissao('ministerio', 'ver'), async (req, res) => {
+  const churchId = req.churchId
   if (!churchId) return res.status(404).json({ error: 'Igreja não encontrada' })
 
   const { data, error } = await supabaseAdmin
@@ -49,8 +40,8 @@ router.get('/', authMiddleware, async (req, res) => {
 })
 
 // POST /api/ministry — cria ministério
-router.post('/', authMiddleware, async (req, res) => {
-  const churchId = await getChurchId(req.authUser.id)
+router.post('/', authMiddleware, checkPermissao('ministerio', 'criar'), async (req, res) => {
+  const churchId = req.churchId
   if (!churchId) return res.status(404).json({ error: 'Igreja não encontrada' })
 
   const { name, description } = req.body
@@ -77,9 +68,11 @@ router.post('/', authMiddleware, async (req, res) => {
 })
 
 // PUT /api/ministry/:id — atualiza ministério
-router.put('/:id', authMiddleware, async (req, res) => {
-  const churchId = await getChurchId(req.authUser.id)
+router.put('/:id', authMiddleware, checkPermissao('ministerio', 'editar'), async (req, res) => {
+  const churchId = req.churchId
   if (!churchId) return res.status(404).json({ error: 'Igreja não encontrada' })
+  if (req.dbUser.db_perfil?.slug === 'lider_departamento')
+    return res.status(403).json({ error: 'Sem permissão para editar ministérios' })
 
   const { name, description, is_active } = req.body
   const updates = {}
@@ -118,9 +111,11 @@ router.put('/:id', authMiddleware, async (req, res) => {
 })
 
 // DELETE /api/ministry/:id — remove ministério
-router.delete('/:id', authMiddleware, async (req, res) => {
-  const churchId = await getChurchId(req.authUser.id)
+router.delete('/:id', authMiddleware, checkPermissao('ministerio', 'arquivar'), async (req, res) => {
+  const churchId = req.churchId
   if (!churchId) return res.status(404).json({ error: 'Igreja não encontrada' })
+  if (req.dbUser.db_perfil?.slug === 'lider_departamento')
+    return res.status(403).json({ error: 'Sem permissão para excluir ministérios' })
 
   // Verifica se há departamentos vinculados
   const { count, error: countError } = await supabaseAdmin

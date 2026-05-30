@@ -1,20 +1,12 @@
 const router = require('express').Router()
 const { supabaseAdmin } = require('../lib/supabase')
 const authMiddleware = require('../middleware/auth')
+const checkPermissao = require('../middleware/checkPermissao')
 
-async function getChurchId(userId) {
-  const { data, error } = await supabaseAdmin
-    .from('db_user')
-    .select('church_id')
-    .eq('user_id', userId)
-    .single()
-  if (error || !data?.church_id) return null
-  return data.church_id
-}
 
 // GET /api/department — lista departamentos (opcional: ?ministry_id=)
-router.get('/', authMiddleware, async (req, res) => {
-  const churchId = await getChurchId(req.authUser.id)
+router.get('/', authMiddleware, checkPermissao('departamento', 'ver'), async (req, res) => {
+  const churchId = req.churchId
   if (!churchId) return res.status(404).json({ error: 'Igreja não encontrada' })
 
   let query = supabaseAdmin
@@ -34,12 +26,43 @@ router.get('/', authMiddleware, async (req, res) => {
     return res.status(500).json({ error: error.message })
   }
 
-  res.json({ departments: data || [] })
+  // Busca líderes de todos os departamentos
+  const deptIds = (data || []).map(d => d.id)
+  let liderByDept = {}
+  if (deptIds.length) {
+    const { data: lidRows } = await supabaseAdmin
+      .from('db_department_lider')
+      .select('department_id, user_id')
+      .eq('church_id', churchId)
+      .in('department_id', deptIds)
+
+    const userIds = [...new Set((lidRows || []).map(l => l.user_id))]
+    let userMap = {}
+    if (userIds.length) {
+      const { data: users } = await supabaseAdmin
+        .from('db_user')
+        .select('id, full_name, nickname, avatar_url')
+        .in('id', userIds)
+      ;(users || []).forEach(u => { userMap[u.id] = u })
+    }
+    ;(lidRows || []).forEach(l => {
+      if (!liderByDept[l.department_id]) liderByDept[l.department_id] = userMap[l.user_id] || null
+    })
+  }
+
+  const departments = (data || []).map(d => ({
+    ...d,
+    leader_name:   liderByDept[d.id]?.nickname || liderByDept[d.id]?.full_name || null,
+    leader_id:     liderByDept[d.id]?.id       || null,
+    leader_avatar: liderByDept[d.id]?.avatar_url || null,
+  }))
+
+  res.json({ departments })
 })
 
 // GET /api/department/:id
-router.get('/:id', authMiddleware, async (req, res) => {
-  const churchId = await getChurchId(req.authUser.id)
+router.get('/:id', authMiddleware, checkPermissao('departamento', 'ver'), async (req, res) => {
+  const churchId = req.churchId
   if (!churchId) return res.status(404).json({ error: 'Igreja não encontrada' })
 
   const { data, error } = await supabaseAdmin
@@ -50,12 +73,39 @@ router.get('/:id', authMiddleware, async (req, res) => {
     .single()
 
   if (error || !data) return res.status(404).json({ error: 'Departamento não encontrado' })
-  res.json({ department: data })
+
+  // Busca líder do departamento
+  const { data: liderRow } = await supabaseAdmin
+    .from('db_department_lider')
+    .select('user_id')
+    .eq('department_id', req.params.id)
+    .eq('church_id', churchId)
+    .limit(1)
+    .maybeSingle()
+
+  let leaderData = null
+  if (liderRow?.user_id) {
+    const { data: u } = await supabaseAdmin
+      .from('db_user')
+      .select('id, full_name, nickname, avatar_url')
+      .eq('id', liderRow.user_id)
+      .single()
+    leaderData = u || null
+  }
+
+  res.json({
+    department: {
+      ...data,
+      leader_name:   leaderData?.nickname || leaderData?.full_name || null,
+      leader_id:     leaderData?.id       || null,
+      leader_avatar: leaderData?.avatar_url || null,
+    }
+  })
 })
 
 // POST /api/department — cria departamento
-router.post('/', authMiddleware, async (req, res) => {
-  const churchId = await getChurchId(req.authUser.id)
+router.post('/', authMiddleware, checkPermissao('departamento', 'criar'), async (req, res) => {
+  const churchId = req.churchId
   if (!churchId) return res.status(404).json({ error: 'Igreja não encontrada' })
 
   const { name, description, ministry_id } = req.body
@@ -85,16 +135,17 @@ router.post('/', authMiddleware, async (req, res) => {
 })
 
 // PUT /api/department/:id — atualiza departamento
-router.put('/:id', authMiddleware, async (req, res) => {
-  const churchId = await getChurchId(req.authUser.id)
+router.put('/:id', authMiddleware, checkPermissao('departamento', 'editar'), async (req, res) => {
+  const churchId = req.churchId
   if (!churchId) return res.status(404).json({ error: 'Igreja não encontrada' })
 
-  const { name, description, ministry_id, is_active } = req.body
+  const { name, description, ministry_id, is_active, is_music_dept } = req.body
   const updates = {}
-  if (name        !== undefined) updates.name        = name.trim()
-  if (description !== undefined) updates.description = description?.trim() || null
-  if (ministry_id !== undefined) updates.ministry_id = ministry_id
-  if (is_active   !== undefined) updates.is_active   = is_active
+  if (name         !== undefined) updates.name         = name.trim()
+  if (description  !== undefined) updates.description  = description?.trim() || null
+  if (ministry_id  !== undefined) updates.ministry_id  = ministry_id
+  if (is_active    !== undefined) updates.is_active    = is_active
+  if (is_music_dept !== undefined) updates.is_music_dept = is_music_dept
 
   const { data, error } = await supabaseAdmin
     .from('db_department')
@@ -116,8 +167,8 @@ router.put('/:id', authMiddleware, async (req, res) => {
 })
 
 // DELETE /api/department/:id
-router.delete('/:id', authMiddleware, async (req, res) => {
-  const churchId = await getChurchId(req.authUser.id)
+router.delete('/:id', authMiddleware, checkPermissao('departamento', 'arquivar'), async (req, res) => {
+  const churchId = req.churchId
   if (!churchId) return res.status(404).json({ error: 'Igreja não encontrada' })
 
   const { error } = await supabaseAdmin

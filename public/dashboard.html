@@ -4,23 +4,28 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Hug Software — Dashboard</title>
+  <script src="/js/auth-check.js"></script>
+  <script src="/js/page-loader.js"></script>
+  <script src="/js/cache.js"></script>
   <link rel="icon" type="image/png" href="/IMG/logo.png">
   <style>
+    * { font-family: 'Plus Jakarta Sans', sans-serif !important; }
+
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --primary:         #235347;
-      --primary-light:   #8eb69b;
-      --primary-focus:   #235347;
-      --primary-dark:    #0b2b26;
-      --accent-yellow:   #f5a623;
-      --accent-green:    #8eb69b;
+      --primary:         #8B5CF6;
+      --primary-light:   #DDD6FE;
+      --primary-focus:   #8B5CF6;
+      --primary-dark:    #7C3AED;
+      --accent-yellow:   #ff5500;
+      --accent-green:    #DDD6FE;
       --muted-teal:      #99bfc2;
       --ink:             #1d1d1f;
       --ink-muted:       #6e6e73;
       --ink-subtle:      #aeaeb2;
       --canvas:          #ffffff;
-      --canvas-page:     #f0f6f2;
+      --canvas-page:     #ECE9E7;
       --canvas-input:    #f2f2f7;
       --hairline:        #e0e0e0;
       --on-dark:         #ffffff;
@@ -36,7 +41,7 @@
     body {
       min-height: 100vh;
       background: var(--canvas-page);
-      font-family: "SF Pro Text", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-family: sans-serif;
       -webkit-font-smoothing: antialiased;
       display: flex;
     }
@@ -44,15 +49,15 @@
     /* ─────────────────── SIDEBAR ─────────────────── */
     .sidebar {
       width: var(--sidebar-w);
-      min-height: 100vh;
-      background: linear-gradient(180deg, #051f20 0%, #0b2b26 55%, #163832 100%);
+      min-height: unset;
+      background: #1c1c1c;
       display: flex;
       flex-direction: column;
       flex-shrink: 0;
       position: fixed;
       top: 0; left: 0; bottom: 0;
       z-index: 100;
-      overflow: hidden;
+      overflow: visible;
       transition: width 0.22s cubic-bezier(.4,0,.2,1);
     }
 
@@ -67,7 +72,7 @@
 
     .logo-mark {
       width: 42px; height: 42px;
-      background: linear-gradient(135deg, #8eb69b, #235347);
+      background: linear-gradient(135deg, #DDD6FE, #8B5CF6);
       border-radius: 11px;
       display: flex; align-items: center; justify-content: center;
       box-shadow: rgba(0,0,0,0.22) 0 3px 12px;
@@ -76,7 +81,7 @@
     .logo-mark svg { width: 22px; height: 22px; color: #fff; }
 
     .logo-text {
-      font-family: "SF Pro Display", system-ui, -apple-system, sans-serif;
+      font-family: sans-serif;
       font-size: 15px;
       font-weight: 700;
       color: var(--on-dark);
@@ -131,6 +136,50 @@
     body.sidebar-collapsed .main { margin-left: 64px; }
     body.sidebar-collapsed #collapseBtn svg { transform: rotate(180deg); }
 
+    /* ── Tooltip sidebar ── */
+    .nav-item {
+      position: relative;
+    }
+    .nav-item::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      left: calc(100% + 12px);
+      top: 50%;
+      transform: translateY(-50%) translateX(-6px);
+      background: #1a1a1a;
+      color: #FFFFFF;
+      font-size: 12px;
+      font-weight: 500;
+      padding: 6px 12px;
+      border-radius: 8px;
+      white-space: nowrap;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.15s ease, transform 0.15s ease;
+      z-index: 9999;
+      letter-spacing: 0.1px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.28);
+    }
+    .nav-item::before {
+      content: '';
+      position: absolute;
+      left: calc(100% + 6px);
+      top: 50%;
+      transform: translateY(-50%) translateX(-6px);
+      border: 5px solid transparent;
+      border-right-color: #1a1a1a;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.15s ease, transform 0.15s ease;
+      z-index: 9999;
+    }
+    .nav-item:hover::after,
+    .nav-item:hover::before {
+      opacity: 1;
+      transform: translateY(-50%) translateX(0);
+    }
+
+
     /* ─────────────────── MAIN AREA ─────────────────── */
     .main {
       margin-left: var(--sidebar-w);
@@ -143,52 +192,120 @@
 
     /* ─────────────────── TOPBAR ─────────────────── */
     .topbar {
-      height: var(--topbar-h);
-      background: var(--canvas);
-      border-bottom: 1px solid var(--hairline);
+      height: 72px;
       display: flex;
       align-items: center;
-      gap: 12px;
-      padding: 0 24px;
+      justify-content: flex-end;
+      padding: 0 28px;
       position: sticky;
       top: 0;
       z-index: 50;
+      background: linear-gradient(135deg, #ECE9E700 0%, #ECE9E7 100%);
+      backdrop-filter: blur(1px);
+      -webkit-backdrop-filter: blur(1px);
     }
 
-    .search-wrap {
-      flex: 1;
-      max-width: 420px;
-      position: relative;
+    /* ── Topbar esquerda: logo + saudação ── */
+    .topbar-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
     }
-    .search-wrap svg {
-      position: absolute;
-      left: 12px; top: 50%;
-      transform: translateY(-50%);
-      width: 15px; height: 15px;
-      color: var(--ink-subtle);
+    .topbar-logomark {
+      width: 42px; height: 42px;
+      border-radius: 50%;
+      object-fit: contain;
+      flex-shrink: 0;
     }
-    .search-wrap input {
-      width: 100%;
-      height: 40px;
-      background: var(--canvas-input);
-      border: 1px solid transparent;
-      border-radius: var(--radius-pill);
-      padding: 0 16px 0 40px;
-      font-size: 14px;
-      font-family: inherit;
-      color: var(--ink);
-      outline: none;
-      letter-spacing: -0.224px;
-      transition: border-color 0.15s;
+    .topbar-hello {
+      font-size: 17px;
+      font-weight: 700;
+      color: #1A1A1A;
+      letter-spacing: -0.3px;
+      line-height: 1.25;
+      white-space: nowrap;
     }
-    .search-wrap input::placeholder { color: var(--ink-subtle); }
-    .search-wrap input:focus { border-color: var(--primary-focus); background: var(--canvas); }
+    .topbar-sub {
+      font-size: 12px;
+      color: #8A8A8A;
+      margin-top: 2px;
+      letter-spacing: 0;
+      white-space: nowrap;
+    }
 
+    /* ── Topbar direita: search + ícones ── */
     .topbar-actions {
       display: flex;
       align-items: center;
-      gap: 4px;
-      margin-left: auto;
+      gap: 8px;
+    }
+
+    /* Search pill + botão dark */
+    .search-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .search-wrap input {
+      width: 300px;
+      height: 42px;
+      background: #FFFFFF;
+      border: 1.5px solid #EEEEEE;
+      border-radius: var(--radius-pill);
+      padding: 0 18px;
+      font-size: 14px;
+      font-family: inherit;
+      color: #1A1A1A;
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .search-wrap input::placeholder { color: #AAAAAA; }
+    .search-wrap input:focus {
+      border-color: #CCCCCC;
+      box-shadow: 0 0 0 3px rgba(0,0,0,0.05);
+    }
+    .search-btn {
+      width: 42px; height: 42px;
+      border-radius: 50%;
+      border: none;
+      background: #8B5CF6;
+      color: #FFFFFF;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: background 0.15s;
+    }
+    .search-btn:hover { background: #7C3AED; }
+    .search-btn svg { width: 18px; height: 18px; }
+
+    /* Ícones do topbar direito */
+    .topbar-actions .icon-btn {
+      width: 42px; height: 42px;
+      background: #FFFFFF;
+      border: 1.5px solid #EEEEEE;
+      border-radius: 50%;
+      color: #555555;
+    }
+    .topbar-actions .icon-btn:hover {
+      background: #F5F5F5;
+      border-color: #DDDDDD;
+      color: #1A1A1A;
+    }
+
+    /* Badge de notificação */
+    .notif-wrap {
+      position: relative;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .notif-badge {
+      position: absolute;
+      top: 6px; right: 6px;
+      width: 9px; height: 9px;
+      background: #EF4444;
+      border-radius: 50%;
+      border: 2px solid var(--canvas-page);
+      pointer-events: none;
     }
 
     .icon-btn {
@@ -292,8 +409,9 @@
     .content-wrap {
       flex: 1;
       display: grid;
-      grid-template-columns: 1fr 320px;
+      grid-template-columns: 1fr 300px;
       gap: 0;
+      align-items: start;
     }
 
     .content {
@@ -302,95 +420,54 @@
     }
 
     /* ─────────────────── HERO BANNER ─────────────────── */
-    .hero {
-      background: linear-gradient(135deg, #051f20 0%, #163832 55%, #235347 100%);
-      border-radius: var(--radius-lg);
-      padding: 32px 40px;
-      position: relative;
-      overflow: hidden;
-      margin-bottom: 24px;
+    /* ─────────────────── PAGE GREETING ─────────────────── */
+    .page-greeting {
+      margin-bottom: 28px;
+      padding: 8px 0 4px;
     }
-
-    .hero::after {
-      content: "";
-      position: absolute;
-      width: 260px; height: 260px;
-      border-radius: 50%;
-      border: 48px solid rgba(255,255,255,0.07);
-      right: -40px; top: -80px;
+    .pg-title {
+      font-size: 30px;
+      font-weight: 700;
+      color: #1A1A1A;
+      letter-spacing: -0.5px;
+      line-height: 1.2;
+      margin-bottom: 6px;
     }
-    .hero::before {
-      content: "";
-      position: absolute;
-      width: 160px; height: 160px;
-      border-radius: 50%;
-      border: 30px solid rgba(255,255,255,0.05);
-      right: 100px; bottom: -50px;
+    #pgSaudacao { color: #1A1A1A; }
+    .pg-name {
+      color: #8B5CF6;
+      font-weight: 700;
+      margin-left: 6px;
     }
-
-    .hero-greeting {
-      font-size: 15px;
-      font-weight: 400;
-      color: var(--on-dark-muted);
-      letter-spacing: -0.224px;
-      margin-bottom: 8px;
+    .pg-sub {
+      font-size: 16px;
+      color: #8A8A8A;
+      font-weight: 500;
+      font-style: italic;
     }
-
-    .hero-title {
-      font-family: "SF Pro Display", system-ui, -apple-system, sans-serif;
-      font-size: 34px;
-      font-weight: 600;
-      color: var(--on-dark);
-      letter-spacing: -0.374px;
-      line-height: 1.14;
-      margin-bottom: 10px;
-    }
-
-    .hero-desc {
-      font-size: 15px;
-      font-weight: 400;
-      color: var(--on-dark-muted);
-      letter-spacing: -0.224px;
-      line-height: 1.5;
-      max-width: 420px;
-      margin-bottom: 24px;
-    }
-
-    .hero-btn {
-      display: inline-flex;
-      align-items: center;
-      height: 40px;
-      padding: 0 22px;
-      background: transparent;
-      border: 1.5px solid rgba(255,255,255,0.55);
-      border-radius: var(--radius-pill);
-      font-family: inherit;
-      font-size: 15px;
-      font-weight: 400;
-      color: var(--on-dark);
-      letter-spacing: -0.224px;
-      cursor: pointer;
-      text-decoration: none;
-      transition: background 0.15s, border-color 0.15s;
-    }
-    .hero-btn:hover { background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.8); }
 
     /* ─────────────────── STATS ROW ─────────────────── */
     .stats-row {
       display: grid;
-      grid-template-columns: repeat(5, 1fr);
+      grid-template-columns: repeat(4, 1fr);
       gap: 16px;
       margin-bottom: 32px;
     }
 
     .stat-card {
-      background: var(--canvas);
-      border: 1px solid var(--hairline);
-      border-radius: var(--radius-md);
-      padding: 20px;
+      background: #FFFFFF;
+      border: 1px solid #EEEEEE;
+      border-radius: 20px;
+      padding: 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
       display: flex;
       align-items: center;
       gap: 16px;
+      transition: box-shadow 0.15s, transform 0.15s;
+    }
+    .stat-card:hover {
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+      transform: translateY(-2px);
     }
 
     .stat-icon {
@@ -400,27 +477,30 @@
       flex-shrink: 0;
     }
     .stat-icon svg { width: 24px; height: 24px; }
-    .stat-icon.teal    { background: rgba(35,83,71,0.12); color: var(--primary); }
+    .stat-icon.teal    { background: rgba(151,71,255,0.12); color: var(--primary); }
     .stat-icon.green   { background: rgba(142,182,155,0.12); color: var(--accent-green); }
     .stat-icon.dark    { background: #1d1d1f; color: #fff; }
-    .stat-icon.yellow  { background: rgba(245,166,35,0.12); color: var(--accent-yellow); }
-    .stat-icon.cyan    { background: rgba(35,83,71,0.10); color: var(--primary-focus); }
+    .stat-icon.yellow  { background: rgba(255,85,0,0.12); color: var(--accent-yellow); }
+    .stat-icon.cyan    { background: rgba(151,71,255,0.10); color: var(--primary-focus); }
+
+    /* ─────────────────── WELCOME CARD (voluntário) ─────────────────── */
 
     .stat-info {}
     .stat-value {
-      font-family: "SF Pro Display", system-ui, -apple-system, sans-serif;
-      font-size: 26px;
-      font-weight: 600;
-      color: var(--ink);
-      letter-spacing: -0.374px;
+      font-family: sans-serif;
+      font-size: 2rem;
+      font-weight: 700;
+      color: #1A1A1A;
+      letter-spacing: -0.5px;
       line-height: 1;
     }
     .stat-label {
-      font-size: 13px;
-      font-weight: 400;
-      color: var(--ink-muted);
-      letter-spacing: -0.224px;
-      margin-top: 4px;
+      font-size: 12px;
+      font-weight: 500;
+      color: #8A8A8A;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: 6px;
     }
 
     /* ─────────────────── SECTION HEADER ─────────────────── */
@@ -432,11 +512,11 @@
     }
 
     .section-title {
-      font-family: "SF Pro Display", system-ui, -apple-system, sans-serif;
-      font-size: 20px;
-      font-weight: 600;
-      color: var(--ink);
-      letter-spacing: -0.374px;
+      font-family: sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      color: #1A1A1A;
+      letter-spacing: -0.3px;
     }
 
     .section-actions {
@@ -482,14 +562,53 @@
       gap: 16px;
     }
 
+    /* ── Paginação Próximos Eventos ── */
+    .lider-paginacao {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      margin-top: 16px;
+    }
+    .lider-paginacao .pag-arrow {
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      border: 1.5px solid #EEEEEE;
+      background: #FFFFFF;
+      color: #6B7280;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s, color 0.15s;
+    }
+    .lider-paginacao .pag-arrow:hover:not(:disabled) {
+      background: #8B5CF6;
+      border-color: #8B5CF6;
+      color: #FFFFFF;
+    }
+    .lider-paginacao .pag-arrow:disabled {
+      opacity: 0.3;
+      cursor: default;
+    }
+    .lider-paginacao .pag-info {
+      font-size: 13px;
+      font-weight: 500;
+      color: #9CA3AF;
+    }
+
     .event-card {
-      background: var(--canvas);
-      border: 1px solid var(--hairline);
-      border-radius: var(--radius-md);
+      background: #FFFFFF;
+      border: 1px solid #EEEEEE;
+      border-radius: 20px;
       padding: 18px;
       display: flex;
       flex-direction: column;
       gap: 12px;
+      transition: box-shadow 0.2s, transform 0.2s;
+      text-decoration: none;
+    }
+    .event-card:hover {
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+      transform: translateY(-2px);
     }
 
     .event-card-top {
@@ -500,8 +619,8 @@
 
     .event-date-badge {
       width: 50px; height: 54px;
-      background: var(--primary);
-      border-radius: var(--radius-sm);
+      background: #7C3AED;
+      border-radius: 12px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -510,7 +629,7 @@
       flex-shrink: 0;
     }
     .event-date-day {
-      font-family: "SF Pro Display", system-ui, -apple-system, sans-serif;
+      font-family: sans-serif;
       font-size: 20px;
       font-weight: 600;
       color: #fff;
@@ -527,8 +646,8 @@
     .badge-status {
       font-size: 11px;
       font-weight: 600;
-      color: var(--accent-green);
-      background: rgba(142,182,155,0.10);
+      color: #166534;
+      background: #DCFCE7;
       border-radius: var(--radius-pill);
       padding: 4px 9px;
       letter-spacing: 0.3px;
@@ -581,26 +700,32 @@
     .badge-dept {
       font-size: 11px;
       color: var(--accent-yellow);
-      background: rgba(245,166,35,0.10);
+      background: rgba(255,85,0,0.10);
       border-radius: var(--radius-pill);
       padding: 3px 8px;
     }
     .badge-pending {
       font-size: 11px;
       color: var(--accent-yellow);
-      background: rgba(245,166,35,0.10);
+      background: rgba(255,85,0,0.10);
       border-radius: var(--radius-pill);
       padding: 3px 8px;
     }
 
     /* ─────────────────── RIGHT PANEL ─────────────────── */
-    .right-panel {
-      border-left: 1px solid var(--hairline);
-      background: var(--canvas);
-      padding: 32px 24px;
+    .right-col {
       display: flex;
       flex-direction: column;
-      gap: 32px;
+      gap: 10px;
+      padding: 20px 16px 20px 0;
+      min-width: 0;
+    }
+
+    .right-panel {
+      background: #FFFFFF;
+      border-radius: 20px;
+      padding: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
     }
 
     /* Calendar */
@@ -608,211 +733,461 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 14px;
+      margin-bottom: 8px;
     }
     .cal-month {
-      font-family: "SF Pro Display", system-ui, -apple-system, sans-serif;
-      font-size: 16px;
+      font-size: 13px;
       font-weight: 600;
       color: var(--ink);
-      letter-spacing: -0.224px;
     }
     .cal-nav {
       background: none;
       border: none;
       cursor: pointer;
       color: var(--ink-muted);
-      padding: 6px;
+      padding: 4px;
       display: flex;
       border-radius: var(--radius-sm);
       transition: background 0.12s;
     }
     .cal-nav:hover { background: var(--canvas-input); }
-    .cal-nav svg { width: 16px; height: 16px; }
+    .cal-nav svg { width: 14px; height: 14px; }
 
     .cal-grid {
       width: 100%;
       border-collapse: collapse;
     }
     .cal-grid th {
-      font-size: 12px;
-      font-weight: 400;
+      font-size: 10px;
+      font-weight: 500;
       color: var(--ink-subtle);
       text-align: center;
-      padding-bottom: 10px;
-      letter-spacing: 0.2px;
+      padding-bottom: 6px;
     }
     .cal-grid td {
       text-align: center;
-      padding: 4px 0;
+      padding: 2px 0;
     }
     .cal-day {
-      width: 34px; height: 34px;
+      width: 28px; height: 28px;
       border-radius: var(--radius-pill);
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      font-size: 13px;
+      font-size: 11px;
       color: var(--ink);
       cursor: pointer;
       transition: background 0.12s;
     }
     .cal-day:hover { background: var(--canvas-input); }
     .cal-day.today {
-      background: var(--primary);
+      background: #7C3AED;
       color: #fff;
-      font-weight: 600;
+      font-weight: 700;
     }
     .cal-day.other-month { color: var(--ink-subtle); }
 
-    /* Ranking */
-    .ranking-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 14px;
-    }
-    .ranking-title {
-      font-family: "SF Pro Display", system-ui, -apple-system, sans-serif;
-      font-size: 16px;
-      font-weight: 600;
-      color: var(--ink);
-      letter-spacing: -0.224px;
-    }
-
-    .rank-list {
+    .cal-cell {
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      align-items: center;
+      gap: 2px;
+    }
+    .cal-dot {
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: #7C3AED;
+      display: block;
     }
 
-    .rank-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 10px 12px;
-      border-radius: var(--radius-md);
-      background: transparent;
+    /* ── Popup eventos do dia (mini calendário) ── */
+    #calDayPopup {
+      position: fixed;
+      z-index: 9999;
+      background: #FFFFFF;
+      border: 1px solid #EEEEEE;
+      border-radius: 14px;
+      box-shadow: 0 8px 28px rgba(0,0,0,0.14);
+      padding: 14px;
+      min-width: 220px;
+      max-width: 280px;
+      display: none;
+    }
+    #calDayPopup.open { display: block; }
+    .cdp-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    .cdp-title { font-size: 13px; font-weight: 700; color: #1A1A1A; letter-spacing: -0.2px; }
+    .cdp-close {
+      width: 24px; height: 24px; border-radius: 50%;
+      border: none; background: #F3F4F6; color: #6B7280;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; font-size: 14px; line-height: 1;
       transition: background 0.12s;
     }
-    .rank-item:hover { background: var(--canvas-page); }
-    .rank-item.first { background: rgba(245,166,35,0.10); }
+    .cdp-close:hover { background: #E5E7EB; }
+    .cdp-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 10px; border-radius: 10px;
+      cursor: pointer; text-decoration: none;
+      transition: background 0.12s; margin-bottom: 4px;
+    }
+    .cdp-item:last-child { margin-bottom: 0; }
+    .cdp-item:hover { background: #F5F0FF; }
+    .cdp-dot { width: 8px; height: 8px; border-radius: 50%; background: #8B5CF6; flex-shrink: 0; }
+    .cdp-info { flex: 1; min-width: 0; }
+    .cdp-name {
+      font-size: 13px; font-weight: 600; color: #1A1A1A;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: -0.2px;
+    }
+    .cdp-time { font-size: 11px; color: #9CA3AF; margin-top: 1px; }
 
-    .rank-pos {
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--ink-muted);
-      width: 16px;
-      text-align: center;
+    /* KPI cards clicáveis no lider-dept */
+    #kpiVolCard:hover, #kpiPendentesCard:hover, #kpiVagasCard:hover, #kpiProxCard:hover {
+      box-shadow: 0 4px 16px rgba(151,71,255,0.10);
+      background: var(--canvas-page);
+    }
+
+    /* ─── LIDER DE DEPARTAMENTO ─── */
+    .events-list { display: flex; flex-direction: column; gap: 10px; }
+    .event-list-item {
+      display: flex; align-items: center; gap: 16px;
+      background: #FFFFFF;
+      border: 1px solid #EEEEEE;
+      border-radius: 20px;
+      padding: 14px 18px;
+      text-decoration: none; cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      transition: box-shadow 0.2s, transform 0.2s;
+    }
+    .event-list-item:hover {
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+      transform: translateY(-2px);
+    }
+    .event-date-sm {
+      width: 44px; height: 48px; border-radius: 10px;
+      background: #7C3AED;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
       flex-shrink: 0;
     }
-    .rank-item.first .rank-pos { color: var(--accent-yellow); }
+    .event-date-sm .day { font-size: 18px; font-weight: 700; color: #fff; line-height: 1; }
+    .event-date-sm .mon { font-size: 10px; color: rgba(255,255,255,0.75); letter-spacing: 0.4px; text-transform: uppercase; }
+    .alerta-card {
+      display: flex; align-items: flex-start; gap: 8px;
+      padding: 8px 10px;
+      background: #FAFAFA;
+      border: 1px solid #EEEEEE;
+      border-left: 3px solid #EEEEEE;
+      border-radius: 12px;
+    }
+    .alerta-card + .alerta-card { margin-top: 6px; }
+    .alerta-card:has(.alerta-icon.warning) { border-left-color: #F59E0B; }
+    .alerta-card:has(.alerta-icon.danger)  { border-left-color: #EF4444; }
+    .alerta-card:has(.alerta-icon.info)    { border-left-color: #8B5CF6; }
+    .alerta-card:has(.alerta-icon.ok)      { border-left-color: #10B981; }
+    .alerta-icon {
+      width: 24px; height: 24px; border-radius: 6px;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .alerta-icon svg { width: 12px; height: 12px; }
+    .alerta-icon.warning { background: #fff3e0;              color: #e07400; }
+    .alerta-icon.danger  { background: rgba(255,59,48,0.08); color: #ff3b30; }
+    .alerta-icon.info    { background: rgba(151,71,255,0.10); color: var(--primary); }
+    .alerta-icon.ok      { background: #e8faf0;              color: #30a46c; }
+    .alerta-msg { font-size: 11px; color: var(--ink); line-height: 1.4; padding-top: 4px; }
+    .lider-badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 3px 9px; border-radius: var(--radius-pill);
+      font-size: 11px; font-weight: 600; letter-spacing: 0.2px; flex-shrink: 0;
+    }
+    .lider-badge::before { content:''; width:5px; height:5px; border-radius:50%; background:currentColor; }
+    .lider-badge.a_fazer      { background: #F3F4F6; color: #6B7280; }
+    .lider-badge.em_andamento { background: #FEF9C3; color: #854D0E; }
+    .lider-badge.concluida    { background: #DCFCE7; color: #166534; }
+    .lider-badge.sem_dept     { background: #F3F4F6; color: #9CA3AF; font-style: italic; }
 
-    .rank-avatar {
-      width: 36px; height: 36px;
-      border-radius: var(--radius-pill);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 14px;
+    /* ═══════════════════════════════════════════════════════
+       LIDER DEPT — visual leve, só ativo para lider_departamento
+       Aplicado via body.lider-glass-mode
+       ═══════════════════════════════════════════════════════ */
+
+    /* Badge pill "nome do departamento" no hero */
+    .hero-dept-badge {
+      display: inline-flex;
+      align-items: center;
+      height: 26px;
+      padding: 4px 12px;
+      background: #1A1A1A;
+      border-radius: 20px;
+      font-size: 11px;
       font-weight: 600;
+      color: #FFFFFF;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    /* ── KPI stat cards no modo lider ── */
+    body.lider-glass-mode #liderDeptSection .stat-card {
+      border-top: none;
+    }
+
+    /* ── Card destaque: Próximo Evento ── */
+    #kpiProxCard {
+      background: #7C3AED;
+      border-color: #7C3AED;
+      box-shadow: 0 4px 20px rgba(107,63,160,0.28);
+    }
+    #kpiProxCard .stat-value { color: #FFFFFF; }
+    #kpiProxCard .stat-label { color: rgba(255,255,255,0.72); }
+    #kpiProxCard .stat-icon.dark {
+      background: rgba(255,255,255,0.18);
       color: #fff;
-      flex-shrink: 0;
+    }
+    #kpiProxCard:hover {
+      background: #5d358c !important;
+      transform: translateY(-2px) !important;
+      box-shadow: 0 6px 28px rgba(107,63,160,0.38) !important;
     }
 
-    .rank-info { flex: 1; min-width: 0; }
-    .rank-name {
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--ink);
-      letter-spacing: -0.224px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .rank-sub {
-      font-size: 12px;
-      color: var(--ink-subtle);
-      letter-spacing: -0.12px;
+    /* ── Voluntários — avatar border por status ── */
+    .vol-avatar-escalado     { border: 2px solid #10B981; }
+    .vol-avatar-nao-escalado { border: 2px solid #D1D5DB; }
+
+  
+    /* ══════════════════════════════════════════════════════
+       SIDEBAR REDESIGN — Floating pill dark
+       ══════════════════════════════════════════════════════ */
+    :root { --sidebar-w: 60px; }
+
+    /* ── Estrutura base ── */
+    .sidebar {
+      width: 60px !important;
+      background: #1c1c1c !important;
+      border-radius: 24px !important;
+      top: 16px !important;
+      bottom: 16px !important;
+      left: 12px !important;
+      min-height: unset !important;
+      height: auto !important;
+      padding: 16px 8px !important;
+      align-items: center !important;
+      overflow: visible !important;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.18) !important;
+      border-right: none !important;
     }
 
-    .rank-pts {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--ink-muted);
-      flex-shrink: 0;
+    /* ── Logo ── */
+    .sidebar-logo { display: none !important; }
+    .logo-text    { display: none !important; }
+
+    /* ── Nav ── */
+    .sidebar-nav {
+      padding: 0 !important;
+      align-items: center !important;
+      gap: 4px !important;
+      overflow: visible !important;
+      flex-direction: column !important;
     }
-    .rank-item.first .rank-pts { color: var(--accent-yellow); }
-  </style>
+    .nav-item {
+      width: 44px !important; height: 44px !important;
+      min-height: 44px !important;
+      padding: 10px !important;
+      border-radius: 14px !important;
+      color: rgba(255,255,255,0.5) !important;
+      justify-content: center !important;
+      gap: 0 !important;
+      background: none !important;
+      letter-spacing: 0 !important;
+    }
+    .nav-item span { display: none !important; }
+    .nav-item svg {
+      width: 20px !important; height: 20px !important;
+      opacity: 1 !important; flex-shrink: 0 !important;
+    }
+    .nav-item:hover {
+      background: rgba(255,255,255,0.1) !important;
+      color: rgba(255,255,255,0.9) !important;
+    }
+    .nav-item.active {
+      background: #FFFFFF !important;
+      color: #1A1A1A !important;
+    }
+    .nav-item.active svg { opacity: 1 !important; }
+
+    /* ── Transição suave ── */
+    .sidebar { transition: transform 0.25s cubic-bezier(.4,0,.2,1), opacity 0.25s !important; }
+    .main    { transition: margin-left 0.25s cubic-bezier(.4,0,.2,1) !important; }
+
+    /* ── Collapsed: sidebar sai pela esquerda ── */
+    body.sidebar-collapsed .sidebar {
+      transform: translateX(calc(-100% - 20px)) !important;
+      opacity: 0 !important;
+      pointer-events: none !important;
+    }
+    body.sidebar-collapsed .main { margin-left: 16px !important; }
+    /* ── Quando collapsed: empurra conteúdo à direita do botão restaurar ── */
+    body.sidebar-collapsed .content {
+      padding-left: 60px !important;
+    }
+    body.sidebar-collapsed .topbar {
+      padding-left: 64px !important;
+    }
+
+
+    /* ── Botão flutuante para restaurar sidebar ── */
+    .sidebar-restore-btn {
+      display: none;
+      position: fixed;
+      top: 20px; left: 16px;
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      background: #1c1c1c;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      align-items: center; justify-content: center;
+      z-index: 200;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      transition: background 0.15s;
+    }
+    .sidebar-restore-btn:hover { background: #333; }
+    .sidebar-restore-btn svg { width: 18px; height: 18px; }
+    body.sidebar-collapsed .sidebar-restore-btn { display: flex; }
+
+    /* ── Main area offset ── */
+    .main { margin-left: 84px !important; }
+
+    /* ── Rodapé da sidebar ── */
+    .sidebar > div:last-child, .sidebar-footer {
+      border-top: none !important;
+      background: none !important;
+      padding: 0 !important;
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      justify-content: center !important;
+      gap: 8px !important;
+      margin-top: auto !important;
+      width: 100% !important;
+    }
+    .sidebar .icon-btn {
+      width: 40px !important; height: 40px !important;
+      border-radius: 50% !important;
+      color: rgba(255,255,255,0.7) !important;
+      background: rgba(255,255,255,0.08) !important;
+      border: none !important;
+      flex-shrink: 0 !important;
+    }
+    .sidebar .icon-btn:hover {
+      background: rgba(255,255,255,0.16) !important;
+      color: #FFFFFF !important;
+    }
+    /* ══════════════════════════════════════════════════════ */
+
+    /* ── Avatar no rodapé da sidebar ── */
+    .sidebar-footer {
+      padding-top: 8px !important;
+      border-top: 1px solid rgba(255,255,255,0.08) !important;
+    }
+    .sidebar .avatar-menu-wrap {
+      position: relative !important;
+      margin: 0 !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+    }
+    .sidebar .avatar {
+      width: 40px !important; height: 40px !important;
+      border-radius: 50% !important;
+      font-size: 13px !important;
+      margin-left: 0 !important;
+      cursor: pointer !important;
+      box-shadow: 0 0 0 2px rgba(255,255,255,0.15) !important;
+    }
+    .sidebar .avatar-dropdown {
+      position: fixed !important;
+      left: 84px !important;
+      bottom: 16px !important;
+      top: auto !important;
+      right: auto !important;
+      transform: translateX(-8px) !important;
+      transition: opacity 0.15s, transform 0.15s !important;
+    }
+    .sidebar .avatar-dropdown.open {
+      transform: translateX(0) !important;
+      opacity: 1 !important;
+      pointer-events: auto !important;
+    }
+  
+    /* ── Notif Dropdown ── */
+    .notif-badge{position:absolute;top:-4px;right:-4px;background:#E85D6A;color:#fff;border-radius:50%;width:18px;height:18px;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;pointer-events:none;}
+    .notif-dropdown{position:absolute;top:48px;right:0;width:360px;background:#fff;border-radius:16px;border:1px solid #E8E5E2;box-shadow:0 8px 32px rgba(0,0,0,0.12);z-index:300;display:none;overflow:hidden;}
+    .notif-dropdown.open{display:block;}
+    .notif-header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid #F5F3F0;}
+    .notif-list{max-height:360px;overflow-y:auto;}
+    .notif-item{padding:12px 16px;border-bottom:1px solid #F5F3F0;cursor:pointer;display:flex;gap:12px;align-items:flex-start;transition:background 0.1s;}
+    .notif-item:hover{background:#F5F3F0;}
+    .notif-item.unread{background:rgba(145,86,241,0.06);}
+    .notif-icon{width:36px;height:36px;border-radius:50%;background:#EDE5FF;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#9156F1;}
+    .notif-content{flex:1;min-width:0;}
+    .notif-title{font-weight:600;font-size:13px;color:#1C1C1C;margin-bottom:2px;}
+    .notif-body{font-size:12px;color:#5C5955;line-height:1.4;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .notif-time{font-size:11px;color:#9E9B96;}
+    .notif-footer{padding:10px 16px;border-top:1px solid #F5F3F0;text-align:center;}
+    </style>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/responsive.css">
 </head>
 <body>
 <script>if(localStorage.getItem('sidebar-collapsed')==='1')document.body.classList.add('sidebar-collapsed')</script>
 
   <!-- ── Sidebar ── -->
   <aside class="sidebar">
-    <div class="sidebar-logo">
-      <div class="logo-mark">
-        <img src="/IMG/logo.png" alt="Logo" style="width:52px;height:52px;object-fit:contain;">
-      </div>
-      <div class="logo-text" id="churchName"></div>
-    </div>
 
     <nav class="sidebar-nav">
-      <a class="nav-item active" href="#">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-        <span>Dashboard</span>
-      </a>
-      <a class="nav-item" href="/ministerios">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-        <span>Ministérios</span>
-      </a>
-      <a class="nav-item" href="/departamentos">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-        <span>Departamentos</span>
-      </a>
-      <a class="nav-item" href="#">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-        <span>Templates</span>
-      </a>
-      <a class="nav-item" href="#">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-        <span>Eventos</span>
-      </a>
-      <a class="nav-item" href="#">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-        <span>Escalação</span>
-      </a>
-      <a class="nav-item" href="#">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
-        <span>Músicas</span>
-      </a>
-      <a class="nav-item" href="#">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-        <span>Voluntários</span>
-      </a>
-      <a class="nav-item" href="#">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-        <span>Líderes</span>
-      </a>
-      <a class="nav-item" href="#">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <span>Triagem</span>
-      </a>
-      <a class="nav-item" href="#">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-        <span>Presença</span>
-      </a>
-      <a class="nav-item" href="#">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-        <span>Gamificação</span>
-      </a>
-      <a class="nav-item" href="#">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-        <span>Relatórios</span>
-      </a>
-      <a class="nav-item" href="/configuracoes">
+      <a class="nav-item" href="/configuracoes" data-tooltip="Configurações" data-menu="configuracoes">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
         <span>Configurações</span>
       </a>
-    </nav>
+      <a class="nav-item active" data-tooltip="Dashboard" data-menu="dashboard" href="/dashboard">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        <span>Dashboard</span>
+      </a>
+      <a class="nav-item" href="/departamentos" data-tooltip="Departamentos" data-menu="departamentos">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><path d="M2 12h20"/></svg>
+        <span>Departamentos</span>
+      </a>
+      <a class="nav-item" href="/escalacoes" data-tooltip="Escalações" data-menu="escalacao">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></svg>
+        <span>Escalação</span>
+      </a>
+      <a class="nav-item" href="/eventos" data-tooltip="Eventos" data-menu="eventos">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <span>Eventos</span>
+      </a>
+      <a class="nav-item" href="/indisponibilidade" data-tooltip="Indisponibilidade" data-menu="indisponibilidade">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M10 14l4 4"/><path d="M14 14l-4 4"/></svg>
+        <span>Indisponibilidade</span>
+      </a>
+      <a class="nav-item" href="/ministerios" data-tooltip="Ministérios" data-menu="ministerios">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4"/><path d="M10 4h4"/><path d="M3 11l9-7 9 7"/><rect x="5" y="11" width="14" height="10" rx="1"/><path d="M10 21v-5h4v5"/></svg>
+        <span>Ministérios</span>
+      </a>
+      <a class="nav-item" href="/musicas" data-tooltip="Músicas" data-menu="musicas">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+        <span>Músicas</span>
+      </a>
+      <a class="nav-item" href="/templates" data-tooltip="Templates" data-menu="templates">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+        <span>Templates</span>
+      </a>      <a class="nav-item" href="/voluntarios" data-tooltip="Voluntários" data-menu="voluntarios">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span>Voluntários</span>
+      </a>      <a class="nav-item" href="/notificacoes" data-tooltip="Notificações" data-menu="notificacoes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span>Notificações</span></a>
+</nav>
   </aside>
 
   <!-- ── Main ── -->
@@ -820,18 +1195,34 @@
 
     <!-- Topbar -->
     <header class="topbar">
-      <div class="search-wrap">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input type="text" placeholder="Buscar eventos, voluntários..." />
-      </div>
 
+      <!-- Direita: search + ícones -->
       <div class="topbar-actions">
-        <button class="icon-btn" title="Notificações">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-        </button>
-        <button class="icon-btn" title="Configurações">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-        </button>
+        <!-- Search pill + botão -->
+        <div class="search-wrap">
+          <input type="text" placeholder="Search..." id="topSearch" />
+          <button class="search-btn" title="Buscar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          </button>
+        </div>
+
+        <!-- Notificações -->
+        <div class="notif-wrapper" style="position:relative;">
+          <button class="icon-btn notif-btn" id="notifBtn" title="Notificações">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            <span class="notif-badge" id="notifBadge" style="display:none">0</span>
+          </button>
+          <div class="notif-dropdown" id="notifDropdown">
+            <div class="notif-header">
+              <span style="font-weight:600;font-size:14px">Notificações</span>
+              <button id="markAllRead" style="font-size:12px;color:#9156F1;background:none;border:none;cursor:pointer;font-family:inherit">Marcar todas como lidas</button>
+            </div>
+            <div class="notif-list" id="notifList"></div>
+            <div class="notif-footer"><a href="/notificacoes" style="font-size:13px;color:#9156F1;text-decoration:none">Ver todas</a></div>
+          </div>
+        </div>
+
+        <!-- Collapse + avatar movidos pelo sidebar-ui.js -->
         <button class="icon-btn" id="collapseBtn" title="Recolher menu">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="transition:transform 0.22s"><polyline points="11 17 6 12 11 7"/><polyline points="18 17 13 12 18 7"/></svg>
         </button>
@@ -846,7 +1237,7 @@
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
               Editar Perfil
             </a>
-            <a class="dropdown-item" href="/configuracoes">
+            <a class="dropdown-item" href="/configuracoes" data-menu-dropdown="configuracoes">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
               Configurações
             </a>
@@ -865,19 +1256,26 @@
 
       <main class="content">
 
-        <!-- Hero -->
-        <div class="hero">
-          <p class="hero-greeting" id="heroGreeting">—</p>
-          <h1 class="hero-title">Dashboard</h1>
-          <p class="hero-desc">Gerencie sua igreja de forma simples e eficiente. Acompanhe eventos, voluntários e escalas em um só lugar.</p>
-          <a href="#" class="hero-btn">Ver Eventos</a>
+        <!-- Page Greeting -->
+        <div class="page-greeting">
+          <h1 class="pg-title">
+            <span id="pgSaudacao">Boa tarde,</span>
+            <span class="pg-name" id="pgNome">Usuário</span>
+          </h1>
+          <p class="pg-sub">Explore informações e atividades da sua congregação</p>
+          <!-- Elementos preservados para compatibilidade com JS -->
+          <span id="heroGreeting"  style="display:none"></span>
+          <span id="heroDesc"      style="display:none"></span>
+          <a    id="heroBtnEventos" href="/eventos" style="display:none"></a>
         </div>
 
+        <!-- Welcome card (only for voluntário) -->
+
         <!-- Stats -->
-        <div class="stats-row">
+        <div class="stats-row" id="statsRow">
           <a class="stat-card" href="/ministerios" style="text-decoration:none;cursor:pointer">
             <div class="stat-icon teal">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4"/><path d="M10 4h4"/><path d="M3 11l9-7 9 7"/><rect x="5" y="11" width="14" height="10" rx="1"/><path d="M10 21v-5h4v5"/></svg>
             </div>
             <div class="stat-info">
               <div class="stat-value" id="statMinisterios">—</div>
@@ -886,43 +1284,35 @@
           </a>
           <a class="stat-card" href="/departamentos" style="text-decoration:none;cursor:pointer">
             <div class="stat-icon cyan">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><path d="M2 12h20"/></svg>
             </div>
             <div class="stat-info">
               <div class="stat-value" id="statDepartamentos">—</div>
               <div class="stat-label">Departamentos Ativos</div>
             </div>
           </a>
-          <div class="stat-card">
+          <a class="stat-card" href="/voluntarios" style="text-decoration:none;cursor:pointer">
             <div class="stat-icon green">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
             </div>
             <div class="stat-info">
-              <div class="stat-value">5</div>
-              <div class="stat-label">Voluntários</div>
+              <div class="stat-value" id="statVoluntarios">—</div>
+              <div class="stat-label">Voluntários Ativos</div>
             </div>
-          </div>
-          <div class="stat-card">
+          </a>
+          <a class="stat-card" href="/templates" style="text-decoration:none;cursor:pointer">
             <div class="stat-icon dark">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
             </div>
             <div class="stat-info">
-              <div class="stat-value">6</div>
-              <div class="stat-label">Eventos Agendados</div>
+              <div class="stat-value" id="statTemplates">—</div>
+              <div class="stat-label">Templates Ativos</div>
             </div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-icon yellow">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
-            </div>
-            <div class="stat-info">
-              <div class="stat-value">2</div>
-              <div class="stat-label">Escalas Pendentes</div>
-            </div>
-          </div>
+          </a>
         </div>
 
         <!-- Events -->
+        <div id="eventsSection">
         <div class="section-header">
           <h2 class="section-title">Próximos Eventos</h2>
           <div class="section-actions">
@@ -1109,137 +1499,118 @@
             </div>
           </div>
         </div>
+        </div><!-- /eventsSection -->
+
+        <!-- Escalas do voluntário -->
+        <div id="volunteerEscalasSection" style="display:none">
+          <div class="section-header">
+            <h2 class="section-title">Eventos que irei servir</h2>
+          </div>
+          <div id="escalasGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px">
+            <p style="color:var(--ink-muted);font-size:14px">Carregando...</p>
+          </div>
+        </div>
+
+        <!-- ── Líder de Departamento ── -->
+        <div id="liderDeptSection" style="display:none">
+
+          <!-- KPIs -->
+          <div class="stats-row">
+            <div class="stat-card" id="kpiVolCard" style="cursor:pointer">
+              <div class="stat-icon green">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              </div>
+              <div class="stat-info">
+                <div class="stat-value" id="kpiVolAtivos">—</div>
+                <div class="stat-label">Voluntários Ativos</div>
+              </div>
+            </div>
+            <div class="stat-card" id="kpiPendentesCard" style="cursor:pointer">
+              <div class="stat-icon yellow">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              </div>
+              <div class="stat-info">
+                <div class="stat-value" id="kpiPendentes">—</div>
+                <div class="stat-label">Pendentes de Confirmar</div>
+              </div>
+            </div>
+            <div class="stat-card" id="kpiVagasCard" style="cursor:pointer">
+              <div class="stat-icon teal">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              </div>
+              <div class="stat-info">
+                <div class="stat-value" id="kpiVagas">—</div>
+                <div class="stat-label">Vagas em Aberto</div>
+              </div>
+            </div>
+            <div class="stat-card" id="kpiProxCard" style="cursor:pointer">
+              <div class="stat-icon dark">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              </div>
+              <div class="stat-info">
+                <div class="stat-value" id="kpiProxData">—</div>
+                <div class="stat-label" id="kpiProxNome">Próximo Evento</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Próximos Eventos -->
+          <div class="section-header">
+            <h2 class="section-title">Próximos Eventos</h2>
+            <div class="section-actions">
+              <a href="/escalacoes" class="link-all">Ver todos</a>
+            </div>
+          </div>
+          <div id="liderEventsGrid" class="events-grid"></div>
+          <div class="lider-paginacao" id="liderPaginacao" style="display:none">
+            <button class="pag-arrow" id="liderPagPrev" onclick="liderIrPagina(_liderPage - 1)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+            <span class="pag-info" id="liderPagInfo"></span>
+            <button class="pag-arrow" id="liderPagNext" onclick="liderIrPagina(_liderPage + 1)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
+          </div>
+
+        </div><!-- /liderDeptSection -->
 
       </main>
 
       <!-- Right panel -->
-      <aside class="right-panel">
+      <!-- Coluna direita: dois cards separados -->
+      <div class="right-col">
 
-        <!-- Calendar -->
-        <div>
+        <!-- Card 1: Calendário -->
+        <div class="right-panel">
           <div class="cal-header">
-            <button class="cal-nav">
+            <button class="cal-nav" onclick="navegarCal(-1)">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
             </button>
-            <span class="cal-month">Maio 2026</span>
-            <button class="cal-nav">
+            <span class="cal-month" id="calMonth"></span>
+            <button class="cal-nav" onclick="navegarCal(1)">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
             </button>
           </div>
-
           <table class="cal-grid">
             <thead>
               <tr>
                 <th>D</th><th>S</th><th>T</th><th>Q</th><th>Q</th><th>S</th><th>S</th>
               </tr>
             </thead>
-            <tbody>
-              <tr>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td><span class="cal-day">1</span></td>
-                <td><span class="cal-day">2</span></td>
-                <td><span class="cal-day">3</span></td>
-              </tr>
-              <tr>
-                <td><span class="cal-day">4</span></td>
-                <td><span class="cal-day">5</span></td>
-                <td><span class="cal-day">6</span></td>
-                <td><span class="cal-day">7</span></td>
-                <td><span class="cal-day today">8</span></td>
-                <td><span class="cal-day">9</span></td>
-                <td><span class="cal-day">10</span></td>
-              </tr>
-              <tr>
-                <td><span class="cal-day">11</span></td>
-                <td><span class="cal-day">12</span></td>
-                <td><span class="cal-day">13</span></td>
-                <td><span class="cal-day">14</span></td>
-                <td><span class="cal-day">15</span></td>
-                <td><span class="cal-day">16</span></td>
-                <td><span class="cal-day">17</span></td>
-              </tr>
-              <tr>
-                <td><span class="cal-day">18</span></td>
-                <td><span class="cal-day">19</span></td>
-                <td><span class="cal-day">20</span></td>
-                <td><span class="cal-day">21</span></td>
-                <td><span class="cal-day">22</span></td>
-                <td><span class="cal-day">23</span></td>
-                <td><span class="cal-day">24</span></td>
-              </tr>
-              <tr>
-                <td><span class="cal-day">25</span></td>
-                <td><span class="cal-day">26</span></td>
-                <td><span class="cal-day">27</span></td>
-                <td><span class="cal-day">28</span></td>
-                <td><span class="cal-day">29</span></td>
-                <td><span class="cal-day">30</span></td>
-                <td><span class="cal-day">31</span></td>
-              </tr>
-            </tbody>
+            <tbody id="calBody"></tbody>
           </table>
         </div>
 
-        <!-- Ranking -->
-        <div>
-          <div class="ranking-header">
-            <span class="ranking-title">Ranking</span>
-            <a href="#" class="link-all">Ver mais</a>
+        <!-- Card 2: Alertas -->
+        <div class="right-panel" id="alertasSection" style="display:none">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#e07400" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;flex-shrink:0"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            <h3 style="font-size:16px;font-weight:600;color:var(--ink)">Alertas</h3>
           </div>
-
-          <div class="rank-list">
-            <div class="rank-item first">
-              <span class="rank-pos">1</span>
-              <div class="rank-avatar" style="background:#235347;">L</div>
-              <div class="rank-info">
-                <div class="rank-name">Luan</div>
-                <div class="rank-sub">1 participação</div>
-              </div>
-              <span class="rank-pts">5 pts</span>
-            </div>
-            <div class="rank-item">
-              <span class="rank-pos">2</span>
-              <div class="rank-avatar" style="background:#0b2b26;">L</div>
-              <div class="rank-info">
-                <div class="rank-name">Lucas</div>
-                <div class="rank-sub">1 participação</div>
-              </div>
-              <span class="rank-pts">0 pts</span>
-            </div>
-            <div class="rank-item">
-              <span class="rank-pos">3</span>
-              <div class="rank-avatar" style="background:#e8612a;">A</div>
-              <div class="rank-info">
-                <div class="rank-name">Augusto</div>
-                <div class="rank-sub">1 participação</div>
-              </div>
-              <span class="rank-pts">0 pts</span>
-            </div>
-            <div class="rank-item">
-              <span class="rank-pos">4</span>
-              <div class="rank-avatar" style="background:#0b2b26;">J</div>
-              <div class="rank-info">
-                <div class="rank-name">José</div>
-                <div class="rank-sub">1 participação</div>
-              </div>
-              <span class="rank-pts">0 pts</span>
-            </div>
-            <div class="rank-item">
-              <span class="rank-pos">5</span>
-              <div class="rank-avatar" style="background:#5856d6;">T</div>
-              <div class="rank-info">
-                <div class="rank-name">THIAGO</div>
-                <div class="rank-sub">1 participação</div>
-              </div>
-              <span class="rank-pts">0 pts</span>
-            </div>
-          </div>
+          <div id="alertasList"></div>
         </div>
 
-      </aside>
+      </div>
     </div>
   </div>
 
@@ -1263,23 +1634,26 @@
     if (usuario.nome) {
       const initial = getInitial(usuario.nome);
       document.getElementById('avatarBtn').textContent = initial;
+      ;(function(){ var _u=JSON.parse(localStorage.getItem('usuario')||'{}'); if(_u && _u.avatar){ var _el=document.getElementById('avatarBtn'); if(_el) _el.innerHTML='<img src="'+_u.avatar+'" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%">'; } })();
       document.getElementById('dropdownName').textContent = usuario.nome;
       document.getElementById('dropdownEmail').textContent = usuario.email || '';
       document.getElementById('heroGreeting').textContent = `${getSaudacao()}, ${usuario.nome}`;
+
+      // Topbar greeting
+      const topbarHello = document.getElementById('topbarHello');
+      if (topbarHello) topbarHello.textContent = `${getSaudacao()}, ${usuario.nome}`;
+
+      // Page greeting
+      const pgSaudacao = document.getElementById('pgSaudacao');
+      const pgNome     = document.getElementById('pgNome');
+      if (pgSaudacao) pgSaudacao.textContent = `${getSaudacao()},`;
+      if (pgNome)     pgNome.textContent     = usuario.nome;
     }
 
     // ── Logout ──
-    async function fazerLogout(e) {
+    function fazerLogout(e) {
       e.preventDefault();
-      const token = localStorage.getItem('access_token');
-      try {
-        await fetch('/api/auth/logout', {
-          method: 'POST',
-          headers: { Authorization: `Bearer ${token}` }
-        });
-      } catch (_) {}
-      localStorage.clear();
-      window.location.href = '/';
+      clearSession();
     }
 
     // ── Colapsar sidebar (persiste entre páginas) ──
@@ -1306,37 +1680,503 @@
     });
   </script>
   <script src="/js/auth-fetch.js"></script>
+  <script src="/js/sidebar-permissions.js"></script>
+    <script src="/js/sidebar-ui.js"></script>
   <script>
-    // Hover no stat card de ministérios
-    const statCardMin = document.querySelector('a.stat-card[href="/ministerios"]');
-    if (statCardMin) {
-      statCardMin.addEventListener('mouseenter', () => statCardMin.style.boxShadow = '0 4px 16px rgba(35,83,71,0.10)');
-      statCardMin.addEventListener('mouseleave', () => statCardMin.style.boxShadow = '');
+    async function carregarMinisterios() {
+      const cached = CacheManager.get('ministerios')
+      if (cached) {
+        const el = document.getElementById('statMinisterios')
+        if (el) el.textContent = cached.filter(m => m.is_active !== false).length
+        return
+      }
+      const res = await authFetch('/api/ministry')
+      if (!res.ok) return
+      const { ministries } = await res.json()
+      CacheManager.set('ministerios', ministries)
+      const el = document.getElementById('statMinisterios')
+      if (el && ministries) el.textContent = ministries.filter(m => m.is_active !== false).length
     }
 
-    // Busca total de ministérios no banco
-    (async () => {
+    async function carregarDepartamentos() {
+      const cached = CacheManager.get('departamentos')
+      if (cached) {
+        const el = document.getElementById('statDepartamentos')
+        if (el) el.textContent = cached.filter(d => d.is_active !== false).length
+        return
+      }
+      const res = await authFetch('/api/department')
+      if (!res.ok) return
+      const { departments } = await res.json()
+      CacheManager.set('departamentos', departments)
+      const el = document.getElementById('statDepartamentos')
+      if (el && departments) el.textContent = departments.filter(d => d.is_active !== false).length
+    }
+
+    async function carregarVoluntarios() {
+      const cached = CacheManager.get('voluntarios')
+      if (cached) {
+        const el = document.getElementById('statVoluntarios')
+        if (el) el.textContent = cached.filter(v => v.is_active !== false).length
+        return
+      }
+      const res = await authFetch('/api/voluntario')
+      if (!res.ok) return
+      const { voluntarios } = await res.json()
+      CacheManager.set('voluntarios', voluntarios)
+      const el = document.getElementById('statVoluntarios')
+      if (el && voluntarios) el.textContent = voluntarios.filter(v => v.is_active !== false).length
+    }
+
+    async function carregarTemplates() {
+      const cached = CacheManager.get('templates')
+      if (cached) {
+        const el = document.getElementById('statTemplates')
+        if (el) el.textContent = cached.filter(t => t.is_active !== false).length
+        return
+      }
+      const res = await authFetch('/api/template')
+      if (!res.ok) return
+      const { templates } = await res.json()
+      CacheManager.set('templates', templates)
+      const el = document.getElementById('statTemplates')
+      if (el && templates) el.textContent = templates.filter(t => t.is_active !== false).length
+    }
+
+    async function carregarEscalasVoluntario() {
+      const grid = document.getElementById('escalasGrid')
+      if (!grid) return
       try {
-        const [mRes, dRes] = await Promise.all([
-          authFetch('/api/ministry'),
-          authFetch('/api/department'),
-        ]);
-        const mJson = await mRes.json();
-        const dJson = await dRes.json();
+        const res = await authFetch('/api/user/eventos-escalados')
+        if (!res.ok) { grid.innerHTML = '<p style="color:var(--ink-muted);font-size:14px">Erro ao carregar eventos.</p>'; return }
+        const { eventos } = await res.json()
+        const MESES = ['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ']
+        if (!eventos?.length) {
+          grid.innerHTML = '<p style="color:var(--ink-muted);font-size:14px;padding:4px 0">Nenhum evento agendado para você.</p>'
+          return
+        }
+        grid.innerHTML = eventos.map(e => {
+          const [,mes,dia] = e.evento_data.split('-')
+          const mesAbrev    = MESES[parseInt(mes, 10) - 1] || ''
+          const hora        = e.evento_hora ? e.evento_hora.slice(0, 5) : ''
+          const jaFezCheckin = e.item_status === 'presente'
+          const checkinBtn = jaFezCheckin
+            ? `<button disabled style="width:100%;height:36px;border-radius:var(--radius-pill);border:1.5px solid #8eb69b;background:rgba(142,182,155,0.12);color:#8eb69b;font-size:13px;font-weight:600;font-family:inherit;cursor:default;display:flex;align-items:center;justify-content:center;gap:6px">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><polyline points="20 6 9 17 4 12"/></svg>
+                Check-in feito
+               </button>`
+            : `<button onclick="event.stopPropagation();fazerCheckin('${e.item_id}', this)" style="width:100%;height:36px;border-radius:var(--radius-pill);border:1.5px solid var(--primary);background:rgba(151,71,255,0.07);color:var(--primary);font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:background 0.12s" onmouseover="this.style.background='rgba(151,71,255,0.14)'" onmouseout="this.style.background='rgba(151,71,255,0.07)'">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><polyline points="20 6 9 17 4 12"/></svg>
+                Check-in
+               </button>`
+          return `
+            <div class="event-card" style="gap:10px;cursor:pointer" onclick="window.location.href='/escalacao/${e.evento_id}'">
+              <div class="event-card-top" style="align-items:flex-start;gap:12px">
+                <div class="event-date-badge" style="flex-shrink:0">
+                  <span class="event-date-day">${parseInt(dia, 10)}</span>
+                  <span class="event-date-mon">${mesAbrev}</span>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:3px;min-width:0;flex:1">
+                  <div class="event-name" style="margin:0;font-size:14px;line-height:1.3">${e.evento_nome}</div>
+                  ${hora ? `<div style="display:flex;align-items:center;gap:4px;font-size:12px;color:var(--ink-muted)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:11px;height:11px;flex-shrink:0"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${hora}</div>` : ''}
+                </div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:6px;padding:10px 0;border-top:1px solid var(--hairline);border-bottom:1px solid var(--hairline)">
+                <div style="display:flex;align-items:center;gap:8px">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;flex-shrink:0;color:var(--ink-muted)"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                  <span style="font-size:11px;color:var(--ink-muted);text-transform:uppercase;letter-spacing:0.4px">Departamento</span>
+                </div>
+                <span style="font-size:14px;font-weight:600;color:var(--ink);letter-spacing:-0.2px;padding-left:21px">${e.department_name || '—'}</span>
+                <div style="display:flex;align-items:center;gap:8px;margin-top:4px">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;flex-shrink:0;color:var(--primary)"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/><path d="M8 12l3 3 5-5"/></svg>
+                  <span style="font-size:11px;color:var(--primary);text-transform:uppercase;letter-spacing:0.4px">Função</span>
+                </div>
+                <span style="font-size:15px;font-weight:700;color:var(--primary);letter-spacing:-0.3px;padding-left:21px">${e.funcao_name || '—'}</span>
+              </div>
+              ${checkinBtn}
+            </div>`
+        }).join('')
+      } catch (_) {
+        grid.innerHTML = '<p style="color:var(--ink-muted);font-size:14px">Erro ao carregar eventos.</p>'
+      }
+    }
 
-        const elM = document.getElementById('statMinisterios');
-        if (elM && mJson.ministries) {
-          const ativos = mJson.ministries.filter(m => m.is_active !== false).length;
-          elM.textContent = ativos;
+    async function fazerCheckin(itemId, btn) {
+      btn.disabled = true
+      btn.style.opacity = '0.6'
+      try {
+        const res = await authFetch(`/api/user/checkin/${itemId}`, { method: 'POST' })
+        if (!res.ok) throw new Error()
+        btn.outerHTML = `<button disabled style="width:100%;height:36px;border-radius:var(--radius-pill);border:1.5px solid #8eb69b;background:rgba(142,182,155,0.12);color:#8eb69b;font-size:13px;font-weight:600;font-family:inherit;cursor:default;display:flex;align-items:center;justify-content:center;gap:6px">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><polyline points="20 6 9 17 4 12"/></svg>
+          Check-in feito
+        </button>`
+      } catch {
+        btn.disabled = false
+        btn.style.opacity = '1'
+      }
+    }
+
+    // ── Lider de Departamento: estado da view ──
+    let _liderEventos  = []
+    let _liderPage     = 0
+    const LIDER_PER_PAGE = 5   // 5 cards por linha na grade
+
+    function liderIrPagina(p) {
+      const total = Math.ceil(_liderEventos.length / LIDER_PER_PAGE)
+      if (p < 0 || p >= total) return
+      _liderPage = p
+      renderLiderEvents()
+    }
+
+    function renderLiderEvents() {
+      const MESES = ['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ']
+      const liderBadgeLabel = { a_fazer: 'A fazer', em_andamento: 'Em andamento', concluida: 'Concluída', sem_dept: 'Outro dept' }
+      const esc = s => (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      const pagEl   = document.getElementById('liderPaginacao')
+      const prevBtn = document.getElementById('liderPagPrev')
+      const nextBtn = document.getElementById('liderPagNext')
+      const infoEl  = document.getElementById('liderPagInfo')
+      const total   = Math.ceil(_liderEventos.length / LIDER_PER_PAGE) || 1
+      const start   = _liderPage * LIDER_PER_PAGE
+      const slice   = _liderEventos.slice(start, start + LIDER_PER_PAGE)
+
+      const gridEl = document.getElementById('liderEventsGrid')
+      gridEl.style.display = 'grid'
+
+      if (!_liderEventos.length) {
+        gridEl.innerHTML    = '<p style="color:var(--ink-muted);font-size:14px;padding:4px 0">Nenhum evento próximo.</p>'
+        pagEl.style.display = 'none'
+        return
+      }
+
+      gridEl.innerHTML = slice.map(e => {
+        const [,ms,dd] = e.start_date.split('-')
+        const hora = e.start_time ? e.start_time.slice(0,5) : ''
+        const badge = `<span class="lider-badge ${e.lider_status}">${esc(liderBadgeLabel[e.lider_status] || e.lider_status)}</span>`
+        const href = e.lider_status !== 'sem_dept' ? `/escalacao/${e.id}` : '#'
+        const clickable = e.lider_status !== 'sem_dept'
+        return `<${clickable ? `a href="${href}"` : 'div'} class="event-card" style="text-decoration:none;${!clickable ? 'opacity:0.6;cursor:default' : ''}">
+          <div class="event-card-top">
+            <div class="event-date-badge">
+              <span class="event-date-day">${parseInt(dd,10)}</span>
+              <span class="event-date-mon">${MESES[parseInt(ms,10)-1]}</span>
+            </div>
+            ${badge}
+          </div>
+          <div class="event-name">${esc(e.name)}</div>
+          ${hora ? `<div class="event-meta-row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${hora}</div>` : ''}
+        </${clickable ? 'a' : 'div'}>`
+      }).join('')
+
+      pagEl.style.display = total > 1 ? 'flex' : 'none'
+      infoEl.textContent  = `${_liderPage + 1} / ${total}`
+      prevBtn.disabled    = _liderPage === 0
+      nextBtn.disabled    = _liderPage >= total - 1
+    }
+
+    function renderAlertas(lista) {
+      const el = document.getElementById('alertasList')
+      if (!lista.length) {
+        el.innerHTML = `<div class="alerta-card">
+          <div class="alerta-icon ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="alerta-msg">Tudo certo! Nenhum alerta no momento.</div>
+        </div>`
+        return
+      }
+      const iconMap = {
+        aguardando_ativacao:   { cls: 'warning', svg: '<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>' },
+        vagas_abertas:         { cls: 'warning', svg: '<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>' },
+        pendente_confirmacao:  { cls: 'danger',  svg: '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>' },
+        escala_nao_publicada:  { cls: 'info',    svg: '<rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/>' }
+      }
+      el.innerHTML = lista.map(a => {
+        const { cls, svg } = iconMap[a.tipo] || { cls: 'info', svg: '<circle cx="12" cy="12" r="10"/>' }
+        const msg = (a.mensagem || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+        const inner = a.link
+          ? `<a href="${a.link}" class="alerta-msg" style="color:inherit;text-decoration:underline;text-underline-offset:2px;cursor:pointer">${msg}</a>`
+          : `<div class="alerta-msg">${msg}</div>`
+        return `<div class="alerta-card">
+          <div class="alerta-icon ${cls}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${svg}</svg></div>
+          ${inner}
+        </div>`
+      }).join('')
+    }
+
+    async function carregarDashboardLiderDept() {
+      try {
+        const res = await authFetch('/api/dashboard/lider-departamento')
+        if (!res.ok) return
+        const d = await res.json()
+        const MESES = ['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ']
+
+        // KPIs
+        document.getElementById('kpiVolAtivos').textContent  = d.kpis.voluntarios_ativos
+        document.getElementById('kpiPendentes').textContent  = d.kpis.escalas_pendentes
+        document.getElementById('kpiVagas').textContent      = d.kpis.vagas_em_aberto
+        if (d.kpis.proximo_evento) {
+          const [,mo,da] = d.kpis.proximo_evento.start_date.split('-')
+          document.getElementById('kpiProxData').textContent = `${parseInt(da,10)}/${parseInt(mo,10)}`
+          document.getElementById('kpiProxNome').textContent = d.kpis.proximo_evento.name
+        } else {
+          document.getElementById('kpiProxData').textContent = '—'
         }
 
-        const elD = document.getElementById('statDepartamentos');
-        if (elD && dJson.departments) {
-          const ativos = dJson.departments.filter(d => d.is_active !== false).length;
-          elD.textContent = ativos;
+        // Badge hero + links dos KPI cards
+        if (d.departamento) {
+          const volCard = document.getElementById('kpiVolCard')
+          if (volCard) volCard.onclick = () => window.location.href = `/voluntarios?dept=${d.departamento.id}`
         }
-      } catch (_) {}
-    })();
+
+        // Pendentes e Vagas → escala do próximo evento com dept; Próximo Evento → escala do evento
+        const proxEventoId = d.kpis.proximo_evento
+          ? (d.proximos_eventos.find(e => e.lider_status !== 'sem_dept'))?.id
+          : null
+
+        const escalacaoHref = proxEventoId ? `/escalacao/${proxEventoId}` : '/escalacoes'
+
+        const pendCard = document.getElementById('kpiPendentesCard')
+        if (pendCard) pendCard.onclick = () => window.location.href = escalacaoHref
+
+        const vagasCard = document.getElementById('kpiVagasCard')
+        if (vagasCard) vagasCard.onclick = () => window.location.href = escalacaoHref
+
+        const proxCard = document.getElementById('kpiProxCard')
+        if (proxCard) proxCard.onclick = () => window.location.href = escalacaoHref
+
+        // Eventos
+        _liderEventos = d.proximos_eventos || []
+        renderLiderEvents()
+
+        // Alertas
+        renderAlertas(d.alertas || [])
+        document.getElementById('alertasSection').style.display = 'block'
+
+      } catch (err) {
+        console.error('[dashboard lider-dept]', err)
+      }
+    }
+
+    function aplicarModoPerfil(perfil_slug) {
+      if (perfil_slug === 'voluntario') {
+        document.getElementById('statsRow').style.display = 'none'
+        document.getElementById('eventsSection').style.display = 'none'
+        document.getElementById('heroBtnEventos').style.display = 'none'
+        document.getElementById('heroDesc').textContent = 'Acompanhe seus eventos, confirme suas escalas e gerencie sua disponibilidade em um só lugar.'
+        document.getElementById('volunteerEscalasSection').style.display = 'block'
+        carregarEscalasVoluntario()
+      } else if (perfil_slug === 'lider_departamento') {
+        document.getElementById('statsRow').style.display = 'none'
+        document.getElementById('eventsSection').style.display = 'none'
+        document.getElementById('heroDesc').textContent = 'Acompanhe seu departamento, escalas e voluntários.'
+        const heroBtnEl = document.getElementById('heroBtnEventos')
+        heroBtnEl.href = '/escalacoes'
+        heroBtnEl.textContent = 'Ver Escalação'
+        document.getElementById('liderDeptSection').style.display = 'block'
+        document.body.classList.add('lider-glass-mode')
+        carregarDashboardLiderDept()
+      } else {
+        Promise.all([
+          carregarMinisterios(),
+          carregarDepartamentos(),
+          carregarVoluntarios(),
+          carregarTemplates(),
+        ]).catch(() => {})
+      }
+    }
+
+    // Hover no stat card de ministérios
+    const statCardMin = document.querySelector('a.stat-card[href="/ministerios"]')
+    if (statCardMin) {
+      statCardMin.addEventListener('mouseenter', () => statCardMin.style.boxShadow = '0 4px 16px rgba(151,71,255,0.10)')
+      statCardMin.addEventListener('mouseleave', () => statCardMin.style.boxShadow = '')
+    }
+
+    ;(async () => {
+      if (!await checkAuth()) return
+      try {
+        let perfil_slug = localStorage.getItem('perfil_slug')
+
+        if (!perfil_slug) {
+          try {
+            const res = await authFetch('/api/auth/me')
+            if (res.ok) {
+              const { usuario } = await res.json()
+              perfil_slug = usuario.perfil_slug || ''
+              localStorage.setItem('perfil_slug', perfil_slug)
+              localStorage.setItem('permissions', JSON.stringify(usuario.permissions || []))
+              const u = JSON.parse(localStorage.getItem('usuario') || '{}')
+              u.perfil_slug = perfil_slug
+              u.permissions = usuario.permissions || []
+              localStorage.setItem('usuario', JSON.stringify(u))
+            }
+          } catch (_) {}
+        }
+
+        aplicarModoPerfil(perfil_slug)
+      } finally {
+        window.hideLoader()
+      }
+    })()
   </script>
+  <script>
+    // ── Calendário dinâmico com dots de eventos ──
+    const MONTHS_PT = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro']
+    const MESES_CURTOS = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez']
+    const calState = { year: new Date().getFullYear(), month: new Date().getMonth() }
+    let _calEventMap = new Map() // dia → [eventos]
+
+    async function fetchEventDates(year, month) {
+      _calEventMap = new Map()
+      try {
+        // 1. Dots: datas do mês
+        const res = await authFetch(`/api/evento/datas?year=${year}&month=${month + 1}`)
+        if (!res.ok) return new Set()
+        const { datas } = await res.json()
+        const days = new Set()
+        ;(datas || []).forEach(d => days.add(parseInt(d.split('-')[2], 10)))
+
+        // 2. Dados completos para o popup (filtra client-side)
+        const startStr = `${year}-${String(month+1).padStart(2,'0')}-01`
+        const endStr   = new Date(year, month+1, 0).toISOString().split('T')[0]
+        const res2 = await authFetch(`/api/evento`)
+        if (res2.ok) {
+          const { eventos } = await res2.json()
+          ;(eventos || [])
+            .filter(e => e.start_date >= startStr && e.start_date <= endStr)
+            .forEach(e => {
+              const d = parseInt(e.start_date.split('-')[2], 10)
+              const arr = _calEventMap.get(d) || []
+              arr.push(e)
+              _calEventMap.set(d, arr)
+            })
+        }
+        return days
+      } catch (_) { return new Set() }
+    }
+
+    function renderCal(year, month, eventDays) {
+      const calMonthEl = document.getElementById('calMonth')
+      const calBodyEl  = document.getElementById('calBody')
+      if (!calMonthEl || !calBodyEl) return
+
+      calMonthEl.textContent = `${MONTHS_PT[month]} ${year}`
+
+      const firstWeekday = new Date(year, month, 1).getDay()
+      const daysInMonth  = new Date(year, month + 1, 0).getDate()
+      const daysInPrev   = new Date(year, month, 0).getDate()
+      const today        = new Date()
+      const isThisMonth  = today.getFullYear() === year && today.getMonth() === month
+      const todayDay     = today.getDate()
+
+      let html = ''
+      let cur  = 1
+      let next = 1
+
+      for (let row = 0; row < 6; row++) {
+        if (cur > daysInMonth) break
+        html += '<tr>'
+        for (let col = 0; col < 7; col++) {
+          const idx = row * 7 + col
+          if (idx < firstWeekday) {
+            const d = daysInPrev - firstWeekday + idx + 1
+            html += `<td><div class="cal-cell"><span class="cal-day other-month">${d}</span></div></td>`
+          } else if (cur > daysInMonth) {
+            html += `<td><div class="cal-cell"><span class="cal-day other-month">${next++}</span></div></td>`
+          } else {
+            const isToday  = isThisMonth && cur === todayDay
+            const hasEvent = eventDays.has(cur)
+            const cls      = 'cal-day' + (isToday ? ' today' : '')
+            const dot      = hasEvent ? `<span class="cal-dot"${isToday ? ' style="background:#fff"' : ''}></span>` : ''
+            const click    = hasEvent
+              ? ` onclick="calDiaClick(event,${year},${month+1},${cur})" style="cursor:pointer"`
+              : ''
+            html += `<td${click}><div class="cal-cell"><span class="${cls}">${cur}</span>${dot}</div></td>`
+            cur++
+          }
+        }
+        html += '</tr>'
+      }
+
+      calBodyEl.innerHTML = html
+    }
+
+    async function navegarCal(dir) {
+      calState.month += dir
+      if (calState.month > 11) { calState.month = 0; calState.year++ }
+      if (calState.month < 0)  { calState.month = 11; calState.year-- }
+      const days = await fetchEventDates(calState.year, calState.month)
+      renderCal(calState.year, calState.month, days)
+    }
+
+    ;(async () => {
+      const days = await fetchEventDates(calState.year, calState.month)
+      renderCal(calState.year, calState.month, days)
+    })()
+
+    // ── Popup de eventos do dia ──────────────────────────
+    function calDiaClick(e, year, month, day) {
+      e.stopPropagation()
+      const popup = document.getElementById('calDayPopup')
+      const evs   = _calEventMap.get(day) || []
+      if (!evs.length) return
+
+      // 1 evento → vai direto
+      if (evs.length === 1) {
+        window.location.href = `/evento/${evs[0].id}`
+        return
+      }
+
+      // Vários → popup
+      const esc = s => (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      const titulo = `${day} de ${MESES_CURTOS[month-1]}`
+
+      popup.innerHTML = `
+        <div class="cdp-header">
+          <span class="cdp-title">${titulo}</span>
+          <button class="cdp-close" onclick="fecharCalPopup()">✕</button>
+        </div>
+        ${evs.map(ev => {
+          const hora = ev.start_time ? ev.start_time.slice(0,5) : ''
+          return `<div class="cdp-item" onclick="window.location.href='/evento/${ev.id}'">
+            <span class="cdp-dot"></span>
+            <div class="cdp-info">
+              <div class="cdp-name">${esc(ev.name)}</div>
+              ${hora ? `<div class="cdp-time">${hora}</div>` : ''}
+            </div>
+            <svg viewBox="0 0 24 24" fill="none" stroke="#C4B5FD" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;flex-shrink:0">
+              <polyline points="9 18 15 12 9 6"/>
+            </svg>
+          </div>`
+        }).join('')}
+      `
+
+      popup.classList.add('open')
+      const vw = window.innerWidth, vh = window.innerHeight
+      const pw = popup.offsetWidth || 240, ph = popup.offsetHeight || 160
+      let x = e.clientX + 10, y = e.clientY + 10
+      if (x + pw > vw - 8) x = e.clientX - pw - 10
+      if (y + ph > vh - 8) y = e.clientY - ph - 10
+      popup.style.left = x + 'px'
+      popup.style.top  = y + 'px'
+    }
+
+    function fecharCalPopup() {
+      document.getElementById('calDayPopup').classList.remove('open')
+    }
+
+    document.addEventListener('click', function(e) {
+      const popup = document.getElementById('calDayPopup')
+      if (popup && popup.classList.contains('open') && !popup.contains(e.target)) {
+        fecharCalPopup()
+      }
+    })
+  </script>
+  <!-- Popup: eventos do dia no mini calendário -->
+  <div id="calDayPopup" role="dialog" aria-modal="true"></div>
+  <script src="/js/top-search.js"></script>
+  <script src="/js/mobile-sidebar.js"></script>
+<script src="/js/notif-ui.js"></script>
 </body>
 </html>
