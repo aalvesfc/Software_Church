@@ -978,6 +978,9 @@
   <script src="/js/sidebar-permissions.js"></script>
     <script src="/js/sidebar-ui.js"></script>
 <script>
+    // SEC-005: função global de escape HTML — disponível em todos os blocos
+    function esc(s) { return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') }
+
 function fazerLogout(e) {
   e?.preventDefault()
   clearSession()
@@ -1305,9 +1308,7 @@ function renderCard(e) {
   `
 }
 
-function esc(s) {
-  return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')
-}
+      // esc() definido globalmente (SEC-005)
 
 init().finally(() => window.hideLoader())
 </script>

@@ -37,12 +37,13 @@ app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc:      ["'self'"],
-      scriptSrc:       ["'self'", "'unsafe-inline'"],  // necessário: frontend usa scripts inline
+      scriptSrc:       ["'self'", "'unsafe-inline'"],
+      scriptSrcAttr:   ["'unsafe-inline'"],  // permite onclick/onX inline nos HTMLs
       styleSrc:        ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
       imgSrc:          ["'self'", "data:", "https://*.supabase.co"],
-      fontSrc:         ["'self'", "https://fonts.gstatic.com"],
+      fontSrc:         ["'self'", "https://fonts.gstatic.com", "https://use.typekit.net", "data:"],
       connectSrc:      ["'self'", "https://*.supabase.co"],
-      frameAncestors:  ["'none'"],  // bloqueia clickjacking via iframe
+      frameAncestors:  ["'none'"],
     },
   },
   crossOriginEmbedderPolicy: false, // necessário para assets externos (fontes, imagens Supabase)

@@ -1841,6 +1841,9 @@
   <script src="/js/sidebar-permissions.js"></script>
     <script src="/js/sidebar-ui.js"></script>
   <script>
+    // SEC-005: função global de escape HTML — disponível em todos os blocos
+    function esc(s) { return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') }
+
     /* ─── Auth / Init ─── */
     let _departments = []
     let _ministries  = []
@@ -2073,9 +2076,7 @@
       }).join('')
     }
 
-    function esc(str) {
-      return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')
-    }
+      // esc() definido globalmente (SEC-005)
 
     let _editingId = null
 

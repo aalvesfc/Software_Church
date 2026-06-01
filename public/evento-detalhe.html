@@ -1461,6 +1461,9 @@
   <script src="/js/sidebar-permissions.js"></script>
     <script src="/js/sidebar-ui.js"></script>
   <script>
+    // SEC-005: função global de escape HTML — disponível em todos os blocos
+    function esc(s) { return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') }
+
     const MESES = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez']
     const MESES_FULL = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro']
     const RECUR_LABEL = {
@@ -1528,7 +1531,7 @@
           return
         }
 
-        const esc = s => (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      // esc() definido globalmente (SEC-005)
         const statusLabel = { escalado:'✓ Escalado', confirmado:'✓ Confirmado', presente:'✓ Presente', pendente:'⚠ Pendente' }
         const statusClass = s => ['confirmado','presente','escalado'].includes(s) ? 'escalado' : (s || 'pendente')
 

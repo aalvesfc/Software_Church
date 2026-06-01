@@ -1621,6 +1621,9 @@
   </div>
 
   <script>
+    // SEC-005: função global de escape HTML — disponível em todos os blocos
+    function esc(s) { return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') }
+
     // ── Carrega dados do usuário logado ──
     const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
     const igreja = JSON.parse(localStorage.getItem('igreja') || '{}');
@@ -1948,7 +1951,7 @@
     function renderLiderEvents() {
       const MESES = ['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ']
       const liderBadgeLabel = { a_fazer: 'A fazer', em_andamento: 'Em andamento', concluida: 'Concluída', sem_dept: 'Outro dept' }
-      const esc = s => (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      // esc() definido globalmente (SEC-005)
       const pagEl   = document.getElementById('liderPaginacao')
       const prevBtn = document.getElementById('liderPagPrev')
       const nextBtn = document.getElementById('liderPagNext')
@@ -2244,7 +2247,7 @@
       }
 
       // Vários → popup
-      const esc = s => (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      // esc() definido globalmente (SEC-005)
       const titulo = `${day} de ${MESES_CURTOS[month-1]}`
 
       popup.innerHTML = `

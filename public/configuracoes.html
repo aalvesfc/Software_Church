@@ -2514,6 +2514,9 @@
     function renderLocais() {
       const empty = document.getElementById('locaisEmpty')
       const list  = document.getElementById('locaisList')
+      const btnNovo = document.getElementById('btnNovoLocal')
+      // Só permite um local — esconde botão quando já existe
+      if (btnNovo) btnNovo.style.display = _locais.length ? 'none' : ''
       if (!_locais.length) {
         empty.style.display = ''; list.innerHTML = ''; return
       }

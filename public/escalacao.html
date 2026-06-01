@@ -1318,6 +1318,9 @@
   <script src="/js/sidebar-permissions.js"></script>
     <script src="/js/sidebar-ui.js"></script>
 <script>
+    // SEC-005: função global de escape HTML — disponível em todos os blocos
+    function esc(s) { return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') }
+
 // ── STATE ──
 const eventId      = location.pathname.split('/').pop()
 const isVoluntario = localStorage.getItem('perfil_slug') === 'voluntario'
@@ -1857,9 +1860,7 @@ async function escalaAutomatica() {
   location.reload()
 }
 
-function esc(s) {
-  return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')
-}
+      // esc() definido globalmente (SEC-005)
 function initials(name) {
   return (name || '?').split(' ').slice(0,2).map(w => w[0]).join('').toUpperCase()
 }
@@ -1934,7 +1935,7 @@ function renderMvcItens(itens) {
         </div>
         <div class="mvc-item-body">
           <div class="mvc-item-title">${esc(item.title)}</div>
-          ${esc(item.description ? `<div class="mvc-item-sub">${esc(item.description))}</div>` : ''}
+          ${esc(item.description ? `<div class="mvc-item-sub">${esc(item.description)}</div>` : ''}
           <div class="mvc-item-tags"><span class="mvc-tag" style="background:rgba(124,58,237,0.10);color:#7c3aed">Pré-evento</span>${item.duration ? `<span class="mvc-tag">${esc(item.duration)}</span>` : ''}</div>
         </div>
       </div>`
@@ -1946,7 +1947,7 @@ function renderMvcItens(itens) {
         </div>
         <div class="mvc-item-body">
           <div class="mvc-item-title">${esc(item.title)}</div>
-          ${esc(item.description ? `<div class="mvc-item-sub">${esc(item.description))}</div>` : ''}
+          ${esc(item.description ? `<div class="mvc-item-sub">${esc(item.description)}</div>` : ''}
           ${item.duration ? `<div class="mvc-item-tags"><span class="mvc-tag">${esc(item.duration)}</span></div>` : ''}
         </div>
       </div>`
@@ -2013,3 +2014,4 @@ init().finally(() => window.hideLoader())
 <script src="/js/notif-ui.js"></script>
 </body>
 </html>
+

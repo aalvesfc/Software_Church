@@ -956,6 +956,9 @@
   <script src="/js/sidebar-permissions.js"></script>
     <script src="/js/sidebar-ui.js"></script>
   <script>
+    // SEC-005: função global de escape HTML — disponível em todos os blocos
+    function esc(s) { return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') }
+
     const usuario = JSON.parse(localStorage.getItem('usuario') || '{}')
     const igreja  = JSON.parse(localStorage.getItem('igreja')  || '{}')
     const _cnel = document.getElementById('churchName'); if (_cnel) _cnel.textContent = igreja?.nome || 'Igreja';
@@ -1064,7 +1067,7 @@
 
     /* ── Tags ── */
     function tagChipHTML(t) {
-      const esc = t.replace(/\\/g,'\\\\').replace(/'/g,"\\'")
+      // esc() definido globalmente (SEC-005)
       if (isLiderDept) return `<span class="tag-chip">${t}</span>`
       return `<span class="tag-chip">${t}<button type="button" onclick="removerTag('${esc}')">✕</button></span>`
     }

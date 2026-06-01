@@ -2088,6 +2088,8 @@
   <script src="/js/sidebar-permissions.js"></script>
     <script src="/js/sidebar-ui.js"></script>
 <script>
+const esc = s => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')
+
 function fazerLogout(e) {
   e?.preventDefault()
   clearSession()
@@ -2611,7 +2613,7 @@ function calDiaClick(e, year, month, day) {
   // Vários eventos → mostra popup
   const MESES = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez']
   const titulo = `${day} de ${MESES[month-1]}`
-  const esc = s => (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      // esc() definido globalmente (SEC-005)
 
   popup.innerHTML = `
     <div class="cdp-header">
