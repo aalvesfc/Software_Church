@@ -1,6 +1,7 @@
 const router = require('express').Router()
 const { supabaseAdmin } = require('../lib/supabase')
 const authMiddleware = require('../middleware/auth')
+const { dbError, serverError } = require('../lib/apiError') // SEC-006
 
 async function getDbUser(userId) {
   const { data } = await supabaseAdmin.from('db_user').select('id, church_id, full_name').eq('user_id', userId).single()
@@ -19,7 +20,7 @@ router.get('/', authMiddleware, async (req, res) => {
     .eq('is_archived', false)
     .order('created_at', { ascending: false })
     .limit(20)
-  if (error) return res.status(500).json({ error: error.message })
+  if (error) return dbError(res, error, 'notificacao')
   res.json({ notificacoes: data || [] })
 })
 
@@ -34,7 +35,7 @@ router.get('/nao-lidas', authMiddleware, async (req, res) => {
     .eq('church_id', dbUser.church_id)
     .eq('is_read', false)
     .eq('is_archived', false)
-  if (error) return res.status(500).json({ error: error.message })
+  if (error) return dbError(res, error, 'notificacao')
   res.json({ count: count || 0 })
 })
 

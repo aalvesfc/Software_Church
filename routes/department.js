@@ -2,6 +2,7 @@ const router = require('express').Router()
 const { supabaseAdmin } = require('../lib/supabase')
 const authMiddleware = require('../middleware/auth')
 const checkPermissao = require('../middleware/checkPermissao')
+const { dbError, serverError } = require('../lib/apiError') // SEC-006
 
 
 // GET /api/department — lista departamentos (opcional: ?ministry_id=)
@@ -23,7 +24,7 @@ router.get('/', authMiddleware, checkPermissao('departamento', 'ver'), async (re
 
   if (error) {
     console.error('[department GET]', error)
-    return res.status(500).json({ error: error.message })
+    return dbError(res, error, 'department')
   }
 
   // Busca líderes de todos os departamentos
@@ -128,7 +129,7 @@ router.post('/', authMiddleware, checkPermissao('departamento', 'criar'), async 
 
   if (error) {
     console.error('[department POST]', error)
-    return res.status(500).json({ error: error.message })
+    return dbError(res, error, 'department')
   }
 
   res.status(201).json({ department: data })
@@ -156,7 +157,7 @@ router.put('/:id', authMiddleware, checkPermissao('departamento', 'editar'), asy
 
   if (error) {
     console.error('[department PUT]', error)
-    return res.status(500).json({ error: error.message })
+    return dbError(res, error, 'department')
   }
 
   if (!data || data.length === 0) {
@@ -179,7 +180,7 @@ router.delete('/:id', authMiddleware, checkPermissao('departamento', 'arquivar')
 
   if (error) {
     console.error('[department DELETE]', error)
-    return res.status(500).json({ error: error.message })
+    return dbError(res, error, 'department')
   }
 
   res.json({ ok: true })

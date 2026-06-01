@@ -1,6 +1,7 @@
 const router = require('express').Router()
 const { supabaseAdmin } = require('../lib/supabase')
 const authMiddleware = require('../middleware/auth')
+const { dbError, serverError } = require('../lib/apiError') // SEC-006
 
 const TURNOS_VALIDOS = ['manha', 'tarde', 'noite']
 
@@ -38,7 +39,7 @@ router.get('/me', authMiddleware, async (req, res) => {
     .eq('member_id', memberId)
     .order('dia_semana', { ascending: true })
 
-  if (error) { console.error('[dispon/me GET]', error); return res.status(500).json({ error: error.message }) }
+  if (error) { console.error('[dispon/me GET]', error); return dbError(res, error, 'disponibilidade') }
   res.json({ disponibilidades: data || [] })
 })
 
@@ -66,7 +67,7 @@ router.post('/me', authMiddleware, async (req, res) => {
     .eq('church_id', dbUser.church_id)
     .eq('member_id', memberId)
 
-  if (delErr) { console.error('[dispon/me DELETE]', delErr); return res.status(500).json({ error: delErr.message }) }
+  if (delErr) { console.error('[dispon/me DELETE]', delErr); return dbError(res, delErr, 'disponibilidade') }
 
   if (disponibilidades.length) {
     const rows = disponibilidades.map(d => ({
@@ -76,7 +77,7 @@ router.post('/me', authMiddleware, async (req, res) => {
       turno:      d.turno,
     }))
     const { error: insErr } = await supabaseAdmin.from('db_disponibilidade').insert(rows)
-    if (insErr) { console.error('[dispon/me INSERT]', insErr); return res.status(500).json({ error: insErr.message }) }
+    if (insErr) { console.error('[dispon/me INSERT]', insErr); return dbError(res, insErr, 'disponibilidade') }
   }
 
   res.json({ ok: true })
@@ -107,7 +108,7 @@ router.get('/:memberId', authMiddleware, async (req, res) => {
     .eq('member_id', req.params.memberId)
     .order('dia_semana', { ascending: true })
 
-  if (error) { console.error('[dispon GET]', error); return res.status(500).json({ error: error.message }) }
+  if (error) { console.error('[dispon GET]', error); return dbError(res, error, 'disponibilidade') }
   res.json({ disponibilidades: data || [] })
 })
 

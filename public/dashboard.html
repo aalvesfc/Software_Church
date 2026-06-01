@@ -36,6 +36,12 @@
       --radius-md:       12px;
       --radius-lg:       18px;
       --radius-pill:     9999px;
+      --success-light:   #F0FAE8;
+      --success-dark:    #5A9E2F;
+      --danger-dark:     #C0394A;
+      --gray-100:        #F5F3F0;
+      --gray-300:        #D1CEC9;
+      --gray-600:        #5C5955;
     }
 
     body {
@@ -1186,7 +1192,7 @@
       </a>      <a class="nav-item" href="/voluntarios" data-tooltip="Voluntários" data-menu="voluntarios">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
         <span>Voluntários</span>
-      </a>      <a class="nav-item" href="/notificacoes" data-tooltip="Notificações" data-menu="notificacoes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span>Notificações</span></a>
+      </a>      <a class="nav-item" href="/notificacoes" data-tooltip="Notificações" data-menu="notificacoes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span>Notificações</span></a><a class="nav-item" href="/presenca" data-tooltip="Presenças" data-menu="presenca"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>Presenças</span></a>
 </nav>
   </aside>
 
@@ -1743,6 +1749,135 @@
       if (el && templates) el.textContent = templates.filter(t => t.is_active !== false).length
     }
 
+    // ── Estado do checkin por evento ──
+    let _escalasData  = []
+    let _checkinCache = {}   // { [eventoId]: { status, checkin_at, checkout_at } }
+
+    function _fmtHora(iso) {
+      try { return new Date(iso).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) } catch { return '' }
+    }
+
+    function pegarGPS() {
+      return new Promise(resolve => {
+        if (!navigator.geolocation) { resolve({ latitude: null, longitude: null }); return }
+        navigator.geolocation.getCurrentPosition(
+          pos => resolve({ latitude: pos.coords.latitude, longitude: pos.coords.longitude }),
+          ()  => resolve({ latitude: null, longitude: null }),
+          { enableHighAccuracy: true, timeout: 10000 }
+        )
+      })
+    }
+
+    function renderCheckinSection(eventoId, eventoData) {
+      const c      = _checkinCache[eventoId]
+      const status = c?.status
+      const hoje   = new Date().toISOString().split('T')[0]
+      const isHoje = eventoData === hoje
+
+      // Estado 3 — saiu (sempre visível, independente do dia)
+      if (status === 'saiu') {
+        const hora = c?.checkout_at ? _fmtHora(c.checkout_at) : ''
+        return `
+          <div style="display:flex;align-items:center;gap:7px;padding:8px 14px;background:var(--success-light);border-radius:var(--radius-pill)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;color:var(--success-dark);flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg>
+            <span style="font-size:13px;font-weight:600;color:var(--success-dark)">Check-out feito${hora ? ' às ' + hora : ''}</span>
+          </div>`
+      }
+
+      // Estado 2 — presente / atrasado (sempre visível)
+      if (status === 'presente' || status === 'atrasado') {
+        const hora = c?.checkin_at ? _fmtHora(c.checkin_at) : ''
+        return `
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <div style="display:flex;align-items:center;gap:6px;padding:5px 12px;background:var(--success-light);border-radius:var(--radius-pill)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;color:var(--success-dark);flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg>
+              <span style="font-size:12px;font-weight:600;color:var(--success-dark)">Check-in feito${hora ? ' às ' + hora : ''}</span>
+            </div>
+            <button id="btn-checkout-${eventoId}" onclick="event.stopPropagation();fazerCheckoutCard('${eventoId}')"
+              style="width:100%;height:36px;border-radius:var(--radius-pill);border:1.5px solid var(--gray-300);background:var(--gray-100);color:var(--gray-600);font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:background 0.12s">
+              Fazer Check-out
+            </button>
+            <div id="ev-err-${eventoId}" style="font-size:12px;color:var(--danger-dark);text-align:center;display:none"></div>
+          </div>`
+      }
+
+      // Estado 1 — aguardando — só exibe botão se o evento é hoje
+      if (isHoje) {
+        return `
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <button id="btn-checkin-${eventoId}" onclick="event.stopPropagation();fazerCheckinCard('${eventoId}')"
+              style="width:100%;height:36px;border-radius:var(--radius-pill);border:1.5px solid var(--primary);background:rgba(139,92,246,0.07);color:var(--primary);font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:background 0.12s">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><polyline points="20 6 9 17 4 12"/></svg>
+              Fazer Check-in
+            </button>
+            <div id="ev-err-${eventoId}" style="font-size:12px;color:var(--danger-dark);text-align:center;display:none"></div>
+          </div>`
+      }
+
+      // Evento futuro — sem botão
+      return ''
+    }
+
+    function _atualizarCardCheckin(eventoId) {
+      const sec = document.getElementById('ev-checkin-' + eventoId)
+      if (!sec) return
+      const ev = _escalasData.find(e => e.evento_id === eventoId)
+      sec.innerHTML = renderCheckinSection(eventoId, ev?.evento_data)
+    }
+
+    async function fazerCheckinCard(eventoId) {
+      const btn   = document.getElementById('btn-checkin-' + eventoId)
+      const errEl = document.getElementById('ev-err-' + eventoId)
+      if (btn)   { btn.disabled = true; btn.textContent = 'Aguardando GPS...' }
+      if (errEl) errEl.style.display = 'none'
+      try {
+        const { latitude, longitude } = await pegarGPS()
+        if (btn) btn.textContent = 'Registrando...'
+        const res = await authFetch('/api/checkin', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ event_id: eventoId, latitude, longitude, method: latitude ? 'gps' : 'manual' })
+        })
+        const data = await res.json()
+        if (!res.ok) {
+          if (errEl) { errEl.textContent = data.error || 'Erro ao fazer check-in'; errEl.style.display = 'block' }
+          if (btn)   { btn.disabled = false; btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><polyline points="20 6 9 17 4 12"/></svg> Fazer Check-in' }
+          return
+        }
+        _checkinCache[eventoId] = data.checkin
+        _atualizarCardCheckin(eventoId)
+      } catch {
+        if (errEl) { errEl.textContent = 'Erro de conexão'; errEl.style.display = 'block' }
+        if (btn)   { btn.disabled = false; btn.textContent = 'Fazer Check-in' }
+      }
+    }
+
+    async function fazerCheckoutCard(eventoId) {
+      const btn   = document.getElementById('btn-checkout-' + eventoId)
+      const errEl = document.getElementById('ev-err-' + eventoId)
+      if (btn)   { btn.disabled = true; btn.textContent = 'Registrando...' }
+      if (errEl) errEl.style.display = 'none'
+      try {
+        const { latitude, longitude } = await pegarGPS()
+        const res = await authFetch('/api/checkin/checkout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ event_id: eventoId, latitude, longitude, method: latitude ? 'gps' : 'manual' })
+        })
+        const data = await res.json()
+        if (!res.ok) {
+          if (errEl) { errEl.textContent = data.error || 'Erro ao fazer check-out'; errEl.style.display = 'block' }
+          if (btn)   { btn.disabled = false; btn.textContent = 'Fazer Check-out' }
+          return
+        }
+        _checkinCache[eventoId] = data.checkin
+        _atualizarCardCheckin(eventoId)
+      } catch {
+        if (errEl) { errEl.textContent = 'Erro de conexão'; errEl.style.display = 'block' }
+        if (btn)   { btn.disabled = false; btn.textContent = 'Fazer Check-out' }
+      }
+    }
+
     async function carregarEscalasVoluntario() {
       const grid = document.getElementById('escalasGrid')
       if (!grid) return
@@ -1750,27 +1885,24 @@
         const res = await authFetch('/api/user/eventos-escalados')
         if (!res.ok) { grid.innerHTML = '<p style="color:var(--ink-muted);font-size:14px">Erro ao carregar eventos.</p>'; return }
         const { eventos } = await res.json()
-        const MESES = ['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ']
-        if (!eventos?.length) {
+        _escalasData  = eventos || []
+        _checkinCache = {}
+
+        if (!_escalasData.length) {
           grid.innerHTML = '<p style="color:var(--ink-muted);font-size:14px;padding:4px 0">Nenhum evento agendado para você.</p>'
           return
         }
-        grid.innerHTML = eventos.map(e => {
+
+        // Inicializa cache com dados da API (já inclui checkin_at e checkout_at)
+        _escalasData.forEach(e => { if (e.checkin) _checkinCache[e.evento_id] = e.checkin })
+
+        const MESES = ['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ']
+        grid.innerHTML = _escalasData.map(e => {
           const [,mes,dia] = e.evento_data.split('-')
-          const mesAbrev    = MESES[parseInt(mes, 10) - 1] || ''
-          const hora        = e.evento_hora ? e.evento_hora.slice(0, 5) : ''
-          const jaFezCheckin = e.item_status === 'presente'
-          const checkinBtn = jaFezCheckin
-            ? `<button disabled style="width:100%;height:36px;border-radius:var(--radius-pill);border:1.5px solid #8eb69b;background:rgba(142,182,155,0.12);color:#8eb69b;font-size:13px;font-weight:600;font-family:inherit;cursor:default;display:flex;align-items:center;justify-content:center;gap:6px">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><polyline points="20 6 9 17 4 12"/></svg>
-                Check-in feito
-               </button>`
-            : `<button onclick="event.stopPropagation();fazerCheckin('${e.item_id}', this)" style="width:100%;height:36px;border-radius:var(--radius-pill);border:1.5px solid var(--primary);background:rgba(151,71,255,0.07);color:var(--primary);font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:background 0.12s" onmouseover="this.style.background='rgba(151,71,255,0.14)'" onmouseout="this.style.background='rgba(151,71,255,0.07)'">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><polyline points="20 6 9 17 4 12"/></svg>
-                Check-in
-               </button>`
+          const mesAbrev   = MESES[parseInt(mes, 10) - 1] || ''
+          const hora       = e.evento_hora ? e.evento_hora.slice(0, 5) : ''
           return `
-            <div class="event-card" style="gap:10px;cursor:pointer" onclick="window.location.href='/escalacao/${e.evento_id}'">
+            <div class="event-card" id="ev-card-${e.evento_id}" style="gap:10px;cursor:pointer" onclick="window.location.href='/escalacao/${e.evento_id}'">
               <div class="event-card-top" style="align-items:flex-start;gap:12px">
                 <div class="event-date-badge" style="flex-shrink:0">
                   <span class="event-date-day">${parseInt(dia, 10)}</span>
@@ -1793,27 +1925,11 @@
                 </div>
                 <span style="font-size:15px;font-weight:700;color:var(--primary);letter-spacing:-0.3px;padding-left:21px">${e.funcao_name || '—'}</span>
               </div>
-              ${checkinBtn}
+              <div id="ev-checkin-${e.evento_id}">${renderCheckinSection(e.evento_id, e.evento_data)}</div>
             </div>`
         }).join('')
       } catch (_) {
         grid.innerHTML = '<p style="color:var(--ink-muted);font-size:14px">Erro ao carregar eventos.</p>'
-      }
-    }
-
-    async function fazerCheckin(itemId, btn) {
-      btn.disabled = true
-      btn.style.opacity = '0.6'
-      try {
-        const res = await authFetch(`/api/user/checkin/${itemId}`, { method: 'POST' })
-        if (!res.ok) throw new Error()
-        btn.outerHTML = `<button disabled style="width:100%;height:36px;border-radius:var(--radius-pill);border:1.5px solid #8eb69b;background:rgba(142,182,155,0.12);color:#8eb69b;font-size:13px;font-weight:600;font-family:inherit;cursor:default;display:flex;align-items:center;justify-content:center;gap:6px">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><polyline points="20 6 9 17 4 12"/></svg>
-          Check-in feito
-        </button>`
-      } catch {
-        btn.disabled = false
-        btn.style.opacity = '1'
       }
     }
 
@@ -1894,8 +2010,8 @@
         const { cls, svg } = iconMap[a.tipo] || { cls: 'info', svg: '<circle cx="12" cy="12" r="10"/>' }
         const msg = (a.mensagem || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
         const inner = a.link
-          ? `<a href="${a.link}" class="alerta-msg" style="color:inherit;text-decoration:underline;text-underline-offset:2px;cursor:pointer">${msg}</a>`
-          : `<div class="alerta-msg">${msg}</div>`
+          ? `<a href="${a.link}" class="alerta-msg" style="color:inherit;text-decoration:underline;text-underline-offset:2px;cursor:pointer">${esc(msg)}</a>`
+          : `<div class="alerta-msg">${esc(msg)}</div>`
         return `<div class="alerta-card">
           <div class="alerta-icon ${cls}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${svg}</svg></div>
           ${inner}

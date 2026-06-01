@@ -2,6 +2,7 @@ const router = require('express').Router()
 const { supabaseAdmin } = require('../lib/supabase')
 const authMiddleware = require('../middleware/auth')
 const checkPermissao = require('../middleware/checkPermissao')
+const { dbError, serverError } = require('../lib/apiError') // SEC-006
 
 const USER_SELECT = 'id, full_name, email, avatar_url'
 
@@ -99,7 +100,7 @@ router.get('/ministerio/:ministryId', authMiddleware, checkPermissao('ministerio
     .eq('ministry_id', req.params.ministryId)
     .eq('church_id', churchId)
 
-  if (error) return res.status(500).json({ error: error.message })
+  if (error) return dbError(res, error, 'lider')
 
   const lideres = (data || [])
     .map(flattenLider)
@@ -144,7 +145,7 @@ router.delete('/ministerio/:ministryId/:userId', authMiddleware, checkPermissao(
     .eq('user_id', userId)
     .eq('church_id', churchId)
 
-  if (error) return res.status(500).json({ error: error.message })
+  if (error) return dbError(res, error, 'lider')
 
   // Rebaixa para 'voluntario' se não for mais líder em nenhum lugar
   await rebaixarSeNaoEhMaisLider(userId, churchId)
@@ -164,7 +165,7 @@ router.get('/departamento/:departmentId', authMiddleware, checkPermissao('depart
     .eq('department_id', req.params.departmentId)
     .eq('church_id', churchId)
 
-  if (error) return res.status(500).json({ error: error.message })
+  if (error) return dbError(res, error, 'lider')
 
   const lideres = (data || [])
     .map(flattenLider)
@@ -209,7 +210,7 @@ router.delete('/departamento/:departmentId/:userId', authMiddleware, checkPermis
     .eq('user_id', userId)
     .eq('church_id', churchId)
 
-  if (error) return res.status(500).json({ error: error.message })
+  if (error) return dbError(res, error, 'lider')
 
   // Rebaixa para 'voluntario' se não for mais líder em nenhum lugar
   await rebaixarSeNaoEhMaisLider(userId, churchId)

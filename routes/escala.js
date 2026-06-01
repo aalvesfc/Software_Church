@@ -2,6 +2,7 @@ const router = require('express').Router()
 const { supabaseAdmin } = require('../lib/supabase')
 const authMiddleware = require('../middleware/auth')
 const checkPermissao = require('../middleware/checkPermissao')
+const { dbError, serverError } = require('../lib/apiError') // SEC-006
 
 // ── GET / ── lista eventos com status de escala
 router.get('/', authMiddleware, checkPermissao('escala', 'ver'), async (req, res) => {
@@ -15,7 +16,7 @@ router.get('/', authMiddleware, checkPermissao('escala', 'ver'), async (req, res
     .eq('is_active', true)
     .order('start_date', { ascending: true })
 
-  if (error) return res.status(500).json({ error: error.message })
+  if (error) return dbError(res, error, 'escala')
   if (!eventos?.length) return res.json({ eventos: [] })
 
   const eventIds = eventos.map(e => e.id)
@@ -115,7 +116,7 @@ router.get('/', authMiddleware, checkPermissao('escala', 'ver'), async (req, res
       .gte('start_date', today)
       .order('start_date', { ascending: true })
 
-    if (evLiderErr) return res.status(500).json({ error: evLiderErr.message })
+    if (evLiderErr) return dbError(res, evLiderErr, 'escala')
     if (!evLider?.length) return res.json({ eventos: [] })
 
     const evLiderIds = evLider.map(e => e.id)
@@ -178,7 +179,7 @@ router.get('/funcao/:funcaoId/tem-membros', authMiddleware, async (req, res) => 
     .eq('church_id', churchId)
     .neq('status', 'cancelado')
     .limit(1)
-  if (error) return res.status(500).json({ error: error.message })
+  if (error) return dbError(res, error, 'escala')
   res.json({ temMembros: (data || []).length > 0 })
 })
 
@@ -218,7 +219,7 @@ router.get('/meus-eventos', authMiddleware, async (req, res) => {
     `)
     .eq('member_id', dbMember.id)
 
-  if (error) { console.error('[meus-eventos]', error); return res.status(500).json({ error: error.message }) }
+  if (error) { console.error('[meus-eventos]', error); return dbError(res, error, 'escala') }
 
   const eventos = (items || [])
     .filter(i => i.db_escala?.db_event)
@@ -260,7 +261,7 @@ router.get('/:eventId/bloqueios', authMiddleware, checkPermissao('escala', 'ver'
     .select('member_id, type, start_date, end_date')
     .eq('church_id', churchId)
 
-  if (error) return res.status(500).json({ error: error.message })
+  if (error) return dbError(res, error, 'escala')
 
   const bloqueados = (data || [])
     .filter(d => {
@@ -332,7 +333,7 @@ router.get('/:eventId', authMiddleware, checkPermissao('escala', 'ver'), async (
       .eq('church_id', churchId)
       .in('department_id', deptIds)
 
-    if (selErr) { console.error('[escala select]', selErr); return res.status(500).json({ error: selErr.message }) }
+    if (selErr) { console.error('[escala select]', selErr); return dbError(res, selErr, 'escala') }
     escalas = existing || []
   }
 
@@ -421,7 +422,7 @@ router.put('/:eventId/status', authMiddleware, checkPermissao('escala', 'editar'
       .eq('event_id', req.params.eventId)
       .eq('department_id', deptRow.department_id)
       .eq('church_id', churchId)
-    if (dErr) { console.error('[escala PUT status lider_dept]', dErr); return res.status(500).json({ error: dErr.message }) }
+    if (dErr) { console.error('[escala PUT status lider_dept]', dErr); return dbError(res, dErr, 'escala') }
 
     // Ao publicar: itens pendentes passam para "escalado"
     if (status === 'publicado') {
@@ -445,7 +446,7 @@ router.put('/:eventId/status', authMiddleware, checkPermissao('escala', 'editar'
     .eq('event_id', req.params.eventId)
     .eq('church_id', churchId)
 
-  if (error) { console.error('[escala PUT status]', error); return res.status(500).json({ error: error.message }) }
+  if (error) { console.error('[escala PUT status]', error); return dbError(res, error, 'escala') }
 
   // Ao publicar: itens pendentes de todas as escalas passam para "escalado"
   if (status === 'publicado') {
@@ -599,7 +600,7 @@ router.post('/:escalaId/item', authMiddleware, checkPermissao('escala', 'criar')
     .select()
     .single()
 
-  if (error) { console.error('[escala_item POST]', error); return res.status(500).json({ error: error.message }) }
+  if (error) { console.error('[escala_item POST]', error); return dbError(res, error, 'escala') }
 
   const { data: member } = await supabaseAdmin
     .from('db_member').select('id, full_name, nickname, photo_url').eq('id', member_id).single()
@@ -718,7 +719,7 @@ router.post('/:eventId/automatica', authMiddleware, checkPermissao('escala', 'cr
 
   if (toInsert.length) {
     const { error: insErr } = await supabaseAdmin.from('db_escala_item').insert(toInsert)
-    if (insErr) { console.error('[escala automatica]', insErr); return res.status(500).json({ error: insErr.message }) }
+    if (insErr) { console.error('[escala automatica]', insErr); return dbError(res, insErr, 'escala') }
   }
 
   // Retorna estrutura atualizada (reutiliza lógica do GET)
@@ -761,7 +762,7 @@ router.delete('/:escalaId/item/:itemId', authMiddleware, checkPermissao('escala'
     .eq('escala_id', req.params.escalaId)
     .eq('church_id', churchId)
 
-  if (error) { console.error('[escala_item DELETE]', error); return res.status(500).json({ error: error.message }) }
+  if (error) { console.error('[escala_item DELETE]', error); return dbError(res, error, 'escala') }
   res.json({ ok: true })
 })
 

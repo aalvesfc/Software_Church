@@ -679,6 +679,8 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
+    // SEC-005: escape de HTML para prevenir XSS em innerHTML
+    function esc(s) { return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') }
     // ── Estado ──
     const params     = new URLSearchParams(location.search)
     const churchSlug = params.get('church') || ''

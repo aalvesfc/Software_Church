@@ -2,6 +2,7 @@ const router = require('express').Router()
 const { supabaseAdmin } = require('../lib/supabase')
 const authMiddleware = require('../middleware/auth')
 const checkPermissao = require('../middleware/checkPermissao')
+const { dbError, serverError } = require('../lib/apiError') // SEC-006
 
 // ── GET /api/dashboard/lider-departamento ──
 router.get('/lider-departamento', authMiddleware, checkPermissao('escala', 'ver'), async (req, res) => {

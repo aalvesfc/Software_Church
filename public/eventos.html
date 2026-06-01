@@ -383,20 +383,22 @@
       gap: 8px;
       height: 40px;
       padding: 0 20px;
-      background: rgba(255,255,255,0.18);
-      border: 1.5px solid rgba(255,255,255,0.55);
+      background: var(--primary);
+      border: none;
       border-radius: var(--radius-pill);
       font-family: inherit;
       font-size: 14px;
-      font-weight: 500;
-      color: var(--on-dark);
+      font-weight: 600;
+      color: #ffffff;
       letter-spacing: -0.224px;
       cursor: pointer;
       text-decoration: none;
-      transition: background 0.15s, border-color 0.15s;
+      transition: background 0.15s, box-shadow 0.15s;
       white-space: nowrap;
+      box-shadow: 0 2px 8px rgba(139,92,246,0.3);
     }
-    .btn-primary:hover { background: rgba(255,255,255,0.28); border-color: rgba(255,255,255,0.8); }
+    .btn-primary:hover { background: var(--primary-dark); box-shadow: 0 4px 16px rgba(139,92,246,0.4); }
+    .btn-primary:active { transform: scale(0.97); }
     .btn-primary svg { width: 16px; height: 16px; }
 
     /* ─────────────────── STATS ─────────────────── */
@@ -1686,6 +1688,18 @@
     .notif-body{font-size:12px;color:#5C5955;line-height:1.4;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
     .notif-time{font-size:11px;color:#9E9B96;}
     .notif-footer{padding:10px 16px;border-top:1px solid #F5F3F0;text-align:center;}
+
+    /* ── Seleção de opção/template — override do design-update !important ── */
+    .option-card.selected {
+      border: 2px solid var(--primary) !important;
+      background: rgba(139,92,246,0.07) !important;
+      padding: 13px 15px !important;
+      box-shadow: 0 0 0 3px rgba(139,92,246,0.12) !important;
+    }
+    .check-card.checked {
+      border: 2px solid var(--primary) !important;
+      background: rgba(139,92,246,0.04) !important;
+    }
     </style>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/responsive.css">
@@ -1727,7 +1741,7 @@
       </a>      <a class="nav-item" href="/voluntarios" data-tooltip="Voluntários" data-menu="voluntarios">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
         <span>Voluntários</span>
-      </a>      <a class="nav-item" href="/notificacoes" data-tooltip="Notificações" data-menu="notificacoes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span>Notificações</span></a></nav>
+      </a>      <a class="nav-item" href="/notificacoes" data-tooltip="Notificações" data-menu="notificacoes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span>Notificações</span></a>      <a class="nav-item" href="/checkin" data-tooltip="Meu Check-in" data-menu="checkin"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg><span>Meu Check-in</span></a>      <a class="nav-item" href="/presenca" data-tooltip="Presenças" data-menu="presenca"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>Presenças</span></a></nav>
   </aside>
 
   <!-- ── Main ── -->
@@ -1917,8 +1931,6 @@
           <div class="step-dot" id="sdot3">3</div>
           <div class="step-line" id="sline3"></div>
           <div class="step-dot" id="sdot4">4</div>
-          <div class="step-line" id="sline4"></div>
-          <div class="step-dot" id="sdot5">5</div>
         </div>
       </div>
 
@@ -1983,26 +1995,8 @@
           </div>
         </div>
 
-        <!-- Etapa 3: Template de Cronograma -->
+        <!-- Etapa 3: Recorrência -->
         <div class="step-panel" id="step3">
-          <div class="step-section-title">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
-            Template de Cronograma
-          </div>
-          <div class="option-list">
-            <div class="option-card selected" id="optSemCronograma" onclick="selectCronograma(this, false)">
-              <div class="option-card-title">Sem cronograma</div>
-              <div class="option-card-sub">Criar evento sem template de cronograma</div>
-            </div>
-            <div class="option-card" id="optComCronograma" onclick="selectCronograma(this, true)">
-              <div class="option-card-title">Com cronograma</div>
-              <div class="option-card-sub">Ativar cronograma de atividades para este evento</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Etapa 4: Recorrência -->
-        <div class="step-panel" id="step4">
           <div class="step-section-title">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-.18-5.76"/></svg>
             Recorrência
@@ -2064,8 +2058,8 @@
           </div>
         </div>
 
-        <!-- Etapa 5: Resumo -->
-        <div class="step-panel" id="step5">
+        <!-- Etapa 4: Resumo -->
+        <div class="step-panel" id="step4">
           <div class="step-section-title">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
             Resumo
@@ -2413,7 +2407,7 @@ function renderLista(area, list) {
               <span class="ev-card-mon">${mon}</span>
             </div>
             <div class="ev-card-title">
-              <div class="ev-card-name">${e.name || '—'}</div>
+              <div class="ev-card-name">${esc(e.name || '—')}</div>
               <span class="badge-status ${status}">${STATUS_LABEL[status] || status}</span>
             </div>
           </div>
@@ -2481,7 +2475,7 @@ function renderCalFull(area) {
     }
     const evs = dateStr ? (byDate[dateStr] || []) : []
     const evHtml = evs.slice(0,3).map(e =>
-      `<div class="full-cal-event" onclick="event.stopPropagation();editarEvento('${e.id}')" title="${e.name}">${fmtTime(e.start_time)} ${e.name || ''}</div>`
+      `<div class="full-cal-event" onclick="event.stopPropagation();editarEvento('${e.id}')" title="${esc(e.name)}">${fmtTime(e.start_time)} ${esc(e.name || '')}</div>`
     ).join('') + (evs.length > 3 ? `<div style="font-size:10px;color:var(--ink-muted);padding:0 2px">+${evs.length-3} mais</div>` : '')
     cells += `<div class="full-cal-cell ${extraCls}"><div class="full-cal-cell-num">${num}</div>${evHtml}</div>`
   }
@@ -2534,7 +2528,7 @@ function renderUpcoming() {
           <span class="upcoming-mon">${mon}</span>
         </div>
         <div class="upcoming-info">
-          <div class="upcoming-name">${e.name || '—'}</div>
+          <div class="upcoming-name">${esc(e.name || '—')}</div>
           <div class="upcoming-time">${horario || 'Horário não definido'}</div>
         </div>
       </div>`
@@ -2725,7 +2719,7 @@ function renderCalWeek(area) {
     const isToday = dateStr === todayStr
     const evs = byDate[dateStr] || []
     const evHtml = evs.map(e =>
-      `<div class="full-cal-event" onclick="editarEvento('${e.id}')" title="${e.name}">${fmtTime(e.start_time)} ${e.name || ''}</div>`
+      `<div class="full-cal-event" onclick="editarEvento('${e.id}')" title="${esc(e.name)}">${fmtTime(e.start_time)} ${esc(e.name || '')}</div>`
     ).join('')
     return `
       <div class="week-cal-col${isToday ? ' today' : ''}">
@@ -2869,12 +2863,6 @@ function abrirModal(evento = null) {
   _syncRecurUI()
   document.getElementById('fieldRecurCount').value = evento?.recurrence_config?.count || ''
 
-  // Cronograma
-  const oSem = document.getElementById('optSemCronograma')
-  const oCom = document.getElementById('optComCronograma')
-  if (_hasCronograma) { oSem.classList.remove('selected'); oCom.classList.add('selected') }
-  else { oSem.classList.add('selected'); oCom.classList.remove('selected') }
-
   irStep(1)
   const backdrop = document.getElementById('modalBackdrop')
   const drawer   = document.getElementById('drawerPanel')
@@ -2916,8 +2904,8 @@ function renderTemplateOptions() {
     </div>`,
     ..._templates.map(t =>
       `<div class="option-card ${_selectedTemplateId === t.id ? 'selected' : ''}" onclick="selectTemplate(this,'${t.id}')">
-        <div class="option-card-title">${t.name || '—'}</div>
-        <div class="option-card-sub">${t.description || ''}</div>
+        <div class="option-card-title">${esc(t.name || '—')}</div>
+        <div class="option-card-sub">${esc(t.description || '')}</div>
       </div>`)
   ]
   list.innerHTML = items.join('')
@@ -3011,18 +2999,18 @@ function recurCalNav(dir) {
 // ── Navegação entre etapas ────────────────────────────
 function irStep(n) {
   _wizStep = n
-  for (let i = 1; i <= 5; i++) {
+  for (let i = 1; i <= 4; i++) {
     document.getElementById(`step${i}`).classList.toggle('active', i === n)
     const dot = document.getElementById(`sdot${i}`)
     dot.classList.remove('active','done')
     if (i < n) dot.classList.add('done')
     else if (i === n) dot.classList.add('active')
-    if (i < 5) document.getElementById(`sline${i}`).classList.toggle('done', i < n)
+    if (i < 4) document.getElementById(`sline${i}`).classList.toggle('done', i < n)
   }
   const btnBack = document.getElementById('btnBack')
   const btnNext = document.getElementById('btnNext')
   btnBack.style.visibility = n > 1 ? 'visible' : 'hidden'
-  if (n === 5) {
+  if (n === 4) {
     renderSummary()
     btnNext.innerHTML = 'Salvar'
   } else {
@@ -3039,8 +3027,8 @@ function proxStep() {
     if (!date) { showToast('Data de início obrigatória', 'error'); return }
     if (!time) { showToast('Horário obrigatório', 'error'); return }
   }
-  if (_wizStep === 4 && _recurrenceType === 'personalizado') renderRecurCal()
-  if (_wizStep < 5) irStep(_wizStep + 1)
+  if (_wizStep === 3 && _recurrenceType === 'personalizado') renderRecurCal()
+  if (_wizStep < 4) irStep(_wizStep + 1)
   else salvarEvento()
 }
 
@@ -3059,13 +3047,17 @@ function renderSummary() {
   const fmt = d => d ? new Date(d+'T12:00:00').toLocaleDateString('pt-BR',{day:'numeric',month:'long',year:'numeric'}) : null
   const timeStr = startTime ? (endTime ? `${startTime} – ${endTime}` : startTime) : null
 
+  const templateNome = _selectedTemplateId
+    ? (_templates.find(t => t.id === _selectedTemplateId)?.name || 'Template selecionado')
+    : 'Sem template'
+
   let html = `
     <div class="summary-row"><div class="summary-label">Nome do Evento</div><div class="summary-value">${name}</div></div>
+    <div class="summary-row"><div class="summary-label">Template</div><div class="summary-value">${templateNome}</div></div>
     <div class="summary-row"><div class="summary-label">Data de Inicio</div><div class="summary-value">${fmt(startDate) || '—'}</div></div>`
   if (endDate && endDate !== startDate) html += `<div class="summary-row"><div class="summary-label">Data de Termino</div><div class="summary-value">${fmt(endDate)}</div></div>`
   if (timeStr) html += `<div class="summary-row"><div class="summary-label">Horario</div><div class="summary-value">${timeStr}</div></div>`
   if (location) html += `<div class="summary-row"><div class="summary-label">Local</div><div class="summary-value">${location}</div></div>`
-  if (_hasCronograma) html += `<div class="summary-row"><div class="summary-label">Cronograma</div><div class="summary-value">Sim</div></div>`
   const recurLabels = { semanal:'Semanal', quinzenal:'Quinzenal', mensal_dia:'Mensal por dia', mensal_semana:'Mensal por semana', personalizado:'Personalizado' }
   if (_recurrenceType !== 'none') {
     const count = parseInt(document.getElementById('fieldRecurCount')?.value) || null
@@ -3144,7 +3136,7 @@ async function salvarEvento() {
     showToast('Erro de conexão', 'error')
   } finally {
     btn.disabled = false
-    btn.innerHTML = _wizStep === 5 ? 'Salvar' : 'Proximo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>'
+    btn.innerHTML = _wizStep === 4 ? 'Salvar' : 'Proximo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>'
   }
 }
 

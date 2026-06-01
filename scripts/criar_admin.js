@@ -1,12 +1,23 @@
 // Gera o hash da senha e cria o usuário admin no Supabase
-// Uso: node scripts/criar_admin.js
+// Uso: ADMIN_PASSWORD=suasenha node scripts/criar_admin.js
+//   ou: node scripts/criar_admin.js SuaSenhaAqui
+// SEC-011: senha nunca hardcoded — lida de variável de ambiente ou argumento CLI
 require('dotenv').config()
 const bcrypt = require('bcryptjs')
 const supabase = require('../lib/supabase')
 
 async function main() {
-  const senha = 'Admin@123'
-  const hash  = await bcrypt.hash(senha, 10)
+  // Lê senha de variável de ambiente ou argumento CLI
+  const senha = process.env.ADMIN_PASSWORD || process.argv[2]
+
+  if (!senha) {
+    console.error('ERRO: senha obrigatória.')
+    console.error('Use: ADMIN_PASSWORD=suasenha node scripts/criar_admin.js')
+    console.error(' ou: node scripts/criar_admin.js SuaSenhaAqui')
+    process.exit(1)
+  }
+
+  const hash = await bcrypt.hash(senha, 10)
 
   const { data, error } = await supabase
     .from('usuarios')
@@ -20,7 +31,8 @@ async function main() {
   }
 
   console.log('Admin criado:', data)
-  console.log('Login: admin@hugapp.com / Admin@123')
+  // SEC-011: nunca exibe a senha no log
+  console.log('Login: admin@hugapp.com / [senha fornecida]')
 }
 
 main()

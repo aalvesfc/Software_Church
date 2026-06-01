@@ -1,6 +1,7 @@
 const router = require('express').Router()
 const { supabaseAdmin } = require('../lib/supabase')
 const authMiddleware = require('../middleware/auth')
+const { dbError, serverError } = require('../lib/apiError') // SEC-006
 
 // GET /api/user/lista — lista usuários ativos da igreja (para seleção de líderes)
 router.get('/lista', authMiddleware, async (req, res) => {
@@ -19,7 +20,7 @@ router.get('/lista', authMiddleware, async (req, res) => {
     .eq('is_active', true)
     .order('full_name', { ascending: true })
 
-  if (error) return res.status(500).json({ error: error.message })
+  if (error) return dbError(res, error, 'user')
 
   const usuarios = (data || []).map(u => ({
     id:          u.id,
@@ -40,7 +41,7 @@ router.get('/generos', authMiddleware, async (req, res) => {
 
   if (error) {
     console.error('[generos] erro Supabase:', JSON.stringify(error))
-    return res.status(500).json({ error: error.message, details: error })
+    return dbError(res, error, 'user')
   }
 
   const normalizado = (data || []).map(row => ({
@@ -59,7 +60,7 @@ router.get('/estados-civis', authMiddleware, async (req, res) => {
 
   if (error) {
     console.error('[estados-civis] erro Supabase:', JSON.stringify(error))
-    return res.status(500).json({ error: error.message, details: error })
+    return dbError(res, error, 'user')
   }
 
   // Normaliza qualquer nome de coluna para { id, name }
@@ -151,7 +152,7 @@ router.get('/departamentos', authMiddleware, async (req, res) => {
     .select('id, status, funcao_id, department_id')
     .eq('member_id', ctx.memberId)
 
-  if (error) return res.status(500).json({ error: error.message })
+  if (error) return dbError(res, error, 'user')
   if (!links?.length) return res.json({ departamentos: [], member_id: ctx.memberId })
 
   const deptIds   = [...new Set(links.map(l => l.department_id))]
@@ -192,7 +193,7 @@ router.get('/indisponibilidades', authMiddleware, async (req, res) => {
     .eq('member_id', ctx.memberId)
     .order('start_date', { ascending: false })
 
-  if (error) return res.status(500).json({ error: error.message })
+  if (error) return dbError(res, error, 'user')
   res.json({ indisponibilidades: data || [], member_id: ctx.memberId })
 })
 
@@ -225,7 +226,7 @@ router.post('/indisponibilidades', authMiddleware, async (req, res) => {
     .select('*, db_department(name)')
     .single()
 
-  if (error) return res.status(500).json({ error: error.message })
+  if (error) return dbError(res, error, 'user')
   res.status(201).json({ indisponibilidade: data })
 })
 
@@ -241,7 +242,7 @@ router.delete('/indisponibilidades/:id', authMiddleware, async (req, res) => {
     .eq('member_id', ctx.memberId)
     .eq('church_id', ctx.churchId)
 
-  if (error) return res.status(500).json({ error: error.message })
+  if (error) return dbError(res, error, 'user')
   res.json({ ok: true })
 })
 
@@ -256,7 +257,7 @@ router.get('/eventos-escalados', authMiddleware, async (req, res) => {
     .eq('member_id', ctx.memberId)
     .eq('church_id', ctx.churchId)
 
-  if (itemsErr) return res.status(500).json({ error: itemsErr.message })
+  if (itemsErr) return dbError(res, itemsErr, 'user')
   if (!items?.length) return res.json({ eventos: [] })
 
   const escalaIds = [...new Set(items.map(i => i.escala_id))]
@@ -288,6 +289,17 @@ router.get('/eventos-escalados', authMiddleware, async (req, res) => {
   const deptMap   = Object.fromEntries((depts    || []).map(d => [d.id, d]))
   const funcMap   = Object.fromEntries((funcoes  || []).map(f => [f.id, f]))
 
+  // Busca check-ins reais do db_checkin para os eventos futuros
+  const eventIdsFuturos = Object.keys(eventMap)
+  const { data: checkins } = eventIdsFuturos.length
+    ? await supabaseAdmin.from('db_checkin')
+        .select('event_id, status, checkin_at, checkout_at')
+        .eq('member_id', ctx.memberId)
+        .eq('church_id', ctx.churchId)
+        .in('event_id', eventIdsFuturos)
+    : { data: [] }
+  const checkinMap = Object.fromEntries((checkins || []).map(c => [c.event_id, c]))
+
   const seen   = new Set()
   const result = items
     .map(item => {
@@ -295,9 +307,11 @@ router.get('/eventos-escalados', authMiddleware, async (req, res) => {
       if (!escala) return null
       const evento = eventMap[escala.event_id]
       if (!evento) return null
+      const checkin = checkinMap[evento.id] || null
       return {
         item_id:         item.id,
-        item_status:     item.status || null,
+        item_status:     checkin ? checkin.status : null,
+        checkin:         checkin,
         evento_id:       evento.id,
         evento_nome:     evento.name,
         evento_data:     evento.start_date,
@@ -333,7 +347,7 @@ router.post('/checkin/:itemId', authMiddleware, async (req, res) => {
     .select('id, status')
     .single()
 
-  if (error) return res.status(500).json({ error: error.message })
+  if (error) return dbError(res, error, 'user')
   if (!data) return res.status(404).json({ error: 'Item não encontrado ou sem permissão' })
 
   res.json({ ok: true, item: data })

@@ -2,6 +2,7 @@ const router = require('express').Router()
 const { supabaseAdmin } = require('../lib/supabase')
 const authMiddleware = require('../middleware/auth')
 const checkPermissao = require('../middleware/checkPermissao')
+const { dbError, serverError } = require('../lib/apiError') // SEC-006
 
 // GET /api/template — lista templates com depts e funções
 router.get('/', authMiddleware, checkPermissao('template', 'ver'), async (req, res) => {
@@ -17,7 +18,7 @@ router.get('/', authMiddleware, checkPermissao('template', 'ver'), async (req, r
 
   if (error) {
     console.error('[template GET]', error)
-    return res.status(500).json({ error: error.message })
+    return dbError(res, error, 'template')
   }
 
   if (!templates?.length) return res.json({ templates: [] })
@@ -97,7 +98,7 @@ router.post('/', authMiddleware, checkPermissao('template', 'criar'), async (req
 
   if (tmplErr) {
     console.error('[template POST]', tmplErr)
-    return res.status(500).json({ error: tmplErr.message })
+    return dbError(res, tmplErr, 'template')
   }
 
   // 2. Insere departamentos e funções
@@ -114,7 +115,7 @@ router.post('/', authMiddleware, checkPermissao('template', 'criar'), async (req
 
     if (deptErr) {
       console.error('[template POST depts]', deptErr)
-      return res.status(500).json({ error: deptErr.message })
+      return dbError(res, deptErr, 'template')
     }
 
     const funcRows = []
@@ -137,7 +138,7 @@ router.post('/', authMiddleware, checkPermissao('template', 'criar'), async (req
 
       if (funcErr) {
         console.error('[template POST funcoes]', funcErr)
-        return res.status(500).json({ error: funcErr.message })
+        return dbError(res, funcErr, 'template')
       }
     }
   }
@@ -165,7 +166,7 @@ router.put('/:id', authMiddleware, checkPermissao('template', 'editar'), async (
 
   if (error) {
     console.error('[template PUT]', error)
-    return res.status(500).json({ error: error.message })
+    return dbError(res, error, 'template')
   }
   if (!data?.length) return res.status(404).json({ error: 'Template não encontrado' })
 
@@ -181,7 +182,7 @@ router.put('/:id', authMiddleware, checkPermissao('template', 'editar'), async (
         template_id: req.params.id, department_id: d.department_id, church_id: churchId
       }))
       const { error: deptErr } = await supabaseAdmin.from('db_template_dept').insert(deptRows)
-      if (deptErr) { console.error('[template PUT depts]', deptErr); return res.status(500).json({ error: deptErr.message }) }
+      if (deptErr) { console.error('[template PUT depts]', deptErr); return dbError(res, deptErr, 'template') }
 
       const funcRows = []
       for (const d of depts) {
@@ -191,7 +192,7 @@ router.put('/:id', authMiddleware, checkPermissao('template', 'editar'), async (
       }
       if (funcRows.length) {
         const { error: funcErr } = await supabaseAdmin.from('db_template_funcao').insert(funcRows)
-        if (funcErr) { console.error('[template PUT funcoes]', funcErr); return res.status(500).json({ error: funcErr.message }) }
+        if (funcErr) { console.error('[template PUT funcoes]', funcErr); return dbError(res, funcErr, 'template') }
       }
     }
   }
@@ -219,7 +220,7 @@ router.delete('/:id', authMiddleware, checkPermissao('template', 'excluir'), asy
 
   if (error) {
     console.error('[template DELETE]', error)
-    return res.status(500).json({ error: error.message })
+    return dbError(res, error, 'template')
   }
 
   res.json({ ok: true })
@@ -266,7 +267,7 @@ router.patch('/:id/vagas', authMiddleware, checkPermissao('template', 'editar'),
       church_id: churchId
     }))
     const { error: insErr } = await supabaseAdmin.from('db_template_funcao').insert(rows)
-    if (insErr) { console.error('[template PATCH vagas]', insErr); return res.status(500).json({ error: insErr.message }) }
+    if (insErr) { console.error('[template PATCH vagas]', insErr); return dbError(res, insErr, 'template') }
   }
 
   res.json({ ok: true })

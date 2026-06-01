@@ -2,6 +2,7 @@ const router = require('express').Router()
 const { supabaseAdmin } = require('../lib/supabase')
 const authMiddleware = require('../middleware/auth')
 const checkPermissao = require('../middleware/checkPermissao')
+const { dbError, serverError } = require('../lib/apiError') // SEC-006
 
 async function getMemberId(dbUserId, churchId) {
   const { data: u } = await supabaseAdmin.from('db_user').select('email').eq('id', dbUserId).single()
@@ -27,7 +28,7 @@ router.get('/me', authMiddleware, checkPermissao('voluntario', 'ver'), async (re
     .eq('member_id', memberId)
     .order('created_at', { ascending: false })
 
-  if (error) { console.error('[indisp/me GET]', error); return res.status(500).json({ error: error.message }) }
+  if (error) { console.error('[indisp/me GET]', error); return dbError(res, error, 'indisponibilidade') }
   res.json({ indisponibilidades: data || [] })
 })
 
@@ -71,7 +72,7 @@ router.post('/me', authMiddleware, checkPermissao('voluntario', 'ver'), async (r
     .select('*, db_department(name)')
     .single()
 
-  if (error) { console.error('[indisp/me POST]', error); return res.status(500).json({ error: error.message }) }
+  if (error) { console.error('[indisp/me POST]', error); return dbError(res, error, 'indisponibilidade') }
   res.status(201).json({ indisponibilidade: data })
 })
 
@@ -90,7 +91,7 @@ router.delete('/me/:id', authMiddleware, checkPermissao('voluntario', 'ver'), as
     .eq('member_id', memberId)
     .eq('church_id', churchId)
 
-  if (error) { console.error('[indisp/me DELETE]', error); return res.status(500).json({ error: error.message }) }
+  if (error) { console.error('[indisp/me DELETE]', error); return dbError(res, error, 'indisponibilidade') }
   res.json({ ok: true })
 })
 
@@ -108,7 +109,7 @@ router.get('/:memberId', authMiddleware, checkPermissao('voluntario', 'ver'), as
     .eq('member_id', req.params.memberId)
     .order('created_at', { ascending: false })
 
-  if (error) { console.error('[indisp GET]', error); return res.status(500).json({ error: error.message }) }
+  if (error) { console.error('[indisp GET]', error); return dbError(res, error, 'indisponibilidade') }
   res.json({ indisponibilidades: data || [] })
 })
 
@@ -143,7 +144,7 @@ router.post('/:memberId', authMiddleware, checkPermissao('voluntario', 'editar')
     .select('*, db_department(name)')
     .single()
 
-  if (error) { console.error('[indisp POST]', error); return res.status(500).json({ error: error.message }) }
+  if (error) { console.error('[indisp POST]', error); return dbError(res, error, 'indisponibilidade') }
   res.status(201).json({ indisponibilidade: data })
 })
 
@@ -159,7 +160,7 @@ router.delete('/:memberId/:id', authMiddleware, checkPermissao('voluntario', 'ed
     .eq('member_id', req.params.memberId)
     .eq('church_id', churchId)
 
-  if (error) { console.error('[indisp DELETE]', error); return res.status(500).json({ error: error.message }) }
+  if (error) { console.error('[indisp DELETE]', error); return dbError(res, error, 'indisponibilidade') }
   res.json({ ok: true })
 })
 

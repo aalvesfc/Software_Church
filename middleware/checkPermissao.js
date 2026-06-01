@@ -5,13 +5,15 @@ function checkPermissao(module, action) {
     const userId = req.authUser?.id
     if (!userId) return res.status(401).json({ error: 'Não autenticado' })
 
-    const { data: dbUser, error: userErr } = await supabaseAdmin
+    // SEC-010: .limit(1).maybeSingle() evita erro 403 em caso de usuário duplicado no db_user
+    const { data: dbUser } = await supabaseAdmin
       .from('db_user')
       .select('id, church_id, perfil_id, db_perfil(slug)')
       .eq('user_id', userId)
-      .single()
+      .limit(1)
+      .maybeSingle()
 
-    if (userErr || !dbUser) {
+    if (!dbUser) {
       return res.status(403).json({ error: 'Usuário não encontrado' })
     }
 

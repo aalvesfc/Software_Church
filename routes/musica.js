@@ -3,6 +3,7 @@ const https  = require('https')
 const { supabaseAdmin } = require('../lib/supabase')
 const authMiddleware = require('../middleware/auth')
 const checkPermissao = require('../middleware/checkPermissao')
+const { dbError, serverError } = require('../lib/apiError') // SEC-006
 
 function deezerSearch(q) {
   return new Promise((resolve, reject) => {
@@ -55,7 +56,7 @@ router.get('/', authMiddleware, checkPermissao('musica', 'ver'), async (req, res
   if (q) query = query.or(`title.ilike.%${q}%,artist.ilike.%${q}%`)
 
   const { data, error } = await query
-  if (error) { console.error('[musica GET]', error); return res.status(500).json({ error: error.message }) }
+  if (error) { console.error('[musica GET]', error); return dbError(res, error, 'musica') }
 
   let musicas = data || []
   if (isVoluntario) {
@@ -110,7 +111,7 @@ router.post('/', authMiddleware, checkPermissao('musica', 'criar'), async (req, 
     .select(FIELDS)
     .single()
 
-  if (error) { console.error('[musica POST]', error); return res.status(500).json({ error: error.message }) }
+  if (error) { console.error('[musica POST]', error); return dbError(res, error, 'musica') }
 
   const musica = data
 
@@ -168,7 +169,7 @@ router.put('/:id/aprovar', authMiddleware, checkPermissao('musica', 'editar'), a
     .select(FIELDS)
     .single()
 
-  if (error) { console.error('[musica aprovar]', error); return res.status(500).json({ error: error.message }) }
+  if (error) { console.error('[musica aprovar]', error); return dbError(res, error, 'musica') }
   if (!data) return res.status(404).json({ error: 'Música não encontrada' })
   res.json({ musica: data })
 })
@@ -186,7 +187,7 @@ router.put('/:id/rejeitar', authMiddleware, checkPermissao('musica', 'editar'), 
     .select(FIELDS)
     .single()
 
-  if (error) { console.error('[musica rejeitar]', error); return res.status(500).json({ error: error.message }) }
+  if (error) { console.error('[musica rejeitar]', error); return dbError(res, error, 'musica') }
   if (!data) return res.status(404).json({ error: 'Música não encontrada' })
   res.json({ musica: data })
 })
@@ -220,7 +221,7 @@ router.put('/:id', authMiddleware, checkPermissao('musica', 'editar'), async (re
     .select(FIELDS)
     .single()
 
-  if (error) { console.error('[musica PUT]', error); return res.status(500).json({ error: error.message }) }
+  if (error) { console.error('[musica PUT]', error); return dbError(res, error, 'musica') }
   if (!data) return res.status(404).json({ error: 'Música não encontrada' })
   res.json({ musica: data })
 })
@@ -236,7 +237,7 @@ router.delete('/:id', authMiddleware, checkPermissao('musica', 'excluir'), async
     .eq('id', req.params.id)
     .eq('church_id', churchId)
 
-  if (error) { console.error('[musica DELETE]', error); return res.status(500).json({ error: error.message }) }
+  if (error) { console.error('[musica DELETE]', error); return dbError(res, error, 'musica') }
   res.json({ ok: true })
 })
 

@@ -1070,7 +1070,7 @@
       </a>      <a class="nav-item" href="/voluntarios" data-tooltip="Voluntários" data-menu="voluntarios">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
         <span>Voluntários</span>
-      </a>      <a class="nav-item" href="/notificacoes" data-tooltip="Notificações" data-menu="notificacoes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span>Notificações</span></a>
+      </a>      <a class="nav-item" href="/notificacoes" data-tooltip="Notificações" data-menu="notificacoes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span>Notificações</span></a>      <a class="nav-item" href="/checkin" data-tooltip="Meu Check-in" data-menu="checkin"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg><span>Meu Check-in</span></a>      <a class="nav-item" href="/presenca" data-tooltip="Presenças" data-menu="presenca"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>Presenças</span></a>
 </nav>
   </aside>
 
@@ -1298,6 +1298,8 @@
   <script src="/js/sidebar-permissions.js"></script>
     <script src="/js/sidebar-ui.js"></script>
   <script>
+    // SEC-005: escape de HTML para prevenir XSS em innerHTML
+    function esc(s) { return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') }
     const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
     const igreja  = JSON.parse(localStorage.getItem('igreja')  || '{}');
 
@@ -1368,8 +1370,8 @@
         <div class="leader-item">
           ${_avatarHtml(l.avatar_url, l.full_name, 'leader-avatar')}
           <div class="leader-name-wrap">
-            <div class="leader-name">${l.full_name}</div>
-            ${l.email ? `<div class="leader-email">${l.email}</div>` : ''}
+            <div class="leader-name">${esc(l.full_name)}</div>
+            ${l.email ? `<div class="leader-email">${esc(l.email)}</div>` : ''}
           </div>
           ${somenteLeitura ? '' : `<button class="btn-leader-remove" onclick="removerLider('${l.user_id}')" title="Remover">${_xSvg}</button>`}
         </div>`).join('')}</div>`;
@@ -1417,8 +1419,8 @@
         return `<div class="picker-vol-item${isLeader ? ' is-leader' : ''}" onclick="adicionarLider('${u.id}','${safe}')">
           ${_avatarHtml(u.avatar_url, u.full_name, 'picker-vol-avatar')}
           <div class="picker-vol-info">
-            <div class="picker-vol-name">${u.full_name || '—'}</div>
-            ${u.email ? `<div class="picker-vol-email">${u.email}</div>` : ''}
+            <div class="picker-vol-name">${esc(u.full_name || '—')}</div>
+            ${u.email ? `<div class="picker-vol-email">${esc(u.email)}</div>` : ''}
           </div>
           ${isLeader ? `<span class="picker-vol-check">${_checkSvg}</span>` : ''}
         </div>`;
@@ -1521,7 +1523,7 @@
         body.innerHTML = `
           <div class="dept-empty">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-            <div class="dept-empty-text">${msg}</div>
+            <div class="dept-empty-text">${esc(msg)}</div>
             ${(!depts.length && !isLiderDept) ? '<a class="dept-empty-link" href="/departamentos">Criar primeiro departamento</a>' : ''}
           </div>`;
         return;
@@ -1539,7 +1541,7 @@
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><path d="M2 12h20"/></svg>
             </div>
             <div style="min-width:0">
-              <div class="dcs-name">${d.name}</div>
+              <div class="dcs-name">${esc(d.name)}</div>
               <span class="dcs-badge ${isArq ? 'arquivado' : 'ativo'}">${isArq ? 'Arquivado' : 'Ativo'}</span>
             </div>
           </div>
@@ -1556,7 +1558,7 @@
 
     function renderMinisterio(m) {
       _ministerioAtual = m;
-      document.title = `Hug Software — ${m.name}`;
+      document.title = `Hug Software — ${esc(m.name)}`;
       const criadoDate = m.created_at ? new Date(m.created_at) : null;
 
       // Header

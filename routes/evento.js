@@ -2,6 +2,7 @@ const router = require('express').Router()
 const { supabaseAdmin } = require('../lib/supabase')
 const authMiddleware = require('../middleware/auth')
 const checkPermissao = require('../middleware/checkPermissao')
+const { dbError, serverError } = require('../lib/apiError') // SEC-006
 
 function generateRecurDates(startDate, recurrenceType, recurrenceConfig) {
   const count = parseInt(recurrenceConfig?.count) || 0
@@ -115,7 +116,7 @@ router.get('/', authMiddleware, checkPermissao('evento', 'ver'), async (req, res
   if (req.query.status) query = query.eq('status', req.query.status)
 
   const { data, error } = await query
-  if (error) { console.error('[evento GET]', error); return res.status(500).json({ error: error.message }) }
+  if (error) { console.error('[evento GET]', error); return dbError(res, error, 'evento') }
   console.log('[evento GET] church=%s total=%d', churchId, (data||[]).length)
   res.json({ eventos: data || [] })
 })
@@ -175,7 +176,7 @@ router.post('/', authMiddleware, checkPermissao('evento', 'criar'), async (req, 
     .select()
     .single()
 
-  if (error) { console.error('[evento POST]', error); return res.status(500).json({ error: error.message }) }
+  if (error) { console.error('[evento POST]', error); return dbError(res, error, 'evento') }
 
   // Cria eventos filhos para recorrência
   if (!parent_event_id && recurrence_type) {
@@ -258,7 +259,7 @@ router.put('/:id', authMiddleware, checkPermissao('evento', 'editar'), async (re
     .eq('church_id', churchId)
     .select()
 
-  if (error) { console.error('[evento PUT]', error); return res.status(500).json({ error: error.message }) }
+  if (error) { console.error('[evento PUT]', error); return dbError(res, error, 'evento') }
   if (!data?.length) return res.status(404).json({ error: 'Evento não encontrado' })
   res.json({ evento: data[0] })
 })
@@ -274,7 +275,7 @@ router.delete('/:id', authMiddleware, checkPermissao('evento', 'cancelar'), asyn
     .eq('id', req.params.id)
     .eq('church_id', churchId)
 
-  if (error) { console.error('[evento DELETE]', error); return res.status(500).json({ error: error.message }) }
+  if (error) { console.error('[evento DELETE]', error); return dbError(res, error, 'evento') }
   res.json({ ok: true })
 })
 

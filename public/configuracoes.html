@@ -8,6 +8,8 @@
   <script src="/js/page-loader.js"></script>
   <script src="/js/cache.js"></script>
   <link rel="icon" type="image/png" href="/IMG/logo.png">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
     * { font-family: 'Plus Jakarta Sans', sans-serif !important; }
 
@@ -767,6 +769,46 @@
     .locais-empty svg { width: 28px; height: 28px; color: var(--ink-subtle); }
     .locais-empty span { font-size: 13px; color: var(--ink-subtle); letter-spacing: -0.12px; }
 
+    /* ── Locais cards ── */
+    .locais-list { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; }
+    .local-card { background: #fff; border: 1px solid #E8E5E2; border-radius: 12px; padding: 14px 16px; display: flex; align-items: center; gap: 14px; }
+    .local-mini-map { width: 60px; height: 60px; border-radius: 8px; overflow: hidden; flex-shrink: 0; border: 1px solid #E8E5E2; }
+    .local-info { flex: 1; min-width: 0; }
+    .local-name { font-size: 14px; font-weight: 600; color: #1C1C1C; }
+    .local-meta { font-size: 12px; color: #7A7772; margin-top: 2px; }
+    .local-actions { display: flex; gap: 6px; flex-shrink: 0; }
+    .local-btn { width: 30px; height: 30px; border-radius: 8px; border: 1px solid #E8E5E2; background: none; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #7A7772; transition: all 0.12s; }
+    .local-btn:hover { background: #F5F3F0; color: #1C1C1C; }
+    .local-btn.danger:hover { background: #FEE8EA; color: #C0394A; border-color: #FEE8EA; }
+    .local-btn svg { width: 14px; height: 14px; }
+
+    /* ── Modal local ── */
+    .modal-local-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 800; display: none; align-items: center; justify-content: center; }
+    .modal-local-overlay.open { display: flex; }
+    .modal-local-box { background: #fff; border-radius: 20px; width: 560px; max-width: 95vw; max-height: 90vh; overflow-y: auto; box-shadow: 0 16px 48px rgba(0,0,0,0.18); }
+    .modal-local-header { background: linear-gradient(135deg, #F5F3EE 0%, #EDE9FE 55%, #C4B5FD 100%); padding: 22px 24px; border-radius: 20px 20px 0 0; display: flex; align-items: center; justify-content: space-between; }
+    .modal-local-title { font-size: 18px; font-weight: 700; color: #1A1A1A; }
+    .modal-local-close { width: 32px; height: 32px; border: none; background: rgba(145,86,241,0.15); border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #1A1A1A; transition: background 0.12s; }
+    .modal-local-close:hover { background: rgba(145,86,241,0.25); }
+    .modal-local-body { padding: 20px 24px; display: flex; flex-direction: column; gap: 16px; }
+    .ml-field { display: flex; flex-direction: column; gap: 6px; position: relative; }
+    .ml-label { font-size: 11px; font-weight: 600; color: #9E9B96; text-transform: uppercase; letter-spacing: 0.5px; }
+    .ml-input { width: 100%; height: 42px; border: 1.5px solid #E8E5E2; border-radius: 10px; padding: 0 14px; font-size: 14px; font-family: inherit; color: #1C1C1C; outline: none; background: #fff; transition: border-color 0.15s; }
+    .ml-input:focus { border-color: #9156F1; box-shadow: 0 0 0 3px rgba(145,86,241,0.10); }
+    .addr-suggestions { position: absolute; top: 100%; left: 0; right: 0; background: #fff; border: 1.5px solid #9156F1; border-top: none; border-radius: 0 0 10px 10px; z-index: 900; max-height: 200px; overflow-y: auto; }
+    .addr-suggestion { padding: 10px 14px; font-size: 13px; cursor: pointer; border-bottom: 1px solid #F5F3F0; color: #1C1C1C; transition: background 0.1s; }
+    .addr-suggestion:hover { background: rgba(145,86,241,0.06); }
+    .addr-suggestion:last-child { border-bottom: none; }
+    #localMap { width: 100%; height: 300px; border-radius: 10px; border: 1.5px solid #E8E5E2; z-index: 1; }
+    .raio-row { display: flex; align-items: center; gap: 12px; }
+    .raio-slider { flex: 1; accent-color: #9156F1; }
+    .raio-label { font-size: 13px; font-weight: 600; color: #9156F1; min-width: 80px; text-align: right; }
+    .modal-local-footer { padding: 16px 24px; border-top: 1px solid #F5F3F0; display: flex; justify-content: flex-end; gap: 10px; }
+    .btn-ml-cancel { height: 38px; padding: 0 18px; background: #F5F3F0; border: none; border-radius: 9999px; font-size: 14px; font-weight: 500; color: #5C5955; font-family: inherit; cursor: pointer; }
+    .btn-ml-save { height: 38px; padding: 0 22px; background: #9156F1; border: none; border-radius: 9999px; font-size: 14px; font-weight: 600; color: #fff; font-family: inherit; cursor: pointer; transition: background 0.15s; }
+    .btn-ml-save:hover { background: #7340D4; }
+    .btn-ml-save:disabled { opacity: 0.5; cursor: default; }
+
     /* ── Toggles ── */
     .toggle-list { display: flex; flex-direction: column; margin-top: 8px; }
 
@@ -1321,7 +1363,7 @@
       <a class="nav-item" href="/voluntarios" data-tooltip="Voluntários" data-menu="voluntarios">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
         <span>Voluntários</span>
-      </a>      <a class="nav-item" href="/notificacoes" data-tooltip="Notificações" data-menu="notificacoes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span>Notificações</span></a>
+      </a>      <a class="nav-item" href="/notificacoes" data-tooltip="Notificações" data-menu="notificacoes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span>Notificações</span></a>      <a class="nav-item" href="/checkin" data-tooltip="Meu Check-in" data-menu="checkin"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg><span>Meu Check-in</span></a>      <a class="nav-item" href="/presenca" data-tooltip="Presenças" data-menu="presenca"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>Presenças</span></a>
 </nav>
   </aside>
 
@@ -1732,7 +1774,7 @@
               <div class="locais-section">
                 <div class="locais-header">
                   <span class="locais-label">Locais para check-in</span>
-                  <button class="btn-novo-local">
+                  <button class="btn-novo-local" id="btnNovoLocal" onclick="abrirModalLocal()">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                     Novo Local
                   </button>
@@ -1741,6 +1783,7 @@
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
                   <span>Nenhum local cadastrado</span>
                 </div>
+                <div class="locais-list" id="locaisList"></div>
               </div>
 
             </div>
@@ -2134,6 +2177,8 @@
   <script src="/js/sidebar-permissions.js"></script>
     <script src="/js/sidebar-ui.js"></script>
   <script>
+    // SEC-005: escape de HTML para prevenir XSS em innerHTML
+    function esc(s) { return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') }
     const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
     const igreja  = JSON.parse(localStorage.getItem('igreja')  || '{}');
 
@@ -2408,6 +2453,228 @@
   </script>
   <script src="/js/top-search.js"></script>
   <script src="/js/mobile-sidebar.js"></script>
-<script src="/js/notif-ui.js"></script>
+  <script src="/js/notif-ui.js"></script>
+
+  <!-- Modal Novo/Editar Local -->
+  <div class="modal-local-overlay" id="modalLocalOverlay">
+    <div class="modal-local-box">
+      <div class="modal-local-header">
+        <span class="modal-local-title" id="modalLocalTitle">Novo Local de Check-in</span>
+        <button class="modal-local-close" onclick="fecharModalLocal()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-local-body">
+        <div class="ml-field">
+          <label class="ml-label">Nome do Local *</label>
+          <input class="ml-input" type="text" id="mlNome" placeholder="Ex: Templo Principal">
+        </div>
+        <div class="ml-field" id="mlAddrWrap">
+          <label class="ml-label">Buscar Endereço</label>
+          <input class="ml-input" type="text" id="mlAddr" placeholder="Digite o endereço para centralizar o mapa..." autocomplete="off">
+          <div id="mlSuggestions" class="addr-suggestions" style="display:none"></div>
+        </div>
+        <div class="ml-field">
+          <label class="ml-label">Localização (arraste o pin para ajustar)</label>
+          <div id="localMap"></div>
+        </div>
+        <div class="ml-field">
+          <label class="ml-label">Raio permitido</label>
+          <div class="raio-row">
+            <input type="range" class="raio-slider" id="mlRaio" min="50" max="2000" step="50" value="500">
+            <span class="raio-label" id="mlRaioLabel">500 metros</span>
+          </div>
+        </div>
+        <input type="hidden" id="mlLat">
+        <input type="hidden" id="mlLng">
+        <input type="hidden" id="mlEditId">
+      </div>
+      <div class="modal-local-footer">
+        <button class="btn-ml-cancel" onclick="fecharModalLocal()">Cancelar</button>
+        <button class="btn-ml-save" id="btnSalvarLocal" onclick="salvarLocal()">Salvar</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* ── Locais Check-in ── */
+    let _localMap = null, _localMarker = null, _localCircle = null
+    let _locais = []
+
+    async function carregarLocais() {
+      try {
+        const res = await authFetch('/api/local-checkin')
+        if (!res.ok) return
+        const { locais } = await res.json()
+        _locais = locais || []
+        renderLocais()
+      } catch {}
+    }
+
+    function renderLocais() {
+      const empty = document.getElementById('locaisEmpty')
+      const list  = document.getElementById('locaisList')
+      if (!_locais.length) {
+        empty.style.display = ''; list.innerHTML = ''; return
+      }
+      empty.style.display = 'none'
+      list.innerHTML = _locais.map(l => `
+        <div class="local-card" id="lcard-${l.id}">
+          <div class="local-info">
+            <div class="local-name">${l.name}</div>
+            <div class="local-meta">
+              ${l.latitude ? `📍 ${Number(l.latitude).toFixed(5)}, ${Number(l.longitude).toFixed(5)}` : ''}
+              · Raio: ${l.raio_metros}m
+            </div>
+          </div>
+          <div class="local-actions">
+            <button class="local-btn" onclick="editarLocal('${l.id}')" title="Editar">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </button>
+            <button class="local-btn danger" onclick="excluirLocal('${l.id}')" title="Excluir">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+            </button>
+          </div>
+        </div>`).join('')
+    }
+
+    function abrirModalLocal(local = null) {
+      document.getElementById('modalLocalTitle').textContent = local ? 'Editar Local' : 'Novo Local de Check-in'
+      document.getElementById('mlNome').value    = local?.name || ''
+      document.getElementById('mlAddr').value    = ''
+      document.getElementById('mlRaio').value    = local?.raio_metros || 500
+      document.getElementById('mlRaioLabel').textContent = (local?.raio_metros || 500) + ' metros'
+      document.getElementById('mlEditId').value  = local?.id || ''
+      document.getElementById('mlLat').value     = local?.latitude || ''
+      document.getElementById('mlLng').value     = local?.longitude || ''
+      document.getElementById('mlSuggestions').style.display = 'none'
+      document.getElementById('modalLocalOverlay').classList.add('open')
+
+      setTimeout(() => {
+        if (_localMap) { _localMap.remove(); _localMap = null; _localMarker = null; _localCircle = null }
+        const lat = local?.latitude ? Number(local.latitude) : -15.7801
+        const lng = local?.longitude ? Number(local.longitude) : -47.9292
+        const raio = Number(document.getElementById('mlRaio').value)
+
+        _localMap = L.map('localMap').setView([lat, lng], 15)
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '© OpenStreetMap', maxZoom: 19
+        }).addTo(_localMap)
+
+        _localMarker = L.marker([lat, lng], { draggable: true }).addTo(_localMap)
+        _localCircle = L.circle([lat, lng], { radius: raio, color: '#9156F1', fillColor: '#9156F1', fillOpacity: 0.12, weight: 2 }).addTo(_localMap)
+
+        _localMarker.on('dragend', () => {
+          const pos = _localMarker.getLatLng()
+          document.getElementById('mlLat').value = pos.lat
+          document.getElementById('mlLng').value = pos.lng
+          _localCircle.setLatLng(pos)
+        })
+      }, 100)
+    }
+
+    function fecharModalLocal() {
+      document.getElementById('modalLocalOverlay').classList.remove('open')
+      if (_localMap) { _localMap.remove(); _localMap = null }
+    }
+
+    // Slider raio
+    document.getElementById('mlRaio').addEventListener('input', function() {
+      const v = parseInt(this.value)
+      document.getElementById('mlRaioLabel').textContent = v + ' metros'
+      if (_localCircle) _localCircle.setRadius(v)
+    })
+
+    // Busca endereço via Nominatim
+    let _addrTimer = null
+    document.getElementById('mlAddr').addEventListener('input', function() {
+      clearTimeout(_addrTimer)
+      const q = this.value.trim()
+      const box = document.getElementById('mlSuggestions')
+      if (q.length < 3) { box.style.display = 'none'; return }
+      _addrTimer = setTimeout(async () => {
+        try {
+          const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=5&addressdetails=1`, {
+            headers: { 'Accept-Language': 'pt-BR' }
+          })
+          const data = await res.json()
+          if (!data.length) { box.style.display = 'none'; return }
+          box.innerHTML = data.map(r => `<div class="addr-suggestion" data-lat="${r.lat}" data-lng="${r.lon}" data-name="${r.display_name}">${r.display_name}</div>`).join('')
+          box.style.display = ''
+          box.querySelectorAll('.addr-suggestion').forEach(el => {
+            el.addEventListener('click', () => {
+              const lat = parseFloat(el.dataset.lat)
+              const lng = parseFloat(el.dataset.lng)
+              document.getElementById('mlAddr').value = el.dataset.name
+              document.getElementById('mlLat').value  = lat
+              document.getElementById('mlLng').value  = lng
+              box.style.display = 'none'
+              if (_localMap && _localMarker) {
+                _localMap.setView([lat, lng], 16)
+                _localMarker.setLatLng([lat, lng])
+                _localCircle.setLatLng([lat, lng])
+              }
+            })
+          })
+        } catch {}
+      }, 500)
+    })
+
+    document.addEventListener('click', e => {
+      if (!e.target.closest('#mlAddrWrap')) document.getElementById('mlSuggestions').style.display = 'none'
+    })
+
+    async function salvarLocal() {
+      const nome  = document.getElementById('mlNome').value.trim()
+      const lat   = parseFloat(document.getElementById('mlLat').value)
+      const lng   = parseFloat(document.getElementById('mlLng').value)
+      const raio  = parseInt(document.getElementById('mlRaio').value)
+      const editId = document.getElementById('mlEditId').value
+
+      if (!nome) { alert('Informe o nome do local'); return }
+      if (isNaN(lat) || isNaN(lng)) { alert('Selecione a localização no mapa'); return }
+
+      const btn = document.getElementById('btnSalvarLocal')
+      btn.disabled = true; btn.textContent = 'Salvando...'
+
+      try {
+        // Atualiza pin antes de salvar com posição atual do mapa
+        if (_localMarker) {
+          const pos = _localMarker.getLatLng()
+          document.getElementById('mlLat').value = pos.lat
+          document.getElementById('mlLng').value = pos.lng
+        }
+
+        const body = { name: nome, latitude: parseFloat(document.getElementById('mlLat').value), longitude: parseFloat(document.getElementById('mlLng').value), raio_metros: raio }
+        const url    = editId ? '/api/local-checkin/' + editId : '/api/local-checkin'
+        const method = editId ? 'PUT' : 'POST'
+        const res = await authFetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+        if (!res.ok) { const e = await res.json(); alert(e.error || 'Erro ao salvar'); return }
+        fecharModalLocal()
+        await carregarLocais()
+      } catch (e) { alert('Erro de conexão') }
+      finally { btn.disabled = false; btn.textContent = 'Salvar' }
+    }
+
+    function editarLocal(id) {
+      const local = _locais.find(l => l.id === id)
+      if (local) abrirModalLocal(local)
+    }
+
+    async function excluirLocal(id) {
+      if (!confirm('Excluir este local?')) return
+      try {
+        await authFetch('/api/local-checkin/' + id, { method: 'DELETE' })
+        await carregarLocais()
+      } catch {}
+    }
+
+    // Carrega locais quando a seção de check-in for aberta
+    document.getElementById('checkinHeader')?.addEventListener('click', () => {
+      setTimeout(carregarLocais, 200)
+    })
+    // Também carrega na inicialização
+    carregarLocais()
+  </script>
 </body>
 </html>

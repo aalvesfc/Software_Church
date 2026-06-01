@@ -2,6 +2,7 @@ const router = require('express').Router()
 const { supabaseAdmin } = require('../lib/supabase')
 const authMiddleware = require('../middleware/auth')
 const checkPermissao = require('../middleware/checkPermissao')
+const { dbError, serverError } = require('../lib/apiError') // SEC-006
 
 async function validateEvent(eventId, churchId) {
   const { data } = await supabaseAdmin
@@ -36,7 +37,7 @@ router.get('/', authMiddleware, checkPermissao('cronograma', 'ver'), async (req,
     .eq('church_id', churchId)
     .order('created_at', { ascending: false })
 
-  if (error) { console.error('[cronograma GET /]', error); return res.status(500).json({ error: error.message }) }
+  if (error) { console.error('[cronograma GET /]', error); return dbError(res, error, 'cronograma') }
   res.json({ cronogramas: data || [] })
 })
 
@@ -52,7 +53,7 @@ router.get('/:eventId', authMiddleware, checkPermissao('cronograma', 'ver'), asy
     .eq('church_id', churchId)
     .maybeSingle()
 
-  if (error) { console.error('[cronograma GET :eventId]', error); return res.status(500).json({ error: error.message }) }
+  if (error) { console.error('[cronograma GET :eventId]', error); return dbError(res, error, 'cronograma') }
   console.log('[cronograma GET :eventId] eventId=%s church=%s found=%s', req.params.eventId, churchId, !!data)
   res.json({ cronograma: data || null })
 })
@@ -74,7 +75,7 @@ router.post('/:eventId', authMiddleware, checkPermissao('cronograma', 'criar'), 
     .select('*')
     .single()
 
-  if (error) { console.error('[cronograma POST]', error); return res.status(500).json({ error: error.message }) }
+  if (error) { console.error('[cronograma POST]', error); return dbError(res, error, 'cronograma') }
   res.status(201).json({ cronograma: data })
 })
 
@@ -94,7 +95,7 @@ router.put('/:id', authMiddleware, checkPermissao('cronograma', 'editar'), async
     .select('*')
     .single()
 
-  if (error) { console.error('[cronograma PUT]', error); return res.status(500).json({ error: error.message }) }
+  if (error) { console.error('[cronograma PUT]', error); return dbError(res, error, 'cronograma') }
   if (!data) return res.status(404).json({ error: 'Cronograma não encontrado' })
   res.json({ cronograma: data })
 })
@@ -117,7 +118,7 @@ router.get('/:cronogramaId/itens', authMiddleware, checkPermissao('cronograma', 
     .eq('church_id', churchId)
     .order('ordem', { ascending: true })
 
-  if (error) { console.error('[cronograma itens GET]', error); return res.status(500).json({ error: error.message }) }
+  if (error) { console.error('[cronograma itens GET]', error); return dbError(res, error, 'cronograma') }
   console.log('[cronograma itens GET] cronogramaId=%s church=%s itens=%d', req.params.cronogramaId, churchId, data?.length ?? 0)
   res.json({ cronograma, itens: data || [] })
 })
@@ -161,7 +162,7 @@ router.post('/:cronogramaId/itens', authMiddleware, checkPermissao('cronograma',
     .select('*, musica:musica_id (id, title, artist, tom, bpm, duration)')
     .single()
 
-  if (error) { console.error('[cronograma itens POST]', error); return res.status(500).json({ error: error.message }) }
+  if (error) { console.error('[cronograma itens POST]', error); return dbError(res, error, 'cronograma') }
   res.status(201).json({ item: data })
 })
 
@@ -205,7 +206,7 @@ router.post('/:cronogramaId/reutilizar', authMiddleware, checkPermissao('cronogr
     .order('ordem', { ascending: true })
 
   console.log('[reutilizar] source itens=%d srcErr=%s', source?.length, srcErr?.message)
-  if (srcErr) return res.status(500).json({ error: srcErr.message })
+  if (srcErr) return dbError(res, srcErr, 'cronograma')
   if (!source?.length) return res.status(400).json({ error: 'O cronograma selecionado não possui itens para copiar' })
 
   const copies = source.map(item => ({
@@ -225,7 +226,7 @@ router.post('/:cronogramaId/reutilizar', authMiddleware, checkPermissao('cronogr
     .insert(copies)
     .select('*, musica:musica_id (id, title, artist, tom, bpm, duration)')
 
-  if (error) { console.error('[cronograma reutilizar]', error); return res.status(500).json({ error: error.message }) }
+  if (error) { console.error('[cronograma reutilizar]', error); return dbError(res, error, 'cronograma') }
   res.status(201).json({ itens: data })
 })
 
@@ -251,7 +252,7 @@ router.put('/:cronogramaId/itens/:id', authMiddleware, checkPermissao('cronogram
     .select('*, musica:musica_id (id, title, artist, tom, bpm, duration)')
     .single()
 
-  if (error) { console.error('[cronograma itens PUT]', error); return res.status(500).json({ error: error.message }) }
+  if (error) { console.error('[cronograma itens PUT]', error); return dbError(res, error, 'cronograma') }
   if (!data) return res.status(404).json({ error: 'Item não encontrado' })
   res.json({ item: data })
 })
@@ -268,7 +269,7 @@ router.delete('/:cronogramaId/itens/:id', authMiddleware, checkPermissao('cronog
     .eq('cronograma_id', req.params.cronogramaId)
     .eq('church_id', churchId)
 
-  if (error) { console.error('[cronograma itens DELETE]', error); return res.status(500).json({ error: error.message }) }
+  if (error) { console.error('[cronograma itens DELETE]', error); return dbError(res, error, 'cronograma') }
   res.json({ ok: true })
 })
 

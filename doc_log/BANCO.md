@@ -37,6 +37,8 @@ db_church
     │   └── db_escala_item → db_member + db_funcao_dept
     ├── db_cronograma
     │   └── db_cronograma_item → db_musica
+    └── db_checkin → db_member + db_local_checkin
+└── db_local_checkin
 └── db_musica
 └── db_notificacao → db_user
 └── db_notificacao_tipo
@@ -499,7 +501,65 @@ action: 'created'   entity: 'evento'    → "Wallace criou evento Culto da Famí
 
 ---
 
-### `db_config` — Configurações da Igreja (chave-valor)
+### `db_local_checkin` — Locais de Check-in
+| Campo | Tipo | Descrição |
+|---|---|---|
+| id | uuid PK | — |
+| church_id | uuid FK | → db_church |
+| name | text NOT NULL | Nome do local (ex: "Templo Principal") |
+| latitude | numeric(10,7) NOT NULL | Coordenada GPS |
+| longitude | numeric(10,7) NOT NULL | Coordenada GPS |
+| raio_metros | int DEFAULT 500 | Raio permitido em metros |
+| is_active | boolean DEFAULT true | Ativo |
+| created_at | timestamptz | — |
+| updated_at | timestamptz | — |
+
+---
+
+### `db_checkin` — Registros de Presença
+| Campo | Tipo | Descrição |
+|---|---|---|
+| id | uuid PK | — |
+| church_id | uuid FK | → db_church |
+| member_id | uuid FK | → db_member |
+| event_id | uuid FK | → db_event |
+| local_id | uuid FK nullable | → db_local_checkin |
+| checkin_at | timestamptz | Horário do check-in |
+| checkin_lat | numeric(10,7) | GPS no check-in |
+| checkin_lng | numeric(10,7) | GPS no check-in |
+| checkin_method | text DEFAULT 'gps' | gps \| qrcode \| manual |
+| checkout_at | timestamptz | Horário do check-out |
+| checkout_lat | numeric(10,7) | GPS no check-out |
+| checkout_lng | numeric(10,7) | GPS no check-out |
+| checkout_method | text | gps \| qrcode \| manual |
+| status | text DEFAULT 'aguardando' | aguardando \| presente \| saiu \| atrasado |
+| created_at | timestamptz | — |
+| updated_at | timestamptz | — |
+| UNIQUE | — | (member_id, event_id) |
+
+**Fluxo:**
+```
+Voluntário escalado no evento → status: 'aguardando'
+Faz check-in → status: 'presente', checkin_at = now()
+Faz check-out → status: 'saiu', checkout_at = now()
+Chegou após tolerância → status: 'atrasado'
+```
+
+**Configurações no db_config:**
+```
+checkin_geolocalizacao   → true | false (GPS obrigatório)
+checkin_raio_metros      → int (raio permitido, default: 500)
+checkin_radar_mapa       → true | false (exibir radar)
+checkin_qrcode           → true | false (permitir QR Code)
+checkin_checkout_manual  → true | false (checkout manual)
+checkin_antecedencia_min → int (minutos antes do evento, default: 60)
+checkin_tolerancia_min   → int (tolerância de atraso, default: 15)
+checkin_modo_offline     → true | false (cache offline)
+checkin_painel_ao_vivo   → true | false (tempo real)
+checkin_validar_precisao → true | false (rejeitar GPS impreciso)
+```
+
+---
 | Campo | Tipo | Descrição |
 |---|---|---|
 | id | uuid PK | — |

@@ -2,6 +2,7 @@ const router = require('express').Router()
 const { supabaseAdmin } = require('../lib/supabase')
 const authMiddleware = require('../middleware/auth')
 const checkPermissao = require('../middleware/checkPermissao')
+const { dbError, serverError } = require('../lib/apiError') // SEC-006
 
 
 // GET /api/ministry/:id — busca ministério único
@@ -33,7 +34,7 @@ router.get('/', authMiddleware, checkPermissao('ministerio', 'ver'), async (req,
 
   if (error) {
     console.error('[ministry GET]', error)
-    return res.status(500).json({ error: error.message })
+    return dbError(res, error, 'ministry')
   }
 
   res.json({ ministries: data || [] })
@@ -61,7 +62,7 @@ router.post('/', authMiddleware, checkPermissao('ministerio', 'criar'), async (r
 
   if (error) {
     console.error('[ministry POST]', error)
-    return res.status(500).json({ error: error.message })
+    return dbError(res, error, 'ministry')
   }
 
   res.status(201).json({ ministry: data })
@@ -89,7 +90,7 @@ router.put('/:id', authMiddleware, checkPermissao('ministerio', 'editar'), async
 
   if (error) {
     console.error('[ministry PUT]', error)
-    return res.status(500).json({ error: error.message })
+    return dbError(res, error, 'ministry')
   }
 
   if (!data || data.length === 0) {
@@ -125,7 +126,7 @@ router.delete('/:id', authMiddleware, checkPermissao('ministerio', 'arquivar'), 
 
   if (countError) {
     console.error('[ministry DELETE count]', countError)
-    return res.status(500).json({ error: countError.message })
+    return dbError(res, countError, 'ministry')
   }
 
   if (count > 0) {
@@ -142,7 +143,7 @@ router.delete('/:id', authMiddleware, checkPermissao('ministerio', 'arquivar'), 
 
   if (error) {
     console.error('[ministry DELETE]', error)
-    return res.status(500).json({ error: error.message })
+    return dbError(res, error, 'ministry')
   }
 
   res.json({ ok: true })

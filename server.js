@@ -1,12 +1,76 @@
 require('dotenv').config()
 const express = require('express')
 const cors = require('cors')
+const helmet = require('helmet') // SEC-004: headers de segurança HTTP
 const path = require('path')
+const rateLimit = require('express-rate-limit') // SEC-002: rate limiting
 
 const app = express()
 
-app.use(cors())
+// SEC-002: limitadores para endpoints críticos de autenticação
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // janela de 15 minutos
+  max: 10,                   // máximo 10 tentativas por IP
+  message: { error: 'Muitas tentativas de login. Aguarde 15 minutos.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+})
+
+const otpLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // janela de 1 hora
+  max: 5,                    // máximo 5 envios de OTP por IP
+  message: { error: 'Limite de envio de códigos atingido. Aguarde 1 hora.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+})
+
+const cadastroLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // janela de 1 hora
+  max: 20,                   // máximo 20 cadastros por IP
+  message: { error: 'Limite de cadastros atingido. Aguarde 1 hora.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+})
+
+// SEC-004: headers de segurança HTTP via Helmet
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc:      ["'self'"],
+      scriptSrc:       ["'self'", "'unsafe-inline'"],  // necessário: frontend usa scripts inline
+      styleSrc:        ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+      imgSrc:          ["'self'", "data:", "https://*.supabase.co"],
+      fontSrc:         ["'self'", "https://fonts.gstatic.com"],
+      connectSrc:      ["'self'", "https://*.supabase.co"],
+      frameAncestors:  ["'none'"],  // bloqueia clickjacking via iframe
+    },
+  },
+  crossOriginEmbedderPolicy: false, // necessário para assets externos (fontes, imagens Supabase)
+}))
+
+// SEC-003: CORS restrito — adicione o domínio de produção em ALLOWED_ORIGINS antes do deploy
+const ALLOWED_ORIGINS = [
+  'http://localhost:3000',
+  'http://127.0.0.1:3000',
+  // 'https://SEU-DOMINIO-PRODUCAO.com', // ← descomentar e preencher antes do deploy
+]
+
+app.use(cors({
+  origin: (origin, callback) => {
+    // Permite requisições sem origin (ex: Postman, apps mobile, curl)
+    if (!origin) return callback(null, true)
+    if (ALLOWED_ORIGINS.includes(origin)) return callback(null, true)
+    callback(new Error('Origem não permitida pelo CORS'))
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+}))
 app.use(express.json({ limit: '10mb' }))
+
+// SEC-002: aplica limitadores antes do router de auth
+app.use('/api/auth/login',    loginLimiter)
+app.use('/api/auth/otp/send', otpLimiter)
+app.use('/api/auth/cadastro', cadastroLimiter)
 app.use((req, res, next) => {
   if (req.path.endsWith('.html') || req.path === '/') {
     res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate')
@@ -169,6 +233,11 @@ app.use('/api/escala',            require('./routes/escala'))
 app.use('/api/lider',            require('./routes/lider'))
 app.use('/api/dashboard',        require('./routes/dashboard'))
 app.use('/api/notificacao',      require('./routes/notificacao'))
+app.use('/api/checkin',          require('./routes/checkin'))
+app.use('/api/local-checkin',    require('./routes/local-checkin'))
+
+app.get('/checkin',  (req, res) => res.sendFile(path.join(__dirname, 'public', 'checkin.html')))
+app.get('/presenca', (req, res) => res.sendFile(path.join(__dirname, 'public', 'presenca.html')))
 
 app.get('/cadastro', (req, res) => res.sendFile(path.join(__dirname, 'public', 'cadastro.html')))
 

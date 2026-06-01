@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hug Software — Meu Check-in</title>
+  <script src="/js/auth-check.js"></script>
+  <script src="/js/page-loader.js"></script>
+  <script src="/js/cache.js"></script>
+  <link rel="icon" type="image/png" href="/IMG/logo.png">
+  <style>
+    * { font-family: 'Plus Jakarta Sans', sans-serif !important; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --primary:       #9156F1;
+      --primary-light: #EDE5FF;
+      --primary-dark:  #7340D4;
+      --primary-10:    rgba(145,86,241,0.1);
+      --ink:           #1d1d1f;
+      --ink-muted:     #6e6e73;
+      --ink-subtle:    #aeaeb2;
+      --canvas:        #ffffff;
+      --canvas-page:   #ECE9E7;
+      --canvas-input:  #f2f2f7;
+      --hairline:      #e0e0e0;
+      --on-dark:       #ffffff;
+      --on-dark-muted: rgba(255,255,255,0.65);
+      --sidebar-w:     60px;
+      --radius-sm:     8px;
+      --radius-md:     12px;
+      --radius-lg:     18px;
+      --radius-xl:     28px;
+      --radius-pill:   9999px;
+      --success-dark:  #5A9E2F;
+      --success-light: #F0FAE8;
+      --warning:       #F59E0B;
+      --warning-dark:  #B45309;
+      --warning-light: #FEF9C3;
+      --danger:        #E85D6A;
+      --danger-dark:   #C0394A;
+      --text-primary:  #1C1C1C;
+      --text-secondary:#5C5955;
+      --text-muted:    #9E9B96;
+      --border:        #E8E5E2;
+      --gray-100:      #F5F3F0;
+      --gray-200:      #E8E5E2;
+      --gray-400:      #9E9B96;
+      --gray-600:      #5C5955;
+    }
+    body { min-height: 100vh; background: var(--canvas-page); -webkit-font-smoothing: antialiased; display: flex; }
+
+    /* ── SIDEBAR ── */
+    .sidebar { width: var(--sidebar-w); min-height: unset; background: #1c1c1c; display: flex; flex-direction: column; flex-shrink: 0; position: fixed; top: 0; left: 0; bottom: 0; z-index: 100; overflow: visible; transition: width 0.22s cubic-bezier(.4,0,.2,1); }
+    .sidebar-nav { flex: 1; padding: 14px 0; overflow-y: auto; scrollbar-width: none; display: flex; flex-direction: column; }
+    .sidebar-nav::-webkit-scrollbar { display: none; }
+    .nav-item { display: flex; align-items: center; gap: 12px; padding: 10px; font-size: 14px; font-weight: 400; color: rgba(255,255,255,0.5); text-decoration: none; cursor: pointer; white-space: nowrap; transition: background 0.12s, color 0.12s; border-radius: 14px; margin: 2px 8px; position: relative; }
+    .nav-item:hover { color: rgba(255,255,255,0.9); background: rgba(255,255,255,0.1); }
+    .nav-item.active { color: #1A1A1A; background: #FFFFFF; }
+    .nav-item svg { width: 20px; height: 20px; flex-shrink: 0; }
+    .nav-item span { display: none; }
+    .nav-item::after { content: attr(data-tooltip); position: absolute; left: calc(100% + 12px); top: 50%; transform: translateY(-50%) translateX(-6px); background: #1a1a1a; color: #fff; font-size: 12px; font-weight: 500; padding: 6px 12px; border-radius: 8px; white-space: nowrap; pointer-events: none; opacity: 0; transition: opacity 0.15s, transform 0.15s; z-index: 9999; box-shadow: 0 4px 14px rgba(0,0,0,0.28); }
+    .nav-item::before { content: ''; position: absolute; left: calc(100% + 6px); top: 50%; transform: translateY(-50%) translateX(-6px); border: 5px solid transparent; border-right-color: #1a1a1a; pointer-events: none; opacity: 0; transition: opacity 0.15s, transform 0.15s; z-index: 9999; }
+    .nav-item:hover::after, .nav-item:hover::before { opacity: 1; transform: translateY(-50%) translateX(0); }
+
+    /* ── MAIN ── */
+    .main { margin-left: 84px; flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+
+    /* ── TOPBAR ── */
+    .topbar { height: 72px; display: flex; align-items: center; justify-content: flex-end; padding: 0 28px; position: sticky; top: 0; z-index: 50; background: linear-gradient(135deg, #ECE9E700 0%, #ECE9E7 100%); backdrop-filter: blur(1px); }
+    .topbar-actions { display: flex; align-items: center; gap: 8px; }
+    .topbar-search { display: flex; align-items: center; gap: 8px; }
+    .topbar-search input { width: 300px; height: 42px; background: #fff; border: 1.5px solid #eee; border-radius: var(--radius-pill); padding: 0 18px; font-size: 14px; font-family: inherit; color: #1A1A1A; outline: none; }
+    .search-btn { width: 42px; height: 42px; border-radius: 50%; border: none; background: var(--primary); color: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
+    .search-btn svg { width: 18px; height: 18px; }
+    .icon-btn { width: 40px; height: 40px; border-radius: var(--radius-pill); border: none; background: none; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--ink-muted); transition: background 0.12s, color 0.12s; }
+    .icon-btn:hover { background: var(--canvas-input); color: var(--ink); }
+    .icon-btn svg { width: 20px; height: 20px; }
+    .avatar { width: 40px; height: 40px; border-radius: var(--radius-pill); background: #e8612a; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 600; color: #fff; cursor: pointer; margin-left: 4px; user-select: none; overflow: hidden; }
+    .avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block; }
+    .avatar-menu-wrap { position: relative; }
+    .avatar-dropdown { position: absolute; top: calc(100% + 8px); right: 0; width: 220px; background: var(--canvas); border: 1px solid var(--hairline); border-radius: var(--radius-md); box-shadow: 0 8px 24px rgba(0,0,0,0.10); padding: 6px; z-index: 200; opacity: 0; pointer-events: none; transform: translateY(-6px); transition: opacity 0.15s, transform 0.15s; }
+    .avatar-dropdown.open { opacity: 1; pointer-events: auto; transform: translateY(0); }
+    .dropdown-header { padding: 10px 12px 12px; border-bottom: 1px solid var(--hairline); margin-bottom: 6px; }
+    .dropdown-name { font-size: 14px; font-weight: 600; color: var(--ink); }
+    .dropdown-email { font-size: 12px; color: var(--ink-subtle); margin-top: 2px; }
+    .dropdown-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; font-size: 14px; color: var(--ink); border-radius: var(--radius-sm); text-decoration: none; cursor: pointer; transition: background 0.12s; }
+    .dropdown-item:hover { background: var(--canvas-page); }
+    .dropdown-item svg { width: 16px; height: 16px; color: var(--ink-muted); }
+    .dropdown-item.danger { color: #ff3b30; }
+    .dropdown-item.danger svg { color: #ff3b30; }
+    .dropdown-item.danger:hover { background: rgba(255,59,48,0.06); }
+    .dropdown-divider { height: 1px; background: var(--hairline); margin: 6px 0; }
+
+    /* ── Notif ── */
+    .notif-badge { position:absolute; top:-4px; right:-4px; background:#E85D6A; color:#fff; border-radius:50%; width:18px; height:18px; font-size:10px; font-weight:700; display:flex; align-items:center; justify-content:center; pointer-events:none; }
+    .notif-dropdown { position:absolute; top:48px; right:0; width:360px; background:#fff; border-radius:16px; border:1px solid #E8E5E2; box-shadow:0 8px 32px rgba(0,0,0,0.12); z-index:300; display:none; overflow:hidden; }
+    .notif-dropdown.open { display:block; }
+    .notif-header { display:flex; align-items:center; justify-content:space-between; padding:14px 16px; border-bottom:1px solid #F5F3F0; }
+    .notif-list { max-height:360px; overflow-y:auto; }
+    .notif-item { padding:12px 16px; border-bottom:1px solid #F5F3F0; cursor:pointer; display:flex; gap:12px; align-items:flex-start; transition:background 0.1s; }
+    .notif-item:hover { background:#F5F3F0; }
+    .notif-item.unread { background:rgba(145,86,241,0.06); }
+    .notif-icon { width:36px; height:36px; border-radius:50%; background:#EDE5FF; display:flex; align-items:center; justify-content:center; flex-shrink:0; color:#9156F1; }
+    .notif-content { flex:1; min-width:0; }
+    .notif-title { font-weight:600; font-size:13px; color:#1C1C1C; margin-bottom:2px; }
+    .notif-body { font-size:12px; color:#5C5955; line-height:1.4; margin-bottom:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .notif-time { font-size:11px; color:#9E9B96; }
+    .notif-footer { padding:10px 16px; border-top:1px solid #F5F3F0; text-align:center; }
+
+    /* ── CONTENT ── */
+    .content { padding: 28px 32px; flex: 1; }
+
+    /* ── PAGE GREETING ── */
+    .page-greeting { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+    .pg-left { display: flex; flex-direction: column; gap: 4px; }
+    .pg-title { font-size: 30px; font-weight: 700; color: #1A1A1A; letter-spacing: -0.5px; line-height: 1.2; }
+    .pg-sup   { font-size: 16px; font-style: italic; color: var(--ink-muted); }
+
+    /* ── CHECK-IN CONTENT ── */
+    .checkin-wrap { max-width: 520px; display: flex; flex-direction: column; gap: 16px; }
+
+    .hero-card { background: linear-gradient(135deg, #F5F3EE 0%, #EDE9FE 55%, #C4B5FD 100%); border-radius: 20px; padding: 24px; position: relative; overflow: hidden; border: 1px solid rgba(196,181,253,0.4); box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+    .hero-card::after { content: ''; position: absolute; width: 200px; height: 200px; border-radius: 50%; border: 40px solid rgba(145,86,241,0.07); right: -60px; top: -60px; pointer-events: none; }
+    .hero-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--primary); margin-bottom: 8px; }
+    .hero-event-name { font-size: 20px; font-weight: 700; color: #1C1C1C; letter-spacing: -0.3px; line-height: 1.3; margin-bottom: 6px; }
+    .hero-time { font-size: 14px; color: var(--text-secondary); display: flex; align-items: center; gap: 6px; }
+    .hero-time svg { width: 14px; height: 14px; color: var(--primary); flex-shrink: 0; }
+
+    .no-event-card { background: #fff; border-radius: 20px; padding: 40px 24px; text-align: center; border: 1px solid var(--border); }
+    .no-event-icon { width: 56px; height: 56px; background: var(--gray-100); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; }
+    .no-event-icon svg { width: 26px; height: 26px; color: var(--gray-400); }
+    .no-event-title { font-size: 16px; font-weight: 700; color: var(--text-primary); margin-bottom: 6px; }
+    .no-event-desc { font-size: 14px; color: var(--text-secondary); line-height: 1.5; }
+
+    .gps-card { background: #fff; border-radius: 16px; padding: 16px 20px; border: 1px solid var(--border); display: flex; align-items: center; gap: 14px; }
+    .gps-icon { width: 40px; height: 40px; border-radius: var(--radius-sm); background: var(--primary-10); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .gps-icon svg { width: 20px; height: 20px; color: var(--primary); }
+    .gps-info { flex: 1; min-width: 0; }
+    .gps-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); margin-bottom: 2px; }
+    .gps-status { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+    .gps-accuracy { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+    .gps-bar-wrap { margin-top: 6px; height: 4px; background: var(--gray-200); border-radius: 2px; overflow: hidden; }
+    .gps-bar { height: 100%; border-radius: 2px; transition: width 0.4s, background-color 0.4s; width: 0%; background: var(--success-dark); }
+    .gps-bar.good { background: var(--success-dark); }
+    .gps-bar.ok   { background: var(--warning); }
+    .gps-bar.poor { background: var(--danger); }
+
+    .action-card { background: #fff; border-radius: 20px; padding: 24px; border: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; gap: 16px; text-align: center; }
+    .status-badge { display: inline-flex; align-items: center; gap: 7px; padding: 8px 18px; border-radius: var(--radius-pill); font-size: 14px; font-weight: 700; }
+    .status-badge .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .badge-presente { background: var(--success-light); color: var(--success-dark); }
+    .badge-presente .dot { background: var(--success-dark); }
+    .badge-atrasado { background: var(--warning-light); color: var(--warning-dark); }
+    .badge-atrasado .dot { background: var(--warning); }
+    .badge-saiu { background: var(--gray-100); color: var(--gray-600); }
+    .badge-saiu .dot { background: var(--gray-400); }
+    .checkin-time { font-size: 13px; color: var(--text-secondary); }
+    .btn-checkin { width: 100%; height: 56px; background: var(--primary); color: #fff; border: none; border-radius: var(--radius-pill); font-size: 16px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: background 0.15s, transform 0.1s, box-shadow 0.15s; box-shadow: 0 4px 16px rgba(145,86,241,0.35); }
+    .btn-checkin:hover { background: var(--primary-dark); box-shadow: 0 6px 24px rgba(145,86,241,0.45); }
+    .btn-checkin:active { transform: scale(0.98); }
+    .btn-checkin svg { width: 20px; height: 20px; }
+    .btn-checkin:disabled { opacity: 0.55; cursor: default; box-shadow: none; transform: none; }
+    .btn-checkout { height: 44px; padding: 0 28px; background: var(--gray-100); color: var(--gray-600); border: 1px solid var(--border); border-radius: var(--radius-pill); font-size: 14px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: background 0.15s, color 0.15s; }
+    .btn-checkout:hover { background: var(--gray-200); color: #1C1C1C; }
+    .btn-checkout svg { width: 16px; height: 16px; }
+    .spinner { width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.35); border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite; flex-shrink: 0; }
+    .spinner.dark { border-color: rgba(0,0,0,0.15); border-top-color: var(--gray-600); }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── SIDEBAR REDESIGN ── */
+    .sidebar { width: 60px !important; background: #1c1c1c !important; border-radius: 24px !important; top: 16px !important; bottom: 16px !important; left: 12px !important; min-height: unset !important; height: auto !important; padding: 16px 8px !important; align-items: center !important; overflow: visible !important; box-shadow: 0 8px 32px rgba(0,0,0,0.18) !important; }
+    .sidebar-restore-btn { display: none; position: fixed; top: 20px; left: 16px; width: 40px; height: 40px; border-radius: 50%; background: #1c1c1c; color: #fff; border: none; cursor: pointer; align-items: center; justify-content: center; z-index: 200; box-shadow: 0 4px 12px rgba(0,0,0,0.2); transition: background 0.15s; }
+    .sidebar-restore-btn:hover { background: #333; }
+    .sidebar-restore-btn svg { width: 18px; height: 18px; }
+    body.sidebar-collapsed .sidebar { transform: translateX(calc(-100% - 20px)) !important; opacity: 0 !important; pointer-events: none !important; }
+    body.sidebar-collapsed .main { margin-left: 16px !important; }
+    body.sidebar-collapsed .sidebar-restore-btn { display: flex; }
+    .sidebar > div:last-child, .sidebar-footer { border-top: none !important; background: none !important; padding: 0 !important; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; gap: 8px !important; margin-top: auto !important; width: 100% !important; }
+    .sidebar-footer { padding-top: 8px !important; border-top: 1px solid rgba(255,255,255,0.08) !important; }
+    .sidebar .icon-btn { width: 40px !important; height: 40px !important; border-radius: 50% !important; color: rgba(255,255,255,0.7) !important; background: rgba(255,255,255,0.08) !important; border: none !important; flex-shrink: 0 !important; }
+    .sidebar .icon-btn:hover { background: rgba(255,255,255,0.16) !important; color: #fff !important; }
+    .sidebar .avatar-menu-wrap { position: relative !important; margin: 0 !important; display: flex !important; align-items: center !important; justify-content: center !important; }
+    .sidebar .avatar { width: 40px !important; height: 40px !important; border-radius: 50% !important; font-size: 13px !important; margin-left: 0 !important; cursor: pointer !important; box-shadow: 0 0 0 2px rgba(255,255,255,0.15) !important; overflow: hidden !important; }
+    .sidebar .avatar-dropdown { position: fixed !important; left: 84px !important; bottom: 16px !important; top: auto !important; right: auto !important; transform: translateX(-8px) !important; transition: opacity 0.15s, transform 0.15s !important; }
+    .sidebar .avatar-dropdown.open { transform: translateX(0) !important; opacity: 1 !important; pointer-events: auto !important; }
+
+    /* ── TOAST ── */
+    #toast { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(16px); background: #1d1d1f; color: #fff; border-radius: var(--radius-pill); padding: 11px 22px; font-size: 14px; font-weight: 500; opacity: 0; pointer-events: none; transition: opacity 0.2s, transform 0.2s; z-index: 999; white-space: nowrap; box-shadow: 0 8px 32px rgba(0,0,0,0.18); max-width: calc(100vw - 40px); text-align: center; }
+    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    #toast.error { background: var(--danger-dark); }
+    #toast.success { background: var(--success-dark); }
+
+    /* Notif dropdown CSS */
+    .notif-badge{position:absolute;top:-4px;right:-4px;background:#E85D6A;color:#fff;border-radius:50%;width:18px;height:18px;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;pointer-events:none;}
+    .notif-dropdown{position:absolute;top:48px;right:0;width:360px;background:#fff;border-radius:16px;border:1px solid #E8E5E2;box-shadow:0 8px 32px rgba(0,0,0,0.12);z-index:300;display:none;overflow:hidden;}
+    .notif-dropdown.open{display:block;}
+  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/responsive.css">
+</head>
+<body>
+<script>if(localStorage.getItem('sidebar-collapsed')==='1')document.body.classList.add('sidebar-collapsed')</script>
+
+  <!-- ── Sidebar ── -->
+  <aside class="sidebar">
+    <nav class="sidebar-nav">
+      <a class="nav-item" href="/configuracoes" data-tooltip="Configurações" data-menu="configuracoes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg><span>Configurações</span></a>
+      <a class="nav-item" data-tooltip="Dashboard" data-menu="dashboard" href="/dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg><span>Dashboard</span></a>
+      <a class="nav-item" href="/departamentos" data-tooltip="Departamentos" data-menu="departamentos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><path d="M2 12h20"/></svg><span>Departamentos</span></a>
+      <a class="nav-item" href="/escalacoes" data-tooltip="Escalações" data-menu="escalacao"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></svg><span>Escalação</span></a>
+      <a class="nav-item" href="/eventos" data-tooltip="Eventos" data-menu="eventos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span>Eventos</span></a>
+      <a class="nav-item" href="/indisponibilidade" data-tooltip="Indisponibilidade" data-menu="indisponibilidade"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M10 14l4 4"/><path d="M14 14l-4 4"/></svg><span>Indisponibilidade</span></a>
+      <a class="nav-item" href="/ministerios" data-tooltip="Ministérios" data-menu="ministerios"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4"/><path d="M10 4h4"/><path d="M3 11l9-7 9 7"/><rect x="5" y="11" width="14" height="10" rx="1"/><path d="M10 21v-5h4v5"/></svg><span>Ministérios</span></a>
+      <a class="nav-item" href="/musicas" data-tooltip="Músicas" data-menu="musicas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg><span>Músicas</span></a>
+      <a class="nav-item" href="/templates" data-tooltip="Templates" data-menu="templates"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg><span>Templates</span></a>
+      <a class="nav-item" href="/voluntarios" data-tooltip="Voluntários" data-menu="voluntarios"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Voluntários</span></a>
+      <a class="nav-item" href="/notificacoes" data-tooltip="Notificações" data-menu="notificacoes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span>Notificações</span></a>
+      <a class="nav-item active" href="/checkin" data-tooltip="Meu Check-in" data-menu="checkin"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg><span>Meu Check-in</span></a>
+      <a class="nav-item" href="/presenca" data-tooltip="Presenças" data-menu="presenca"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>Presenças</span></a>
+    </nav>
+  </aside>
+
+  <button class="sidebar-restore-btn" id="sidebarRestoreBtn">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="13 17 18 12 13 7"/><polyline points="6 17 11 12 6 7"/></svg>
+  </button>
+
+  <!-- ── Main ── -->
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-actions">
+        <div class="topbar-search">
+          <input type="text" placeholder="Search..." id="topSearch" />
+          <button class="search-btn" title="Buscar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          </button>
+        </div>
+        <div class="notif-wrapper" style="position:relative;">
+          <button class="icon-btn notif-btn" id="notifBtn" title="Notificações">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            <span class="notif-badge" id="notifBadge" style="display:none">0</span>
+          </button>
+          <div class="notif-dropdown" id="notifDropdown">
+            <div class="notif-header">
+              <span style="font-weight:600;font-size:14px">Notificações</span>
+              <button id="markAllRead" style="font-size:12px;color:#9156F1;background:none;border:none;cursor:pointer;font-family:inherit">Marcar todas como lidas</button>
+            </div>
+            <div class="notif-list" id="notifList"></div>
+            <div class="notif-footer"><a href="/notificacoes" style="font-size:13px;color:#9156F1;text-decoration:none">Ver todas</a></div>
+          </div>
+        </div>
+        <button class="icon-btn" id="collapseBtn" title="Recolher menu" onclick="document.body.classList.toggle('sidebar-collapsed');localStorage.setItem('sidebar-collapsed',document.body.classList.contains('sidebar-collapsed')?'1':'0')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="transition:transform 0.22s"><polyline points="11 17 6 12 11 7"/><polyline points="18 17 13 12 18 7"/></svg>
+        </button>
+        <div class="avatar-menu-wrap">
+          <div class="avatar" id="avatarBtn">A</div>
+          <div class="avatar-dropdown" id="avatarDropdown">
+            <div class="dropdown-header">
+              <div class="dropdown-name" id="dropdownName">—</div>
+              <div class="dropdown-email" id="dropdownEmail">—</div>
+            </div>
+            <a class="dropdown-item" href="/editar-perfil">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              Editar Perfil
+            </a>
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item danger" href="#" onclick="fazerLogout(event)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+              Sair
+            </a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="content">
+      <div class="page-greeting">
+        <div class="pg-left">
+          <h1 class="pg-title"><span style="color:#9156F1">Meu Check-in</span></h1>
+          <p class="pg-sup">Registre sua presença no evento de hoje.</p>
+        </div>
+      </div>
+
+      <div class="checkin-wrap">
+        <div id="heroWrap"></div>
+        <div class="gps-card" id="gpsCard">
+          <div class="gps-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="2" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="2" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="22" y2="12"/></svg>
+          </div>
+          <div class="gps-info">
+            <div class="gps-label">Localização GPS</div>
+            <div class="gps-status" id="gpsStatus">Obtendo localização...</div>
+            <div class="gps-accuracy" id="gpsAccuracy"></div>
+            <div class="gps-bar-wrap" id="gpsBarWrap" style="display:none">
+              <div class="gps-bar" id="gpsBar"></div>
+            </div>
+          </div>
+        </div>
+        <div class="action-card" id="actionCard"></div>
+      </div>
+    </main>
+  </div>
+
+  <div id="toast"></div>
+
+  <script src="/js/auth-fetch.js"></script>
+  <script src="/js/sidebar-permissions.js"></script>
+  <script src="/js/sidebar-ui.js"></script>
+  <script>
+    let _evento = null, _checkin = null, _coords = null, _loading = false
+
+    async function init() {
+      if (!await checkAuth()) return
+
+      // Avatar
+      const avatarBtn = document.getElementById('avatarBtn')
+      const avatarDD  = document.getElementById('avatarDropdown')
+      if (avatarBtn) avatarBtn.addEventListener('click', e => { e.stopPropagation(); avatarDD?.classList.toggle('open') })
+      document.addEventListener('click', () => avatarDD?.classList.remove('open'))
+
+      try {
+        const r = await authFetch('/api/auth/me')
+        if (r.ok) {
+          const d = await r.json()
+          const name = d.usuario?.nome || d.usuario?.email || '?'
+          const u = JSON.parse(localStorage.getItem('usuario') || '{}')
+          if (avatarBtn) avatarBtn.innerHTML = u.avatar
+            ? `<img src="${u.avatar}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`
+            : name.charAt(0).toUpperCase()
+          const dn = document.getElementById('dropdownName');  if (dn) dn.textContent = name
+          const de = document.getElementById('dropdownEmail'); if (de) de.textContent = d.usuario?.email || ''
+        }
+      } catch {}
+
+      obterLocalizacao()
+      await carregarMeuEvento()
+    }
+
+    function fazerLogout(e) { e.preventDefault(); clearSession() }
+
+    function obterLocalizacao() {
+      if (!navigator.geolocation) { document.getElementById('gpsStatus').textContent = 'GPS não disponível'; return }
+      navigator.geolocation.getCurrentPosition(
+        pos => { _coords = pos.coords; atualizarGPSUI(pos.coords.accuracy) },
+        err => {
+          let msg = 'GPS não disponível'
+          if (err.code === 1) msg = 'Permissão negada'
+          else if (err.code === 3) msg = 'Tempo esgotado'
+          document.getElementById('gpsStatus').textContent = msg
+          document.getElementById('gpsAccuracy').textContent = 'Check-in será feito sem GPS'
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+      )
+    }
+
+    function atualizarGPSUI(accuracy) {
+      document.getElementById('gpsStatus').textContent = 'Localização obtida'
+      const acc = document.getElementById('gpsAccuracy')
+      acc.textContent = `Precisão: ${Math.round(accuracy)}m`
+      document.getElementById('gpsBarWrap').style.display = ''
+      const bar = document.getElementById('gpsBar')
+      let pct, cls
+      if (accuracy <= 20)      { pct = 100; cls = 'good'; acc.textContent += ' — Excelente' }
+      else if (accuracy <= 50) { pct = 65;  cls = 'ok';   acc.textContent += ' — Aceitável' }
+      else                     { pct = 30;  cls = 'poor';  acc.textContent += ' — Fraca' }
+      bar.style.width = pct + '%'
+      bar.className = 'gps-bar ' + cls
+    }
+
+    async function carregarMeuEvento() {
+      try {
+        const res = await authFetch('/api/checkin/meu-evento')
+        if (!res.ok) { renderHeroSemEvento(); renderActionSemEvento(); return }
+        const data = await res.json()
+        _evento  = data.evento
+        _checkin = data.checkin
+        renderUI()
+      } catch (e) { renderHeroSemEvento(); renderActionSemEvento() }
+    }
+
+    function renderUI() {
+      if (!_evento) { renderHeroSemEvento(); renderActionSemEvento(); return }
+      renderHeroEvento(); renderActionCard()
+    }
+
+    function renderHeroEvento() {
+      const hora = _evento.start_time ? _evento.start_time.substring(0, 5) : null
+      document.getElementById('heroWrap').innerHTML = `
+        <div class="hero-card">
+          <div class="hero-label">Evento de hoje</div>
+          <div class="hero-event-name">${escHtml(_evento.name)}</div>
+          ${hora ? `<div class="hero-time"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${hora}</div>` : ''}
+        </div>`
+    }
+
+    function renderHeroSemEvento() {
+      document.getElementById('heroWrap').innerHTML = `
+        <div class="no-event-card">
+          <div class="no-event-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+          <div class="no-event-title">Nenhum evento hoje</div>
+          <div class="no-event-desc">Você não está escalado em nenhum evento para hoje.</div>
+        </div>`
+    }
+
+    function renderActionSemEvento() {
+      document.getElementById('actionCard').innerHTML = ''
+      document.getElementById('actionCard').style.display = 'none'
+      document.getElementById('gpsCard').style.display = 'none'
+    }
+
+    function renderActionCard() {
+      const card = document.getElementById('actionCard')
+      card.style.display = ''
+      if (!_checkin) {
+        card.innerHTML = `
+          <p style="font-size:13px;color:var(--text-secondary);margin-bottom:4px;">Você ainda não registrou presença neste evento.</p>
+          <button class="btn-checkin" id="btnCheckin" onclick="fazerCheckin()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Fazer Check-in
+          </button>`
+      } else if (_checkin.status === 'saiu') {
+        const horaOut = _checkin.checkout_at ? formatarHora(_checkin.checkout_at) : ''
+        card.innerHTML = `
+          <span class="status-badge badge-saiu"><span class="dot"></span>Saiu${horaOut ? ' às ' + horaOut : ''}</span>
+          <p style="font-size:13px;color:var(--text-secondary);">Check-out registrado com sucesso.</p>`
+      } else {
+        const horaIn = _checkin.checkin_at ? formatarHora(_checkin.checkin_at) : ''
+        const badgeClass = _checkin.status === 'atrasado' ? 'badge-atrasado' : 'badge-presente'
+        const badgeLabel = _checkin.status === 'atrasado' ? 'Atrasado' : 'Presente'
+        card.innerHTML = `
+          <span class="status-badge ${badgeClass}"><span class="dot"></span>${badgeLabel}${horaIn ? ' desde ' + horaIn : ''}</span>
+          <p style="font-size:13px;color:var(--text-secondary);">Presença registrada. Bom evento!</p>
+          <button class="btn-checkout" id="btnCheckout" onclick="fazerCheckout()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            Fazer Check-out
+          </button>`
+      }
+    }
+
+    async function fazerCheckin() {
+      if (!_evento || _loading) return
+      _loading = true
+      const btn = document.getElementById('btnCheckin')
+      if (btn) { btn.disabled = true; btn.innerHTML = '<div class="spinner"></div> Registrando...' }
+      try {
+        const body = { event_id: _evento.id, latitude: _coords?.latitude || null, longitude: _coords?.longitude || null, method: _coords ? 'gps' : 'manual' }
+        const res = await authFetch('/api/checkin', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+        const data = await res.json()
+        console.log('[checkin] POST response:', res.status, data)
+        if (!res.ok) {
+          showToast(data.error || 'Erro ao fazer check-in', 'error')
+          if (btn) { btn.disabled = false; btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Fazer Check-in' }
+          return
+        }
+        await carregarMeuEvento()
+        showToast('Check-in realizado com sucesso!', 'success')
+      } catch { showToast('Erro de conexão', 'error'); if (btn) { btn.disabled = false; btn.innerHTML = 'Fazer Check-in' } }
+      finally { _loading = false }
+    }
+
+    async function fazerCheckout() {
+      if (!_evento || _loading) return
+      _loading = true
+      const btn = document.getElementById('btnCheckout')
+      if (btn) { btn.disabled = true; btn.innerHTML = '<div class="spinner dark"></div> Registrando...' }
+      try {
+        const body = { event_id: _evento.id, latitude: _coords?.latitude || null, longitude: _coords?.longitude || null, method: _coords ? 'gps' : 'manual' }
+        const res = await authFetch('/api/checkin/checkout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+        const data = await res.json()
+        if (!res.ok) { showToast(data.error || 'Erro ao fazer check-out', 'error'); return }
+        _checkin = data.checkin
+        renderUI()
+        showToast('Check-out realizado!', 'success')
+      } catch { showToast('Erro de conexão', 'error') }
+      finally { _loading = false }
+    }
+
+    function formatarHora(iso) { try { return new Date(iso).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) } catch { return '' } }
+    function escHtml(str) { return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;') }
+
+    let _toastTimer = null
+    function showToast(msg, type = '') {
+      const t = document.getElementById('toast')
+      t.textContent = msg; t.className = 'show' + (type ? ' ' + type : '')
+      clearTimeout(_toastTimer); _toastTimer = setTimeout(() => { t.className = '' }, 3200)
+    }
+
+    init()
+  </script>
+  <script src="/js/top-search.js"></script>
+  <script src="/js/notif-ui.js"></script>
+</body>
+</html>

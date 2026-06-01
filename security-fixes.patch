@@ -1,0 +1,2163 @@
+diff --git a/middleware/checkPermissao.js b/middleware/checkPermissao.js
+index a1f15e8..ac8c950 100644
+--- a/middleware/checkPermissao.js
++++ b/middleware/checkPermissao.js
+@@ -5,13 +5,15 @@ function checkPermissao(module, action) {
+     const userId = req.authUser?.id
+     if (!userId) return res.status(401).json({ error: 'Não autenticado' })
+ 
+-    const { data: dbUser, error: userErr } = await supabaseAdmin
++    // SEC-010: .limit(1).maybeSingle() evita erro 403 em caso de usuário duplicado no db_user
++    const { data: dbUser } = await supabaseAdmin
+       .from('db_user')
+       .select('id, church_id, perfil_id, db_perfil(slug)')
+       .eq('user_id', userId)
+-      .single()
++      .limit(1)
++      .maybeSingle()
+ 
+-    if (userErr || !dbUser) {
++    if (!dbUser) {
+       return res.status(403).json({ error: 'Usuário não encontrado' })
+     }
+ 
+diff --git a/package-lock.json b/package-lock.json
+index 8e547bd..55f0ca6 100644
+--- a/package-lock.json
++++ b/package-lock.json
+@@ -14,6 +14,8 @@
+         "cors": "^2.8.6",
+         "dotenv": "^17.4.2",
+         "express": "^5.2.1",
++        "express-rate-limit": "^8.5.2",
++        "helmet": "^8.2.0",
+         "jsonwebtoken": "^9.0.3"
+       },
+       "devDependencies": {
+@@ -503,6 +505,24 @@
+         "url": "https://opencollective.com/express"
+       }
+     },
++    "node_modules/express-rate-limit": {
++      "version": "8.5.2",
++      "resolved": "https://registry.npmjs.org/express-rate-limit/-/express-rate-limit-8.5.2.tgz",
++      "integrity": "sha512-5Kb34ipNX694DH48vN9irak1Qx30nb0PLYHXfJgw4YEjiC3ZEmZJhwOp+VfiCYwFzvFTdB9QkArYS5kXa2cx2A==",
++      "license": "MIT",
++      "dependencies": {
++        "ip-address": "^10.2.0"
++      },
++      "engines": {
++        "node": ">= 16"
++      },
++      "funding": {
++        "url": "https://github.com/sponsors/express-rate-limit"
++      },
++      "peerDependencies": {
++        "express": ">= 4.11"
++      }
++    },
+     "node_modules/fill-range": {
+       "version": "7.1.1",
+       "resolved": "https://registry.npmjs.org/fill-range/-/fill-range-7.1.1.tgz",
+@@ -675,6 +695,18 @@
+         "node": ">= 0.4"
+       }
+     },
++    "node_modules/helmet": {
++      "version": "8.2.0",
++      "resolved": "https://registry.npmjs.org/helmet/-/helmet-8.2.0.tgz",
++      "integrity": "sha512-DRgTIUgnWcJ62KyarxxziuqYxKGnR6Rgg19BlbucN/dpmJbl1XOit6qvoOX0ZT+HhWe5OUVhU/a1zpGyc1xA0Q==",
++      "license": "MIT",
++      "engines": {
++        "node": ">=18.0.0"
++      },
++      "funding": {
++        "url": "https://github.com/sponsors/EvanHahn"
++      }
++    },
+     "node_modules/http-errors": {
+       "version": "2.0.1",
+       "resolved": "https://registry.npmjs.org/http-errors/-/http-errors-2.0.1.tgz",
+@@ -733,6 +765,15 @@
+       "integrity": "sha512-k/vGaX4/Yla3WzyMCvTQOXYeIHvqOKtnqBduzTHpzpQZzAskKMhZ2K+EnBiSM9zGSoIFeMpXKxa4dYeZIQqewQ==",
+       "license": "ISC"
+     },
++    "node_modules/ip-address": {
++      "version": "10.2.0",
++      "resolved": "https://registry.npmjs.org/ip-address/-/ip-address-10.2.0.tgz",
++      "integrity": "sha512-/+S6j4E9AHvW9SWMSEY9Xfy66O5PWvVEJ08O0y5JGyEKQpojb0K0GKpz/v5HJ/G0vi3D2sjGK78119oXZeE0qA==",
++      "license": "MIT",
++      "engines": {
++        "node": ">= 12"
++      }
++    },
+     "node_modules/ipaddr.js": {
+       "version": "1.9.1",
+       "resolved": "https://registry.npmjs.org/ipaddr.js/-/ipaddr.js-1.9.1.tgz",
+diff --git a/package.json b/package.json
+index 46a0206..4df7ef8 100644
+--- a/package.json
++++ b/package.json
+@@ -18,6 +18,8 @@
+     "cors": "^2.8.6",
+     "dotenv": "^17.4.2",
+     "express": "^5.2.1",
++    "express-rate-limit": "^8.5.2",
++    "helmet": "^8.2.0",
+     "jsonwebtoken": "^9.0.3"
+   },
+   "devDependencies": {
+diff --git a/public/cadastro.html b/public/cadastro.html
+index 6c04727..c73acb2 100644
+--- a/public/cadastro.html
++++ b/public/cadastro.html
+@@ -679,6 +679,8 @@
+ 
+   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+   <script>
++    // SEC-005: escape de HTML para prevenir XSS em innerHTML
++    function esc(s) { return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') }
+     // ── Estado ──
+     const params     = new URLSearchParams(location.search)
+     const churchSlug = params.get('church') || ''
+diff --git a/public/configuracoes.html b/public/configuracoes.html
+index 9121fb9..35263d2 100644
+--- a/public/configuracoes.html
++++ b/public/configuracoes.html
+@@ -2134,6 +2134,8 @@
+   <script src="/js/sidebar-permissions.js"></script>
+     <script src="/js/sidebar-ui.js"></script>
+   <script>
++    // SEC-005: escape de HTML para prevenir XSS em innerHTML
++    function esc(s) { return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') }
+     const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
+     const igreja  = JSON.parse(localStorage.getItem('igreja')  || '{}');
+ 
+diff --git a/public/cronograma.html b/public/cronograma.html
+index eb1179a..71607e4 100644
+--- a/public/cronograma.html
++++ b/public/cronograma.html
+@@ -946,6 +946,8 @@
+   <script src="/js/sidebar-permissions.js"></script>
+     <script src="/js/sidebar-ui.js"></script>
+   <script>
++    // SEC-005: escape de HTML para prevenir XSS em innerHTML
++    function esc(s) { return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') }
+     const cronogramaId = location.pathname.split('/').pop()
+     let _cronograma = null
+     let _itens = []
+@@ -1160,8 +1162,8 @@
+       let meta = ''
+       if (!isSecao) {
+         const badge  = isAntes ? `<span class="antes-badge">Pré-evento</span>` : ''
+-        const desc   = item.description ? `<span class="cron-desc">${item.description}</span>` : ''
+-        const artist = item.musica?.artist ? `<span class="cron-artist">${item.musica.artist}</span>` : ''
++        const desc   = item.description ? `<span class="cron-desc">${esc(item.description)}</span>` : ''
++        const artist = item.musica?.artist ? `<span class="cron-artist">${esc(item.musica.artist)}</span>` : ''
+         const tom    = item.musica?.tom ? `<span class="cron-tom">${item.musica.tom}</span>` : ''
+         if (badge || desc || artist || tom) meta = `<div class="cron-meta">${badge}${artist}${tom}${desc}</div>`
+       }
+@@ -1171,7 +1173,7 @@
+           <div class="drag-handle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/></svg></div>
+           ${typeIcon}
+           <div class="cron-body">
+-            <div class="cron-title">${item.title || '—'}</div>
++            <div class="cron-title">${esc(item.title || '—')}</div>
+             ${meta}
+           </div>
+           ${!isSecao && dur ? `<div class="cron-duration">${dur}</div>` : ''}
+@@ -1318,7 +1320,7 @@
+             html += libMusicas.slice(0, 5).map(m => `
+               <div class="music-result-item" onmousedown="event.preventDefault()" onclick="definirMusica(${escJson(m)})">
+                 <div class="music-result-info">
+-                  <div class="music-result-title">${m.title}</div>
++                  <div class="music-result-title">${esc(m.title)}</div>
+                   <div class="music-result-sub">${[m.artist, m.tom].filter(Boolean).join(' • ')}</div>
+                 </div>
+               </div>`).join('')
+@@ -1329,7 +1331,7 @@
+             html += deezerFiltrado.slice(0, 5).map(d => `
+               <div class="music-result-item" onmousedown="event.preventDefault()" onclick="definirMusica(${escJson(d)})">
+                 <div class="music-result-info">
+-                  <div class="music-result-title">${d.title}</div>
++                  <div class="music-result-title">${esc(d.title)}</div>
+                   <div class="music-result-sub">${[d.artist, d.album].filter(Boolean).join(' · ')}</div>
+                 </div>
+                 <span class="music-result-badge">DZ</span>
+@@ -1479,7 +1481,7 @@
+           const dateStr = d ? `${d.getDate()} ${MESES[d.getMonth()]} ${d.getFullYear()}` : ''
+           return `
+             <div class="event-option" data-id="${c.id}" onclick="selecionarCronogramaReutilizar('${c.id}', this)">
+-              <div class="event-option-name">${c.name || '—'}</div>
++              <div class="event-option-name">${esc(c.name || '—')}</div>
+               ${c.evento?.name || dateStr ? `<div class="event-option-date">${[c.evento?.name, dateStr].filter(Boolean).join(' · ')}</div>` : ''}
+             </div>`
+         }).join('')
+diff --git a/public/dashboard.html b/public/dashboard.html
+index 7ed9882..9592a61 100644
+--- a/public/dashboard.html
++++ b/public/dashboard.html
+@@ -1894,8 +1894,8 @@
+         const { cls, svg } = iconMap[a.tipo] || { cls: 'info', svg: '<circle cx="12" cy="12" r="10"/>' }
+         const msg = (a.mensagem || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+         const inner = a.link
+-          ? `<a href="${a.link}" class="alerta-msg" style="color:inherit;text-decoration:underline;text-underline-offset:2px;cursor:pointer">${msg}</a>`
+-          : `<div class="alerta-msg">${msg}</div>`
++          ? `<a href="${a.link}" class="alerta-msg" style="color:inherit;text-decoration:underline;text-underline-offset:2px;cursor:pointer">${esc(msg)}</a>`
++          : `<div class="alerta-msg">${esc(msg)}</div>`
+         return `<div class="alerta-card">
+           <div class="alerta-icon ${cls}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${svg}</svg></div>
+           ${inner}
+diff --git a/public/departamento-detalhe.html b/public/departamento-detalhe.html
+index 6e7aa0c..31edf20 100644
+--- a/public/departamento-detalhe.html
++++ b/public/departamento-detalhe.html
+@@ -1554,6 +1554,8 @@
+   <script src="/js/sidebar-permissions.js"></script>
+     <script src="/js/sidebar-ui.js"></script>
+   <script>
++    // SEC-005: escape de HTML para prevenir XSS em innerHTML
++    function esc(s) { return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') }
+     const departmentId = location.pathname.split('/').pop()
+     const _urlParams   = new URLSearchParams(location.search)
+     const _fromMinisterio = _urlParams.get('from') === 'ministerio'
+@@ -1616,7 +1618,7 @@
+         if (!res.ok) throw new Error(json.error || 'Erro ao carregar')
+         renderDepartamento(json.department)
+         if (_fromMinisterio && json.department.db_ministry?.name) {
+-          document.getElementById('btnBackMinisterio').textContent = `Voltar ao Ministério: ${json.department.db_ministry.name}`
++          document.getElementById('btnBackMinisterio').textContent = `Voltar ao Ministério: ${esc(json.department.db_ministry.name)}`
+         }
+         if (new URLSearchParams(location.search).get('edit') === '1') entrarModoEdicao()
+       } catch (err) {
+@@ -1626,7 +1628,7 @@
+ 
+     function renderDepartamento(d) {
+       _dept = d
+-      document.title = `Hug Software — ${d.name}`
++      document.title = `Hug Software — ${esc(d.name)}`
+ 
+       const ativo = d.is_active !== false
+       const ministryName = d.db_ministry?.name || '—'
+@@ -1800,7 +1802,7 @@
+         tableWrap.classList.add('hidden')
+         list.innerHTML = `<div class="func-grid">${_funcoes.map(f => `
+           <div class="func-card" data-id="${f.id}">
+-            <div class="func-card-name" title="${f.name}">${f.name}</div>
++            <div class="func-card-name" title="${esc(f.name)}">${esc(f.name)}</div>
+             <div class="func-card-actions">
+               <button class="btn-func-action" title="Editar" onclick="abrirEditarFuncao('${f.id}')">${editSvg}</button>
+               <button class="btn-func-action danger" title="Excluir" onclick="excluirFuncao('${f.id}')">${delSvg}</button>
+@@ -1812,8 +1814,8 @@
+         tableWrap.classList.remove('hidden')
+         document.getElementById('funcTableBody').innerHTML = _funcoes.map(f => `
+           <tr>
+-            <td>${f.name}</td>
+-            <td class="func-td-desc">${f.description || '<span style="color:var(--ink-subtle);font-style:italic">—</span>'}</td>
++            <td>${esc(f.name)}</td>
++            <td class="func-td-desc">${esc(f.description || '<span style="color:var(--ink-subtle);font-style:italic">—</span>')}</td>
+             <td>
+               <div style="display:inline-flex;gap:6px;">
+                 <button class="btn-func-action" title="Editar" onclick="abrirEditarFuncao('${f.id}')">${editSvg}</button>
+@@ -1983,8 +1985,8 @@
+         <div class="leader-item">
+           ${_ldAvatarHtml(l.avatar_url, l.full_name, 'leader-avatar')}
+           <div class="leader-name-wrap">
+-            <div class="leader-name">${l.full_name}</div>
+-            ${l.email ? `<div class="leader-email">${l.email}</div>` : ''}
++            <div class="leader-name">${esc(l.full_name)}</div>
++            ${l.email ? `<div class="leader-email">${esc(l.email)}</div>` : ''}
+           </div>
+           <button class="btn-leader-remove" onclick="removerLider('${l.user_id}')" title="Remover">${_xSvg}</button>
+         </div>`).join('')}</div>`
+@@ -2034,8 +2036,8 @@
+         return `<div class="picker-vol-item${isLeader ? ' is-leader' : ''}" onclick="adicionarLider('${u.id}','${safeName}')">
+           ${_ldAvatarHtml(u.avatar_url, u.full_name, 'picker-vol-avatar')}
+           <div class="picker-vol-info">
+-            <div class="picker-vol-name">${u.full_name || '—'}</div>
+-            ${u.email ? `<div class="picker-vol-email">${u.email}</div>` : ''}
++            <div class="picker-vol-name">${esc(u.full_name || '—')}</div>
++            ${u.email ? `<div class="picker-vol-email">${esc(u.email)}</div>` : ''}
+           </div>
+           ${isLeader ? `<span class="picker-vol-check">${_checkSvg}</span>` : ''}
+         </div>`
+diff --git a/public/editar-perfil.html b/public/editar-perfil.html
+index 5b699a7..f5e0953 100644
+--- a/public/editar-perfil.html
++++ b/public/editar-perfil.html
+@@ -1827,6 +1827,8 @@
+   <script src="/js/sidebar-permissions.js"></script>
+     <script src="/js/sidebar-ui.js"></script>
+   <script>
++    // SEC-005: escape de HTML para prevenir XSS em innerHTML
++    function esc(s) { return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') }
+     // ── Accordion ──
+     function toggleAccordion(header) {
+       const body    = header.nextElementSibling;
+@@ -2000,7 +2002,7 @@
+       el.innerHTML = lista.map(d => `
+         <div class="aside-item">
+           <div class="aside-item-info">
+-            <div class="aside-item-name">${d.funcao_name || 'Sem função definida'}</div>
++            <div class="aside-item-name">${esc(d.funcao_name || 'Sem função definida')}</div>
+             <div class="aside-item-sub">${d.department_name}</div>
+           </div>
+         </div>
+@@ -2045,7 +2047,7 @@
+       el.innerHTML = _indisps.map(i => {
+         let sub = fmt(i.start_date)
+         if (i.end_date) sub += ` → ${fmt(i.end_date)}`
+-        if (i.db_department?.name) sub += ` · ${i.db_department.name}`
++        if (i.db_department?.name) sub += ` · ${esc(i.db_department.name)}`
+         return `
+           <div class="aside-item">
+             <div class="aside-item-info">
+diff --git a/public/escalacao.html b/public/escalacao.html
+index 1296850..ff4dec0 100644
+--- a/public/escalacao.html
++++ b/public/escalacao.html
+@@ -1934,7 +1934,7 @@ function renderMvcItens(itens) {
+         </div>
+         <div class="mvc-item-body">
+           <div class="mvc-item-title">${esc(item.title)}</div>
+-          ${item.description ? `<div class="mvc-item-sub">${esc(item.description)}</div>` : ''}
++          ${esc(item.description ? `<div class="mvc-item-sub">${esc(item.description))}</div>` : ''}
+           <div class="mvc-item-tags"><span class="mvc-tag" style="background:rgba(124,58,237,0.10);color:#7c3aed">Pré-evento</span>${item.duration ? `<span class="mvc-tag">${esc(item.duration)}</span>` : ''}</div>
+         </div>
+       </div>`
+@@ -1946,7 +1946,7 @@ function renderMvcItens(itens) {
+         </div>
+         <div class="mvc-item-body">
+           <div class="mvc-item-title">${esc(item.title)}</div>
+-          ${item.description ? `<div class="mvc-item-sub">${esc(item.description)}</div>` : ''}
++          ${esc(item.description ? `<div class="mvc-item-sub">${esc(item.description))}</div>` : ''}
+           ${item.duration ? `<div class="mvc-item-tags"><span class="mvc-tag">${esc(item.duration)}</span></div>` : ''}
+         </div>
+       </div>`
+@@ -1966,7 +1966,7 @@ function renderMvcItens(itens) {
+         </div>
+         <div class="mvc-item-body">
+           <div class="mvc-item-title">${esc(nome)}</div>
+-          ${m.artist ? `<div class="mvc-item-sub">${esc(m.artist)}</div>` : ''}
++          ${esc(m.artist ? `<div class="mvc-item-sub">${esc(m.artist))}</div>` : ''}
+           ${tags.length ? `<div class="mvc-item-tags">${tags.map(t=>`<span class="mvc-tag">${t}</span>`).join('')}</div>` : ''}
+           ${links.length ? `<div class="mvc-item-links">${links.join('')}</div>` : ''}
+         </div>
+diff --git a/public/evento-detalhe.html b/public/evento-detalhe.html
+index 2e579f9..fbdcd5d 100644
+--- a/public/evento-detalhe.html
++++ b/public/evento-detalhe.html
+@@ -1520,7 +1520,7 @@
+         if (departamento?.name && titulo) {
+           titulo.innerHTML = `
+             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;vertical-align:-3px;margin-right:6px"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+-            Minha Equipe <span style="font-weight:400;color:var(--ink-muted);font-size:13px">— ${departamento.name}</span>`
++            Minha Equipe <span style="font-weight:400;color:var(--ink-muted);font-size:13px">— ${esc(departamento.name)}</span>`
+         }
+ 
+         if (!funcoes?.length) {
+@@ -1748,7 +1748,7 @@
+       document.getElementById('hdrDay').textContent = day
+       document.getElementById('hdrMon').textContent = mon
+       document.getElementById('hdrName').textContent = e.name || '—'
+-      document.title = `${e.name || 'Evento'} — Hug Software`
++      document.title = `${esc(e.name || 'Evento')} — Hug Software`
+ 
+       const status = effectiveStatus(e)
+       const hdrStatus = document.getElementById('hdrStatus')
+@@ -2132,7 +2132,7 @@
+             </div>
+             <div class="mvc-item-body">
+               <div class="mvc-item-title">${esc2(item.title)}</div>
+-              ${item.description ? `<div class="mvc-item-sub">${esc2(item.description)}</div>` : ''}
++              ${esc(item.description ? `<div class="mvc-item-sub">${esc2(item.description))}</div>` : ''}
+               <div class="mvc-item-tags"><span class="mvc-tag" style="background:rgba(124,58,237,0.10);color:#7c3aed">Pré-evento</span>${item.duration ? `<span class="mvc-tag">${esc2(item.duration)}</span>` : ''}</div>
+             </div>
+           </div>`
+@@ -2144,7 +2144,7 @@
+             </div>
+             <div class="mvc-item-body">
+               <div class="mvc-item-title">${esc2(item.title)}</div>
+-              ${item.description ? `<div class="mvc-item-sub">${esc2(item.description)}</div>` : ''}
++              ${esc(item.description ? `<div class="mvc-item-sub">${esc2(item.description))}</div>` : ''}
+               ${item.duration ? `<div class="mvc-item-tags"><span class="mvc-tag">${esc2(item.duration)}</span></div>` : ''}
+             </div>
+           </div>`
+@@ -2164,7 +2164,7 @@
+             </div>
+             <div class="mvc-item-body">
+               <div class="mvc-item-title">${esc2(nome)}</div>
+-              ${m.artist ? `<div class="mvc-item-sub">${esc2(m.artist)}</div>` : ''}
++              ${esc(m.artist ? `<div class="mvc-item-sub">${esc2(m.artist))}</div>` : ''}
+               ${tags.length ? `<div class="mvc-item-tags">${tags.map(t=>`<span class="mvc-tag">${t}</span>`).join('')}</div>` : ''}
+               ${links.length ? `<div class="mvc-item-links">${links.join('')}</div>` : ''}
+             </div>
+diff --git a/public/eventos.html b/public/eventos.html
+index de67d82..6674316 100644
+--- a/public/eventos.html
++++ b/public/eventos.html
+@@ -2413,7 +2413,7 @@ function renderLista(area, list) {
+               <span class="ev-card-mon">${mon}</span>
+             </div>
+             <div class="ev-card-title">
+-              <div class="ev-card-name">${e.name || '—'}</div>
++              <div class="ev-card-name">${esc(e.name || '—')}</div>
+               <span class="badge-status ${status}">${STATUS_LABEL[status] || status}</span>
+             </div>
+           </div>
+@@ -2481,7 +2481,7 @@ function renderCalFull(area) {
+     }
+     const evs = dateStr ? (byDate[dateStr] || []) : []
+     const evHtml = evs.slice(0,3).map(e =>
+-      `<div class="full-cal-event" onclick="event.stopPropagation();editarEvento('${e.id}')" title="${e.name}">${fmtTime(e.start_time)} ${e.name || ''}</div>`
++      `<div class="full-cal-event" onclick="event.stopPropagation();editarEvento('${e.id}')" title="${esc(e.name)}">${fmtTime(e.start_time)} ${esc(e.name || '')}</div>`
+     ).join('') + (evs.length > 3 ? `<div style="font-size:10px;color:var(--ink-muted);padding:0 2px">+${evs.length-3} mais</div>` : '')
+     cells += `<div class="full-cal-cell ${extraCls}"><div class="full-cal-cell-num">${num}</div>${evHtml}</div>`
+   }
+@@ -2534,7 +2534,7 @@ function renderUpcoming() {
+           <span class="upcoming-mon">${mon}</span>
+         </div>
+         <div class="upcoming-info">
+-          <div class="upcoming-name">${e.name || '—'}</div>
++          <div class="upcoming-name">${esc(e.name || '—')}</div>
+           <div class="upcoming-time">${horario || 'Horário não definido'}</div>
+         </div>
+       </div>`
+@@ -2725,7 +2725,7 @@ function renderCalWeek(area) {
+     const isToday = dateStr === todayStr
+     const evs = byDate[dateStr] || []
+     const evHtml = evs.map(e =>
+-      `<div class="full-cal-event" onclick="editarEvento('${e.id}')" title="${e.name}">${fmtTime(e.start_time)} ${e.name || ''}</div>`
++      `<div class="full-cal-event" onclick="editarEvento('${e.id}')" title="${esc(e.name)}">${fmtTime(e.start_time)} ${esc(e.name || '')}</div>`
+     ).join('')
+     return `
+       <div class="week-cal-col${isToday ? ' today' : ''}">
+@@ -2916,8 +2916,8 @@ function renderTemplateOptions() {
+     </div>`,
+     ..._templates.map(t =>
+       `<div class="option-card ${_selectedTemplateId === t.id ? 'selected' : ''}" onclick="selectTemplate(this,'${t.id}')">
+-        <div class="option-card-title">${t.name || '—'}</div>
+-        <div class="option-card-sub">${t.description || ''}</div>
++        <div class="option-card-title">${esc(t.name || '—')}</div>
++        <div class="option-card-sub">${esc(t.description || '')}</div>
+       </div>`)
+   ]
+   list.innerHTML = items.join('')
+diff --git a/public/indisponibilidade.html b/public/indisponibilidade.html
+index 6a5d0cc..6e604b5 100644
+--- a/public/indisponibilidade.html
++++ b/public/indisponibilidade.html
+@@ -1076,6 +1076,8 @@
+     <script src="/js/sidebar-ui.js"></script>
+ <script src="/js/auth-menu.js"></script>
+ <script>
++    // SEC-005: escape de HTML para prevenir XSS em innerHTML
++    function esc(s) { return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') }
+   // ── estado ──
+   let _tipo = null
+   let _lista = []
+diff --git a/public/login.html b/public/login.html
+index 5ce972a..fc328a4 100644
+--- a/public/login.html
++++ b/public/login.html
+@@ -445,6 +445,8 @@
+ 
+   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+   <script>
++    // SEC-005: escape de HTML para prevenir XSS em innerHTML
++    function esc(s) { return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') }
+     let supabaseClient = null
+ 
+     async function initSupabase() {
+diff --git a/public/ministerio-detalhe.html b/public/ministerio-detalhe.html
+index 7c9831c..7ab0737 100644
+--- a/public/ministerio-detalhe.html
++++ b/public/ministerio-detalhe.html
+@@ -1298,6 +1298,8 @@
+   <script src="/js/sidebar-permissions.js"></script>
+     <script src="/js/sidebar-ui.js"></script>
+   <script>
++    // SEC-005: escape de HTML para prevenir XSS em innerHTML
++    function esc(s) { return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') }
+     const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
+     const igreja  = JSON.parse(localStorage.getItem('igreja')  || '{}');
+ 
+@@ -1368,8 +1370,8 @@
+         <div class="leader-item">
+           ${_avatarHtml(l.avatar_url, l.full_name, 'leader-avatar')}
+           <div class="leader-name-wrap">
+-            <div class="leader-name">${l.full_name}</div>
+-            ${l.email ? `<div class="leader-email">${l.email}</div>` : ''}
++            <div class="leader-name">${esc(l.full_name)}</div>
++            ${l.email ? `<div class="leader-email">${esc(l.email)}</div>` : ''}
+           </div>
+           ${somenteLeitura ? '' : `<button class="btn-leader-remove" onclick="removerLider('${l.user_id}')" title="Remover">${_xSvg}</button>`}
+         </div>`).join('')}</div>`;
+@@ -1417,8 +1419,8 @@
+         return `<div class="picker-vol-item${isLeader ? ' is-leader' : ''}" onclick="adicionarLider('${u.id}','${safe}')">
+           ${_avatarHtml(u.avatar_url, u.full_name, 'picker-vol-avatar')}
+           <div class="picker-vol-info">
+-            <div class="picker-vol-name">${u.full_name || '—'}</div>
+-            ${u.email ? `<div class="picker-vol-email">${u.email}</div>` : ''}
++            <div class="picker-vol-name">${esc(u.full_name || '—')}</div>
++            ${u.email ? `<div class="picker-vol-email">${esc(u.email)}</div>` : ''}
+           </div>
+           ${isLeader ? `<span class="picker-vol-check">${_checkSvg}</span>` : ''}
+         </div>`;
+@@ -1521,7 +1523,7 @@
+         body.innerHTML = `
+           <div class="dept-empty">
+             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+-            <div class="dept-empty-text">${msg}</div>
++            <div class="dept-empty-text">${esc(msg)}</div>
+             ${(!depts.length && !isLiderDept) ? '<a class="dept-empty-link" href="/departamentos">Criar primeiro departamento</a>' : ''}
+           </div>`;
+         return;
+@@ -1539,7 +1541,7 @@
+               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><path d="M2 12h20"/></svg>
+             </div>
+             <div style="min-width:0">
+-              <div class="dcs-name">${d.name}</div>
++              <div class="dcs-name">${esc(d.name)}</div>
+               <span class="dcs-badge ${isArq ? 'arquivado' : 'ativo'}">${isArq ? 'Arquivado' : 'Ativo'}</span>
+             </div>
+           </div>
+@@ -1556,7 +1558,7 @@
+ 
+     function renderMinisterio(m) {
+       _ministerioAtual = m;
+-      document.title = `Hug Software — ${m.name}`;
++      document.title = `Hug Software — ${esc(m.name)}`;
+       const criadoDate = m.created_at ? new Date(m.created_at) : null;
+ 
+       // Header
+diff --git a/public/ministerios.html b/public/ministerios.html
+index 5fe06ac..04a993e 100644
+--- a/public/ministerios.html
++++ b/public/ministerios.html
+@@ -1824,6 +1824,8 @@
+   <script src="/js/sidebar-permissions.js"></script>
+     <script src="/js/sidebar-ui.js"></script>
+   <script>
++    // SEC-005: escape de HTML para prevenir XSS em innerHTML
++    function esc(s) { return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') }
+     const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
+     const igreja  = JSON.parse(localStorage.getItem('igreja')  || '{}');
+     const isLiderDept = (usuario.perfil_slug || localStorage.getItem('perfil_slug') || '') === 'lider_departamento';
+@@ -1941,7 +1943,7 @@
+               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4"/><path d="M10 4h4"/><path d="M3 11l9-7 9 7"/><rect x="5" y="11" width="14" height="10" rx="1"/><path d="M10 21v-5h4v5"/></svg>
+             </div>
+             <div class="mc-info">
+-              <div class="mc-name">${m.name}</div>
++              <div class="mc-name">${esc(m.name)}</div>
+               ${arquivado ? '<span class="archived-badge">Arquivado</span>' : '<span class="mc-status">Ativo</span>'}
+             </div>
+           </div>
+@@ -1969,11 +1971,11 @@
+               <div style="width:40px;height:40px;border-radius:10px;background:${iconColor};display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                 <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4"/><path d="M10 4h4"/><path d="M3 11l9-7 9 7"/><rect x="5" y="11" width="14" height="10" rx="1"/><path d="M10 21v-5h4v5"/></svg>
+               </div>
+-              <span style="font-weight:600;color:var(--ink)">${m.name}</span>
++              <span style="font-weight:600;color:var(--ink)">${esc(m.name)}</span>
+             </div>
+           </td>
+           <td style="color:var(--ink-muted);max-width:320px">
+-            <span style="display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${m.description || '—'}</span>
++            <span style="display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(m.description || '—')}</span>
+           </td>
+           <td>
+             <span style="display:inline-flex;align-items:center;justify-content:center;min-width:32px;height:28px;padding:0 10px;background:rgba(151,71,255,0.10);border-radius:9999px;font-size:13px;font-weight:600;color:var(--primary)">0</span>
+diff --git a/public/musicas.html b/public/musicas.html
+index 9100132..9f1d6f8 100644
+--- a/public/musicas.html
++++ b/public/musicas.html
+@@ -933,6 +933,8 @@
+   <script src="/js/sidebar-permissions.js"></script>
+     <script src="/js/sidebar-ui.js"></script>
+   <script>
++    // SEC-005: escape de HTML para prevenir XSS em innerHTML
++    function esc(s) { return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') }
+     const _permissions = JSON.parse(localStorage.getItem('permissions') || '[]')
+     const _userId      = JSON.parse(localStorage.getItem('usuario') || '{}').id || ''
+     function temPermissao(module, action) {
+@@ -988,8 +990,8 @@
+ 
+       const canApprove = temPermissao('musica','editar') && m.status === 'pendente'
+       return `<tr id="musica-${m.id}">
+-        <td class="td-title">${m.title}</td>
+-        <td class="td-muted">${m.artist || '—'}</td>
++        <td class="td-title">${esc(m.title)}</td>
++        <td class="td-muted">${esc(m.artist || '—')}</td>
+         <td>${linkHtml}</td>
+         <td>${statusHtml}</td>
+         <td>
+@@ -1026,8 +1028,8 @@
+           </div>
+         </div>
+         <div>
+-          <div class="bloco-title">${m.title}</div>
+-          <div class="bloco-artist">${m.artist || '—'}</div>
++          <div class="bloco-title">${esc(m.title)}</div>
++          <div class="bloco-artist">${esc(m.artist || '—')}</div>
+         </div>
+         <div class="bloco-footer">
+           <div class="plat-links">${platParts.length ? platParts.join('') : '<span style="font-size:11px;color:var(--ink-subtle)">—</span>'}</div>
+@@ -1145,8 +1147,8 @@
+           box.innerHTML = resultados.map((item, idx) =>
+             `<div class="deezer-result" onmousedown="event.preventDefault()" onclick="selecionarResultado(${idx})">
+               <div class="deezer-result-info">
+-                <div class="deezer-result-name">${item.title}</div>
+-                <div class="deezer-result-sub">${item.artist || ''}${item.album ? ' · ' + item.album : ''}</div>
++                <div class="deezer-result-name">${esc(item.title)}</div>
++                <div class="deezer-result-sub">${esc(item.artist || '')}${item.album ? ' · ' + item.album : ''}</div>
+               </div>
+               <div class="deezer-result-dur">${item.duration ? secToMmss(item.duration) : ''}</div>
+             </div>`
+@@ -1289,7 +1291,7 @@
+     function abrirModal(musica = null) {
+       _editId = musica?.id || null
+       document.getElementById('modalTitle').textContent    = musica ? 'Editar Música' : 'Nova Música'
+-      document.getElementById('modalSubtitle').textContent = musica ? `${musica.title || ''}` : 'Preencha os dados da música'
++      document.getElementById('modalSubtitle').textContent = musica ? `${esc(musica.title || '')}` : 'Preencha os dados da música'
+       document.getElementById('fTitle').value    = musica?.title    || ''
+       document.getElementById('fArtist').value   = musica?.artist   || ''
+       document.getElementById('fTom').value      = musica?.tom      || ''
+diff --git a/public/notificacoes.html b/public/notificacoes.html
+index 9a799d2..3f12d55 100644
+--- a/public/notificacoes.html
++++ b/public/notificacoes.html
+@@ -304,6 +304,8 @@
+   <script src="/js/sidebar-permissions.js"></script>
+   <script src="/js/sidebar-ui.js"></script>
+   <script>
++    // SEC-005: escape de HTML para prevenir XSS em innerHTML
++    function esc(s) { return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') }
+     let todasNotificacoes = []
+     let filtroAtual = 'todas'
+ 
+@@ -363,8 +365,8 @@
+             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+           </div>
+           <div class="notif-page-body" onclick="abrirNotif('${n.id}','${n.action_url || ''}')">
+-            <div class="notif-page-title${n.is_read ? ' read' : ''}">${n.title}</div>
+-            <div class="notif-page-text">${n.body}</div>
++            <div class="notif-page-title${n.is_read ? ' read' : ''}">${esc(n.title)}</div>
++            <div class="notif-page-text">${esc(n.body)}</div>
+             <div class="notif-page-time">${formatarTempo(n.created_at)}</div>
+           </div>
+           <div class="notif-page-actions">
+diff --git a/public/template-detalhe.html b/public/template-detalhe.html
+index 217615a..9eeb66c 100644
+--- a/public/template-detalhe.html
++++ b/public/template-detalhe.html
+@@ -1030,7 +1030,7 @@
+         document.getElementById('headerName').textContent = template.name
+         document.getElementById('headerMeta').textContent =
+           template.created_at ? 'Criado em ' + new Date(template.created_at).toLocaleDateString('pt-BR') : ''
+-        document.title = `Hug Software — ${template.name}`
++        document.title = `Hug Software — ${esc(template.name)}`
+ 
+         // Preenche campos
+         document.getElementById('fNome').value = template.name || ''
+@@ -1155,7 +1155,7 @@
+           <div class="ministry-block ${autoOpen}" id="minBlock_${deptId}">
+             <div class="ministry-head" onclick="toggleMin('${deptId}')">
+               <div class="ministry-dot" style="background:${color}"></div>
+-              <span class="ministry-name-text">${d.name}</span>
++              <span class="ministry-name-text">${esc(d.name)}</span>
+               <span class="ministry-count" id="minCount_${deptId}">${checked}/${funcs.length}</span>
+               <svg class="ministry-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+             </div>
+@@ -1174,7 +1174,7 @@
+                 const allowVagas  = canChangeVagas(f.id)
+                 return `<div class="dept-check-row">
+                   <input type="checkbox" id="fc_${f.id}" ${sel ? 'checked' : ''} ${allowToggle ? `onchange="toggleFuncAcordeon('${f.id}','${deptId}',this.checked)"` : 'disabled style="opacity:0.5;cursor:not-allowed"'} />
+-                  <label class="dept-check-label" for="fc_${f.id}">${f.name}</label>
++                  <label class="dept-check-label" for="fc_${f.id}">${esc(f.name)}</label>
+                   <div class="vagas-ctrl" id="vagasCtrl_${f.id}" style="margin-left:auto;${sel ? '' : 'display:none'}" onclick="event.stopPropagation()">
+                     <button class="vagas-btn" ${allowVagas ? `onclick="mudaVagas('${f.id}',-1)"` : 'disabled style="opacity:0.35;cursor:not-allowed"'}>−</button>
+                     <span class="vagas-val" id="vagas_${f.id}">${v}</span>
+@@ -1201,7 +1201,7 @@
+         return `
+           <div class="dept-card${sel ? ' selected' : ''}" ${allowToggle ? `onclick="toggleFuncDirect('${f.id}')"` : 'style="cursor:default;opacity:0.5"'}>
+             <div class="dept-card-dot" style="background:${sel ? '#5A9E2F' : '#9E9B96'}"></div>
+-            <div class="dept-card-name">${f.name}</div>
++            <div class="dept-card-name">${esc(f.name)}</div>
+             <div class="dept-card-min">${d ? d.name : ''}</div>
+             <div class="dept-card-foot">
+               ${sel ? `<div class="vagas-ctrl" onclick="event.stopPropagation()">
+@@ -1231,7 +1231,7 @@
+             <div class="dept-list-check">${checkSVG}</div>
+             <div style="width:8px;height:8px;border-radius:50%;background:${color};flex-shrink:0"></div>
+             <div class="dept-list-info">
+-              <div class="dept-list-name">${f.name}</div>
++              <div class="dept-list-name">${esc(f.name)}</div>
+               <div class="dept-list-min">${d ? d.name : ''}</div>
+             </div>
+           </div>${divider}`
+@@ -1283,7 +1283,7 @@
+           const res = await authFetch(`/api/escala/funcao/${f.id}/tem-membros`)
+           if (res.ok) {
+             const { temMembros } = await res.json()
+-            if (temMembros) { showToast(`"${f.name}" tem membros escalados — mantida`, 'error'); continue }
++            if (temMembros) { showToast(`"${esc(f.name)}" tem membros escalados — mantida`, 'error'); continue }
+           }
+           _selectedFuncoes.delete(f.id)
+           delete _vagasMap[f.id]
+diff --git a/public/templates.html b/public/templates.html
+index 91d72c8..78da46c 100644
+--- a/public/templates.html
++++ b/public/templates.html
+@@ -1405,7 +1405,7 @@
+           <div class="ministry-block" id="minBlock_${m.id}">
+             <div class="ministry-head" onclick="toggleMinistryBlock('${m.id}')">
+               <div class="ministry-dot" style="background:${color}"></div>
+-              <span class="ministry-name">${m.name}</span>
++              <span class="ministry-name">${esc(m.name)}</span>
+               <span class="ministry-count" id="minCount_${m.id}">${checked}/${depts.length} selecionados</span>
+               <svg class="ministry-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+             </div>
+@@ -1413,7 +1413,7 @@
+               ${depts.map(d => `
+                 <div class="dept-check-row">
+                   <input type="checkbox" id="dept_${d.id}" ${_wizDepts.has(d.id) ? 'checked' : ''} onchange="toggleDept('${d.id}','${m.id}',this.checked)" />
+-                  <label class="dept-check-label" for="dept_${d.id}">${d.name}</label>
++                  <label class="dept-check-label" for="dept_${d.id}">${esc(d.name)}</label>
+                 </div>`).join('')}
+             </div>
+           </div>`
+@@ -1451,12 +1451,12 @@
+           <div class="review-dept-block">
+             <div class="review-dept-head">
+               <div style="width:8px;height:8px;border-radius:50%;background:${color};flex-shrink:0"></div>
+-              <span class="review-dept-name">${d.name}</span>
++              <span class="review-dept-name">${esc(d.name)}</span>
+               <span style="font-size:12px;color:var(--ink-muted);margin-left:auto;">${m ? m.name : ''}</span>
+             </div>
+             <div class="review-dept-body">
+               ${funcs.length
+-                ? funcs.map(f => `<div class="review-func-row">• ${f.name}</div>`).join('')
++                ? funcs.map(f => `<div class="review-func-row">• ${esc(f.name)}</div>`).join('')
+                 : '<div class="review-func-row" style="color:var(--ink-subtle)">Sem funções cadastradas</div>'}
+             </div>
+           </div>`
+diff --git a/public/voluntario-detalhe.html b/public/voluntario-detalhe.html
+index 816d67a..01f9e0b 100644
+--- a/public/voluntario-detalhe.html
++++ b/public/voluntario-detalhe.html
+@@ -1229,6 +1229,8 @@
+   <script src="/js/sidebar-permissions.js"></script>
+     <script src="/js/sidebar-ui.js"></script>
+   <script>
++    // SEC-005: escape de HTML para prevenir XSS em innerHTML
++    function esc(s) { return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') }
+     const volunteerId  = location.pathname.split('/').pop()
+     const _params      = new URLSearchParams(location.search)
+     const _isPendente  = _params.get('pendente') === '1'
+@@ -1373,7 +1375,7 @@
+       const ini = initials(v.full_name); const color = avatarColor(v.full_name)
+       const el = document.getElementById('heroAvatar')
+       if (v.photo_url) {
+-        el.outerHTML = `<img class="hero-avatar" id="heroAvatar" src="${v.photo_url}" alt="${v.full_name}">`
++        el.outerHTML = `<img class="hero-avatar" id="heroAvatar" src="${v.photo_url}" alt="${esc(v.full_name)}">`
+       } else { el.style.background = color; el.textContent = ini }
+       document.getElementById('heroName').textContent = v.full_name || '—'
+       const ativo = v.is_active !== false
+@@ -1388,7 +1390,7 @@
+       const el = document.getElementById('photoDisplay')
+       const ini = initials(v.full_name); const color = avatarColor(v.full_name)
+       el.innerHTML = v.photo_url
+-        ? `<img class="photo-av" src="${v.photo_url}" alt="${v.full_name}">`
++        ? `<img class="photo-av" src="${v.photo_url}" alt="${esc(v.full_name)}">`
+         : `<div class="photo-ph" style="background:${color}">${ini}</div>`
+     }
+ 
+diff --git a/public/voluntarios.html b/public/voluntarios.html
+index 4b62c0d..d65c995 100644
+--- a/public/voluntarios.html
++++ b/public/voluntarios.html
+@@ -2272,7 +2272,7 @@
+           ? `<div class="td-avatar" style="background:#e0e0e0;overflow:hidden;padding:0"><img src="${esc(v.photo_url)}" style="width:100%;height:100%;object-fit:cover"></div>`
+           : `<div class="td-avatar" style="background:${color}">${esc(ini)}</div>`
+         return `<tr>
+-          <td><div class="td-vol-name">${tdAvatar}<div><div class="td-name">${esc(v.full_name)}</div>${v.nickname ? `<div class="td-muted" style="font-size:11px">${esc(v.nickname)}</div>` : ''}</div></div></td>
++          <td><div class="td-vol-name">${tdAvatar}<div><div class="td-name">${esc(v.full_name)}</div>${esc(v.nickname ? `<div class="td-muted" style="font-size:11px">${esc(v.nickname))}</div>` : ''}</div></div></td>
+           <td class="td-muted">${esc([...new Set((v.db_member_dept || []).filter(r => r.status === 'ativo').map(r => r.db_department?.name).filter(Boolean))].join(', ') || '—')}</td>
+           <td class="td-muted">${esc(v.whatsapp || '—')}</td>
+           <td><span style="display:inline-flex;align-items:center;gap:4px;height:22px;padding:0 9px;border-radius:9999px;font-size:11px;font-weight:600;background:${ativo ? 'rgba(142,182,155,0.12)' : 'rgba(0,0,0,0.06)'};color:${ativo ? '#008a50' : 'var(--ink-muted)'}">${ativo ? 'Ativo' : 'Arquivado'}</span></td>
+diff --git a/routes/auth.js b/routes/auth.js
+index 5bdf763..cacd37d 100644
+--- a/routes/auth.js
++++ b/routes/auth.js
+@@ -1,6 +1,8 @@
+ const router = require('express').Router()
+ const { supabaseAuth, supabaseAdmin } = require('../lib/supabase')
+-const authMiddleware = require('../middleware/auth')
++const authMiddleware = require("../middleware/auth")
++const { uploadPhoto } = require("../lib/uploadUtils") // SEC-001: upload seguro centralizado
++const { dbError, serverError } = require('../lib/apiError') // SEC-006
+ 
+ // POST /api/auth/login
+ router.post('/login', async (req, res) => {
+@@ -180,7 +182,11 @@ router.post('/refresh', async (req, res) => {
+ // POST /api/auth/logout
+ router.post('/logout', authMiddleware, async (req, res) => {
+   const token = req.headers.authorization?.split(' ')[1]
+-  await supabaseAuth.auth.admin?.signOut(token).catch(() => {})
++  // SEC-008: usa supabaseAdmin (service key) — .admin sempre disponível, sem optional chain
++  if (token) {
++    const { error } = await supabaseAdmin.auth.admin.signOut(token)
++    if (error) console.warn('[logout] signOut error:', error.message)
++  }
+   res.json({ ok: true })
+ })
+ 
+@@ -192,14 +198,14 @@ router.get('/config', (req, res) => {
+ // GET /api/auth/generos — lista de gêneros (público, para o cadastro)
+ router.get('/generos', async (req, res) => {
+   const { data, error } = await supabaseAdmin.from('db_genero').select('id, name').order('name')
+-  if (error) return res.status(500).json({ error: error.message })
++  if (error) return dbError(res, error, 'auth')
+   res.json({ generos: data || [] })
+ })
+ 
+ // GET /api/auth/estados-civis — lista de estados civis (público, para o cadastro)
+ router.get('/estados-civis', async (req, res) => {
+   const { data, error } = await supabaseAdmin.from('db_status_civil').select('id, name').order('name')
+-  if (error) return res.status(500).json({ error: error.message })
++  if (error) return dbError(res, error, 'auth')
+   res.json({ estados: data || [] })
+ })
+ 
+@@ -335,7 +341,7 @@ router.post('/cadastro', async (req, res) => {
+         if (authErr?.message?.includes('already registered')) {
+           return res.status(409).json({ error: 'Este e-mail já possui uma conta no sistema' })
+         }
+-        return res.status(500).json({ error: authErr?.message || 'Erro ao criar conta' })
++        return dbError(res, authErr, 'auth cadastro')
+       }
+       userId = authData.user.id
+     }
+@@ -401,31 +407,21 @@ router.post('/cadastro', async (req, res) => {
+ 
+       if (memberErr) {
+         console.error('[cadastro] db_member ERRO:', JSON.stringify(memberErr))
+-        return res.status(500).json({ error: memberErr.message })
++        return dbError(res, memberErr, 'auth')
+       }
+ 
+-      // Upload foto se fornecida
++      // Upload foto se fornecida — SEC-001: usa uploadPhoto seguro com validação de MIME
+       if (photo_base64 && memberData) {
+         try {
+-          const matches = photo_base64.match(/^data:(.+);base64,(.+)$/)
+-          if (matches) {
+-            const contentType = matches[1]
+-            const buffer = Buffer.from(matches[2], 'base64')
+-            const ext = contentType.split('/')[1]?.split('+')[0] || 'jpg'
+-            const fileName = `photos/${memberData.id}-${Date.now()}.${ext}`
+-            await supabaseAdmin.storage.createBucket('voluntarios', { public: true }).catch(() => {})
+-            const { error: uploadErr } = await supabaseAdmin.storage
+-              .from('voluntarios').upload(fileName, buffer, { contentType, upsert: true })
+-            if (!uploadErr) {
+-              const { data: { publicUrl } } = supabaseAdmin.storage.from('voluntarios').getPublicUrl(fileName)
+-              await supabaseAdmin.from('db_member').update({ photo_url: publicUrl }).eq('id', memberData.id)
+-            }
++          const photoUrl = await uploadPhoto(photo_base64, memberData.id)
++          if (photoUrl) {
++            await supabaseAdmin.from('db_member').update({ photo_url: photoUrl }).eq('id', memberData.id)
+           }
+         } catch (e) { console.error('[cadastro photo]', e) }
+       }
+     } catch (e) {
+       console.error('[cadastro] db_member EXCEPTION:', e.message)
+-      return res.status(500).json({ error: e.message })
++      return dbError(res, e, 'auth')
+     }
+ 
+     // 6. Notifica owners da igreja
+diff --git a/routes/church.js b/routes/church.js
+index db5a4e7..99c0977 100644
+--- a/routes/church.js
++++ b/routes/church.js
+@@ -2,6 +2,7 @@ const router = require('express').Router()
+ const { supabaseAdmin } = require('../lib/supabase')
+ const authMiddleware = require('../middleware/auth')
+ const checkPermissao = require('../middleware/checkPermissao')
++const { dbError, serverError } = require('../lib/apiError') // SEC-006
+ 
+ // GET /api/church — retorna dados da igreja do usuário logado
+ router.get('/', authMiddleware, async (req, res) => {
+diff --git a/routes/cronograma.js b/routes/cronograma.js
+index f94ce92..a08f737 100644
+--- a/routes/cronograma.js
++++ b/routes/cronograma.js
+@@ -2,6 +2,7 @@ const router = require('express').Router()
+ const { supabaseAdmin } = require('../lib/supabase')
+ const authMiddleware = require('../middleware/auth')
+ const checkPermissao = require('../middleware/checkPermissao')
++const { dbError, serverError } = require('../lib/apiError') // SEC-006
+ 
+ async function validateEvent(eventId, churchId) {
+   const { data } = await supabaseAdmin
+@@ -36,7 +37,7 @@ router.get('/', authMiddleware, checkPermissao('cronograma', 'ver'), async (req,
+     .eq('church_id', churchId)
+     .order('created_at', { ascending: false })
+ 
+-  if (error) { console.error('[cronograma GET /]', error); return res.status(500).json({ error: error.message }) }
++  if (error) { console.error('[cronograma GET /]', error); return dbError(res, error, 'cronograma') }
+   res.json({ cronogramas: data || [] })
+ })
+ 
+@@ -52,7 +53,7 @@ router.get('/:eventId', authMiddleware, checkPermissao('cronograma', 'ver'), asy
+     .eq('church_id', churchId)
+     .maybeSingle()
+ 
+-  if (error) { console.error('[cronograma GET :eventId]', error); return res.status(500).json({ error: error.message }) }
++  if (error) { console.error('[cronograma GET :eventId]', error); return dbError(res, error, 'cronograma') }
+   console.log('[cronograma GET :eventId] eventId=%s church=%s found=%s', req.params.eventId, churchId, !!data)
+   res.json({ cronograma: data || null })
+ })
+@@ -74,7 +75,7 @@ router.post('/:eventId', authMiddleware, checkPermissao('cronograma', 'criar'),
+     .select('*')
+     .single()
+ 
+-  if (error) { console.error('[cronograma POST]', error); return res.status(500).json({ error: error.message }) }
++  if (error) { console.error('[cronograma POST]', error); return dbError(res, error, 'cronograma') }
+   res.status(201).json({ cronograma: data })
+ })
+ 
+@@ -94,7 +95,7 @@ router.put('/:id', authMiddleware, checkPermissao('cronograma', 'editar'), async
+     .select('*')
+     .single()
+ 
+-  if (error) { console.error('[cronograma PUT]', error); return res.status(500).json({ error: error.message }) }
++  if (error) { console.error('[cronograma PUT]', error); return dbError(res, error, 'cronograma') }
+   if (!data) return res.status(404).json({ error: 'Cronograma não encontrado' })
+   res.json({ cronograma: data })
+ })
+@@ -117,7 +118,7 @@ router.get('/:cronogramaId/itens', authMiddleware, checkPermissao('cronograma',
+     .eq('church_id', churchId)
+     .order('ordem', { ascending: true })
+ 
+-  if (error) { console.error('[cronograma itens GET]', error); return res.status(500).json({ error: error.message }) }
++  if (error) { console.error('[cronograma itens GET]', error); return dbError(res, error, 'cronograma') }
+   console.log('[cronograma itens GET] cronogramaId=%s church=%s itens=%d', req.params.cronogramaId, churchId, data?.length ?? 0)
+   res.json({ cronograma, itens: data || [] })
+ })
+@@ -161,7 +162,7 @@ router.post('/:cronogramaId/itens', authMiddleware, checkPermissao('cronograma',
+     .select('*, musica:musica_id (id, title, artist, tom, bpm, duration)')
+     .single()
+ 
+-  if (error) { console.error('[cronograma itens POST]', error); return res.status(500).json({ error: error.message }) }
++  if (error) { console.error('[cronograma itens POST]', error); return dbError(res, error, 'cronograma') }
+   res.status(201).json({ item: data })
+ })
+ 
+@@ -205,7 +206,7 @@ router.post('/:cronogramaId/reutilizar', authMiddleware, checkPermissao('cronogr
+     .order('ordem', { ascending: true })
+ 
+   console.log('[reutilizar] source itens=%d srcErr=%s', source?.length, srcErr?.message)
+-  if (srcErr) return res.status(500).json({ error: srcErr.message })
++  if (srcErr) return dbError(res, srcErr, 'cronograma')
+   if (!source?.length) return res.status(400).json({ error: 'O cronograma selecionado não possui itens para copiar' })
+ 
+   const copies = source.map(item => ({
+@@ -225,7 +226,7 @@ router.post('/:cronogramaId/reutilizar', authMiddleware, checkPermissao('cronogr
+     .insert(copies)
+     .select('*, musica:musica_id (id, title, artist, tom, bpm, duration)')
+ 
+-  if (error) { console.error('[cronograma reutilizar]', error); return res.status(500).json({ error: error.message }) }
++  if (error) { console.error('[cronograma reutilizar]', error); return dbError(res, error, 'cronograma') }
+   res.status(201).json({ itens: data })
+ })
+ 
+@@ -251,7 +252,7 @@ router.put('/:cronogramaId/itens/:id', authMiddleware, checkPermissao('cronogram
+     .select('*, musica:musica_id (id, title, artist, tom, bpm, duration)')
+     .single()
+ 
+-  if (error) { console.error('[cronograma itens PUT]', error); return res.status(500).json({ error: error.message }) }
++  if (error) { console.error('[cronograma itens PUT]', error); return dbError(res, error, 'cronograma') }
+   if (!data) return res.status(404).json({ error: 'Item não encontrado' })
+   res.json({ item: data })
+ })
+@@ -268,7 +269,7 @@ router.delete('/:cronogramaId/itens/:id', authMiddleware, checkPermissao('cronog
+     .eq('cronograma_id', req.params.cronogramaId)
+     .eq('church_id', churchId)
+ 
+-  if (error) { console.error('[cronograma itens DELETE]', error); return res.status(500).json({ error: error.message }) }
++  if (error) { console.error('[cronograma itens DELETE]', error); return dbError(res, error, 'cronograma') }
+   res.json({ ok: true })
+ })
+ 
+diff --git a/routes/dashboard.js b/routes/dashboard.js
+index d9a38a5..77d8004 100644
+--- a/routes/dashboard.js
++++ b/routes/dashboard.js
+@@ -2,6 +2,7 @@ const router = require('express').Router()
+ const { supabaseAdmin } = require('../lib/supabase')
+ const authMiddleware = require('../middleware/auth')
+ const checkPermissao = require('../middleware/checkPermissao')
++const { dbError, serverError } = require('../lib/apiError') // SEC-006
+ 
+ // ── GET /api/dashboard/lider-departamento ──
+ router.get('/lider-departamento', authMiddleware, checkPermissao('escala', 'ver'), async (req, res) => {
+diff --git a/routes/department.js b/routes/department.js
+index 267ab23..eb9f2a3 100644
+--- a/routes/department.js
++++ b/routes/department.js
+@@ -2,6 +2,7 @@ const router = require('express').Router()
+ const { supabaseAdmin } = require('../lib/supabase')
+ const authMiddleware = require('../middleware/auth')
+ const checkPermissao = require('../middleware/checkPermissao')
++const { dbError, serverError } = require('../lib/apiError') // SEC-006
+ 
+ 
+ // GET /api/department — lista departamentos (opcional: ?ministry_id=)
+@@ -23,7 +24,7 @@ router.get('/', authMiddleware, checkPermissao('departamento', 'ver'), async (re
+ 
+   if (error) {
+     console.error('[department GET]', error)
+-    return res.status(500).json({ error: error.message })
++    return dbError(res, error, 'department')
+   }
+ 
+   // Busca líderes de todos os departamentos
+@@ -128,7 +129,7 @@ router.post('/', authMiddleware, checkPermissao('departamento', 'criar'), async
+ 
+   if (error) {
+     console.error('[department POST]', error)
+-    return res.status(500).json({ error: error.message })
++    return dbError(res, error, 'department')
+   }
+ 
+   res.status(201).json({ department: data })
+@@ -156,7 +157,7 @@ router.put('/:id', authMiddleware, checkPermissao('departamento', 'editar'), asy
+ 
+   if (error) {
+     console.error('[department PUT]', error)
+-    return res.status(500).json({ error: error.message })
++    return dbError(res, error, 'department')
+   }
+ 
+   if (!data || data.length === 0) {
+@@ -179,7 +180,7 @@ router.delete('/:id', authMiddleware, checkPermissao('departamento', 'arquivar')
+ 
+   if (error) {
+     console.error('[department DELETE]', error)
+-    return res.status(500).json({ error: error.message })
++    return dbError(res, error, 'department')
+   }
+ 
+   res.json({ ok: true })
+diff --git a/routes/disponibilidade.js b/routes/disponibilidade.js
+index 2808b0f..91e6bd8 100644
+--- a/routes/disponibilidade.js
++++ b/routes/disponibilidade.js
+@@ -1,6 +1,7 @@
+ const router = require('express').Router()
+ const { supabaseAdmin } = require('../lib/supabase')
+ const authMiddleware = require('../middleware/auth')
++const { dbError, serverError } = require('../lib/apiError') // SEC-006
+ 
+ const TURNOS_VALIDOS = ['manha', 'tarde', 'noite']
+ 
+@@ -38,7 +39,7 @@ router.get('/me', authMiddleware, async (req, res) => {
+     .eq('member_id', memberId)
+     .order('dia_semana', { ascending: true })
+ 
+-  if (error) { console.error('[dispon/me GET]', error); return res.status(500).json({ error: error.message }) }
++  if (error) { console.error('[dispon/me GET]', error); return dbError(res, error, 'disponibilidade') }
+   res.json({ disponibilidades: data || [] })
+ })
+ 
+@@ -66,7 +67,7 @@ router.post('/me', authMiddleware, async (req, res) => {
+     .eq('church_id', dbUser.church_id)
+     .eq('member_id', memberId)
+ 
+-  if (delErr) { console.error('[dispon/me DELETE]', delErr); return res.status(500).json({ error: delErr.message }) }
++  if (delErr) { console.error('[dispon/me DELETE]', delErr); return dbError(res, delErr, 'disponibilidade') }
+ 
+   if (disponibilidades.length) {
+     const rows = disponibilidades.map(d => ({
+@@ -76,7 +77,7 @@ router.post('/me', authMiddleware, async (req, res) => {
+       turno:      d.turno,
+     }))
+     const { error: insErr } = await supabaseAdmin.from('db_disponibilidade').insert(rows)
+-    if (insErr) { console.error('[dispon/me INSERT]', insErr); return res.status(500).json({ error: insErr.message }) }
++    if (insErr) { console.error('[dispon/me INSERT]', insErr); return dbError(res, insErr, 'disponibilidade') }
+   }
+ 
+   res.json({ ok: true })
+@@ -107,7 +108,7 @@ router.get('/:memberId', authMiddleware, async (req, res) => {
+     .eq('member_id', req.params.memberId)
+     .order('dia_semana', { ascending: true })
+ 
+-  if (error) { console.error('[dispon GET]', error); return res.status(500).json({ error: error.message }) }
++  if (error) { console.error('[dispon GET]', error); return dbError(res, error, 'disponibilidade') }
+   res.json({ disponibilidades: data || [] })
+ })
+ 
+diff --git a/routes/escala.js b/routes/escala.js
+index 799c6a4..9c6131f 100644
+--- a/routes/escala.js
++++ b/routes/escala.js
+@@ -2,6 +2,7 @@ const router = require('express').Router()
+ const { supabaseAdmin } = require('../lib/supabase')
+ const authMiddleware = require('../middleware/auth')
+ const checkPermissao = require('../middleware/checkPermissao')
++const { dbError, serverError } = require('../lib/apiError') // SEC-006
+ 
+ // ── GET / ── lista eventos com status de escala
+ router.get('/', authMiddleware, checkPermissao('escala', 'ver'), async (req, res) => {
+@@ -15,7 +16,7 @@ router.get('/', authMiddleware, checkPermissao('escala', 'ver'), async (req, res
+     .eq('is_active', true)
+     .order('start_date', { ascending: true })
+ 
+-  if (error) return res.status(500).json({ error: error.message })
++  if (error) return dbError(res, error, 'escala')
+   if (!eventos?.length) return res.json({ eventos: [] })
+ 
+   const eventIds = eventos.map(e => e.id)
+@@ -115,7 +116,7 @@ router.get('/', authMiddleware, checkPermissao('escala', 'ver'), async (req, res
+       .gte('start_date', today)
+       .order('start_date', { ascending: true })
+ 
+-    if (evLiderErr) return res.status(500).json({ error: evLiderErr.message })
++    if (evLiderErr) return dbError(res, evLiderErr, 'escala')
+     if (!evLider?.length) return res.json({ eventos: [] })
+ 
+     const evLiderIds = evLider.map(e => e.id)
+@@ -178,7 +179,7 @@ router.get('/funcao/:funcaoId/tem-membros', authMiddleware, async (req, res) =>
+     .eq('church_id', churchId)
+     .neq('status', 'cancelado')
+     .limit(1)
+-  if (error) return res.status(500).json({ error: error.message })
++  if (error) return dbError(res, error, 'escala')
+   res.json({ temMembros: (data || []).length > 0 })
+ })
+ 
+@@ -218,7 +219,7 @@ router.get('/meus-eventos', authMiddleware, async (req, res) => {
+     `)
+     .eq('member_id', dbMember.id)
+ 
+-  if (error) { console.error('[meus-eventos]', error); return res.status(500).json({ error: error.message }) }
++  if (error) { console.error('[meus-eventos]', error); return dbError(res, error, 'escala') }
+ 
+   const eventos = (items || [])
+     .filter(i => i.db_escala?.db_event)
+@@ -260,7 +261,7 @@ router.get('/:eventId/bloqueios', authMiddleware, checkPermissao('escala', 'ver'
+     .select('member_id, type, start_date, end_date')
+     .eq('church_id', churchId)
+ 
+-  if (error) return res.status(500).json({ error: error.message })
++  if (error) return dbError(res, error, 'escala')
+ 
+   const bloqueados = (data || [])
+     .filter(d => {
+@@ -332,7 +333,7 @@ router.get('/:eventId', authMiddleware, checkPermissao('escala', 'ver'), async (
+       .eq('church_id', churchId)
+       .in('department_id', deptIds)
+ 
+-    if (selErr) { console.error('[escala select]', selErr); return res.status(500).json({ error: selErr.message }) }
++    if (selErr) { console.error('[escala select]', selErr); return dbError(res, selErr, 'escala') }
+     escalas = existing || []
+   }
+ 
+@@ -421,7 +422,7 @@ router.put('/:eventId/status', authMiddleware, checkPermissao('escala', 'editar'
+       .eq('event_id', req.params.eventId)
+       .eq('department_id', deptRow.department_id)
+       .eq('church_id', churchId)
+-    if (dErr) { console.error('[escala PUT status lider_dept]', dErr); return res.status(500).json({ error: dErr.message }) }
++    if (dErr) { console.error('[escala PUT status lider_dept]', dErr); return dbError(res, dErr, 'escala') }
+ 
+     // Ao publicar: itens pendentes passam para "escalado"
+     if (status === 'publicado') {
+@@ -445,7 +446,7 @@ router.put('/:eventId/status', authMiddleware, checkPermissao('escala', 'editar'
+     .eq('event_id', req.params.eventId)
+     .eq('church_id', churchId)
+ 
+-  if (error) { console.error('[escala PUT status]', error); return res.status(500).json({ error: error.message }) }
++  if (error) { console.error('[escala PUT status]', error); return dbError(res, error, 'escala') }
+ 
+   // Ao publicar: itens pendentes de todas as escalas passam para "escalado"
+   if (status === 'publicado') {
+@@ -599,7 +600,7 @@ router.post('/:escalaId/item', authMiddleware, checkPermissao('escala', 'criar')
+     .select()
+     .single()
+ 
+-  if (error) { console.error('[escala_item POST]', error); return res.status(500).json({ error: error.message }) }
++  if (error) { console.error('[escala_item POST]', error); return dbError(res, error, 'escala') }
+ 
+   const { data: member } = await supabaseAdmin
+     .from('db_member').select('id, full_name, nickname, photo_url').eq('id', member_id).single()
+@@ -718,7 +719,7 @@ router.post('/:eventId/automatica', authMiddleware, checkPermissao('escala', 'cr
+ 
+   if (toInsert.length) {
+     const { error: insErr } = await supabaseAdmin.from('db_escala_item').insert(toInsert)
+-    if (insErr) { console.error('[escala automatica]', insErr); return res.status(500).json({ error: insErr.message }) }
++    if (insErr) { console.error('[escala automatica]', insErr); return dbError(res, insErr, 'escala') }
+   }
+ 
+   // Retorna estrutura atualizada (reutiliza lógica do GET)
+@@ -761,7 +762,7 @@ router.delete('/:escalaId/item/:itemId', authMiddleware, checkPermissao('escala'
+     .eq('escala_id', req.params.escalaId)
+     .eq('church_id', churchId)
+ 
+-  if (error) { console.error('[escala_item DELETE]', error); return res.status(500).json({ error: error.message }) }
++  if (error) { console.error('[escala_item DELETE]', error); return dbError(res, error, 'escala') }
+   res.json({ ok: true })
+ })
+ 
+diff --git a/routes/evento.js b/routes/evento.js
+index e79bdf7..a51bb20 100644
+--- a/routes/evento.js
++++ b/routes/evento.js
+@@ -2,6 +2,7 @@ const router = require('express').Router()
+ const { supabaseAdmin } = require('../lib/supabase')
+ const authMiddleware = require('../middleware/auth')
+ const checkPermissao = require('../middleware/checkPermissao')
++const { dbError, serverError } = require('../lib/apiError') // SEC-006
+ 
+ function generateRecurDates(startDate, recurrenceType, recurrenceConfig) {
+   const count = parseInt(recurrenceConfig?.count) || 0
+@@ -115,7 +116,7 @@ router.get('/', authMiddleware, checkPermissao('evento', 'ver'), async (req, res
+   if (req.query.status) query = query.eq('status', req.query.status)
+ 
+   const { data, error } = await query
+-  if (error) { console.error('[evento GET]', error); return res.status(500).json({ error: error.message }) }
++  if (error) { console.error('[evento GET]', error); return dbError(res, error, 'evento') }
+   console.log('[evento GET] church=%s total=%d', churchId, (data||[]).length)
+   res.json({ eventos: data || [] })
+ })
+@@ -175,7 +176,7 @@ router.post('/', authMiddleware, checkPermissao('evento', 'criar'), async (req,
+     .select()
+     .single()
+ 
+-  if (error) { console.error('[evento POST]', error); return res.status(500).json({ error: error.message }) }
++  if (error) { console.error('[evento POST]', error); return dbError(res, error, 'evento') }
+ 
+   // Cria eventos filhos para recorrência
+   if (!parent_event_id && recurrence_type) {
+@@ -258,7 +259,7 @@ router.put('/:id', authMiddleware, checkPermissao('evento', 'editar'), async (re
+     .eq('church_id', churchId)
+     .select()
+ 
+-  if (error) { console.error('[evento PUT]', error); return res.status(500).json({ error: error.message }) }
++  if (error) { console.error('[evento PUT]', error); return dbError(res, error, 'evento') }
+   if (!data?.length) return res.status(404).json({ error: 'Evento não encontrado' })
+   res.json({ evento: data[0] })
+ })
+@@ -274,7 +275,7 @@ router.delete('/:id', authMiddleware, checkPermissao('evento', 'cancelar'), asyn
+     .eq('id', req.params.id)
+     .eq('church_id', churchId)
+ 
+-  if (error) { console.error('[evento DELETE]', error); return res.status(500).json({ error: error.message }) }
++  if (error) { console.error('[evento DELETE]', error); return dbError(res, error, 'evento') }
+   res.json({ ok: true })
+ })
+ 
+diff --git a/routes/funcao.js b/routes/funcao.js
+index 9e2429d..aee1292 100644
+--- a/routes/funcao.js
++++ b/routes/funcao.js
+@@ -2,6 +2,7 @@ const router = require('express').Router()
+ const { supabaseAdmin } = require('../lib/supabase')
+ const authMiddleware = require('../middleware/auth')
+ const checkPermissao = require('../middleware/checkPermissao')
++const { dbError, serverError } = require('../lib/apiError') // SEC-006
+ 
+ 
+ // GET /api/funcao?department_id=xxx
+@@ -18,7 +19,7 @@ router.get('/', authMiddleware, checkPermissao('funcao', 'ver'), async (req, res
+   if (req.query.department_id) query = query.eq('department_id', req.query.department_id)
+ 
+   const { data, error } = await query
+-  if (error) { console.error('[funcao GET]', error); return res.status(500).json({ error: error.message }) }
++  if (error) { console.error('[funcao GET]', error); return dbError(res, error, 'funcao') }
+   res.json({ funcoes: data || [] })
+ })
+ 
+@@ -37,7 +38,7 @@ router.post('/', authMiddleware, checkPermissao('funcao', 'criar'), async (req,
+     .select()
+     .single()
+ 
+-  if (error) { console.error('[funcao POST]', error); return res.status(500).json({ error: error.message }) }
++  if (error) { console.error('[funcao POST]', error); return dbError(res, error, 'funcao') }
+   res.status(201).json({ funcao: data })
+ })
+ 
+@@ -59,7 +60,7 @@ router.put('/:id', authMiddleware, checkPermissao('funcao', 'editar'), async (re
+     .eq('church_id', churchId)
+     .select()
+ 
+-  if (error) { console.error('[funcao PUT]', error); return res.status(500).json({ error: error.message }) }
++  if (error) { console.error('[funcao PUT]', error); return dbError(res, error, 'funcao') }
+   if (!data?.length) return res.status(404).json({ error: 'Função não encontrada' })
+   res.json({ funcao: data[0] })
+ })
+@@ -78,7 +79,7 @@ router.delete('/:id', authMiddleware, checkPermissao('funcao', 'arquivar'), asyn
+   if (error) {
+     console.error('[funcao DELETE]', error)
+     if (error.code === '23503') return res.status(410).json({ error: 'Tem voluntario vinculado a está função' })
+-    return res.status(500).json({ error: error.message })
++    return dbError(res, error, 'funcao')
+   }
+   res.json({ ok: true })
+ })
+diff --git a/routes/indisponibilidade.js b/routes/indisponibilidade.js
+index 8e8c156..ac66ddf 100644
+--- a/routes/indisponibilidade.js
++++ b/routes/indisponibilidade.js
+@@ -2,6 +2,7 @@ const router = require('express').Router()
+ const { supabaseAdmin } = require('../lib/supabase')
+ const authMiddleware = require('../middleware/auth')
+ const checkPermissao = require('../middleware/checkPermissao')
++const { dbError, serverError } = require('../lib/apiError') // SEC-006
+ 
+ async function getMemberId(dbUserId, churchId) {
+   const { data: u } = await supabaseAdmin.from('db_user').select('email').eq('id', dbUserId).single()
+@@ -27,7 +28,7 @@ router.get('/me', authMiddleware, checkPermissao('voluntario', 'ver'), async (re
+     .eq('member_id', memberId)
+     .order('created_at', { ascending: false })
+ 
+-  if (error) { console.error('[indisp/me GET]', error); return res.status(500).json({ error: error.message }) }
++  if (error) { console.error('[indisp/me GET]', error); return dbError(res, error, 'indisponibilidade') }
+   res.json({ indisponibilidades: data || [] })
+ })
+ 
+@@ -71,7 +72,7 @@ router.post('/me', authMiddleware, checkPermissao('voluntario', 'ver'), async (r
+     .select('*, db_department(name)')
+     .single()
+ 
+-  if (error) { console.error('[indisp/me POST]', error); return res.status(500).json({ error: error.message }) }
++  if (error) { console.error('[indisp/me POST]', error); return dbError(res, error, 'indisponibilidade') }
+   res.status(201).json({ indisponibilidade: data })
+ })
+ 
+@@ -90,7 +91,7 @@ router.delete('/me/:id', authMiddleware, checkPermissao('voluntario', 'ver'), as
+     .eq('member_id', memberId)
+     .eq('church_id', churchId)
+ 
+-  if (error) { console.error('[indisp/me DELETE]', error); return res.status(500).json({ error: error.message }) }
++  if (error) { console.error('[indisp/me DELETE]', error); return dbError(res, error, 'indisponibilidade') }
+   res.json({ ok: true })
+ })
+ 
+@@ -108,7 +109,7 @@ router.get('/:memberId', authMiddleware, checkPermissao('voluntario', 'ver'), as
+     .eq('member_id', req.params.memberId)
+     .order('created_at', { ascending: false })
+ 
+-  if (error) { console.error('[indisp GET]', error); return res.status(500).json({ error: error.message }) }
++  if (error) { console.error('[indisp GET]', error); return dbError(res, error, 'indisponibilidade') }
+   res.json({ indisponibilidades: data || [] })
+ })
+ 
+@@ -143,7 +144,7 @@ router.post('/:memberId', authMiddleware, checkPermissao('voluntario', 'editar')
+     .select('*, db_department(name)')
+     .single()
+ 
+-  if (error) { console.error('[indisp POST]', error); return res.status(500).json({ error: error.message }) }
++  if (error) { console.error('[indisp POST]', error); return dbError(res, error, 'indisponibilidade') }
+   res.status(201).json({ indisponibilidade: data })
+ })
+ 
+@@ -159,7 +160,7 @@ router.delete('/:memberId/:id', authMiddleware, checkPermissao('voluntario', 'ed
+     .eq('member_id', req.params.memberId)
+     .eq('church_id', churchId)
+ 
+-  if (error) { console.error('[indisp DELETE]', error); return res.status(500).json({ error: error.message }) }
++  if (error) { console.error('[indisp DELETE]', error); return dbError(res, error, 'indisponibilidade') }
+   res.json({ ok: true })
+ })
+ 
+diff --git a/routes/lider.js b/routes/lider.js
+index 3c97848..bcace0a 100644
+--- a/routes/lider.js
++++ b/routes/lider.js
+@@ -2,6 +2,7 @@ const router = require('express').Router()
+ const { supabaseAdmin } = require('../lib/supabase')
+ const authMiddleware = require('../middleware/auth')
+ const checkPermissao = require('../middleware/checkPermissao')
++const { dbError, serverError } = require('../lib/apiError') // SEC-006
+ 
+ const USER_SELECT = 'id, full_name, email, avatar_url'
+ 
+@@ -99,7 +100,7 @@ router.get('/ministerio/:ministryId', authMiddleware, checkPermissao('ministerio
+     .eq('ministry_id', req.params.ministryId)
+     .eq('church_id', churchId)
+ 
+-  if (error) return res.status(500).json({ error: error.message })
++  if (error) return dbError(res, error, 'lider')
+ 
+   const lideres = (data || [])
+     .map(flattenLider)
+@@ -144,7 +145,7 @@ router.delete('/ministerio/:ministryId/:userId', authMiddleware, checkPermissao(
+     .eq('user_id', userId)
+     .eq('church_id', churchId)
+ 
+-  if (error) return res.status(500).json({ error: error.message })
++  if (error) return dbError(res, error, 'lider')
+ 
+   // Rebaixa para 'voluntario' se não for mais líder em nenhum lugar
+   await rebaixarSeNaoEhMaisLider(userId, churchId)
+@@ -164,7 +165,7 @@ router.get('/departamento/:departmentId', authMiddleware, checkPermissao('depart
+     .eq('department_id', req.params.departmentId)
+     .eq('church_id', churchId)
+ 
+-  if (error) return res.status(500).json({ error: error.message })
++  if (error) return dbError(res, error, 'lider')
+ 
+   const lideres = (data || [])
+     .map(flattenLider)
+@@ -209,7 +210,7 @@ router.delete('/departamento/:departmentId/:userId', authMiddleware, checkPermis
+     .eq('user_id', userId)
+     .eq('church_id', churchId)
+ 
+-  if (error) return res.status(500).json({ error: error.message })
++  if (error) return dbError(res, error, 'lider')
+ 
+   // Rebaixa para 'voluntario' se não for mais líder em nenhum lugar
+   await rebaixarSeNaoEhMaisLider(userId, churchId)
+diff --git a/routes/ministry.js b/routes/ministry.js
+index b5793ab..429a581 100644
+--- a/routes/ministry.js
++++ b/routes/ministry.js
+@@ -2,6 +2,7 @@ const router = require('express').Router()
+ const { supabaseAdmin } = require('../lib/supabase')
+ const authMiddleware = require('../middleware/auth')
+ const checkPermissao = require('../middleware/checkPermissao')
++const { dbError, serverError } = require('../lib/apiError') // SEC-006
+ 
+ 
+ // GET /api/ministry/:id — busca ministério único
+@@ -33,7 +34,7 @@ router.get('/', authMiddleware, checkPermissao('ministerio', 'ver'), async (req,
+ 
+   if (error) {
+     console.error('[ministry GET]', error)
+-    return res.status(500).json({ error: error.message })
++    return dbError(res, error, 'ministry')
+   }
+ 
+   res.json({ ministries: data || [] })
+@@ -61,7 +62,7 @@ router.post('/', authMiddleware, checkPermissao('ministerio', 'criar'), async (r
+ 
+   if (error) {
+     console.error('[ministry POST]', error)
+-    return res.status(500).json({ error: error.message })
++    return dbError(res, error, 'ministry')
+   }
+ 
+   res.status(201).json({ ministry: data })
+@@ -89,7 +90,7 @@ router.put('/:id', authMiddleware, checkPermissao('ministerio', 'editar'), async
+ 
+   if (error) {
+     console.error('[ministry PUT]', error)
+-    return res.status(500).json({ error: error.message })
++    return dbError(res, error, 'ministry')
+   }
+ 
+   if (!data || data.length === 0) {
+@@ -125,7 +126,7 @@ router.delete('/:id', authMiddleware, checkPermissao('ministerio', 'arquivar'),
+ 
+   if (countError) {
+     console.error('[ministry DELETE count]', countError)
+-    return res.status(500).json({ error: countError.message })
++    return dbError(res, countError, 'ministry')
+   }
+ 
+   if (count > 0) {
+@@ -142,7 +143,7 @@ router.delete('/:id', authMiddleware, checkPermissao('ministerio', 'arquivar'),
+ 
+   if (error) {
+     console.error('[ministry DELETE]', error)
+-    return res.status(500).json({ error: error.message })
++    return dbError(res, error, 'ministry')
+   }
+ 
+   res.json({ ok: true })
+diff --git a/routes/musica.js b/routes/musica.js
+index a35c1a8..1970518 100644
+--- a/routes/musica.js
++++ b/routes/musica.js
+@@ -3,6 +3,7 @@ const https  = require('https')
+ const { supabaseAdmin } = require('../lib/supabase')
+ const authMiddleware = require('../middleware/auth')
+ const checkPermissao = require('../middleware/checkPermissao')
++const { dbError, serverError } = require('../lib/apiError') // SEC-006
+ 
+ function deezerSearch(q) {
+   return new Promise((resolve, reject) => {
+@@ -55,7 +56,7 @@ router.get('/', authMiddleware, checkPermissao('musica', 'ver'), async (req, res
+   if (q) query = query.or(`title.ilike.%${q}%,artist.ilike.%${q}%`)
+ 
+   const { data, error } = await query
+-  if (error) { console.error('[musica GET]', error); return res.status(500).json({ error: error.message }) }
++  if (error) { console.error('[musica GET]', error); return dbError(res, error, 'musica') }
+ 
+   let musicas = data || []
+   if (isVoluntario) {
+@@ -110,7 +111,7 @@ router.post('/', authMiddleware, checkPermissao('musica', 'criar'), async (req,
+     .select(FIELDS)
+     .single()
+ 
+-  if (error) { console.error('[musica POST]', error); return res.status(500).json({ error: error.message }) }
++  if (error) { console.error('[musica POST]', error); return dbError(res, error, 'musica') }
+ 
+   const musica = data
+ 
+@@ -168,7 +169,7 @@ router.put('/:id/aprovar', authMiddleware, checkPermissao('musica', 'editar'), a
+     .select(FIELDS)
+     .single()
+ 
+-  if (error) { console.error('[musica aprovar]', error); return res.status(500).json({ error: error.message }) }
++  if (error) { console.error('[musica aprovar]', error); return dbError(res, error, 'musica') }
+   if (!data) return res.status(404).json({ error: 'Música não encontrada' })
+   res.json({ musica: data })
+ })
+@@ -186,7 +187,7 @@ router.put('/:id/rejeitar', authMiddleware, checkPermissao('musica', 'editar'),
+     .select(FIELDS)
+     .single()
+ 
+-  if (error) { console.error('[musica rejeitar]', error); return res.status(500).json({ error: error.message }) }
++  if (error) { console.error('[musica rejeitar]', error); return dbError(res, error, 'musica') }
+   if (!data) return res.status(404).json({ error: 'Música não encontrada' })
+   res.json({ musica: data })
+ })
+@@ -220,7 +221,7 @@ router.put('/:id', authMiddleware, checkPermissao('musica', 'editar'), async (re
+     .select(FIELDS)
+     .single()
+ 
+-  if (error) { console.error('[musica PUT]', error); return res.status(500).json({ error: error.message }) }
++  if (error) { console.error('[musica PUT]', error); return dbError(res, error, 'musica') }
+   if (!data) return res.status(404).json({ error: 'Música não encontrada' })
+   res.json({ musica: data })
+ })
+@@ -236,7 +237,7 @@ router.delete('/:id', authMiddleware, checkPermissao('musica', 'excluir'), async
+     .eq('id', req.params.id)
+     .eq('church_id', churchId)
+ 
+-  if (error) { console.error('[musica DELETE]', error); return res.status(500).json({ error: error.message }) }
++  if (error) { console.error('[musica DELETE]', error); return dbError(res, error, 'musica') }
+   res.json({ ok: true })
+ })
+ 
+diff --git a/routes/notificacao.js b/routes/notificacao.js
+index 5c49134..034777c 100644
+--- a/routes/notificacao.js
++++ b/routes/notificacao.js
+@@ -1,6 +1,7 @@
+ const router = require('express').Router()
+ const { supabaseAdmin } = require('../lib/supabase')
+ const authMiddleware = require('../middleware/auth')
++const { dbError, serverError } = require('../lib/apiError') // SEC-006
+ 
+ async function getDbUser(userId) {
+   const { data } = await supabaseAdmin.from('db_user').select('id, church_id, full_name').eq('user_id', userId).single()
+@@ -19,7 +20,7 @@ router.get('/', authMiddleware, async (req, res) => {
+     .eq('is_archived', false)
+     .order('created_at', { ascending: false })
+     .limit(20)
+-  if (error) return res.status(500).json({ error: error.message })
++  if (error) return dbError(res, error, 'notificacao')
+   res.json({ notificacoes: data || [] })
+ })
+ 
+@@ -34,7 +35,7 @@ router.get('/nao-lidas', authMiddleware, async (req, res) => {
+     .eq('church_id', dbUser.church_id)
+     .eq('is_read', false)
+     .eq('is_archived', false)
+-  if (error) return res.status(500).json({ error: error.message })
++  if (error) return dbError(res, error, 'notificacao')
+   res.json({ count: count || 0 })
+ })
+ 
+diff --git a/routes/template.js b/routes/template.js
+index 5d45ae1..06b3b5b 100644
+--- a/routes/template.js
++++ b/routes/template.js
+@@ -2,6 +2,7 @@ const router = require('express').Router()
+ const { supabaseAdmin } = require('../lib/supabase')
+ const authMiddleware = require('../middleware/auth')
+ const checkPermissao = require('../middleware/checkPermissao')
++const { dbError, serverError } = require('../lib/apiError') // SEC-006
+ 
+ // GET /api/template — lista templates com depts e funções
+ router.get('/', authMiddleware, checkPermissao('template', 'ver'), async (req, res) => {
+@@ -17,7 +18,7 @@ router.get('/', authMiddleware, checkPermissao('template', 'ver'), async (req, r
+ 
+   if (error) {
+     console.error('[template GET]', error)
+-    return res.status(500).json({ error: error.message })
++    return dbError(res, error, 'template')
+   }
+ 
+   if (!templates?.length) return res.json({ templates: [] })
+@@ -97,7 +98,7 @@ router.post('/', authMiddleware, checkPermissao('template', 'criar'), async (req
+ 
+   if (tmplErr) {
+     console.error('[template POST]', tmplErr)
+-    return res.status(500).json({ error: tmplErr.message })
++    return dbError(res, tmplErr, 'template')
+   }
+ 
+   // 2. Insere departamentos e funções
+@@ -114,7 +115,7 @@ router.post('/', authMiddleware, checkPermissao('template', 'criar'), async (req
+ 
+     if (deptErr) {
+       console.error('[template POST depts]', deptErr)
+-      return res.status(500).json({ error: deptErr.message })
++      return dbError(res, deptErr, 'template')
+     }
+ 
+     const funcRows = []
+@@ -137,7 +138,7 @@ router.post('/', authMiddleware, checkPermissao('template', 'criar'), async (req
+ 
+       if (funcErr) {
+         console.error('[template POST funcoes]', funcErr)
+-        return res.status(500).json({ error: funcErr.message })
++        return dbError(res, funcErr, 'template')
+       }
+     }
+   }
+@@ -165,7 +166,7 @@ router.put('/:id', authMiddleware, checkPermissao('template', 'editar'), async (
+ 
+   if (error) {
+     console.error('[template PUT]', error)
+-    return res.status(500).json({ error: error.message })
++    return dbError(res, error, 'template')
+   }
+   if (!data?.length) return res.status(404).json({ error: 'Template não encontrado' })
+ 
+@@ -181,7 +182,7 @@ router.put('/:id', authMiddleware, checkPermissao('template', 'editar'), async (
+         template_id: req.params.id, department_id: d.department_id, church_id: churchId
+       }))
+       const { error: deptErr } = await supabaseAdmin.from('db_template_dept').insert(deptRows)
+-      if (deptErr) { console.error('[template PUT depts]', deptErr); return res.status(500).json({ error: deptErr.message }) }
++      if (deptErr) { console.error('[template PUT depts]', deptErr); return dbError(res, deptErr, 'template') }
+ 
+       const funcRows = []
+       for (const d of depts) {
+@@ -191,7 +192,7 @@ router.put('/:id', authMiddleware, checkPermissao('template', 'editar'), async (
+       }
+       if (funcRows.length) {
+         const { error: funcErr } = await supabaseAdmin.from('db_template_funcao').insert(funcRows)
+-        if (funcErr) { console.error('[template PUT funcoes]', funcErr); return res.status(500).json({ error: funcErr.message }) }
++        if (funcErr) { console.error('[template PUT funcoes]', funcErr); return dbError(res, funcErr, 'template') }
+       }
+     }
+   }
+@@ -219,7 +220,7 @@ router.delete('/:id', authMiddleware, checkPermissao('template', 'excluir'), asy
+ 
+   if (error) {
+     console.error('[template DELETE]', error)
+-    return res.status(500).json({ error: error.message })
++    return dbError(res, error, 'template')
+   }
+ 
+   res.json({ ok: true })
+@@ -266,7 +267,7 @@ router.patch('/:id/vagas', authMiddleware, checkPermissao('template', 'editar'),
+       church_id: churchId
+     }))
+     const { error: insErr } = await supabaseAdmin.from('db_template_funcao').insert(rows)
+-    if (insErr) { console.error('[template PATCH vagas]', insErr); return res.status(500).json({ error: insErr.message }) }
++    if (insErr) { console.error('[template PATCH vagas]', insErr); return dbError(res, insErr, 'template') }
+   }
+ 
+   res.json({ ok: true })
+diff --git a/routes/user.js b/routes/user.js
+index e9e9bd4..3b045d4 100644
+--- a/routes/user.js
++++ b/routes/user.js
+@@ -1,6 +1,7 @@
+ const router = require('express').Router()
+ const { supabaseAdmin } = require('../lib/supabase')
+ const authMiddleware = require('../middleware/auth')
++const { dbError, serverError } = require('../lib/apiError') // SEC-006
+ 
+ // GET /api/user/lista — lista usuários ativos da igreja (para seleção de líderes)
+ router.get('/lista', authMiddleware, async (req, res) => {
+@@ -19,7 +20,7 @@ router.get('/lista', authMiddleware, async (req, res) => {
+     .eq('is_active', true)
+     .order('full_name', { ascending: true })
+ 
+-  if (error) return res.status(500).json({ error: error.message })
++  if (error) return dbError(res, error, 'user')
+ 
+   const usuarios = (data || []).map(u => ({
+     id:          u.id,
+@@ -40,7 +41,7 @@ router.get('/generos', authMiddleware, async (req, res) => {
+ 
+   if (error) {
+     console.error('[generos] erro Supabase:', JSON.stringify(error))
+-    return res.status(500).json({ error: error.message, details: error })
++    return dbError(res, error, 'user')
+   }
+ 
+   const normalizado = (data || []).map(row => ({
+@@ -59,7 +60,7 @@ router.get('/estados-civis', authMiddleware, async (req, res) => {
+ 
+   if (error) {
+     console.error('[estados-civis] erro Supabase:', JSON.stringify(error))
+-    return res.status(500).json({ error: error.message, details: error })
++    return dbError(res, error, 'user')
+   }
+ 
+   // Normaliza qualquer nome de coluna para { id, name }
+@@ -151,7 +152,7 @@ router.get('/departamentos', authMiddleware, async (req, res) => {
+     .select('id, status, funcao_id, department_id')
+     .eq('member_id', ctx.memberId)
+ 
+-  if (error) return res.status(500).json({ error: error.message })
++  if (error) return dbError(res, error, 'user')
+   if (!links?.length) return res.json({ departamentos: [], member_id: ctx.memberId })
+ 
+   const deptIds   = [...new Set(links.map(l => l.department_id))]
+@@ -192,7 +193,7 @@ router.get('/indisponibilidades', authMiddleware, async (req, res) => {
+     .eq('member_id', ctx.memberId)
+     .order('start_date', { ascending: false })
+ 
+-  if (error) return res.status(500).json({ error: error.message })
++  if (error) return dbError(res, error, 'user')
+   res.json({ indisponibilidades: data || [], member_id: ctx.memberId })
+ })
+ 
+@@ -225,7 +226,7 @@ router.post('/indisponibilidades', authMiddleware, async (req, res) => {
+     .select('*, db_department(name)')
+     .single()
+ 
+-  if (error) return res.status(500).json({ error: error.message })
++  if (error) return dbError(res, error, 'user')
+   res.status(201).json({ indisponibilidade: data })
+ })
+ 
+@@ -241,7 +242,7 @@ router.delete('/indisponibilidades/:id', authMiddleware, async (req, res) => {
+     .eq('member_id', ctx.memberId)
+     .eq('church_id', ctx.churchId)
+ 
+-  if (error) return res.status(500).json({ error: error.message })
++  if (error) return dbError(res, error, 'user')
+   res.json({ ok: true })
+ })
+ 
+@@ -256,7 +257,7 @@ router.get('/eventos-escalados', authMiddleware, async (req, res) => {
+     .eq('member_id', ctx.memberId)
+     .eq('church_id', ctx.churchId)
+ 
+-  if (itemsErr) return res.status(500).json({ error: itemsErr.message })
++  if (itemsErr) return dbError(res, itemsErr, 'user')
+   if (!items?.length) return res.json({ eventos: [] })
+ 
+   const escalaIds = [...new Set(items.map(i => i.escala_id))]
+@@ -333,7 +334,7 @@ router.post('/checkin/:itemId', authMiddleware, async (req, res) => {
+     .select('id, status')
+     .single()
+ 
+-  if (error) return res.status(500).json({ error: error.message })
++  if (error) return dbError(res, error, 'user')
+   if (!data) return res.status(404).json({ error: 'Item não encontrado ou sem permissão' })
+ 
+   res.json({ ok: true, item: data })
+diff --git a/routes/voluntario.js b/routes/voluntario.js
+index c36de8b..e25a231 100644
+--- a/routes/voluntario.js
++++ b/routes/voluntario.js
+@@ -2,35 +2,8 @@ const router = require('express').Router()
+ const { supabaseAdmin } = require('../lib/supabase')
+ const authMiddleware = require('../middleware/auth')
+ const checkPermissao = require('../middleware/checkPermissao')
+-
+-
+-async function uploadPhoto(base64Data, memberId) {
+-  try {
+-    const matches = base64Data.match(/^data:(.+);base64,(.+)$/)
+-    if (!matches) return null
+-    const contentType = matches[1]
+-    const buffer = Buffer.from(matches[2], 'base64')
+-    const ext = contentType.split('/')[1]?.split('+')[0] || 'jpg'
+-    const fileName = `photos/${memberId}-${Date.now()}.${ext}`
+-
+-    await supabaseAdmin.storage.createBucket('voluntarios', { public: true }).catch(() => {})
+-
+-    const { error } = await supabaseAdmin.storage
+-      .from('voluntarios')
+-      .upload(fileName, buffer, { contentType, upsert: true })
+-
+-    if (error) { console.error('[photo upload]', error); return null }
+-
+-    const { data: { publicUrl } } = supabaseAdmin.storage
+-      .from('voluntarios')
+-      .getPublicUrl(fileName)
+-
+-    return publicUrl
+-  } catch (e) {
+-    console.error('[photo upload exception]', e)
+-    return null
+-  }
+-}
++const { uploadPhoto } = require('../lib/uploadUtils') // SEC-001: upload seguro centralizado
++const { dbError, serverError } = require('../lib/apiError') // SEC-006
+ 
+ async function syncDepts(memberId, departmentIds, churchId) {
+   await supabaseAdmin.from('db_member_dept').delete().eq('member_id', memberId)
+@@ -97,7 +70,7 @@ router.get('/pendentes', authMiddleware, checkPermissao('voluntario', 'ver'), as
+ 
+   if (error) {
+     console.error('[pendentes] db_user query error:', error.message, '| churchId:', churchId)
+-    return res.status(500).json({ error: error.message })
++    return dbError(res, error, 'voluntario')
+   }
+ 
+   console.log('[pendentes] churchId=%s found %d pending users', churchId, users?.length ?? 0)
+@@ -138,7 +111,7 @@ router.put('/:id/aprovar', authMiddleware, checkPermissao('voluntario', 'editar'
+     .eq('id', req.params.id)
+     .eq('church_id', churchId)
+ 
+-  if (error) return res.status(500).json({ error: error.message })
++  if (error) return dbError(res, error, 'voluntario')
+   res.json({ ok: true })
+ })
+ 
+@@ -183,7 +156,7 @@ router.get('/', authMiddleware, checkPermissao('voluntario', 'ver'), async (req,
+     .eq('church_id', churchId)
+     .order('full_name', { ascending: true })
+ 
+-  if (error) { console.error('[voluntario GET]', error); return res.status(500).json({ error: error.message }) }
++  if (error) { console.error('[voluntario GET]', error); return dbError(res, error, 'voluntario') }
+ 
+   const voluntarios = await attachDepts(data || [])
+   res.json({ voluntarios })
+@@ -278,7 +251,7 @@ router.get('/:id', authMiddleware, checkPermissao('voluntario', 'ver'), async (r
+     .eq('church_id', churchId)
+     .single()
+ 
+-  if (error) { console.error('[voluntario GET/:id]', error); return res.status(500).json({ error: error.message }) }
++  if (error) { console.error('[voluntario GET/:id]', error); return dbError(res, error, 'voluntario') }
+   if (!data) return res.status(404).json({ error: 'Voluntário não encontrado' })
+ 
+   const [voluntario] = await attachDepts([data])
+@@ -318,7 +291,7 @@ router.post('/', authMiddleware, checkPermissao('voluntario', 'criar'), async (r
+     .select('id')
+     .single()
+ 
+-  if (insErr) { console.error('[voluntario POST]', insErr); return res.status(500).json({ error: insErr.message }) }
++  if (insErr) { console.error('[voluntario POST]', insErr); return dbError(res, insErr, 'voluntario') }
+ 
+   await syncDepts(created.id, department_ids, churchId)
+ 
+@@ -328,7 +301,7 @@ router.post('/', authMiddleware, checkPermissao('voluntario', 'criar'), async (r
+   }
+ 
+   const { data, error } = await supabaseAdmin.from('db_member').select(SELECT).eq('id', created.id).single()
+-  if (error) return res.status(500).json({ error: error.message })
++  if (error) return dbError(res, error, 'voluntario')
+ 
+   const [voluntario] = await attachDepts([data])
+   res.status(201).json({ voluntario })
+@@ -374,7 +347,7 @@ router.put('/:id', authMiddleware, checkPermissao('voluntario', 'editar'), async
+     .eq('id', req.params.id)
+     .eq('church_id', churchId)
+ 
+-  if (error) { console.error('[voluntario PUT]', error); return res.status(500).json({ error: error.message }) }
++  if (error) { console.error('[voluntario PUT]', error); return dbError(res, error, 'voluntario') }
+ 
+   if (department_ids !== undefined) await syncDepts(req.params.id, department_ids, churchId)
+ 
+@@ -425,7 +398,7 @@ router.post('/:id/departamento', authMiddleware, checkPermissao('voluntario', 'e
+     .select()
+     .single()
+ 
+-  if (error) { console.error('[dept POST]', error); return res.status(500).json({ error: error.message }) }
++  if (error) { console.error('[dept POST]', error); return dbError(res, error, 'voluntario') }
+   res.status(201).json({ vínculo: data })
+ })
+ 
+@@ -462,7 +435,7 @@ router.patch('/dept-ativar/:linkId', authMiddleware, checkPermissao('voluntario'
+     .eq('id', req.params.linkId)
+     .eq('church_id', churchId)
+ 
+-  if (error) return res.status(500).json({ error: error.message })
++  if (error) return dbError(res, error, 'voluntario')
+   res.json({ ok: true })
+ })
+ 
+@@ -496,7 +469,7 @@ router.put('/:id/funcao', authMiddleware, checkPermissao('voluntario', 'editar')
+     .eq('id', link_id)
+     .eq('church_id', churchId)
+ 
+-  if (error) { console.error('[funcao PUT]', error); return res.status(500).json({ error: error.message }) }
++  if (error) { console.error('[funcao PUT]', error); return dbError(res, error, 'voluntario') }
+   res.json({ ok: true })
+ })
+ 
+@@ -511,7 +484,7 @@ router.delete('/:id/departamento/:linkId', authMiddleware, checkPermissao('volun
+     .eq('id', req.params.linkId)
+     .eq('church_id', churchId)
+ 
+-  if (error) { console.error('[dept DELETE]', error); return res.status(500).json({ error: error.message }) }
++  if (error) { console.error('[dept DELETE]', error); return dbError(res, error, 'voluntario') }
+   res.json({ ok: true })
+ })
+ 
+@@ -528,7 +501,7 @@ router.delete('/:id', authMiddleware, checkPermissao('voluntario', 'excluir'), a
+     .eq('id', req.params.id)
+     .eq('church_id', churchId)
+ 
+-  if (error) { console.error('[voluntario DELETE]', error); return res.status(500).json({ error: error.message }) }
++  if (error) { console.error('[voluntario DELETE]', error); return dbError(res, error, 'voluntario') }
+   res.json({ ok: true })
+ })
+ 
+diff --git a/scripts/criar_admin.js b/scripts/criar_admin.js
+index ab3cf93..9c29210 100644
+--- a/scripts/criar_admin.js
++++ b/scripts/criar_admin.js
+@@ -1,12 +1,23 @@
+ // Gera o hash da senha e cria o usuário admin no Supabase
+-// Uso: node scripts/criar_admin.js
++// Uso: ADMIN_PASSWORD=suasenha node scripts/criar_admin.js
++//   ou: node scripts/criar_admin.js SuaSenhaAqui
++// SEC-011: senha nunca hardcoded — lida de variável de ambiente ou argumento CLI
+ require('dotenv').config()
+ const bcrypt = require('bcryptjs')
+ const supabase = require('../lib/supabase')
+ 
+ async function main() {
+-  const senha = 'Admin@123'
+-  const hash  = await bcrypt.hash(senha, 10)
++  // Lê senha de variável de ambiente ou argumento CLI
++  const senha = process.env.ADMIN_PASSWORD || process.argv[2]
++
++  if (!senha) {
++    console.error('ERRO: senha obrigatória.')
++    console.error('Use: ADMIN_PASSWORD=suasenha node scripts/criar_admin.js')
++    console.error(' ou: node scripts/criar_admin.js SuaSenhaAqui')
++    process.exit(1)
++  }
++
++  const hash = await bcrypt.hash(senha, 10)
+ 
+   const { data, error } = await supabase
+     .from('usuarios')
+@@ -20,7 +31,8 @@ async function main() {
+   }
+ 
+   console.log('Admin criado:', data)
+-  console.log('Login: admin@hugapp.com / Admin@123')
++  // SEC-011: nunca exibe a senha no log
++  console.log('Login: admin@hugapp.com / [senha fornecida]')
+ }
+ 
+ main()
+diff --git a/server.js b/server.js
+index 8dd0c10..f86f2ea 100644
+--- a/server.js
++++ b/server.js
+@@ -1,12 +1,76 @@
+ require('dotenv').config()
+ const express = require('express')
+ const cors = require('cors')
++const helmet = require('helmet') // SEC-004: headers de segurança HTTP
+ const path = require('path')
++const rateLimit = require('express-rate-limit') // SEC-002: rate limiting
+ 
+ const app = express()
+ 
+-app.use(cors())
++// SEC-002: limitadores para endpoints críticos de autenticação
++const loginLimiter = rateLimit({
++  windowMs: 15 * 60 * 1000, // janela de 15 minutos
++  max: 10,                   // máximo 10 tentativas por IP
++  message: { error: 'Muitas tentativas de login. Aguarde 15 minutos.' },
++  standardHeaders: true,
++  legacyHeaders: false,
++})
++
++const otpLimiter = rateLimit({
++  windowMs: 60 * 60 * 1000, // janela de 1 hora
++  max: 5,                    // máximo 5 envios de OTP por IP
++  message: { error: 'Limite de envio de códigos atingido. Aguarde 1 hora.' },
++  standardHeaders: true,
++  legacyHeaders: false,
++})
++
++const cadastroLimiter = rateLimit({
++  windowMs: 60 * 60 * 1000, // janela de 1 hora
++  max: 20,                   // máximo 20 cadastros por IP
++  message: { error: 'Limite de cadastros atingido. Aguarde 1 hora.' },
++  standardHeaders: true,
++  legacyHeaders: false,
++})
++
++// SEC-004: headers de segurança HTTP via Helmet
++app.use(helmet({
++  contentSecurityPolicy: {
++    directives: {
++      defaultSrc:      ["'self'"],
++      scriptSrc:       ["'self'", "'unsafe-inline'"],  // necessário: frontend usa scripts inline
++      styleSrc:        ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
++      imgSrc:          ["'self'", "data:", "https://*.supabase.co"],
++      fontSrc:         ["'self'", "https://fonts.gstatic.com"],
++      connectSrc:      ["'self'", "https://*.supabase.co"],
++      frameAncestors:  ["'none'"],  // bloqueia clickjacking via iframe
++    },
++  },
++  crossOriginEmbedderPolicy: false, // necessário para assets externos (fontes, imagens Supabase)
++}))
++
++// SEC-003: CORS restrito — adicione o domínio de produção em ALLOWED_ORIGINS antes do deploy
++const ALLOWED_ORIGINS = [
++  'http://localhost:3000',
++  'http://127.0.0.1:3000',
++  // 'https://SEU-DOMINIO-PRODUCAO.com', // ← descomentar e preencher antes do deploy
++]
++
++app.use(cors({
++  origin: (origin, callback) => {
++    // Permite requisições sem origin (ex: Postman, apps mobile, curl)
++    if (!origin) return callback(null, true)
++    if (ALLOWED_ORIGINS.includes(origin)) return callback(null, true)
++    callback(new Error('Origem não permitida pelo CORS'))
++  },
++  credentials: true,
++  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
++}))
+ app.use(express.json({ limit: '10mb' }))
++
++// SEC-002: aplica limitadores antes do router de auth
++app.use('/api/auth/login',    loginLimiter)
++app.use('/api/auth/otp/send', otpLimiter)
++app.use('/api/auth/cadastro', cadastroLimiter)
+ app.use((req, res, next) => {
+   if (req.path.endsWith('.html') || req.path === '/') {
+     res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate')
+diff --git a/lib/uploadUtils.js b/lib/uploadUtils.js
+new file mode 100644
+index 0000000..9d460fa
+--- /dev/null
++++ b/lib/uploadUtils.js
+@@ -0,0 +1,87 @@
++// lib/uploadUtils.js
++// Utilitário centralizado para upload de fotos no Supabase Storage
++// SEC-001: valida MIME type antes de qualquer operação de upload
++
++const { supabaseAdmin } = require('./supabase')
++
++// Tipos de imagem permitidos — nada além disso é aceito
++const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
++
++// Mapeamento fixo de MIME → extensão (nunca usa o que veio do atacante)
++const EXT_MAP = {
++  'image/jpeg': 'jpg',
++  'image/png':  'png',
++  'image/webp': 'webp',
++  'image/gif':  'gif',
++}
++
++// Limite de 5MB por foto
++const MAX_BYTES = 5 * 1024 * 1024
++
++/**
++ * Faz upload de uma foto em base64 para o bucket 'voluntarios'.
++ * Retorna a URL pública, ou null se o upload falhar ou for rejeitado.
++ *
++ * @param {string} base64Data  - Data URI completo: "data:image/jpeg;base64,..."
++ * @param {string} memberId    - ID do membro (usado no nome do arquivo)
++ * @returns {Promise<string|null>}
++ */
++async function uploadPhoto(base64Data, memberId) {
++  try {
++    // 1. Extrai MIME type e dados base64 do Data URI
++    const matches = base64Data.match(/^data:(.+);base64,(.+)$/)
++    if (!matches) {
++      console.warn('[photo upload] formato inválido — não é um Data URI válido')
++      return null
++    }
++
++    const contentType = matches[1]
++
++    // 2. Valida que o MIME type é uma imagem permitida
++    //    Rejeita qualquer coisa que não seja jpeg/png/webp/gif
++    if (!ALLOWED_TYPES.includes(contentType)) {
++      console.warn('[photo upload] tipo rejeitado:', contentType)
++      return null
++    }
++
++    // 3. Converte base64 para Buffer
++    const buffer = Buffer.from(matches[2], 'base64')
++
++    // 4. Valida tamanho máximo de 5MB
++    if (buffer.length > MAX_BYTES) {
++      console.warn('[photo upload] arquivo muito grande:', buffer.length, 'bytes')
++      return null
++    }
++
++    // 5. Usa extensão do mapa fixo — nunca da string do atacante
++    const ext = EXT_MAP[contentType]
++    const fileName = `photos/${memberId}-${Date.now()}.${ext}`
++
++    // 6. Garante que o bucket existe (ignora erro se já existir)
++    await supabaseAdmin.storage
++      .createBucket('voluntarios', { public: true })
++      .catch(() => {})
++
++    // 7. Faz o upload com o contentType validado
++    const { error } = await supabaseAdmin.storage
++      .from('voluntarios')
++      .upload(fileName, buffer, { contentType, upsert: true })
++
++    if (error) {
++      console.error('[photo upload] erro no storage:', error)
++      return null
++    }
++
++    // 8. Retorna a URL pública do arquivo
++    const { data: { publicUrl } } = supabaseAdmin.storage
++      .from('voluntarios')
++      .getPublicUrl(fileName)
++
++    return publicUrl
++  } catch (e) {
++    console.error('[photo upload] exceção:', e)
++    return null
++  }
++}
++
++module.exports = { uploadPhoto }
+diff --git a/lib/apiError.js b/lib/apiError.js
+new file mode 100644
+index 0000000..055f7aa
+--- /dev/null
++++ b/lib/apiError.js
+@@ -0,0 +1,31 @@
++// lib/apiError.js
++// SEC-006: helper centralizado para erros internos
++// Loga o erro completo no servidor mas envia mensagem genérica ao cliente
++// Evita expor nomes de tabelas, constraints e estrutura interna do banco
++
++/**
++ * Responde com 500 e mensagem genérica, logando o erro real no servidor.
++ *
++ * @param {object} res      - Response do Express
++ * @param {Error|object} error - Erro original (Supabase, JS, etc.)
++ * @param {string} context  - Identificador do contexto para o log (ex: 'voluntario GET')
++ */
++function dbError(res, error, context = '') {
++  const msg = error?.message || error?.error_description || String(error)
++  console.error(`[DB ERROR]${context ? ' ' + context : ''}:`, msg)
++  return res.status(500).json({ error: 'Erro interno. Tente novamente.' })
++}
++
++/**
++ * Responde com 500 para erros inesperados (catch de exceção).
++ *
++ * @param {object} res      - Response do Express
++ * @param {Error} err       - Exceção capturada
++ * @param {string} context  - Identificador do contexto para o log
++ */
++function serverError(res, err, context = '') {
++  console.error(`[SERVER ERROR]${context ? ' ' + context : ''}:`, err?.message || err)
++  return res.status(500).json({ error: 'Erro interno. Tente novamente.' })
++}
++
++module.exports = { dbError, serverError }

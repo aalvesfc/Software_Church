@@ -2,35 +2,8 @@ const router = require('express').Router()
 const { supabaseAdmin } = require('../lib/supabase')
 const authMiddleware = require('../middleware/auth')
 const checkPermissao = require('../middleware/checkPermissao')
-
-
-async function uploadPhoto(base64Data, memberId) {
-  try {
-    const matches = base64Data.match(/^data:(.+);base64,(.+)$/)
-    if (!matches) return null
-    const contentType = matches[1]
-    const buffer = Buffer.from(matches[2], 'base64')
-    const ext = contentType.split('/')[1]?.split('+')[0] || 'jpg'
-    const fileName = `photos/${memberId}-${Date.now()}.${ext}`
-
-    await supabaseAdmin.storage.createBucket('voluntarios', { public: true }).catch(() => {})
-
-    const { error } = await supabaseAdmin.storage
-      .from('voluntarios')
-      .upload(fileName, buffer, { contentType, upsert: true })
-
-    if (error) { console.error('[photo upload]', error); return null }
-
-    const { data: { publicUrl } } = supabaseAdmin.storage
-      .from('voluntarios')
-      .getPublicUrl(fileName)
-
-    return publicUrl
-  } catch (e) {
-    console.error('[photo upload exception]', e)
-    return null
-  }
-}
+const { uploadPhoto } = require('../lib/uploadUtils') // SEC-001: upload seguro centralizado
+const { dbError, serverError } = require('../lib/apiError') // SEC-006
 
 async function syncDepts(memberId, departmentIds, churchId) {
   await supabaseAdmin.from('db_member_dept').delete().eq('member_id', memberId)
@@ -97,7 +70,7 @@ router.get('/pendentes', authMiddleware, checkPermissao('voluntario', 'ver'), as
 
   if (error) {
     console.error('[pendentes] db_user query error:', error.message, '| churchId:', churchId)
-    return res.status(500).json({ error: error.message })
+    return dbError(res, error, 'voluntario')
   }
 
   console.log('[pendentes] churchId=%s found %d pending users', churchId, users?.length ?? 0)
@@ -138,7 +111,7 @@ router.put('/:id/aprovar', authMiddleware, checkPermissao('voluntario', 'editar'
     .eq('id', req.params.id)
     .eq('church_id', churchId)
 
-  if (error) return res.status(500).json({ error: error.message })
+  if (error) return dbError(res, error, 'voluntario')
   res.json({ ok: true })
 })
 
@@ -183,7 +156,7 @@ router.get('/', authMiddleware, checkPermissao('voluntario', 'ver'), async (req,
     .eq('church_id', churchId)
     .order('full_name', { ascending: true })
 
-  if (error) { console.error('[voluntario GET]', error); return res.status(500).json({ error: error.message }) }
+  if (error) { console.error('[voluntario GET]', error); return dbError(res, error, 'voluntario') }
 
   const voluntarios = await attachDepts(data || [])
   res.json({ voluntarios })
@@ -278,7 +251,7 @@ router.get('/:id', authMiddleware, checkPermissao('voluntario', 'ver'), async (r
     .eq('church_id', churchId)
     .single()
 
-  if (error) { console.error('[voluntario GET/:id]', error); return res.status(500).json({ error: error.message }) }
+  if (error) { console.error('[voluntario GET/:id]', error); return dbError(res, error, 'voluntario') }
   if (!data) return res.status(404).json({ error: 'Voluntário não encontrado' })
 
   const [voluntario] = await attachDepts([data])
@@ -318,7 +291,7 @@ router.post('/', authMiddleware, checkPermissao('voluntario', 'criar'), async (r
     .select('id')
     .single()
 
-  if (insErr) { console.error('[voluntario POST]', insErr); return res.status(500).json({ error: insErr.message }) }
+  if (insErr) { console.error('[voluntario POST]', insErr); return dbError(res, insErr, 'voluntario') }
 
   await syncDepts(created.id, department_ids, churchId)
 
@@ -328,7 +301,7 @@ router.post('/', authMiddleware, checkPermissao('voluntario', 'criar'), async (r
   }
 
   const { data, error } = await supabaseAdmin.from('db_member').select(SELECT).eq('id', created.id).single()
-  if (error) return res.status(500).json({ error: error.message })
+  if (error) return dbError(res, error, 'voluntario')
 
   const [voluntario] = await attachDepts([data])
   res.status(201).json({ voluntario })
@@ -374,7 +347,7 @@ router.put('/:id', authMiddleware, checkPermissao('voluntario', 'editar'), async
     .eq('id', req.params.id)
     .eq('church_id', churchId)
 
-  if (error) { console.error('[voluntario PUT]', error); return res.status(500).json({ error: error.message }) }
+  if (error) { console.error('[voluntario PUT]', error); return dbError(res, error, 'voluntario') }
 
   if (department_ids !== undefined) await syncDepts(req.params.id, department_ids, churchId)
 
@@ -425,7 +398,7 @@ router.post('/:id/departamento', authMiddleware, checkPermissao('voluntario', 'e
     .select()
     .single()
 
-  if (error) { console.error('[dept POST]', error); return res.status(500).json({ error: error.message }) }
+  if (error) { console.error('[dept POST]', error); return dbError(res, error, 'voluntario') }
   res.status(201).json({ vínculo: data })
 })
 
@@ -462,7 +435,7 @@ router.patch('/dept-ativar/:linkId', authMiddleware, checkPermissao('voluntario'
     .eq('id', req.params.linkId)
     .eq('church_id', churchId)
 
-  if (error) return res.status(500).json({ error: error.message })
+  if (error) return dbError(res, error, 'voluntario')
   res.json({ ok: true })
 })
 
@@ -496,7 +469,7 @@ router.put('/:id/funcao', authMiddleware, checkPermissao('voluntario', 'editar')
     .eq('id', link_id)
     .eq('church_id', churchId)
 
-  if (error) { console.error('[funcao PUT]', error); return res.status(500).json({ error: error.message }) }
+  if (error) { console.error('[funcao PUT]', error); return dbError(res, error, 'voluntario') }
   res.json({ ok: true })
 })
 
@@ -511,7 +484,7 @@ router.delete('/:id/departamento/:linkId', authMiddleware, checkPermissao('volun
     .eq('id', req.params.linkId)
     .eq('church_id', churchId)
 
-  if (error) { console.error('[dept DELETE]', error); return res.status(500).json({ error: error.message }) }
+  if (error) { console.error('[dept DELETE]', error); return dbError(res, error, 'voluntario') }
   res.json({ ok: true })
 })
 
@@ -528,7 +501,7 @@ router.delete('/:id', authMiddleware, checkPermissao('voluntario', 'excluir'), a
     .eq('id', req.params.id)
     .eq('church_id', churchId)
 
-  if (error) { console.error('[voluntario DELETE]', error); return res.status(500).json({ error: error.message }) }
+  if (error) { console.error('[voluntario DELETE]', error); return dbError(res, error, 'voluntario') }
   res.json({ ok: true })
 })
 

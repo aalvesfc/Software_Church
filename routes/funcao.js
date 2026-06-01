@@ -2,6 +2,7 @@ const router = require('express').Router()
 const { supabaseAdmin } = require('../lib/supabase')
 const authMiddleware = require('../middleware/auth')
 const checkPermissao = require('../middleware/checkPermissao')
+const { dbError, serverError } = require('../lib/apiError') // SEC-006
 
 
 // GET /api/funcao?department_id=xxx
@@ -18,7 +19,7 @@ router.get('/', authMiddleware, checkPermissao('funcao', 'ver'), async (req, res
   if (req.query.department_id) query = query.eq('department_id', req.query.department_id)
 
   const { data, error } = await query
-  if (error) { console.error('[funcao GET]', error); return res.status(500).json({ error: error.message }) }
+  if (error) { console.error('[funcao GET]', error); return dbError(res, error, 'funcao') }
   res.json({ funcoes: data || [] })
 })
 
@@ -37,7 +38,7 @@ router.post('/', authMiddleware, checkPermissao('funcao', 'criar'), async (req, 
     .select()
     .single()
 
-  if (error) { console.error('[funcao POST]', error); return res.status(500).json({ error: error.message }) }
+  if (error) { console.error('[funcao POST]', error); return dbError(res, error, 'funcao') }
   res.status(201).json({ funcao: data })
 })
 
@@ -59,7 +60,7 @@ router.put('/:id', authMiddleware, checkPermissao('funcao', 'editar'), async (re
     .eq('church_id', churchId)
     .select()
 
-  if (error) { console.error('[funcao PUT]', error); return res.status(500).json({ error: error.message }) }
+  if (error) { console.error('[funcao PUT]', error); return dbError(res, error, 'funcao') }
   if (!data?.length) return res.status(404).json({ error: 'Função não encontrada' })
   res.json({ funcao: data[0] })
 })
@@ -78,7 +79,7 @@ router.delete('/:id', authMiddleware, checkPermissao('funcao', 'arquivar'), asyn
   if (error) {
     console.error('[funcao DELETE]', error)
     if (error.code === '23503') return res.status(410).json({ error: 'Tem voluntario vinculado a está função' })
-    return res.status(500).json({ error: error.message })
+    return dbError(res, error, 'funcao')
   }
   res.json({ ok: true })
 })

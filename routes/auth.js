@@ -1,6 +1,8 @@
 const router = require('express').Router()
 const { supabaseAuth, supabaseAdmin } = require('../lib/supabase')
-const authMiddleware = require('../middleware/auth')
+const authMiddleware = require("../middleware/auth")
+const { uploadPhoto } = require("../lib/uploadUtils") // SEC-001: upload seguro centralizado
+const { dbError, serverError } = require('../lib/apiError') // SEC-006
 
 // POST /api/auth/login
 router.post('/login', async (req, res) => {
@@ -24,19 +26,34 @@ router.post('/login', async (req, res) => {
   const { session, user: authUser } = authData
 
   // 2. Busca perfil do usuário + dados da igreja + gênero
-  const { data: dbUser, error: userError } = await supabaseAdmin
+  const SELECT_USER = `
+    id, nickname, email, phone, avatar_url, is_active, church_id, perfil_id,
+    db_church ( id, name, slug, logo_url, is_active ),
+    db_genero ( name ),
+    db_perfil ( slug )
+  `
+  let { data: dbUser, error: userError } = await supabaseAdmin
     .from('db_user')
-    .select(`
-      id, nickname, email, phone, avatar_url, is_active, church_id, perfil_id,
-      db_church ( id, name, slug, logo_url, is_active ),
-      db_genero ( name ),
-      db_perfil ( slug )
-    `)
+    .select(SELECT_USER)
     .eq('user_id', authUser.id)
-    .single()
+    .limit(1).maybeSingle()
+
+  // Fallback: user_id desatualizado (conta Auth recriada) → busca por email e corrige
+  if (!dbUser && !userError) {
+    const { data: byEmail } = await supabaseAdmin
+      .from('db_user')
+      .select(SELECT_USER)
+      .eq('email', authUser.email)
+      .limit(1).maybeSingle()
+    if (byEmail) {
+      await supabaseAdmin.from('db_user').update({ user_id: authUser.id }).eq('id', byEmail.id)
+      dbUser = byEmail
+      console.log('[login] user_id corrigido para email=%s novo_id=%s', authUser.email, authUser.id)
+    }
+  }
 
   if (userError || !dbUser) {
-    console.log('[login] db_user não encontrado para user_id=%s erro=%s', authUser.id, userError?.message)
+    console.log('[login] db_user não encontrado para user_id=%s email=%s erro=%s', authUser.id, authUser.email, userError?.message)
     return res.status(403).json({ error: 'Usuário não encontrado no sistema' })
   }
 
@@ -107,7 +124,7 @@ router.get('/me', authMiddleware, async (req, res) => {
       db_perfil ( slug )
     `)
     .eq('user_id', req.authUser.id)
-    .single()
+    .limit(1).maybeSingle()
 
   if (error || !dbUser) {
     console.error('[auth/me] db_user not found for user_id=%s error=%s', req.authUser.id, error?.message)
@@ -115,7 +132,7 @@ router.get('/me', authMiddleware, async (req, res) => {
   }
 
   const [{ data: dbExtra }, { data: dbMemberMe }, { data: permissoes }] = await Promise.all([
-    supabaseAdmin.from('db_user').select('genero_id, status_civil_id, birth_date').eq('user_id', req.authUser.id).single(),
+    supabaseAdmin.from('db_user').select('genero_id, status_civil_id, birth_date').eq('user_id', req.authUser.id).limit(1).maybeSingle(),
     supabaseAdmin.from('db_member').select('photo_url').eq('email', dbUser.email).eq('church_id', dbUser.church_id).maybeSingle(),
     supabaseAdmin.from('db_perfil_permissao').select('db_permissao(module, action)').eq('perfil_id', dbUser.perfil_id)
   ])
@@ -180,7 +197,11 @@ router.post('/refresh', async (req, res) => {
 // POST /api/auth/logout
 router.post('/logout', authMiddleware, async (req, res) => {
   const token = req.headers.authorization?.split(' ')[1]
-  await supabaseAuth.auth.admin?.signOut(token).catch(() => {})
+  // SEC-008: usa supabaseAdmin (service key) — .admin sempre disponível, sem optional chain
+  if (token) {
+    const { error } = await supabaseAdmin.auth.admin.signOut(token)
+    if (error) console.warn('[logout] signOut error:', error.message)
+  }
   res.json({ ok: true })
 })
 
@@ -192,14 +213,14 @@ router.get('/config', (req, res) => {
 // GET /api/auth/generos — lista de gêneros (público, para o cadastro)
 router.get('/generos', async (req, res) => {
   const { data, error } = await supabaseAdmin.from('db_genero').select('id, name').order('name')
-  if (error) return res.status(500).json({ error: error.message })
+  if (error) return dbError(res, error, 'auth')
   res.json({ generos: data || [] })
 })
 
 // GET /api/auth/estados-civis — lista de estados civis (público, para o cadastro)
 router.get('/estados-civis', async (req, res) => {
   const { data, error } = await supabaseAdmin.from('db_status_civil').select('id, name').order('name')
-  if (error) return res.status(500).json({ error: error.message })
+  if (error) return dbError(res, error, 'auth')
   res.json({ estados: data || [] })
 })
 
@@ -335,7 +356,7 @@ router.post('/cadastro', async (req, res) => {
         if (authErr?.message?.includes('already registered')) {
           return res.status(409).json({ error: 'Este e-mail já possui uma conta no sistema' })
         }
-        return res.status(500).json({ error: authErr?.message || 'Erro ao criar conta' })
+        return dbError(res, authErr, 'auth cadastro')
       }
       userId = authData.user.id
     }
@@ -401,31 +422,21 @@ router.post('/cadastro', async (req, res) => {
 
       if (memberErr) {
         console.error('[cadastro] db_member ERRO:', JSON.stringify(memberErr))
-        return res.status(500).json({ error: memberErr.message })
+        return dbError(res, memberErr, 'auth')
       }
 
-      // Upload foto se fornecida
+      // Upload foto se fornecida — SEC-001: usa uploadPhoto seguro com validação de MIME
       if (photo_base64 && memberData) {
         try {
-          const matches = photo_base64.match(/^data:(.+);base64,(.+)$/)
-          if (matches) {
-            const contentType = matches[1]
-            const buffer = Buffer.from(matches[2], 'base64')
-            const ext = contentType.split('/')[1]?.split('+')[0] || 'jpg'
-            const fileName = `photos/${memberData.id}-${Date.now()}.${ext}`
-            await supabaseAdmin.storage.createBucket('voluntarios', { public: true }).catch(() => {})
-            const { error: uploadErr } = await supabaseAdmin.storage
-              .from('voluntarios').upload(fileName, buffer, { contentType, upsert: true })
-            if (!uploadErr) {
-              const { data: { publicUrl } } = supabaseAdmin.storage.from('voluntarios').getPublicUrl(fileName)
-              await supabaseAdmin.from('db_member').update({ photo_url: publicUrl }).eq('id', memberData.id)
-            }
+          const photoUrl = await uploadPhoto(photo_base64, memberData.id)
+          if (photoUrl) {
+            await supabaseAdmin.from('db_member').update({ photo_url: photoUrl }).eq('id', memberData.id)
           }
         } catch (e) { console.error('[cadastro photo]', e) }
       }
     } catch (e) {
       console.error('[cadastro] db_member EXCEPTION:', e.message)
-      return res.status(500).json({ error: e.message })
+      return dbError(res, e, 'auth')
     }
 
     // 6. Notifica owners da igreja
