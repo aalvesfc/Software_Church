@@ -120,24 +120,35 @@
     .pg-sup { font-size:16px; color:var(--ink-muted); }
     .pg-actions { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
 
-    /* ── EVENTO SELECTOR ── */
-    .selector-wrap { display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
-    .selector-label { font-size:13px; font-weight:600; color:var(--ink-muted); white-space:nowrap; }
-    .evento-select {
-      height:40px; padding:0 14px; background:var(--canvas); border:1.5px solid var(--hairline);
-      border-radius:var(--radius-pill); font-size:14px; font-family:inherit; color:var(--ink);
-      outline:none; cursor:pointer; min-width:260px; max-width:400px; transition:border-color 0.15s;
+    /* ── EVENT CARDS ROW ── */
+    .eventos-row { display:flex; gap:10px; overflow-x:auto; padding-bottom:2px; margin-bottom:8px; scrollbar-width:none; }
+    .eventos-row::-webkit-scrollbar { display:none; }
+    .evento-card {
+      display:flex; flex-direction:column; gap:3px; flex-shrink:0;
+      background:#FFFFFF; border:1.5px solid #EEEEEE; border-radius:14px;
+      padding:11px 18px; cursor:pointer; white-space:nowrap;
+      transition:border-color 0.15s, box-shadow 0.15s, transform 0.15s;
     }
-    .evento-select:focus { border-color:var(--primary); }
-
+    .evento-card:hover { border-color:var(--primary-light); box-shadow:0 4px 12px rgba(0,0,0,0.07); transform:translateY(-1px); }
+    .evento-card.active { background:#7C3AED; border-color:#7C3AED; }
+    .evento-card-name { font-size:14px; font-weight:600; color:var(--ink); }
+    .evento-card.active .evento-card-name { color:#fff; }
+    .evento-card-hora { font-size:12px; color:var(--ink-muted); }
+    .evento-card.active .evento-card-hora { color:rgba(255,255,255,0.65); }
+    .evento-card-status { display:inline-block; margin-top:5px; font-size:11px; font-weight:600; padding:2px 8px; border-radius:var(--radius-pill); }
+    .evento-card-status.agendado  { background:rgba(0,122,255,0.10); color:#007aff; }
+    .evento-card-status.concluido { background:var(--success-light); color:var(--success-dark); }
+    .evento-card-status.cancelado { background:var(--danger-light); color:var(--danger-dark); }
+    .evento-card.active .evento-card-status { background:rgba(255,255,255,0.2); color:#fff; }
+    .eventos-meta { display:flex; align-items:center; justify-content:flex-end; gap:10px; margin-bottom:20px; }
     .btn-atualizar {
-      height:40px; padding:0 20px; background:var(--canvas); border:1.5px solid var(--hairline);
-      border-radius:var(--radius-pill); font-size:14px; font-weight:600; color:var(--ink-muted);
-      font-family:inherit; cursor:pointer; display:inline-flex; align-items:center; gap:7px;
-      transition:background 0.15s, border-color 0.15s, color 0.15s; white-space:nowrap;
+      height:32px; padding:0 14px; background:transparent; border:1.5px solid var(--hairline);
+      border-radius:var(--radius-pill); font-size:13px; font-weight:600; color:var(--ink-muted);
+      font-family:inherit; cursor:pointer; display:inline-flex; align-items:center; gap:6px;
+      transition:background 0.15s, color 0.15s;
     }
-    .btn-atualizar:hover { background:var(--canvas-input); border-color:var(--hairline); color:var(--ink); }
-    .btn-atualizar svg { width:15px; height:15px; }
+    .btn-atualizar:hover { background:var(--canvas-input); color:var(--ink); }
+    .btn-atualizar svg { width:13px; height:13px; }
     .btn-atualizar.spinning svg { animation:spin 0.7s linear infinite; }
     @keyframes spin { to { transform:rotate(360deg); } }
 
@@ -197,6 +208,8 @@
     .badge-aguardando .dot { background:var(--gray-400); }
     .badge-atrasado  { background:var(--warning-light); color:var(--warning-dark); }
     .badge-atrasado  .dot { background:var(--warning); }
+    .badge-chegou    { background:var(--success-light); color:var(--success-dark); }
+    .badge-chegou    .dot { background:var(--success-dark); }
     .badge-saiu      { background:#EDE5FF; color:#7C3AED; }
     .badge-saiu      .dot { background:#9156F1; }
 
@@ -210,8 +223,6 @@
     #toast { position:fixed; bottom:28px; left:50%; transform:translateX(-50%) translateY(12px); background:#1d1d1f; color:#fff; border-radius:var(--radius-pill); padding:10px 20px; font-size:14px; font-weight:500; opacity:0; pointer-events:none; transition:opacity 0.2s, transform 0.2s; z-index:999; }
     #toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
 
-    /* ── TOOLBAR ── */
-    .toolbar { display:flex; align-items:center; gap:12px; margin-bottom:20px; flex-wrap:wrap; }
     .last-update { font-size:12px; color:var(--ink-subtle); }
 
     /* ── SIDEBAR redesign (igual musicas.html) ── */
@@ -311,31 +322,6 @@
           </div>
         </div>
 
-        <button class="icon-btn" id="collapseBtn" title="Recolher menu">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="transition:transform 0.22s"><polyline points="11 17 6 12 11 7"/><polyline points="18 17 13 12 18 7"/></svg>
-        </button>
-        <div class="avatar-menu-wrap">
-          <div class="avatar" id="avatarBtn">A</div>
-          <div class="avatar-dropdown" id="avatarDropdown">
-            <div class="dropdown-header">
-              <div class="dropdown-name" id="dropdownName">—</div>
-              <div class="dropdown-email" id="dropdownEmail">—</div>
-            </div>
-            <a class="dropdown-item" href="/editar-perfil">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-              Editar Perfil
-            </a>
-            <a class="dropdown-item" href="/configuracoes" data-menu-dropdown="configuracoes">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-              Configurações
-            </a>
-            <div class="dropdown-divider"></div>
-            <a class="dropdown-item danger" href="#" onclick="fazerLogout(event)">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-              Sair
-            </a>
-          </div>
-        </div>
       </div>
     </header>
 
@@ -347,24 +333,6 @@
           <h1 class="pg-title"><span style="color:#9156F1">Presenças</span></h1>
           <p class="pg-sup">Monitore as presenças em tempo real.</p>
         </div>
-      </div>
-
-      <!-- Toolbar: evento selector + botão atualizar -->
-      <div class="toolbar">
-        <div class="selector-wrap">
-          <span class="selector-label">Evento:</span>
-          <select class="evento-select" id="eventoSelect" onchange="carregarPresenca()">
-            <option value="">Selecione um evento de hoje...</option>
-          </select>
-        </div>
-        <button class="btn-atualizar" id="btnAtualizar" onclick="atualizar()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="23 4 23 10 17 10"/>
-            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
-          </svg>
-          Atualizar
-        </button>
-        <span class="last-update" id="lastUpdate"></span>
       </div>
 
       <!-- Stat cards -->
@@ -407,6 +375,19 @@
         </div>
       </div>
 
+      <!-- Eventos de hoje: cards horizontais -->
+      <div class="eventos-row" id="eventosRow"></div>
+      <div class="eventos-meta">
+        <span class="last-update" id="lastUpdate"></span>
+        <button class="btn-atualizar" id="btnAtualizar" onclick="atualizar()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="23 4 23 10 17 10"/>
+            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+          </svg>
+          Atualizar
+        </button>
+      </div>
+
       <!-- Lista de voluntários por departamento -->
       <div id="presencaWrap"></div>
 
@@ -419,41 +400,67 @@
   <script src="/js/sidebar-permissions.js"></script>
   <script>
     let _pollingTimer = null
+    let _selectedEventoId = null
+    let _eventosHoje = []
 
-    // ── Carregar eventos de hoje ────────────────────────────────────────────
+    // ── Carregar eventos do mês do departamento ─────────────────────────────
     async function carregarEventosHoje() {
       try {
-        const res = await authFetch('/api/checkin/eventos-hoje')
+        const res = await authFetch('/api/checkin/eventos-mes')
         if (!res.ok) return
         const { eventos } = await res.json()
-        const sel = document.getElementById('eventoSelect')
-        sel.innerHTML = '<option value="">Selecione um evento de hoje...</option>'
-        ;(eventos || []).forEach(ev => {
-          const opt = document.createElement('option')
-          opt.value = ev.id
-          const hora = ev.start_time ? ' — ' + ev.start_time.substring(0, 5) : ''
-          opt.textContent = ev.name + hora
-          sel.appendChild(opt)
-        })
-        // Se só há um evento, seleciona automaticamente
-        if (eventos?.length === 1) {
-          sel.value = eventos[0].id
-          await carregarPresenca()
-        }
+        _eventosHoje = eventos || []
+        renderEventoCards()
+        // Seleciona automaticamente o evento de hoje, se houver apenas um
+        const hoje = new Date().toISOString().split('T')[0]
+        const eventoHoje = _eventosHoje.filter(e => e.start_date === hoje)
+        if (eventoHoje.length === 1) selecionarEvento(eventoHoje[0].id)
       } catch (e) {
-        console.error('[eventos-hoje]', e)
+        console.error('[eventos-mes]', e)
       }
+    }
+
+    function renderEventoCards() {
+      const row = document.getElementById('eventosRow')
+      if (!_eventosHoje.length) {
+        row.innerHTML = '<span style="font-size:14px;color:var(--ink-muted);padding:8px 0">Nenhum evento hoje.</span>'
+        return
+      }
+      const STATUS_LABEL = { agendado: 'Agendado', concluido: 'Concluído', cancelado: 'Cancelado' }
+      function isEventPast(ev) {
+        if (!ev.start_date) return false
+        const time = ev.start_time || '23:59:59'
+        return new Date(`${ev.start_date}T${time}`) < new Date()
+      }
+      row.innerHTML = _eventosHoje.map(ev => {
+        const horaIni  = ev.start_time ? ev.start_time.substring(0, 5) : ''
+        const horaFim  = ev.end_time   ? ev.end_time.substring(0, 5)   : ''
+        const horario  = horaIni && horaFim ? `${horaIni} – ${horaFim}` : horaIni
+        const data     = ev.start_date ? new Date(ev.start_date + 'T00:00:00').toLocaleDateString('pt-BR', { day:'2-digit', month:'short' }) : ''
+        const rawStatus = ev.status || 'agendado'
+        const statusCls = rawStatus === 'agendado' && isEventPast(ev) ? 'concluido' : rawStatus
+        return `<div class="evento-card${_selectedEventoId === ev.id ? ' active' : ''}" onclick="selecionarEvento('${ev.id}')">
+          <span class="evento-card-name">${escHtml(ev.name)}</span>
+          <span class="evento-card-hora">${[data, horario].filter(Boolean).join(' · ')}</span>
+          <span class="evento-card-status ${statusCls}">${STATUS_LABEL[statusCls] || statusCls}</span>
+        </div>`
+      }).join('')
+    }
+
+    function selecionarEvento(id) {
+      _selectedEventoId = id
+      renderEventoCards()
+      carregarPresenca()
     }
 
     // ── Carregar presenças ────────────────────────────────────────────────
     async function carregarPresenca() {
-      const eventoId = document.getElementById('eventoSelect').value
-      if (!eventoId) {
+      if (!_selectedEventoId) {
         limparDados()
         return
       }
       try {
-        const res = await authFetch('/api/checkin/presenca/' + eventoId)
+        const res = await authFetch('/api/checkin/presenca/' + _selectedEventoId)
         if (!res.ok) return
         const { itens } = await res.json()
         renderPresenca(itens || [])
@@ -538,23 +545,26 @@
       const inicial = nome.charAt(0).toUpperCase()
 
       let badgeHtml = ''
-      let horaHtml  = ''
 
       if (!item.checkin) {
         badgeHtml = '<span class="badge badge-aguardando"><span class="dot"></span>Aguardando</span>'
       } else {
-        const st = item.checkin.status
-        if (st === 'presente') {
-          badgeHtml = '<span class="badge badge-presente"><span class="dot"></span>Presente</span>'
-        } else if (st === 'atrasado') {
-          badgeHtml = '<span class="badge badge-atrasado"><span class="dot"></span>Atrasado</span>'
-        } else if (st === 'saiu') {
-          badgeHtml = '<span class="badge badge-saiu"><span class="dot"></span>Saiu</span>'
+        const st        = item.checkin.status
+        const horaChegou = item.checkin.checkin_at  ? formatarHora(item.checkin.checkin_at)  : ''
+        const horaSaiu   = item.checkin.checkout_at ? formatarHora(item.checkin.checkout_at) : ''
+
+        if (st === 'saiu') {
+          const chegouBadge = horaChegou
+            ? `<span class="badge badge-chegou"><span class="dot"></span>Chegou — ${horaChegou}</span>`
+            : ''
+          const saiuLabel = horaSaiu ? `Saiu — ${horaSaiu}` : 'Saiu'
+          badgeHtml = chegouBadge + `<span class="badge badge-saiu"><span class="dot"></span>${saiuLabel}</span>`
+        } else if (st === 'presente' || st === 'atrasado') {
+          const cls   = st === 'atrasado' ? 'badge-atrasado' : 'badge-chegou'
+          const label = horaChegou ? `Chegou — ${horaChegou}` : 'Presente'
+          badgeHtml = `<span class="badge ${cls}"><span class="dot"></span>${label}</span>`
         } else {
           badgeHtml = '<span class="badge badge-aguardando"><span class="dot"></span>Aguardando</span>'
-        }
-        if (item.checkin.checkin_at) {
-          horaHtml = `<span class="vol-checkin-time">${formatarHora(item.checkin.checkin_at)}</span>`
         }
       }
 
@@ -567,7 +577,6 @@
           </div>
           <div class="vol-status">
             ${badgeHtml}
-            ${horaHtml}
           </div>
         </div>
       `
@@ -635,8 +644,14 @@
     function initAvatar() {
       const nome  = localStorage.getItem('user_nome') || ''
       const email = localStorage.getItem('user_email') || ''
+      const u     = JSON.parse(localStorage.getItem('usuario') || '{}')
+
       document.querySelectorAll('#avatarBtn').forEach(el => {
-        el.textContent = nome.charAt(0).toUpperCase() || 'A'
+        if (u && u.avatar) {
+          el.innerHTML = `<img src="${u.avatar}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`
+        } else {
+          el.textContent = nome.charAt(0).toUpperCase() || 'A'
+        }
       })
       document.querySelectorAll('#dropdownName').forEach(el => el.textContent = nome || '—')
       document.querySelectorAll('#dropdownEmail').forEach(el => el.textContent = email || '—')

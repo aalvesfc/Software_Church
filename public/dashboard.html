@@ -1777,15 +1777,8 @@
       const hoje   = new Date().toISOString().split('T')[0]
       const isHoje = eventoData === hoje
 
-      // Estado 3 — saiu (sempre visível, independente do dia)
-      if (status === 'saiu') {
-        const hora = c?.checkout_at ? _fmtHora(c.checkout_at) : ''
-        return `
-          <div style="display:flex;align-items:center;gap:7px;padding:8px 14px;background:var(--success-light);border-radius:var(--radius-pill)">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;color:var(--success-dark);flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg>
-            <span style="font-size:13px;font-weight:600;color:var(--success-dark)">Check-out feito${hora ? ' às ' + hora : ''}</span>
-          </div>`
-      }
+      // Estado 3 — saiu: info já aparece no header, nada aqui
+      if (status === 'saiu') return ''
 
       // Estado 2 — presente / atrasado (sempre visível)
       if (status === 'presente' || status === 'atrasado') {
@@ -1821,11 +1814,28 @@
       return ''
     }
 
+    function renderTimesSection(e) {
+      const c            = _checkinCache[e.evento_id]
+      const hora         = e.evento_hora ? e.evento_hora.slice(0, 5) : ''
+      const horaCheckin  = c?.checkin_at  ? _fmtHora(c.checkin_at)  : ''
+      const horaCheckout = c?.checkout_at ? _fmtHora(c.checkout_at) : ''
+      const clockSvg     = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:11px;height:11px;flex-shrink:0"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`
+      const checkinLine  = (horaCheckin || hora)
+        ? `<div style="display:flex;align-items:center;gap:4px;font-size:12px;color:var(--ink-muted)">${clockSvg}<span>Check-in&nbsp;${horaCheckin || hora}</span></div>`
+        : ''
+      const checkoutLine = horaCheckout
+        ? `<div style="display:flex;align-items:center;gap:4px;font-size:12px;color:var(--success-dark)">${clockSvg}<span>Check-out&nbsp;${horaCheckout}</span></div>`
+        : ''
+      return checkinLine + checkoutLine
+    }
+
     function _atualizarCardCheckin(eventoId) {
       const sec = document.getElementById('ev-checkin-' + eventoId)
       if (!sec) return
       const ev = _escalasData.find(e => e.evento_id === eventoId)
       sec.innerHTML = renderCheckinSection(eventoId, ev?.evento_data)
+      const timesEl = document.getElementById('ev-times-' + eventoId)
+      if (timesEl && ev) timesEl.innerHTML = renderTimesSection(ev)
     }
 
     async function fazerCheckinCard(eventoId) {
@@ -1903,7 +1913,7 @@
         grid.innerHTML = _escalasData.map(e => {
           const [,mes,dia] = e.evento_data.split('-')
           const mesAbrev   = MESES[parseInt(mes, 10) - 1] || ''
-          const hora       = e.evento_hora ? e.evento_hora.slice(0, 5) : ''
+          const hora = e.evento_hora ? e.evento_hora.slice(0, 5) : ''
           return `
             <div class="event-card" id="ev-card-${e.evento_id}" style="gap:10px;cursor:pointer" onclick="window.location.href='/escalacao/${e.evento_id}'">
               <div class="event-card-top" style="align-items:flex-start;gap:12px">
@@ -1913,7 +1923,6 @@
                 </div>
                 <div style="display:flex;flex-direction:column;gap:3px;min-width:0;flex:1">
                   <div class="event-name" style="margin:0;font-size:14px;line-height:1.3">${e.evento_nome}</div>
-                  ${hora ? `<div style="display:flex;align-items:center;gap:4px;font-size:12px;color:var(--ink-muted)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:11px;height:11px;flex-shrink:0"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${hora}</div>` : ''}
                 </div>
               </div>
               <div style="display:flex;flex-direction:column;gap:6px;padding:10px 0;border-top:1px solid var(--hairline);border-bottom:1px solid var(--hairline)">
@@ -1927,6 +1936,7 @@
                   <span style="font-size:11px;color:var(--primary);text-transform:uppercase;letter-spacing:0.4px">Função</span>
                 </div>
                 <span style="font-size:15px;font-weight:700;color:var(--primary);letter-spacing:-0.3px;padding-left:21px">${e.funcao_name || '—'}</span>
+                <div id="ev-times-${e.evento_id}" style="margin-top:6px;padding-left:21px;display:flex;flex-direction:column;gap:3px">${renderTimesSection(e)}</div>
               </div>
               <div id="ev-checkin-${e.evento_id}">${renderCheckinSection(e.evento_id, e.evento_data)}</div>
             </div>`

@@ -2135,7 +2135,7 @@
             </div>
             <div class="mvc-item-body">
               <div class="mvc-item-title">${esc2(item.title)}</div>
-              ${esc(item.description ? `<div class="mvc-item-sub">${esc2(item.description))}</div>` : ''}
+              ${item.description ? `<div class="mvc-item-sub">${esc2(item.description)}</div>` : ''}
               <div class="mvc-item-tags"><span class="mvc-tag" style="background:rgba(124,58,237,0.10);color:#7c3aed">Pré-evento</span>${item.duration ? `<span class="mvc-tag">${esc2(item.duration)}</span>` : ''}</div>
             </div>
           </div>`
@@ -2147,7 +2147,7 @@
             </div>
             <div class="mvc-item-body">
               <div class="mvc-item-title">${esc2(item.title)}</div>
-              ${esc(item.description ? `<div class="mvc-item-sub">${esc2(item.description))}</div>` : ''}
+              ${item.description ? `<div class="mvc-item-sub">${esc2(item.description)}</div>` : ''}
               ${item.duration ? `<div class="mvc-item-tags"><span class="mvc-tag">${esc2(item.duration)}</span></div>` : ''}
             </div>
           </div>`
@@ -2167,7 +2167,7 @@
             </div>
             <div class="mvc-item-body">
               <div class="mvc-item-title">${esc2(nome)}</div>
-              ${esc(m.artist ? `<div class="mvc-item-sub">${esc2(m.artist))}</div>` : ''}
+              ${m.artist ? `<div class="mvc-item-sub">${esc2(m.artist)}</div>` : ''}
               ${tags.length ? `<div class="mvc-item-tags">${tags.map(t=>`<span class="mvc-tag">${t}</span>`).join('')}</div>` : ''}
               ${links.length ? `<div class="mvc-item-links">${links.join('')}</div>` : ''}
             </div>

@@ -340,7 +340,7 @@ router.get('/eventos-hoje', authMiddleware, async (req, res) => {
 
     const { data: eventos, error } = await supabaseAdmin
       .from('db_event')
-      .select('id, name, start_time, status')
+      .select('id, name, start_date, start_time, end_time, status')
       .eq('church_id', dbUser.church_id)
       .eq('start_date', hoje)
       .neq('status', 'cancelado')
@@ -350,6 +350,90 @@ router.get('/eventos-hoje', authMiddleware, async (req, res) => {
     res.json({ eventos: eventos || [] })
   } catch (e) {
     console.error('[checkin/eventos-hoje]', e)
+    res.status(500).json({ error: e.message })
+  }
+})
+
+// GET /api/checkin/eventos-mes — eventos do mês corrente onde o dept do usuário está escalado
+router.get('/eventos-mes', authMiddleware, async (req, res) => {
+  try {
+    const dbUser = await getDbUser(req.authUser.id)
+    if (!dbUser) return res.status(404).json({ error: 'Usuário não encontrado' })
+
+    const hoje = new Date()
+    const mesInicio = new Date(hoje.getFullYear(), hoje.getMonth(), 1).toISOString().split('T')[0]
+    const mesFim    = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0).toISOString().split('T')[0]
+
+    // Descobre o perfil e departamento do usuário
+    const { data: dbUserFull } = await supabaseAdmin
+      .from('db_user')
+      .select('perfil:perfil_id(slug)')
+      .eq('user_id', req.authUser.id).single()
+
+    const perfil  = dbUserFull?.perfil?.slug
+    const isLider = perfil === 'lider' || perfil === 'lider_departamento'
+
+    // Se é líder, filtra pelos eventos onde o seu departamento tem escala
+    if (isLider) {
+      const { data: deptLider } = await supabaseAdmin
+        .from('db_department_lider')
+        .select('department_id')
+        .eq('user_id', dbUser.id)
+        .eq('church_id', dbUser.church_id)
+        .limit(1).maybeSingle()
+
+      if (!deptLider?.department_id) return res.json({ eventos: [] })
+
+      // Funções do departamento
+      const { data: funcoes } = await supabaseAdmin
+        .from('db_funcao_dept')
+        .select('id')
+        .eq('department_id', deptLider.department_id)
+        .eq('church_id', dbUser.church_id)
+
+      const funcaoIds = (funcoes || []).map(f => f.id)
+      if (!funcaoIds.length) return res.json({ eventos: [] })
+
+      // Escala items com essas funções
+      const { data: items } = await supabaseAdmin
+        .from('db_escala_item')
+        .select('escala:escala_id(event_id)')
+        .in('funcao_id', funcaoIds)
+        .eq('church_id', dbUser.church_id)
+        .neq('status', 'cancelado')
+
+      const eventIds = [...new Set((items || []).map(i => i.escala?.event_id).filter(Boolean))]
+      if (!eventIds.length) return res.json({ eventos: [] })
+
+      const { data: eventos, error } = await supabaseAdmin
+        .from('db_event')
+        .select('id, name, start_date, start_time, end_time, status')
+        .in('id', eventIds)
+        .gte('start_date', mesInicio)
+        .lte('start_date', mesFim)
+        .neq('status', 'cancelado')
+        .order('start_date', { ascending: true })
+        .order('start_time', { ascending: true })
+
+      if (error) return res.status(500).json({ error: error.message })
+      return res.json({ eventos: eventos || [] })
+    }
+
+    // Fallback: retorna todos os eventos do mês da church
+    const { data: eventos, error } = await supabaseAdmin
+      .from('db_event')
+      .select('id, name, start_date, start_time, end_time, status')
+      .eq('church_id', dbUser.church_id)
+      .gte('start_date', mesInicio)
+      .lte('start_date', mesFim)
+      .neq('status', 'cancelado')
+      .order('start_date', { ascending: true })
+      .order('start_time', { ascending: true })
+
+    if (error) return res.status(500).json({ error: error.message })
+    res.json({ eventos: eventos || [] })
+  } catch (e) {
+    console.error('[checkin/eventos-mes]', e)
     res.status(500).json({ error: e.message })
   }
 })
