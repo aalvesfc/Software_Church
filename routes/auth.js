@@ -248,9 +248,12 @@ router.post('/otp/send', async (req, res) => {
     .eq('email', email.trim().toLowerCase())
     .maybeSingle()
 
-  if (existing) {
-    return res.status(409).json({ error: 'Este e-mail já está cadastrado nesta igreja' })
-  }
+  // SEC-007: resposta idêntica independente de o email existir ou não
+// Evita user enumeration — atacante não consegue distinguir os dois casos
+if (existing) {
+    console.warn('[otp/send] email já cadastrado, retornando ok silencioso:', email.trim().toLowerCase())
+    return res.json({ ok: true })
+}
 
   const { error } = await supabaseAuth.auth.signInWithOtp({
     email: email.trim().toLowerCase(),

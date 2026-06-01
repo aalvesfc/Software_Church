@@ -6,3 +6,13 @@ Servidor rodando em http://localhost:3000
 [me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
 [me] email=felipe.admfg@gmail.com perfil_id=ac51973d-b218-4167-901d-f1cf395ec88e db_perfil={"slug":"voluntario"} perfil_slug=voluntario permissions_count=4
 [me] email=admin@hub.com perfil_id=da2b6f88-490f-45bd-bdf2-97901c335314 db_perfil={"slug":"owner"} perfil_slug=owner permissions_count=1
+[evento GET] church=1f5b8dd7-ba76-4de7-97c0-58a7467eaf73 total=30
+[evento GET] church=1f5b8dd7-ba76-4de7-97c0-58a7467eaf73 total=30
+[evento GET] church=1f5b8dd7-ba76-4de7-97c0-58a7467eaf73 total=30
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[evento GET] church=1f5b8dd7-ba76-4de7-97c0-58a7467eaf73 total=30
+[me] email=felipe.admfg@gmail.com perfil_id=ac51973d-b218-4167-901d-f1cf395ec88e db_perfil={"slug":"voluntario"} perfil_slug=voluntario permissions_count=4
+[me] email=admin@hub.com perfil_id=da2b6f88-490f-45bd-bdf2-97901c335314 db_perfil={"slug":"owner"} perfil_slug=owner permissions_count=1
+[me] email=aalvesfc98@gmail.com perfil_id=7389231f-da02-49f6-8203-6f93131b6c54 db_perfil={"slug":"lider_departamento"} perfil_slug=lider_departamento permissions_count=18
+[me] email=felipe.admfg@gmail.com perfil_id=ac51973d-b218-4167-901d-f1cf395ec88e db_perfil={"slug":"voluntario"} perfil_slug=voluntario permissions_count=4
+[me] email=admin@hub.com perfil_id=da2b6f88-490f-45bd-bdf2-97901c335314 db_perfil={"slug":"owner"} perfil_slug=owner permissions_count=1
