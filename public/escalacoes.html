@@ -976,6 +976,7 @@
 
 <script src="/js/auth-fetch.js"></script>
   <script src="/js/sidebar-permissions.js"></script>
+  <script src="/js/trocar-perfil.js"></script>
     <script src="/js/sidebar-ui.js"></script>
 <script>
     // SEC-005: função global de escape HTML — disponível em todos os blocos
@@ -1006,9 +1007,10 @@ document.getElementById('topSearch').addEventListener('input', e => {
 const MESES = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez']
 const MESES_FULL = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro']
 
-const isVoluntario = localStorage.getItem('perfil_slug') === 'voluntario'
-const isLider      = localStorage.getItem('perfil_slug') === 'lider'
-const isLiderDept  = localStorage.getItem('perfil_slug') === 'lider_departamento'
+const _perfilEfetivo = localStorage.getItem('perfil_efetivo') || localStorage.getItem('perfil_slug') || ''
+const isVoluntario = _perfilEfetivo === 'voluntario'
+const isLider      = _perfilEfetivo === 'lider'
+const isLiderDept  = _perfilEfetivo === 'lider_departamento'
 let _eventos = []
 let _tab = 'todos'
 let _view = 'lista'
@@ -1149,9 +1151,18 @@ function setLiderDeptFilter(status) {
 
 function render() {
   const q = document.getElementById('searchInput').value.toLowerCase().trim()
-  const today = new Date().toISOString().split('T')[0]
+  const _td = new Date()
+  const today = `${_td.getFullYear()}-${String(_td.getMonth()+1).padStart(2,'0')}-${String(_td.getDate()).padStart(2,'0')}`
+
+  // Limite: mês atual + próximo mês
+  const _now = new Date()
+  const mesAtualInicio  = `${_now.getFullYear()}-${String(_now.getMonth() + 1).padStart(2, '0')}-01`
+  const _proxMes = new Date(_now.getFullYear(), _now.getMonth() + 2, 0) // último dia do mês seguinte
+  const mesSeguinteFim  = `${_proxMes.getFullYear()}-${String(_proxMes.getMonth()+1).padStart(2,'0')}-${String(_proxMes.getDate()).padStart(2,'0')}`
 
   let lista = _eventos.filter(e => {
+    if (!e.start_date) return false
+    if (e.start_date < mesAtualInicio || e.start_date > mesSeguinteFim) return false
     if (q && !e.name.toLowerCase().includes(q)) return false
     if (!isLiderDept) {
       if (_tab === 'proximos' && e.start_date < today) return false
@@ -1201,7 +1212,7 @@ function render() {
 function renderCalendario(lista) {
   const year = _calDate.getFullYear()
   const month = _calDate.getMonth()
-  const todayStr = new Date().toISOString().split('T')[0]
+  const _tds = new Date(); const todayStr = `${_tds.getFullYear()}-${String(_tds.getMonth()+1).padStart(2,'0')}-${String(_tds.getDate()).padStart(2,'0')}`
 
   const eventsByDate = {}
   for (const e of lista) {

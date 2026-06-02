@@ -1192,7 +1192,7 @@
       </a>      <a class="nav-item" href="/voluntarios" data-tooltip="Voluntários" data-menu="voluntarios">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
         <span>Voluntários</span>
-      </a>      <a class="nav-item" href="/notificacoes" data-tooltip="Notificações" data-menu="notificacoes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span>Notificações</span></a><a class="nav-item" href="/presenca" data-tooltip="Presenças" data-menu="presenca"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>Presenças</span></a>
+      </a>      <a class="nav-item" href="/checkin" data-tooltip="Meu Check-in" data-menu="checkin"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg><span>Meu Check-in</span></a><a class="nav-item" href="/notificacoes" data-tooltip="Notificações" data-menu="notificacoes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span>Notificações</span></a><a class="nav-item" href="/presenca" data-tooltip="Presenças" data-menu="presenca"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>Presenças</span></a>
 </nav>
   </aside>
 
@@ -1690,6 +1690,7 @@
   </script>
   <script src="/js/auth-fetch.js"></script>
   <script src="/js/sidebar-permissions.js"></script>
+  <script src="/js/trocar-perfil.js"></script>
     <script src="/js/sidebar-ui.js"></script>
   <script>
     async function carregarMinisterios() {
@@ -1774,7 +1775,8 @@
     function renderCheckinSection(eventoId, eventoData) {
       const c      = _checkinCache[eventoId]
       const status = c?.status
-      const hoje   = new Date().toISOString().split('T')[0]
+      const _dh = new Date()
+      const hoje   = `${_dh.getFullYear()}-${String(_dh.getMonth()+1).padStart(2,'0')}-${String(_dh.getDate()).padStart(2,'0')}`
       const isHoje = eventoData === hoje
 
       // Estado 3 — saiu: info já aparece no header, nada aqui
@@ -1819,10 +1821,17 @@
       const hora         = e.evento_hora ? e.evento_hora.slice(0, 5) : ''
       const horaCheckin  = c?.checkin_at  ? _fmtHora(c.checkin_at)  : ''
       const horaCheckout = c?.checkout_at ? _fmtHora(c.checkout_at) : ''
-      const clockSvg     = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:11px;height:11px;flex-shrink:0"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`
-      const checkinLine  = (horaCheckin || hora)
-        ? `<div style="display:flex;align-items:center;gap:4px;font-size:12px;color:var(--ink-muted)">${clockSvg}<span>Check-in&nbsp;${horaCheckin || hora}</span></div>`
-        : ''
+      const clockSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:11px;height:11px;flex-shrink:0"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`
+
+      // Sem check-in: mostra só horário do evento, sem label
+      // Com check-in: mostra "Check-in HH:MM" (horário real)
+      let checkinLine = ''
+      if (horaCheckin) {
+        checkinLine = `<div style="display:flex;align-items:center;gap:4px;font-size:12px;color:var(--ink-muted)">${clockSvg}<span>Check-in&nbsp;${horaCheckin}</span></div>`
+      } else if (hora) {
+        checkinLine = `<div style="display:flex;align-items:center;gap:4px;font-size:12px;color:var(--ink-muted)">${clockSvg}<span>${hora}</span></div>`
+      }
+
       const checkoutLine = horaCheckout
         ? `<div style="display:flex;align-items:center;gap:4px;font-size:12px;color:var(--success-dark)">${clockSvg}<span>Check-out&nbsp;${horaCheckout}</span></div>`
         : ''
@@ -2142,7 +2151,11 @@
           } catch (_) {}
         }
 
-        aplicarModoPerfil(perfil_slug)
+        // Usa perfil_efetivo (lider em modo voluntario aparece como voluntario)
+        const perfilEfetivo = localStorage.getItem('perfil_efetivo') ||
+          (typeof window.calcularPerfilEfetivo === 'function' ? window.calcularPerfilEfetivo() : perfil_slug)
+        localStorage.setItem('perfil_efetivo', perfilEfetivo)
+        aplicarModoPerfil(perfilEfetivo)
       } finally {
         window.hideLoader()
       }
@@ -2167,7 +2180,7 @@
 
         // 2. Dados completos para o popup (filtra client-side)
         const startStr = `${year}-${String(month+1).padStart(2,'0')}-01`
-        const endStr   = new Date(year, month+1, 0).toISOString().split('T')[0]
+        const _eod = new Date(year, month+1, 0); const endStr = `${_eod.getFullYear()}-${String(_eod.getMonth()+1).padStart(2,'0')}-${String(_eod.getDate()).padStart(2,'0')}`
         const res2 = await authFetch(`/api/evento`)
         if (res2.ok) {
           const { eventos } = await res2.json()

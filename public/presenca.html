@@ -121,8 +121,18 @@
     .pg-actions { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
 
     /* ── EVENT CARDS ROW ── */
-    .eventos-row { display:flex; gap:10px; overflow-x:auto; padding-bottom:2px; margin-bottom:8px; scrollbar-width:none; }
-    .eventos-row::-webkit-scrollbar { display:none; }
+    .eventos-row-wrap { display:flex; align-items:stretch; gap:8px; margin-bottom:8px; }
+    .eventos-nav-btn {
+      width:34px; height:34px; flex-shrink:0; align-self:center;
+      background:#fff; border:1.5px solid var(--hairline); border-radius:50%;
+      display:flex; align-items:center; justify-content:center;
+      cursor:pointer; transition:background 0.15s, border-color 0.15s;
+      color:var(--ink-muted);
+    }
+    .eventos-nav-btn:hover:not(:disabled) { background:var(--canvas-input); border-color:var(--gray-400); color:var(--ink); }
+    .eventos-nav-btn:disabled { opacity:0.28; cursor:default; }
+    .eventos-nav-btn svg { width:15px; height:15px; }
+    .eventos-row { display:flex; gap:10px; overflow:hidden; flex:1; }
     .evento-card {
       display:flex; flex-direction:column; gap:3px; flex-shrink:0;
       background:#FFFFFF; border:1.5px solid #EEEEEE; border-radius:14px;
@@ -375,8 +385,16 @@
         </div>
       </div>
 
-      <!-- Eventos de hoje: cards horizontais -->
-      <div class="eventos-row" id="eventosRow"></div>
+      <!-- Eventos de hoje: cards horizontais com paginação -->
+      <div class="eventos-row-wrap">
+        <button class="eventos-nav-btn" id="evNavPrev" onclick="navEventos(-1)" disabled title="Anterior">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <div class="eventos-row" id="eventosRow"></div>
+        <button class="eventos-nav-btn" id="evNavNext" onclick="navEventos(1)" disabled title="Próximo">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
       <div class="eventos-meta">
         <span class="last-update" id="lastUpdate"></span>
         <button class="btn-atualizar" id="btnAtualizar" onclick="atualizar()">
@@ -398,10 +416,13 @@
 
   <script src="/js/auth-fetch.js"></script>
   <script src="/js/sidebar-permissions.js"></script>
+  <script src="/js/trocar-perfil.js"></script>
   <script>
     let _pollingTimer = null
     let _selectedEventoId = null
     let _eventosHoje = []
+    const CARDS_POR_PAG = 6
+    let _paginaEventos = 0
 
     // ── Carregar eventos do mês do departamento ─────────────────────────────
     async function carregarEventosHoje() {
@@ -410,9 +431,12 @@
         if (!res.ok) return
         const { eventos } = await res.json()
         _eventosHoje = eventos || []
-        renderEventoCards()
-        // Seleciona automaticamente o evento de hoje, se houver apenas um
+        // Navega para a página que contém o primeiro evento de hoje
         const hoje = new Date().toISOString().split('T')[0]
+        const idxHoje = _eventosHoje.findIndex(e => e.start_date === hoje)
+        if (idxHoje >= 0) _paginaEventos = Math.floor(idxHoje / CARDS_POR_PAG)
+        renderEventoCards()
+        // Seleciona automaticamente se houver apenas um evento hoje
         const eventoHoje = _eventosHoje.filter(e => e.start_date === hoje)
         if (eventoHoje.length === 1) selecionarEvento(eventoHoje[0].id)
       } catch (e) {
@@ -420,19 +444,33 @@
       }
     }
 
+    const STATUS_LABEL = { agendado: 'Agendado', concluido: 'Concluído', cancelado: 'Cancelado' }
+    function isEventPast(ev) {
+      if (!ev.start_date) return false
+      return new Date(`${ev.start_date}T${ev.start_time || '23:59:59'}`) < new Date()
+    }
+
     function renderEventoCards() {
-      const row = document.getElementById('eventosRow')
-      if (!_eventosHoje.length) {
+      const row      = document.getElementById('eventosRow')
+      const btnPrev  = document.getElementById('evNavPrev')
+      const btnNext  = document.getElementById('evNavNext')
+      const total    = _eventosHoje.length
+      const maxPag   = Math.max(0, Math.ceil(total / CARDS_POR_PAG) - 1)
+
+      // Garante que a página não excede o máximo
+      _paginaEventos = Math.min(_paginaEventos, maxPag)
+
+      if (!total) {
         row.innerHTML = '<span style="font-size:14px;color:var(--ink-muted);padding:8px 0">Nenhum evento hoje.</span>'
+        if (btnPrev) btnPrev.disabled = true
+        if (btnNext) btnNext.disabled = true
         return
       }
-      const STATUS_LABEL = { agendado: 'Agendado', concluido: 'Concluído', cancelado: 'Cancelado' }
-      function isEventPast(ev) {
-        if (!ev.start_date) return false
-        const time = ev.start_time || '23:59:59'
-        return new Date(`${ev.start_date}T${time}`) < new Date()
-      }
-      row.innerHTML = _eventosHoje.map(ev => {
+
+      const inicio = _paginaEventos * CARDS_POR_PAG
+      const fatia  = _eventosHoje.slice(inicio, inicio + CARDS_POR_PAG)
+
+      row.innerHTML = fatia.map(ev => {
         const horaIni  = ev.start_time ? ev.start_time.substring(0, 5) : ''
         const horaFim  = ev.end_time   ? ev.end_time.substring(0, 5)   : ''
         const horario  = horaIni && horaFim ? `${horaIni} – ${horaFim}` : horaIni
@@ -445,6 +483,15 @@
           <span class="evento-card-status ${statusCls}">${STATUS_LABEL[statusCls] || statusCls}</span>
         </div>`
       }).join('')
+
+      if (btnPrev) btnPrev.disabled = _paginaEventos === 0
+      if (btnNext) btnNext.disabled = _paginaEventos >= maxPag
+    }
+
+    function navEventos(dir) {
+      const maxPag = Math.max(0, Math.ceil(_eventosHoje.length / CARDS_POR_PAG) - 1)
+      _paginaEventos = Math.min(maxPag, Math.max(0, _paginaEventos + dir))
+      renderEventoCards()
     }
 
     function selecionarEvento(id) {
@@ -642,9 +689,9 @@
 
     // ── Avatar + dropdown ─────────────────────────────────────────────────
     function initAvatar() {
-      const nome  = localStorage.getItem('user_nome') || ''
-      const email = localStorage.getItem('user_email') || ''
       const u     = JSON.parse(localStorage.getItem('usuario') || '{}')
+      const nome  = u.nome  || u.nickname || ''
+      const email = u.email || ''
 
       document.querySelectorAll('#avatarBtn').forEach(el => {
         if (u && u.avatar) {

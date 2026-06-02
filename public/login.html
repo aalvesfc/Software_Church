@@ -487,7 +487,8 @@
         mostrarErro('Conta não encontrada no sistema. Solicite cadastro ao seu líder.')
         return
       }
-      const { usuario, igreja } = await res.json()
+      const meData = await res.json()
+      const { usuario, igreja } = meData
       localStorage.setItem('access_token',    session.access_token)
       localStorage.setItem('refresh_token',   session.refresh_token)
       localStorage.setItem('expires_at',      session.expires_at)
@@ -496,7 +497,10 @@
       localStorage.setItem('permissions',     JSON.stringify(usuario.permissions || []))
       localStorage.setItem('perfil_slug',     usuario.perfil_slug || '')
       localStorage.setItem('permissions_at',  Date.now().toString())
-      window.location.href = '/dashboard'
+      if (['lider_departamento', 'lider_ministerio'].includes(usuario.perfil_slug)) {
+        localStorage.setItem('modulo_ativo', 'lider')
+      }
+      window.location.href = usuario.perfil_slug === 'sistema_owner' ? '/painel-sistema' : '/dashboard'
     }
 
     function togglePw() {
@@ -548,7 +552,10 @@
         localStorage.setItem('permissions',     JSON.stringify(dados.usuario.permissions || []));
         localStorage.setItem('perfil_slug',     dados.usuario.perfil_slug || '');
         localStorage.setItem('permissions_at',  Date.now().toString());
-        window.location.href = '/dashboard';
+        if (['lider_departamento', 'lider_ministerio'].includes(dados.usuario.perfil_slug)) {
+          localStorage.setItem('modulo_ativo', 'lider');
+        }
+        window.location.href = dados.redirect || '/dashboard';
 
       } catch {
         mostrarErro('Não foi possível conectar ao servidor.');

@@ -931,13 +931,18 @@
   <div id="toast"></div>
   <script src="/js/auth-fetch.js"></script>
   <script src="/js/sidebar-permissions.js"></script>
+  <script src="/js/trocar-perfil.js"></script>
     <script src="/js/sidebar-ui.js"></script>
   <script>
     // SEC-005: escape de HTML para prevenir XSS em innerHTML
     function esc(s) { return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') }
-    const _permissions = JSON.parse(localStorage.getItem('permissions') || '[]')
-    const _userId      = JSON.parse(localStorage.getItem('usuario') || '{}').id || ''
+    const _permissions    = JSON.parse(localStorage.getItem('permissions') || '[]')
+    const _userId         = JSON.parse(localStorage.getItem('usuario') || '{}').id || ''
+    const _perfilEfetivo  = localStorage.getItem('perfil_efetivo') || localStorage.getItem('perfil_slug') || ''
+    const _isVoluntario   = _perfilEfetivo === 'voluntario'
     function temPermissao(module, action) {
+      // Voluntário não pode editar nem excluir (independente das permissões do perfil real)
+      if (_isVoluntario && (action === 'editar' || action === 'excluir')) return false
       if (_permissions.includes('*')) return true
       return _permissions.includes(`${module}:${action}`)
     }
@@ -1162,7 +1167,7 @@
       if (!await checkAuth()) return
       // Se vier de notificação com ?id=, remove filtro de status para garantir que a música apareça
       if (new URLSearchParams(location.search).get('id')) _filtroStatus = 'todos'
-      if (localStorage.getItem('perfil_slug') === 'voluntario') {
+      if (_isVoluntario) {
         document.getElementById('statsRow').style.display = 'none'
       }
 

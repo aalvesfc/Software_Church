@@ -353,6 +353,16 @@
       cursor: pointer; transition: background 0.14s;
     }
     .hero-btn-rascunho:hover { background: var(--primary-dark); }
+    .hero-btn-checkin {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 8px 18px; border-radius: var(--radius-pill);
+      background: rgba(255,255,255,0.18); color: #fff;
+      font-size: 12px; font-weight: 700; border: 1.5px solid rgba(255,255,255,0.4);
+      cursor: pointer; transition: background 0.14s; letter-spacing: -0.1px;
+    }
+    .hero-btn-checkin:hover { background: rgba(255,255,255,0.28); }
+    .hero-btn-checkin.saiu { background: rgba(52,199,89,0.25); border-color: rgba(52,199,89,0.6); }
+    .hero-btn-checkin svg { width:14px; height:14px; }
     .hero-status-badge {
       display: inline-flex; align-items: center; gap: 6px;
       padding: 9px 20px; border-radius: var(--radius-pill);
@@ -1316,6 +1326,7 @@
 
 <script src="/js/auth-fetch.js"></script>
   <script src="/js/sidebar-permissions.js"></script>
+  <script src="/js/trocar-perfil.js"></script>
     <script src="/js/sidebar-ui.js"></script>
 <script>
     // SEC-005: função global de escape HTML — disponível em todos os blocos
@@ -1323,10 +1334,12 @@
 
 // ── STATE ──
 const eventId      = location.pathname.split('/').pop()
-const isVoluntario = localStorage.getItem('perfil_slug') === 'voluntario'
-const isLider      = localStorage.getItem('perfil_slug') === 'lider'
-const isLiderDept  = localStorage.getItem('perfil_slug') === 'lider_departamento'
+const _perfilEfetivo = localStorage.getItem('perfil_efetivo') || localStorage.getItem('perfil_slug') || ''
+const isVoluntario = _perfilEfetivo === 'voluntario'
+const isLider      = _perfilEfetivo === 'lider'
+const isLiderDept  = _perfilEfetivo === 'lider_departamento'
 let _evento        = null
+let _meuCheckin    = null   // { status, checkin_at, checkout_at } | null
 let _statusGeral   = 'rascunho'   // 'rascunho' | 'publicado'
 let _templateDepts = []   // cada item tem: { department_id, department_name, escala_id, escala_status, funcoes, itens }
 let _allVols       = []
@@ -1394,6 +1407,14 @@ async function init() {
 
   if (isVoluntario) {
     await carregarEscala()
+    // Busca check-in atual do voluntário para este evento
+    try {
+      const rc = await authFetch('/api/checkin/meu-evento')
+      if (rc.ok) {
+        const dc = await rc.json()
+        if (dc.evento?.id === eventId) _meuCheckin = dc.checkin || null
+      }
+    } catch {}
     await aplicarModoVoluntario()
   } else {
     await Promise.all([carregarEscala(), carregarVoluntarios()])
@@ -1463,6 +1484,74 @@ function calcStats() {
   return { totalVagas, preenchidas, confirmados }
 }
 
+// ── CHECK-IN DO VOLUNTÁRIO ──────────────────────────────────────────────────
+function _hojeLocal() {
+  const d = new Date()
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`
+}
+
+function renderCheckinBtnHero() {
+  const isHoje = _evento?.start_date === _hojeLocal()
+  if (!isHoje) return ''
+  const st = _meuCheckin?.status
+  if (st === 'saiu') {
+    return `<button class="hero-btn-checkin saiu" disabled>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      Check-out feito
+    </button>`
+  }
+  if (st === 'presente' || st === 'atrasado') {
+    return `<button class="hero-btn-rascunho" onclick="fazerCheckoutHero()" id="heroCheckoutBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      Fazer Check-out
+    </button>`
+  }
+  return `<button class="hero-btn-rascunho" onclick="fazerCheckinHero()" id="heroCheckinBtn">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><polyline points="20 6 9 17 4 12"/></svg>
+    Fazer Check-in
+  </button>`
+}
+
+async function fazerCheckinHero() {
+  const btn = document.getElementById('heroCheckinBtn')
+  if (btn) { btn.disabled = true; btn.textContent = 'Registrando...' }
+  try {
+    let latitude = null, longitude = null
+    try {
+      const pos = await new Promise((res, rej) => navigator.geolocation.getCurrentPosition(res, rej, { timeout: 8000 }))
+      latitude  = pos.coords.latitude
+      longitude = pos.coords.longitude
+    } catch {}
+    const r = await authFetch('/api/checkin', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ event_id: eventId, latitude, longitude, method: latitude ? 'gps' : 'manual' })
+    })
+    const data = await r.json()
+    if (!r.ok) { showToast(data.error || 'Erro ao fazer check-in', 'error'); if (btn) { btn.disabled = false; btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><polyline points="20 6 9 17 4 12"/></svg> Fazer Check-in' }; return }
+    _meuCheckin = data.checkin
+    renderContent()
+    showToast('Check-in feito!')
+  } catch { showToast('Erro de conexão', 'error'); if (btn) btn.disabled = false }
+}
+
+async function fazerCheckoutHero() {
+  const btn = document.getElementById('heroCheckoutBtn')
+  if (btn) { btn.disabled = true; btn.textContent = 'Registrando...' }
+  try {
+    const r = await authFetch('/api/checkin/checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ event_id: eventId })
+    })
+    const data = await r.json()
+    if (!r.ok) { showToast(data.error || 'Erro ao fazer check-out', 'error'); if (btn) btn.disabled = false; return }
+    _meuCheckin = data.checkin
+    renderContent()
+    showToast('Check-out feito!')
+  } catch { showToast('Erro de conexão', 'error'); if (btn) btn.disabled = false }
+}
+
 // ── CONTENT ──
 function renderContent() {
   document.getElementById('pageLoader')?.remove()
@@ -1490,7 +1579,7 @@ function renderContent() {
                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px"><path d="M22 2L11 13"/><path d="M22 2L15 22l-4-9-9-4 20-7z"/></svg>
                  Salvar Escala
                </button>`)
-          : isVoluntario ? ''
+          : isVoluntario ? renderCheckinBtnHero()
           : _statusGeral === 'publicado'
             ? `<span class="hero-status-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px"><polyline points="20 6 9 17 4 12"/></svg> Publicado</span>
                <button class="hero-btn-rascunho" onclick="alterarStatusEscala('rascunho')">Voltar para Rascunho</button>`

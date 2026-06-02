@@ -2086,6 +2086,7 @@
 
 <script src="/js/auth-fetch.js"></script>
   <script src="/js/sidebar-permissions.js"></script>
+  <script src="/js/trocar-perfil.js"></script>
     <script src="/js/sidebar-ui.js"></script>
 <script>
 const esc = s => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')
@@ -2097,7 +2098,8 @@ function fazerLogout(e) {
 
 // ── Estado ────────────────────────────────────────────
 let _eventos = []
-let _isLiderDept = false
+let _isLiderDept    = false
+let _isVoluntarioMode = false  // true quando perfil_efetivo === 'voluntario'
 let _view = 'lista'
 let _calSubView = 'mes'   // 'mes' | 'semana'
 let _calYear, _calMonth
@@ -2147,9 +2149,16 @@ async function init() {
   document.getElementById('dropdownEmail').textContent = usuario.email || '—'
 
   // Restrições por perfil
-  if (usuario.perfil_slug === 'lider_departamento') {
+  const _perfilEfetivo = localStorage.getItem('perfil_efetivo') || usuario.perfil_slug || ''
+  if (_perfilEfetivo === 'lider_departamento') {
     _isLiderDept = true
     document.getElementById('btnNovoEvento')?.remove()
+  }
+  // Voluntário (real ou líder em modo voluntário): somente visualização
+  if (_perfilEfetivo === 'voluntario') {
+    _isVoluntarioMode = true
+    document.getElementById('btnNovoEvento')?.remove()
+    document.getElementById('btnNovoEvento2')?.remove()
   }
 
   await carregarEventos()
@@ -2321,13 +2330,20 @@ function setStatFilter(f) {
 // ── Filtro ────────────────────────────────────────────
 function filteredEventos() {
   const q = (document.getElementById('searchInput')?.value || '').toLowerCase().trim()
-  let list = q
-    ? _eventos.filter(e =>
-        (e.name || '').toLowerCase().includes(q) ||
-        (Array.isArray(e.location) ? e.location.join(' ') : (e.location || '')).toLowerCase().includes(q) ||
-        (e.description || '').toLowerCase().includes(q)
-      )
-    : [..._eventos]
+
+  // Primeiro dia do mês atual (YYYY-MM-01)
+  const hoje = new Date()
+  const inicioMes = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-01`
+
+  let list = _eventos.filter(e => (e.start_date || '') >= inicioMes)
+
+  if (q) {
+    list = list.filter(e =>
+      (e.name || '').toLowerCase().includes(q) ||
+      (Array.isArray(e.location) ? e.location.join(' ') : (e.location || '')).toLowerCase().includes(q) ||
+      (e.description || '').toLowerCase().includes(q)
+    )
+  }
 
   if (_statFilter === 'agendado') {
     list = list.filter(e => e.status === 'agendado' && !isEventPast(e))
@@ -2400,7 +2416,7 @@ function renderLista(area, list) {
     const horario = e.start_time ? (e.end_time ? `${fmtTime(e.start_time)} – ${fmtTime(e.end_time)}` : fmtTime(e.start_time)) : ''
     const local   = e.location?.length ? (Array.isArray(e.location) ? e.location.join(', ') : e.location) : ''
     return `
-      <div class="ev-card ${status}" onclick="editarEvento('${e.id}')">
+      <div class="ev-card ${status}" onclick="${_isVoluntarioMode ? `window.location.href='/evento/${e.id}'` : `editarEvento('${e.id}')`}" style="cursor:pointer">
         <div class="ev-card-accent"></div>
         <div class="ev-card-inner">
           <div class="ev-card-top">

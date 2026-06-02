@@ -1459,6 +1459,7 @@
 
   <script src="/js/auth-fetch.js"></script>
   <script src="/js/sidebar-permissions.js"></script>
+  <script src="/js/trocar-perfil.js"></script>
     <script src="/js/sidebar-ui.js"></script>
   <script>
     // SEC-005: função global de escape HTML — disponível em todos os blocos
@@ -1615,8 +1616,14 @@
           document.getElementById('dropdownName').textContent  = name
           document.getElementById('dropdownEmail').textContent = d.usuario?.email || ''
 
-          // Restrições e seções para lider_departamento
-          if (d.usuario?.perfil_slug === 'lider_departamento') {
+          // Calcula perfil efetivo (líder em modo voluntário = voluntário)
+          const _perfil     = d.usuario?.perfil_slug || ''
+          const _moduloAtivo = localStorage.getItem('modulo_ativo')
+          const _isLider     = ['lider_departamento', 'lider_ministerio'].includes(_perfil)
+          const _perfilEfetivo = (_isLider && _moduloAtivo === 'voluntario') ? 'voluntario' : _perfil
+
+          // Restrições e seções para lider_departamento (no perfil de líder)
+          if (_perfil === 'lider_departamento' && _perfilEfetivo !== 'voluntario') {
             document.getElementById('cardAcoesRapidas')?.remove()
             document.getElementById('cardTemplate')?.remove()
             document.getElementById('cardCronograma')?.remove()
@@ -1627,27 +1634,53 @@
               carregarMinhaEquipe()
             }
           }
+
+          // Vista voluntário: apenas Informações Gerais (read-only) + Minha Equipe
+          if (_perfilEfetivo === 'voluntario') {
+            // Remove cards de gestão
+            document.getElementById('cardAcoesRapidas')?.remove()
+            document.getElementById('cardTemplate')?.remove()
+            document.getElementById('cardCronograma')?.remove()
+            document.getElementById('cardEdit')?.remove()
+            document.getElementById('btnConcluir')?.closest('.detail-card')?.remove()
+            // Esconde header actions (editar/excluir)
+            const hdrAct = document.getElementById('hdrActions')
+            if (hdrAct) hdrAct.style.display = 'none'
+            // Esconde botão Ir para Escalação dentro de Minha Equipe
+            document.querySelector('.equipe-rodape')?.remove()
+            // Esconde campo Data de Criação (não relevante para voluntário)
+            const _elCreated = document.getElementById('vCreatedAt')
+            if (_elCreated) _elCreated.parentElement.style.display = 'none'
+            // Exibe e carrega Minha Equipe
+            const cardEquipe = document.getElementById('cardMinhaEquipe')
+            if (cardEquipe) {
+              cardEquipe.style.display = 'block'
+              carregarMinhaEquipe()
+            }
+          }
         }
       } catch {}
 
-      // Time mask
-      ['fStartTime','fEndTime'].forEach(id => applyTimeMask(document.getElementById(id)))
+      // Time mask (só existe quando o formulário de edição está presente)
+      ['fStartTime','fEndTime'].forEach(id => { const el = document.getElementById(id); if (el) applyTimeMask(el) })
 
-      // Location tag input
+      // Location tag input (só existe no formulário de edição)
       const tagInput = document.getElementById('locationTagInput')
-      tagInput.addEventListener('keydown', e => {
-        if (e.key === 'Enter') {
-          e.preventDefault()
-          const v = tagInput.value.trim()
-          if (v) { addLocationTag(v); tagInput.value = ''; document.getElementById('locationSuggestions').classList.remove('open') }
-        } else if (e.key === 'Backspace' && !tagInput.value && _locationTags.length) {
-          removeLocationTag(_locationTags.length - 1)
-        }
-      })
-      tagInput.addEventListener('input', () => renderLocationSuggestions(tagInput.value))
-      tagInput.addEventListener('focus', () => renderLocationSuggestions(tagInput.value))
-      tagInput.addEventListener('blur', () => setTimeout(() => document.getElementById('locationSuggestions').classList.remove('open'), 180))
-      document.getElementById('locationWrapper').addEventListener('click', () => tagInput.focus())
+      if (tagInput) {
+        tagInput.addEventListener('keydown', e => {
+          if (e.key === 'Enter') {
+            e.preventDefault()
+            const v = tagInput.value.trim()
+            if (v) { addLocationTag(v); tagInput.value = ''; document.getElementById('locationSuggestions').classList.remove('open') }
+          } else if (e.key === 'Backspace' && !tagInput.value && _locationTags.length) {
+            removeLocationTag(_locationTags.length - 1)
+          }
+        })
+        tagInput.addEventListener('input', () => renderLocationSuggestions(tagInput.value))
+        tagInput.addEventListener('focus', () => renderLocationSuggestions(tagInput.value))
+        tagInput.addEventListener('blur', () => setTimeout(() => document.getElementById('locationSuggestions').classList.remove('open'), 180))
+        document.getElementById('locationWrapper')?.addEventListener('click', () => tagInput.focus())
+      }
 
       await Promise.all([carregarEvento(), carregarLocais()])
     }
@@ -1819,6 +1852,7 @@
 
     // ── Render form (modo edição) ──────────────────────
     function renderForm(e) {
+      if (!document.getElementById('fName')) return // formulário removido (ex: modo voluntário)
       document.getElementById('fName').value      = e.name || ''
       document.getElementById('fDesc').value      = e.description || ''
       document.getElementById('fStartDate').value = e.start_date || ''
