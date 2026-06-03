@@ -1,6 +1,11 @@
+// MÓDULO: voluntariado
 const router = require('express').Router()
 const { supabaseAdmin } = require('../lib/supabase')
 const authMiddleware = require('../middleware/auth')
+const checkModulo = require('../middleware/checkModulo')
+
+router.use(authMiddleware)
+router.use(checkModulo('voluntariado'))
 
 function calcularDistancia(lat1, lng1, lat2, lng2) {
   const R = 6371000
@@ -33,7 +38,7 @@ router.get('/meu-evento', authMiddleware, async (req, res) => {
     if (!dbUser) return res.status(404).json({ error: 'Usuário não encontrado' })
     if (!dbUser.member_id) return res.json({ evento: null, checkin: null })
 
-    const hoje = new Date().toISOString().split('T')[0]
+    const hoje = (() => { const _d = new Date(); return _d.getFullYear()+'-'+String(_d.getMonth()+1).padStart(2,'0')+'-'+String(_d.getDate()).padStart(2,'0') })()
 
     // Busca eventos de hoje em que o voluntário está escalado
     const { data: escalas } = await supabaseAdmin
@@ -129,7 +134,7 @@ router.post('/', authMiddleware, async (req, res) => {
     if (!evento) return res.status(404).json({ error: 'Evento não encontrado' })
 
     // 1. Validação de data
-    const hoje = new Date().toISOString().split('T')[0]
+    const hoje = (() => { const _d = new Date(); return _d.getFullYear()+'-'+String(_d.getMonth()+1).padStart(2,'0')+'-'+String(_d.getDate()).padStart(2,'0') })()
     if (evento.start_date !== hoje) {
       console.warn('[checkin POST] 403 data errada — evento:', evento.start_date, 'hoje:', hoje)
       return res.status(403).json({ error: 'Check-in só pode ser feito no dia do evento' })
@@ -336,7 +341,7 @@ router.get('/eventos-hoje', authMiddleware, async (req, res) => {
     const dbUser = await getDbUser(req.authUser.id)
     if (!dbUser) return res.status(404).json({ error: 'Usuário não encontrado' })
 
-    const hoje = new Date().toISOString().split('T')[0]
+    const hoje = (() => { const _d = new Date(); return _d.getFullYear()+'-'+String(_d.getMonth()+1).padStart(2,'0')+'-'+String(_d.getDate()).padStart(2,'0') })()
 
     const { data: eventos, error } = await supabaseAdmin
       .from('db_event')
@@ -361,8 +366,8 @@ router.get('/eventos-mes', authMiddleware, async (req, res) => {
     if (!dbUser) return res.status(404).json({ error: 'Usuário não encontrado' })
 
     const hoje = new Date()
-    const mesInicio = new Date(hoje.getFullYear(), hoje.getMonth(), 1).toISOString().split('T')[0]
-    const mesFim    = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0).toISOString().split('T')[0]
+    const mesInicio = (() => { const _m = new Date(hoje.getFullYear(), hoje.getMonth(), 1); return _m.getFullYear()+'-'+String(_m.getMonth()+1).padStart(2,'0')+'-01' })()
+    const mesFim    = (() => { const _m = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0); return _m.getFullYear()+'-'+String(_m.getMonth()+1).padStart(2,'0')+'-'+String(_m.getDate()).padStart(2,'0') })()
 
     // Descobre o perfil e departamento do usuário
     const { data: dbUserFull } = await supabaseAdmin

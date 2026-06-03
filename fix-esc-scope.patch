@@ -1,8 +1,8 @@
 diff --git a/public/dashboard.html b/public/dashboard.html
-index 7ed9882..444dbe5 100644
+index 6a42f66..9701172 100644
 --- a/public/dashboard.html
 +++ b/public/dashboard.html
-@@ -1615,6 +1615,9 @@
+@@ -1621,6 +1621,9 @@
    </div>
  
    <script>
@@ -12,37 +12,26 @@ index 7ed9882..444dbe5 100644
      // ── Carrega dados do usuário logado ──
      const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
      const igreja = JSON.parse(localStorage.getItem('igreja') || '{}');
-@@ -1832,7 +1835,7 @@
+@@ -1948,7 +1951,7 @@
      function renderLiderEvents() {
        const MESES = ['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ']
        const liderBadgeLabel = { a_fazer: 'A fazer', em_andamento: 'Em andamento', concluida: 'Concluída', sem_dept: 'Outro dept' }
 -      const esc = s => (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-+      // esc() definido globalmente acima (SEC-005)
++      // esc() definido globalmente (SEC-005)
        const pagEl   = document.getElementById('liderPaginacao')
        const prevBtn = document.getElementById('liderPagPrev')
        const nextBtn = document.getElementById('liderPagNext')
-@@ -1894,8 +1897,8 @@
-         const { cls, svg } = iconMap[a.tipo] || { cls: 'info', svg: '<circle cx="12" cy="12" r="10"/>' }
-         const msg = (a.mensagem || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-         const inner = a.link
--          ? `<a href="${a.link}" class="alerta-msg" style="color:inherit;text-decoration:underline;text-underline-offset:2px;cursor:pointer">${msg}</a>`
--          : `<div class="alerta-msg">${msg}</div>`
-+          ? `<a href="${a.link}" class="alerta-msg" style="color:inherit;text-decoration:underline;text-underline-offset:2px;cursor:pointer">${esc(msg)}</a>`
-+          : `<div class="alerta-msg">${esc(msg)}</div>`
-         return `<div class="alerta-card">
-           <div class="alerta-icon ${cls}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${svg}</svg></div>
-           ${inner}
-@@ -2128,7 +2131,7 @@
+@@ -2244,7 +2247,7 @@
        }
  
        // Vários → popup
 -      const esc = s => (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-+      // esc() definido globalmente acima (SEC-005)
++      // esc() definido globalmente (SEC-005)
        const titulo = `${day} de ${MESES_CURTOS[month-1]}`
  
        popup.innerHTML = `
 diff --git a/public/departamentos.html b/public/departamentos.html
-index 32b08dd..3ff063d 100644
+index 424cb08..f058c7b 100644
 --- a/public/departamentos.html
 +++ b/public/departamentos.html
 @@ -1841,6 +1841,9 @@
@@ -55,17 +44,19 @@ index 32b08dd..3ff063d 100644
      /* ─── Auth / Init ─── */
      let _departments = []
      let _ministries  = []
-@@ -2073,7 +2076,7 @@
+@@ -2073,9 +2076,7 @@
        }).join('')
      }
  
 -    function esc(str) {
+-      return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')
+-    }
 +      // esc() definido globalmente (SEC-005)
-       return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')
-     }
+ 
+     let _editingId = null
  
 diff --git a/public/escalacao.html b/public/escalacao.html
-index 1296850..b8819d3 100644
+index 8850650..ec5ee96 100644
 --- a/public/escalacao.html
 +++ b/public/escalacao.html
 @@ -1318,6 +1318,9 @@
@@ -89,35 +80,8 @@ index 1296850..b8819d3 100644
  function initials(name) {
    return (name || '?').split(' ').slice(0,2).map(w => w[0]).join('').toUpperCase()
  }
-@@ -1934,7 +1935,7 @@ function renderMvcItens(itens) {
-         </div>
-         <div class="mvc-item-body">
-           <div class="mvc-item-title">${esc(item.title)}</div>
--          ${item.description ? `<div class="mvc-item-sub">${esc(item.description)}</div>` : ''}
-+          ${esc(item.description ? `<div class="mvc-item-sub">${esc(item.description))}</div>` : ''}
-           <div class="mvc-item-tags"><span class="mvc-tag" style="background:rgba(124,58,237,0.10);color:#7c3aed">Pré-evento</span>${item.duration ? `<span class="mvc-tag">${esc(item.duration)}</span>` : ''}</div>
-         </div>
-       </div>`
-@@ -1946,7 +1947,7 @@ function renderMvcItens(itens) {
-         </div>
-         <div class="mvc-item-body">
-           <div class="mvc-item-title">${esc(item.title)}</div>
--          ${item.description ? `<div class="mvc-item-sub">${esc(item.description)}</div>` : ''}
-+          ${esc(item.description ? `<div class="mvc-item-sub">${esc(item.description))}</div>` : ''}
-           ${item.duration ? `<div class="mvc-item-tags"><span class="mvc-tag">${esc(item.duration)}</span></div>` : ''}
-         </div>
-       </div>`
-@@ -1966,7 +1967,7 @@ function renderMvcItens(itens) {
-         </div>
-         <div class="mvc-item-body">
-           <div class="mvc-item-title">${esc(nome)}</div>
--          ${m.artist ? `<div class="mvc-item-sub">${esc(m.artist)}</div>` : ''}
-+          ${esc(m.artist ? `<div class="mvc-item-sub">${esc(m.artist))}</div>` : ''}
-           ${tags.length ? `<div class="mvc-item-tags">${tags.map(t=>`<span class="mvc-tag">${t}</span>`).join('')}</div>` : ''}
-           ${links.length ? `<div class="mvc-item-links">${links.join('')}</div>` : ''}
-         </div>
 diff --git a/public/escalacoes.html b/public/escalacoes.html
-index 903b654..df63af2 100644
+index 6a7c70c..a642796 100644
 --- a/public/escalacoes.html
 +++ b/public/escalacoes.html
 @@ -978,6 +978,9 @@
@@ -142,7 +106,7 @@ index 903b654..df63af2 100644
  init().finally(() => window.hideLoader())
  </script>
 diff --git a/public/evento-detalhe.html b/public/evento-detalhe.html
-index 2e579f9..72937bc 100644
+index c23b99b..04352b7 100644
 --- a/public/evento-detalhe.html
 +++ b/public/evento-detalhe.html
 @@ -1461,6 +1461,9 @@
@@ -155,15 +119,6 @@ index 2e579f9..72937bc 100644
      const MESES = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez']
      const MESES_FULL = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro']
      const RECUR_LABEL = {
-@@ -1520,7 +1523,7 @@
-         if (departamento?.name && titulo) {
-           titulo.innerHTML = `
-             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;vertical-align:-3px;margin-right:6px"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
--            Minha Equipe <span style="font-weight:400;color:var(--ink-muted);font-size:13px">— ${departamento.name}</span>`
-+            Minha Equipe <span style="font-weight:400;color:var(--ink-muted);font-size:13px">— ${esc(departamento.name)}</span>`
-         }
- 
-         if (!funcoes?.length) {
 @@ -1528,7 +1531,7 @@
            return
          }
@@ -173,47 +128,11 @@ index 2e579f9..72937bc 100644
          const statusLabel = { escalado:'✓ Escalado', confirmado:'✓ Confirmado', presente:'✓ Presente', pendente:'⚠ Pendente' }
          const statusClass = s => ['confirmado','presente','escalado'].includes(s) ? 'escalado' : (s || 'pendente')
  
-@@ -1748,7 +1751,7 @@
-       document.getElementById('hdrDay').textContent = day
-       document.getElementById('hdrMon').textContent = mon
-       document.getElementById('hdrName').textContent = e.name || '—'
--      document.title = `${e.name || 'Evento'} — Hug Software`
-+      document.title = `${esc(e.name || 'Evento')} — Hug Software`
- 
-       const status = effectiveStatus(e)
-       const hdrStatus = document.getElementById('hdrStatus')
-@@ -2132,7 +2135,7 @@
-             </div>
-             <div class="mvc-item-body">
-               <div class="mvc-item-title">${esc2(item.title)}</div>
--              ${item.description ? `<div class="mvc-item-sub">${esc2(item.description)}</div>` : ''}
-+              ${esc(item.description ? `<div class="mvc-item-sub">${esc2(item.description))}</div>` : ''}
-               <div class="mvc-item-tags"><span class="mvc-tag" style="background:rgba(124,58,237,0.10);color:#7c3aed">Pré-evento</span>${item.duration ? `<span class="mvc-tag">${esc2(item.duration)}</span>` : ''}</div>
-             </div>
-           </div>`
-@@ -2144,7 +2147,7 @@
-             </div>
-             <div class="mvc-item-body">
-               <div class="mvc-item-title">${esc2(item.title)}</div>
--              ${item.description ? `<div class="mvc-item-sub">${esc2(item.description)}</div>` : ''}
-+              ${esc(item.description ? `<div class="mvc-item-sub">${esc2(item.description))}</div>` : ''}
-               ${item.duration ? `<div class="mvc-item-tags"><span class="mvc-tag">${esc2(item.duration)}</span></div>` : ''}
-             </div>
-           </div>`
-@@ -2164,7 +2167,7 @@
-             </div>
-             <div class="mvc-item-body">
-               <div class="mvc-item-title">${esc2(nome)}</div>
--              ${m.artist ? `<div class="mvc-item-sub">${esc2(m.artist)}</div>` : ''}
-+              ${esc(m.artist ? `<div class="mvc-item-sub">${esc2(m.artist))}</div>` : ''}
-               ${tags.length ? `<div class="mvc-item-tags">${tags.map(t=>`<span class="mvc-tag">${t}</span>`).join('')}</div>` : ''}
-               ${links.length ? `<div class="mvc-item-links">${links.join('')}</div>` : ''}
-             </div>
 diff --git a/public/eventos.html b/public/eventos.html
-index de67d82..299ca8a 100644
+index 04c182f..aa3f973 100644
 --- a/public/eventos.html
 +++ b/public/eventos.html
-@@ -2094,6 +2094,9 @@
+@@ -2088,6 +2088,9 @@
    <script src="/js/sidebar-permissions.js"></script>
      <script src="/js/sidebar-ui.js"></script>
  <script>
@@ -223,34 +142,7 @@ index de67d82..299ca8a 100644
  function fazerLogout(e) {
    e?.preventDefault()
    clearSession()
-@@ -2413,7 +2416,7 @@ function renderLista(area, list) {
-               <span class="ev-card-mon">${mon}</span>
-             </div>
-             <div class="ev-card-title">
--              <div class="ev-card-name">${e.name || '—'}</div>
-+              <div class="ev-card-name">${esc(e.name || '—')}</div>
-               <span class="badge-status ${status}">${STATUS_LABEL[status] || status}</span>
-             </div>
-           </div>
-@@ -2481,7 +2484,7 @@ function renderCalFull(area) {
-     }
-     const evs = dateStr ? (byDate[dateStr] || []) : []
-     const evHtml = evs.slice(0,3).map(e =>
--      `<div class="full-cal-event" onclick="event.stopPropagation();editarEvento('${e.id}')" title="${e.name}">${fmtTime(e.start_time)} ${e.name || ''}</div>`
-+      `<div class="full-cal-event" onclick="event.stopPropagation();editarEvento('${e.id}')" title="${esc(e.name)}">${fmtTime(e.start_time)} ${esc(e.name || '')}</div>`
-     ).join('') + (evs.length > 3 ? `<div style="font-size:10px;color:var(--ink-muted);padding:0 2px">+${evs.length-3} mais</div>` : '')
-     cells += `<div class="full-cal-cell ${extraCls}"><div class="full-cal-cell-num">${num}</div>${evHtml}</div>`
-   }
-@@ -2534,7 +2537,7 @@ function renderUpcoming() {
-           <span class="upcoming-mon">${mon}</span>
-         </div>
-         <div class="upcoming-info">
--          <div class="upcoming-name">${e.name || '—'}</div>
-+          <div class="upcoming-name">${esc(e.name || '—')}</div>
-           <div class="upcoming-time">${horario || 'Horário não definido'}</div>
-         </div>
-       </div>`
-@@ -2617,7 +2620,7 @@ function calDiaClick(e, year, month, day) {
+@@ -2611,7 +2614,7 @@ function calDiaClick(e, year, month, day) {
    // Vários eventos → mostra popup
    const MESES = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez']
    const titulo = `${day} de ${MESES[month-1]}`
@@ -259,28 +151,8 @@ index de67d82..299ca8a 100644
  
    popup.innerHTML = `
      <div class="cdp-header">
-@@ -2725,7 +2728,7 @@ function renderCalWeek(area) {
-     const isToday = dateStr === todayStr
-     const evs = byDate[dateStr] || []
-     const evHtml = evs.map(e =>
--      `<div class="full-cal-event" onclick="editarEvento('${e.id}')" title="${e.name}">${fmtTime(e.start_time)} ${e.name || ''}</div>`
-+      `<div class="full-cal-event" onclick="editarEvento('${e.id}')" title="${esc(e.name)}">${fmtTime(e.start_time)} ${esc(e.name || '')}</div>`
-     ).join('')
-     return `
-       <div class="week-cal-col${isToday ? ' today' : ''}">
-@@ -2916,8 +2919,8 @@ function renderTemplateOptions() {
-     </div>`,
-     ..._templates.map(t =>
-       `<div class="option-card ${_selectedTemplateId === t.id ? 'selected' : ''}" onclick="selectTemplate(this,'${t.id}')">
--        <div class="option-card-title">${t.name || '—'}</div>
--        <div class="option-card-sub">${t.description || ''}</div>
-+        <div class="option-card-title">${esc(t.name || '—')}</div>
-+        <div class="option-card-sub">${esc(t.description || '')}</div>
-       </div>`)
-   ]
-   list.innerHTML = items.join('')
 diff --git a/public/template-detalhe.html b/public/template-detalhe.html
-index 217615a..27c042d 100644
+index 770b1be..b5e2c53 100644
 --- a/public/template-detalhe.html
 +++ b/public/template-detalhe.html
 @@ -956,6 +956,9 @@
@@ -293,15 +165,6 @@ index 217615a..27c042d 100644
      const usuario = JSON.parse(localStorage.getItem('usuario') || '{}')
      const igreja  = JSON.parse(localStorage.getItem('igreja')  || '{}')
      const _cnel = document.getElementById('churchName'); if (_cnel) _cnel.textContent = igreja?.nome || 'Igreja';
-@@ -1030,7 +1033,7 @@
-         document.getElementById('headerName').textContent = template.name
-         document.getElementById('headerMeta').textContent =
-           template.created_at ? 'Criado em ' + new Date(template.created_at).toLocaleDateString('pt-BR') : ''
--        document.title = `Hug Software — ${template.name}`
-+        document.title = `Hug Software — ${esc(template.name)}`
- 
-         // Preenche campos
-         document.getElementById('fNome').value = template.name || ''
 @@ -1064,7 +1067,7 @@
  
      /* ── Tags ── */
@@ -311,48 +174,3 @@ index 217615a..27c042d 100644
        if (isLiderDept) return `<span class="tag-chip">${t}</span>`
        return `<span class="tag-chip">${t}<button type="button" onclick="removerTag('${esc}')">✕</button></span>`
      }
-@@ -1155,7 +1158,7 @@
-           <div class="ministry-block ${autoOpen}" id="minBlock_${deptId}">
-             <div class="ministry-head" onclick="toggleMin('${deptId}')">
-               <div class="ministry-dot" style="background:${color}"></div>
--              <span class="ministry-name-text">${d.name}</span>
-+              <span class="ministry-name-text">${esc(d.name)}</span>
-               <span class="ministry-count" id="minCount_${deptId}">${checked}/${funcs.length}</span>
-               <svg class="ministry-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-             </div>
-@@ -1174,7 +1177,7 @@
-                 const allowVagas  = canChangeVagas(f.id)
-                 return `<div class="dept-check-row">
-                   <input type="checkbox" id="fc_${f.id}" ${sel ? 'checked' : ''} ${allowToggle ? `onchange="toggleFuncAcordeon('${f.id}','${deptId}',this.checked)"` : 'disabled style="opacity:0.5;cursor:not-allowed"'} />
--                  <label class="dept-check-label" for="fc_${f.id}">${f.name}</label>
-+                  <label class="dept-check-label" for="fc_${f.id}">${esc(f.name)}</label>
-                   <div class="vagas-ctrl" id="vagasCtrl_${f.id}" style="margin-left:auto;${sel ? '' : 'display:none'}" onclick="event.stopPropagation()">
-                     <button class="vagas-btn" ${allowVagas ? `onclick="mudaVagas('${f.id}',-1)"` : 'disabled style="opacity:0.35;cursor:not-allowed"'}>−</button>
-                     <span class="vagas-val" id="vagas_${f.id}">${v}</span>
-@@ -1201,7 +1204,7 @@
-         return `
-           <div class="dept-card${sel ? ' selected' : ''}" ${allowToggle ? `onclick="toggleFuncDirect('${f.id}')"` : 'style="cursor:default;opacity:0.5"'}>
-             <div class="dept-card-dot" style="background:${sel ? '#5A9E2F' : '#9E9B96'}"></div>
--            <div class="dept-card-name">${f.name}</div>
-+            <div class="dept-card-name">${esc(f.name)}</div>
-             <div class="dept-card-min">${d ? d.name : ''}</div>
-             <div class="dept-card-foot">
-               ${sel ? `<div class="vagas-ctrl" onclick="event.stopPropagation()">
-@@ -1231,7 +1234,7 @@
-             <div class="dept-list-check">${checkSVG}</div>
-             <div style="width:8px;height:8px;border-radius:50%;background:${color};flex-shrink:0"></div>
-             <div class="dept-list-info">
--              <div class="dept-list-name">${f.name}</div>
-+              <div class="dept-list-name">${esc(f.name)}</div>
-               <div class="dept-list-min">${d ? d.name : ''}</div>
-             </div>
-           </div>${divider}`
-@@ -1283,7 +1286,7 @@
-           const res = await authFetch(`/api/escala/funcao/${f.id}/tem-membros`)
-           if (res.ok) {
-             const { temMembros } = await res.json()
--            if (temMembros) { showToast(`"${f.name}" tem membros escalados — mantida`, 'error'); continue }
-+            if (temMembros) { showToast(`"${esc(f.name)}" tem membros escalados — mantida`, 'error'); continue }
-           }
-           _selectedFuncoes.delete(f.id)
-           delete _vagasMap[f.id]

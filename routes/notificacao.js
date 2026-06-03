@@ -1,3 +1,4 @@
+// MÓDULO: core (sem módulo específico)
 const router = require('express').Router()
 const { supabaseAdmin } = require('../lib/supabase')
 const authMiddleware = require('../middleware/auth')

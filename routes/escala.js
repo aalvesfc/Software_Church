@@ -1,8 +1,13 @@
+// MÓDULO: voluntariado
 const router = require('express').Router()
 const { supabaseAdmin } = require('../lib/supabase')
 const authMiddleware = require('../middleware/auth')
 const checkPermissao = require('../middleware/checkPermissao')
+const checkModulo = require('../middleware/checkModulo')
 const { dbError, serverError } = require('../lib/apiError') // SEC-006
+
+router.use(authMiddleware)
+router.use(checkModulo('voluntariado'))
 
 // ── GET / ── lista eventos com status de escala
 router.get('/', authMiddleware, checkPermissao('escala', 'ver'), async (req, res) => {
@@ -103,10 +108,12 @@ router.get('/', authMiddleware, checkPermissao('escala', 'ver'), async (req, res
       .eq('church_id', churchId)
 
     const templateIds = (tdRows || []).map(r => r.template_id)
+    console.log('[escala lider_dept] deptId=%s templateIds=%j', deptId, templateIds)
     if (!templateIds.length) return res.json({ eventos: [] })
 
-    // 3. Busca eventos futuros com esses templates
-    const today = new Date().toISOString().split('T')[0]
+    // 3. Busca eventos futuros com esses templates (data local, não UTC)
+    const _d = new Date()
+    const today = `${_d.getFullYear()}-${String(_d.getMonth()+1).padStart(2,'0')}-${String(_d.getDate()).padStart(2,'0')}`
     const { data: evLider, error: evLiderErr } = await supabaseAdmin
       .from('db_event')
       .select('id, name, start_date, start_time, status')
@@ -116,6 +123,7 @@ router.get('/', authMiddleware, checkPermissao('escala', 'ver'), async (req, res
       .gte('start_date', today)
       .order('start_date', { ascending: true })
 
+    console.log('[escala lider_dept] evLider count=%d (from=%s)', evLider?.length || 0, today)
     if (evLiderErr) return dbError(res, evLiderErr, 'escala')
     if (!evLider?.length) return res.json({ eventos: [] })
 

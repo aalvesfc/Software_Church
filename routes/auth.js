@@ -1,3 +1,4 @@
+// MÓDULO: core
 const router = require('express').Router()
 const { supabaseAuth, supabaseAdmin } = require('../lib/supabase')
 const authMiddleware = require("../middleware/auth")
@@ -62,6 +63,29 @@ router.post('/login', async (req, res) => {
     return res.status(403).json({ error: 'Conta inativa. Contate o administrador.' })
   }
 
+  // Sistema owner: bypassa validação de igreja e retorna redirect para o painel
+  if (dbUser.db_perfil?.slug === 'sistema_owner') {
+    await supabaseAdmin.from('db_user').update({ last_sign_in: new Date().toISOString() }).eq('id', dbUser.id)
+    return res.json({
+      access_token:  session.access_token,
+      refresh_token: session.refresh_token,
+      expires_at:    session.expires_at,
+      redirect:      '/painel-sistema',
+      usuario: {
+        id:          dbUser.id,
+        nome:        dbUser.full_name || dbUser.email,
+        email:       dbUser.email,
+        perfil_slug: 'sistema_owner',
+        permissions: ['*'],
+      },
+      igreja: {
+        id:   '00000000-0000-0000-0000-000000000001',
+        nome: 'Hug Software',
+        slug: 'hug-sistema',
+      },
+    })
+  }
+
   if (!dbUser.db_church?.is_active) {
     console.log('[login] igreja inativa church_id=%s', dbUser.church_id)
     return res.status(403).json({ error: 'Igreja inativa. Contate o suporte.' })
@@ -115,65 +139,69 @@ router.post('/login', async (req, res) => {
 
 // GET /api/auth/me — retorna dados do usuário logado
 router.get('/me', authMiddleware, async (req, res) => {
-  const { data: dbUser, error } = await supabaseAdmin
-    .from('db_user')
-    .select(`
-      id, nickname, full_name, email, phone, avatar_url, role, is_active, perfil_id,
-      db_church ( id, name, slug, logo_url ),
-      db_genero ( id, name ),
-      db_perfil ( slug )
-    `)
-    .eq('user_id', req.authUser.id)
-    .limit(1).maybeSingle()
+  try {
+    const { data: dbUser, error } = await supabaseAdmin
+      .from('db_user')
+      .select(`
+        id, nickname, full_name, email, phone, avatar_url, role, is_active, perfil_id,
+        db_church ( id, name, slug, logo_url ),
+        db_genero ( id, name ),
+        db_perfil ( slug )
+      `)
+      .eq('user_id', req.authUser.id)
+      .limit(1).maybeSingle()
 
-  if (error || !dbUser) {
-    console.error('[auth/me] db_user not found for user_id=%s error=%s', req.authUser.id, error?.message)
-    return res.status(404).json({ error: 'Usuário não encontrado' })
-  }
-
-  const [{ data: dbExtra }, { data: dbMemberMe }, { data: permissoes }] = await Promise.all([
-    supabaseAdmin.from('db_user').select('genero_id, status_civil_id, birth_date').eq('user_id', req.authUser.id).limit(1).maybeSingle(),
-    supabaseAdmin.from('db_member').select('photo_url').eq('email', dbUser.email).eq('church_id', dbUser.church_id).maybeSingle(),
-    supabaseAdmin.from('db_perfil_permissao').select('db_permissao(module, action)').eq('perfil_id', dbUser.perfil_id)
-  ])
-
-  const isAdmin = ['owner', 'admin'].includes(dbUser.db_perfil?.slug)
-  const permissions = isAdmin
-    ? ['*']
-    : (permissoes || []).filter(p => p.db_permissao).map(p => `${p.db_permissao.module}:${p.db_permissao.action}`)
-
-  const perfil_slug = dbUser.db_perfil?.slug || null
-
-  console.log('[me] email=%s perfil_id=%s db_perfil=%j perfil_slug=%s permissions_count=%d',
-    dbUser.email, dbUser.perfil_id, dbUser.db_perfil, perfil_slug, permissions.length)
-
-  const generoNome = dbUser.db_genero?.name || ''
-  const prefixo = generoNome === 'Masculino' ? 'Sr.' : generoNome === 'Feminino' ? 'Sra.' : ''
-  const nickname = (dbUser.nickname || '').trim()
-  const nomeExibicao = prefixo ? `${prefixo} ${nickname}` : nickname
-
-  res.json({
-    usuario: {
-      id: dbUser.id,
-      nome: nomeExibicao,
-      nickname: dbUser.nickname || '',
-      full_name: dbUser.full_name || '',
-      email: dbUser.email,
-      phone: dbUser.phone || '',
-      genero_id: dbExtra?.genero_id || null,
-      status_civil_id: dbExtra?.status_civil_id || null,
-      birth_date: dbExtra?.birth_date || null,
-      avatar: dbMemberMe?.photo_url || dbUser.avatar_url || null,
-      perfil_slug,
-      permissions
-    },
-    igreja: {
-      id: dbUser.db_church.id,
-      nome: dbUser.db_church.name,
-      slug: dbUser.db_church.slug,
-      logo: dbUser.db_church.logo_url
+    if (error || !dbUser) {
+      console.error('[auth/me] db_user not found for user_id=%s error=%s', req.authUser.id, error?.message)
+      return res.status(404).json({ error: 'Usuário não encontrado' })
     }
-  })
+
+    const [{ data: dbExtra }, { data: dbMemberMe }, { data: permissoes }] = await Promise.all([
+      supabaseAdmin.from('db_user').select('genero_id, status_civil_id, birth_date').eq('user_id', req.authUser.id).limit(1).maybeSingle(),
+      supabaseAdmin.from('db_member').select('photo_url').eq('email', dbUser.email).eq('church_id', dbUser.church_id).maybeSingle(),
+      supabaseAdmin.from('db_perfil_permissao').select('db_permissao(module, action)').eq('perfil_id', dbUser.perfil_id)
+    ])
+
+    const perfil_slug = dbUser.db_perfil?.slug || null
+    const isAdmin     = ['owner', 'admin', 'sistema_owner'].includes(perfil_slug)
+    const permissions = isAdmin
+      ? ['*']
+      : (permissoes || []).filter(p => p.db_permissao).map(p => `${p.db_permissao.module}:${p.db_permissao.action}`)
+
+    console.log('[me] email=%s perfil_slug=%s permissions_count=%d permissions=%j',
+      dbUser.email, perfil_slug, permissions.length, permissions)
+
+    const generoNome  = dbUser.db_genero?.name || ''
+    const prefixo     = generoNome === 'Masculino' ? 'Sr.' : generoNome === 'Feminino' ? 'Sra.' : ''
+    const nickname    = (dbUser.nickname || '').trim()
+    const nomeExibicao = prefixo ? `${prefixo} ${nickname}` : nickname
+
+    // db_church pode ser null para sistema_owner (church virtual não existe em db_church)
+    const igreja = dbUser.db_church
+      ? { id: dbUser.db_church.id, nome: dbUser.db_church.name, slug: dbUser.db_church.slug, logo: dbUser.db_church.logo_url }
+      : { id: dbUser.church_id,    nome: 'Sistema',             slug: 'sistema',             logo: null }
+
+    res.json({
+      usuario: {
+        id:             dbUser.id,
+        nome:           nomeExibicao,
+        nickname:       dbUser.nickname || '',
+        full_name:      dbUser.full_name || '',
+        email:          dbUser.email,
+        phone:          dbUser.phone || '',
+        genero_id:      dbExtra?.genero_id      || null,
+        status_civil_id: dbExtra?.status_civil_id || null,
+        birth_date:     dbExtra?.birth_date     || null,
+        avatar:         dbMemberMe?.photo_url || dbUser.avatar_url || null,
+        perfil_slug,
+        permissions,
+      },
+      igreja,
+    })
+  } catch (err) {
+    console.error('[auth/me] erro interno:', err?.message)
+    res.status(500).json({ error: 'Erro interno ao buscar usuário' })
+  }
 })
 
 // POST /api/auth/refresh — renova access_token usando refresh_token

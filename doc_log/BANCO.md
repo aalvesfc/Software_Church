@@ -47,6 +47,9 @@ db_church
     └── db_perfil_permissao → db_permissao
 └── db_permissao
 └── db_log → db_user
+└── db_contrato → db_church
+    └── db_contrato_modulo → db_modulo
+└── db_modulo
 ```
 
 ---
@@ -771,9 +774,105 @@ function temPermissao(module, action) {
 
 ### Menu lateral por perfil
 ```
-Dono/Admin  → vê tudo
+Dono/Admin  → vee tudo
 Líder       → Dashboard, Ministérios, Departamentos, Funções,
               Voluntários, Eventos, Escalação, Cronograma, Músicas
 Secretário  → Dashboard, Membros, Voluntários, Eventos, Templates, Músicas
 Voluntário  → Dashboard, Eventos (somente visualização), Músicas
+```
+
+---
+
+### `db_modulo` — Módulos Disponíveis no Sistema
+| Campo | Tipo | Descrição |
+|---|---|---|
+| id | uuid PK | — |
+| name | text NOT NULL | Nome do módulo |
+| slug | text UNIQUE | Identificador único |
+| description | text | Descrição |
+| is_active | boolean DEFAULT true | Ativo |
+| created_at | timestamptz | — |
+
+**Módulos cadastrados:**
+```
+voluntariado → Voluntariado
+membresia    → Membresia
+kids         → Kids
+financeiro   → Financeiro
+escalacao    → Escalação
+cronograma   → Cronograma
+musicas      → Músicas
+```
+
+---
+
+### `db_contrato` — Contrato da Igreja
+| Campo | Tipo | Descrição |
+|---|---|---|
+| id | uuid PK | — |
+| church_id | uuid FK UNIQUE | → db_church |
+| periodicidade | text DEFAULT 'mensal' | mensal \| trimestral \| anual |
+| status | text DEFAULT 'trial' | trial \| ativo \| inadimplente \| bloqueado \| cancelado |
+| inicio_em | date DEFAULT today | Início do contrato |
+| vencimento_em | date NOT NULL | Data de vencimento |
+| bloqueio_em | date | vencimento + 3 meses |
+| valor | numeric(10,2) | Valor contratado |
+| observacoes | text | Observações internas |
+| created_by | uuid FK | → db_user (quem criou) |
+| created_at | timestamptz | — |
+| updated_at | timestamptz | — |
+
+**Status do contrato:**
+```
+trial       → cadastrou mas ainda não assinou
+ativo       → contrato ativo e em dia
+inadimplente → passou do vencimento mas dentro dos 3 meses
+bloqueado   → vencimento + 3 meses → acesso bloqueado automaticamente
+cancelado   → contrato encerrado
+```
+
+---
+
+### `db_contrato_modulo` — Módulos Contratados por Igreja
+| Campo | Tipo | Descrição |
+|---|---|---|
+| id | uuid PK | — |
+| contrato_id | uuid FK | → db_contrato |
+| church_id | uuid FK | → db_church |
+| modulo_id | uuid FK | → db_modulo |
+| limite | int nullable | null = ilimitado, ex: 500 para voluntários |
+| is_active | boolean DEFAULT true | Ativo |
+| created_at | timestamptz | — |
+| UNIQUE | — | (contrato_id, modulo_id) |
+
+**Exemplo:**
+```
+Igreja X contratou:
+└── voluntariado → limite: 500
+└── membresia   → limite: null (ilimitado)
+```
+
+**Verificação de módulo no backend:**
+```js
+async function temModulo(churchId, moduloSlug) {
+  const { data } = await supabaseAdmin
+    .from('db_contrato_modulo')
+    .select('limite, db_modulo(slug), db_contrato(status)')
+    .eq('church_id', churchId)
+    .eq('db_modulo.slug', moduloSlug)
+    .eq('is_active', true)
+    .single()
+
+  if (!data) return false
+  if (data.db_contrato.status === 'bloqueado') return false
+  if (data.db_contrato.status === 'cancelado') return false
+  return true
+}
+```
+
+**Regras de inadimplência:**
+```
+vencimento_em < hoje → status: 'inadimplente'
+vencimento_em + 3 meses < hoje → status: 'bloqueado' (automático)
+Dono pode reativar manualmente a qualquer momento
 ```

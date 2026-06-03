@@ -1,3 +1,4 @@
+// MÓDULO: voluntariado
 const router = require('express').Router()
 const { supabaseAdmin } = require('../lib/supabase')
 const authMiddleware = require('../middleware/auth')
@@ -9,7 +10,7 @@ router.get('/lider-departamento', authMiddleware, checkPermissao('escala', 'ver'
   try {
     const churchId = req.churchId
     const userId   = req.dbUser.id
-    const hoje     = new Date().toISOString().split('T')[0]
+    const hoje     = (() => { const _d = new Date(); return _d.getFullYear()+'-'+String(_d.getMonth()+1).padStart(2,'0')+'-'+String(_d.getDate()).padStart(2,'0') })()
 
     // 1. department_id do líder
     const { data: deptLiderRow } = await supabaseAdmin

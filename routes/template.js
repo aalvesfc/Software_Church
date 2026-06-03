@@ -1,3 +1,4 @@
+// MÓDULO: voluntariado
 const router = require('express').Router()
 const { supabaseAdmin } = require('../lib/supabase')
 const authMiddleware = require('../middleware/auth')

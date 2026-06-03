@@ -1,9 +1,15 @@
+// MÓDULO: voluntariado
 const router = require('express').Router()
 const { supabaseAdmin } = require('../lib/supabase')
 const authMiddleware = require('../middleware/auth')
 const checkPermissao = require('../middleware/checkPermissao')
+const checkModulo = require('../middleware/checkModulo')
+const checkLimiteVoluntarios = require('../middleware/checkLimiteVoluntarios')
 const { uploadPhoto } = require('../lib/uploadUtils') // SEC-001: upload seguro centralizado
 const { dbError, serverError } = require('../lib/apiError') // SEC-006
+
+router.use(authMiddleware)
+router.use(checkModulo('voluntariado'))
 
 async function syncDepts(memberId, departmentIds, churchId) {
   await supabaseAdmin.from('db_member_dept').delete().eq('member_id', memberId)
@@ -259,7 +265,7 @@ router.get('/:id', authMiddleware, checkPermissao('voluntario', 'ver'), async (r
 })
 
 // POST /api/voluntario
-router.post('/', authMiddleware, checkPermissao('voluntario', 'criar'), async (req, res) => {
+router.post('/', authMiddleware, checkPermissao('voluntario', 'criar'), checkLimiteVoluntarios, async (req, res) => {
   const churchId = req.churchId
   if (!churchId) return res.status(404).json({ error: 'Igreja não encontrada' })
 

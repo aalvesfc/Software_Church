@@ -158,8 +158,37 @@ app.use('/api/indisponibilidade',  require('./routes/indisponibilidade'))
         .limit(1)
         .maybeSingle()
 
-      if (!deptLiderRow?.department_id) return res.json({ departamento: null, funcoes: [] })
-      const deptId = deptLiderRow.department_id
+      let deptId = deptLiderRow?.department_id
+
+      // Fallback para voluntários: descobre o departamento pelo escala_item
+      if (!deptId) {
+        const { data: dbUserEmail } = await supabaseAdmin
+          .from('db_user').select('email').eq('id', req.dbUser.id).single()
+        const { data: member } = await supabaseAdmin
+          .from('db_member').select('id')
+          .eq('email', dbUserEmail?.email).eq('church_id', churchId).maybeSingle()
+
+        if (member?.id) {
+          const { data: escalas } = await supabaseAdmin
+            .from('db_escala').select('id, department_id')
+            .eq('event_id', eventId).eq('church_id', churchId)
+
+          const escalaIds = (escalas || []).map(e => e.id)
+          if (escalaIds.length) {
+            const { data: meuItem } = await supabaseAdmin
+              .from('db_escala_item').select('escala_id')
+              .eq('member_id', member.id).eq('church_id', churchId)
+              .in('escala_id', escalaIds).limit(1).maybeSingle()
+
+            if (meuItem) {
+              const escala = escalas.find(e => e.id === meuItem.escala_id)
+              deptId = escala?.department_id
+            }
+          }
+        }
+      }
+
+      if (!deptId) return res.json({ departamento: null, funcoes: [] })
 
       const [{ data: deptInfo }, { data: evento }] = await Promise.all([
         supabaseAdmin.from('db_department').select('id, name').eq('id', deptId).maybeSingle(),
@@ -236,6 +265,8 @@ app.use('/api/dashboard',        require('./routes/dashboard'))
 app.use('/api/notificacao',      require('./routes/notificacao'))
 app.use('/api/checkin',          require('./routes/checkin'))
 app.use('/api/local-checkin',    require('./routes/local-checkin'))
+app.use('/api/contrato',         require('./routes/contrato'))
+app.use('/api/config/sistema',   require('./routes/configSistema'))
 
 app.get('/checkin',  (req, res) => res.sendFile(path.join(__dirname, 'public', 'checkin.html')))
 app.get('/presenca', (req, res) => res.sendFile(path.join(__dirname, 'public', 'presenca.html')))
@@ -264,6 +295,9 @@ app.get('/escalacoes',         (req, res) => res.sendFile(path.join(__dirname, '
 app.get('/escalacao/:eventId', (req, res) => res.sendFile(path.join(__dirname, 'public', 'escalacao.html')))
 app.get('/indisponibilidade',  (req, res) => res.sendFile(path.join(__dirname, 'public', 'indisponibilidade.html')))
 app.get('/notificacoes',       (req, res) => res.sendFile(path.join(__dirname, 'public', 'notificacoes.html')))
+app.get('/painel-sistema',        (req, res) => res.sendFile(path.join(__dirname, 'public', 'painel-sistema.html')))
+app.get('/configuracao-sistema',  (req, res) => res.sendFile(path.join(__dirname, 'public', 'configuracao-sistema.html')))
+app.get('/bloqueado',             (req, res) => res.sendFile(path.join(__dirname, 'public', 'bloqueado.html')))
 
 const PORT = process.env.PORT || 3000
 app.listen(PORT, () => console.log(`Servidor rodando em http://localhost:${PORT}`))

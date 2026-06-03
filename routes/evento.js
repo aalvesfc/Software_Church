@@ -1,3 +1,4 @@
+// MÓDULO: voluntariado
 const router = require('express').Router()
 const { supabaseAdmin } = require('../lib/supabase')
 const authMiddleware = require('../middleware/auth')
@@ -177,6 +178,7 @@ router.post('/', authMiddleware, checkPermissao('evento', 'criar'), async (req, 
     .single()
 
   if (error) { console.error('[evento POST]', error); return dbError(res, error, 'evento') }
+  console.log('[evento POST] criado id=%s name=%s template_id=%s start_date=%s', data?.id, data?.name, data?.template_id, data?.start_date)
 
   // Cria eventos filhos para recorrência
   if (!parent_event_id && recurrence_type) {

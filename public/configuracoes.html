@@ -2180,6 +2180,8 @@
   <script>
     // SEC-005: escape de HTML para prevenir XSS em innerHTML
     function esc(s) { return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') }
+
+    function fazerLogout(e) { e.preventDefault(); clearSession(); }
     const usuario = JSON.parse(localStorage.getItem('usuario') || '{}');
     const igreja  = JSON.parse(localStorage.getItem('igreja')  || '{}');
 
@@ -2679,6 +2681,7 @@
     })
     // Também carrega na inicialização
     carregarLocais()
+
   </script>
 </body>
 </html>

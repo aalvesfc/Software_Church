@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hug Software — Configurações do Sistema</title>
+  <script src="/js/auth-check.js"></script>
+  <script>
+    ;(function () {
+      const perfil = localStorage.getItem('perfil_slug')
+      if (perfil !== 'sistema_owner') {
+        window.location.href = perfil ? '/dashboard' : '/'
+      }
+    })()
+  </script>
+  <link rel="icon" type="image/png" href="/IMG/logo.png">
+  <style>
+    * { font-family: 'Plus Jakarta Sans', sans-serif !important; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --primary:      #8B5CF6;
+      --primary-dark: #7C3AED;
+      --ink:          #1d1d1f;
+      --ink-muted:    #6e6e73;
+      --ink-subtle:   #aeaeb2;
+      --canvas:       #ffffff;
+      --canvas-page:  #ECE9E7;
+      --canvas-input: #f2f2f7;
+      --hairline:     #e0e0e0;
+      --radius-sm:    8px;
+      --radius-md:    12px;
+      --radius-lg:    18px;
+      --radius-pill:  9999px;
+      --success:      #15803d;
+      --danger:       #C0394A;
+    }
+
+    body { min-height: 100vh; background: var(--canvas-page); display: flex; -webkit-font-smoothing: antialiased; }
+
+    /* ── SIDEBAR ── */
+    .sys-sidebar {
+      width: 220px; flex-shrink: 0;
+      background: #1c1c1c;
+      display: flex; flex-direction: column;
+      position: fixed; top: 0; left: 0; bottom: 0; z-index: 100;
+    }
+    .sys-sidebar-brand {
+      display: flex; align-items: center; gap: 10px;
+      padding: 22px 18px 18px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .sys-brand-logo {
+      width: 32px; height: 32px; border-radius: 8px; background: var(--primary);
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .sys-brand-logo svg { width: 16px; height: 16px; color: #fff; }
+    .sys-brand-name { font-size: 13px; font-weight: 700; color: #fff; letter-spacing: -0.2px; }
+    .sys-brand-tag  { font-size: 10px; font-weight: 600; color: rgba(255,255,255,0.35); letter-spacing: 0.08em; text-transform: uppercase; margin-top: 1px; }
+    .sys-nav { flex: 1; padding: 14px 12px; display: flex; flex-direction: column; gap: 2px; }
+    .sys-nav-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px; border-radius: 10px;
+      font-size: 14px; font-weight: 500; color: rgba(255,255,255,0.55);
+      text-decoration: none; transition: background 0.15s, color 0.15s;
+    }
+    .sys-nav-item:hover { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.9); }
+    .sys-nav-item.active { background: #fff; color: #1a1a1a; font-weight: 600; }
+    .sys-nav-item svg { width: 18px; height: 18px; flex-shrink: 0; }
+    .sys-sidebar-footer {
+      padding: 16px 18px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+    .sys-footer-user { font-size: 12px; color: rgba(255,255,255,0.4); margin-bottom: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sys-btn-logout {
+      width: 100%; height: 32px; background: rgba(255,255,255,0.08); border: none;
+      border-radius: 8px; font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.6);
+      cursor: pointer; font-family: inherit; transition: background 0.15s, color 0.15s;
+    }
+    .sys-btn-logout:hover { background: rgba(255,255,255,0.15); color: #fff; }
+
+    /* ── MAIN ── */
+    .sys-main { margin-left: 220px; flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+
+    /* ── TOPBAR ── */
+    .topbar {
+      position: sticky; top: 0; z-index: 50;
+      background: rgba(236,233,231,0.85); backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--hairline);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 32px; height: 64px;
+    }
+    .topbar-title { font-size: 16px; font-weight: 700; color: var(--ink); letter-spacing: -0.3px; }
+    .topbar-user  { font-size: 13px; color: var(--ink-muted); }
+
+    /* ── PAGE ── */
+    .page { max-width: 860px; margin: 0 auto; padding: 36px 32px 64px; width: 100%; }
+
+    /* ── SECTION HEADER ── */
+    .section-header { margin-bottom: 24px; }
+    .section-title { font-size: 22px; font-weight: 700; color: var(--ink); letter-spacing: -0.03em; }
+    .section-sub   { font-size: 14px; color: var(--ink-muted); margin-top: 4px; }
+
+    /* ── INFO BOX ── */
+    .info-box {
+      background: rgba(139,92,246,0.06); border-left: 3px solid var(--primary);
+      border-radius: 0 10px 10px 0; padding: 12px 16px; margin-bottom: 24px;
+      font-size: 13px; color: var(--ink-muted); line-height: 1.6;
+    }
+
+    /* ── SLIDE CARDS ── */
+    .slides-grid { display: flex; flex-direction: column; gap: 16px; margin-bottom: 24px; }
+
+    .slide-card {
+      background: var(--canvas); border: 1px solid var(--hairline);
+      border-radius: var(--radius-lg); padding: 22px 24px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    }
+    .slide-card-header {
+      display: flex; align-items: center; gap: 12px; margin-bottom: 20px;
+    }
+    .slide-num {
+      width: 30px; height: 30px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), #4C1D95);
+      color: #fff; font-size: 13px; font-weight: 700;
+      display: grid; place-items: center; flex-shrink: 0;
+    }
+    .slide-card-header h3 { font-size: 15px; font-weight: 700; color: var(--ink); }
+    .slide-card-header p  { font-size: 12px; color: var(--ink-muted); margin-top: 1px; }
+
+    .slide-body {
+      display: grid; grid-template-columns: 180px 1fr; gap: 22px; align-items: start;
+    }
+
+    /* ── FOTO DROPZONE ── */
+    .foto-col { display: flex; flex-direction: column; gap: 8px; }
+    .foto-lbl { font-size: 11px; font-weight: 700; color: var(--ink-muted); text-transform: uppercase; letter-spacing: 0.3px; }
+    .dropzone {
+      width: 180px; height: 128px;
+      border: 2px dashed var(--hairline); border-radius: 10px;
+      position: relative; overflow: hidden; cursor: pointer;
+      background: var(--canvas-input);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 6px;
+      transition: border-color .2s, background .2s;
+    }
+    .dropzone:hover { border-color: var(--primary); background: rgba(139,92,246,0.04); }
+    .dropzone.has-img { border-style: solid; border-color: var(--hairline); }
+    .dropzone input[type="file"] {
+      position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+    }
+    .dropzone img {
+      position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; border-radius: 8px;
+    }
+    .dropzone .dz-ov {
+      position: absolute; inset: 0;
+      background: rgba(0,0,0,0.42); border-radius: 8px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+      opacity: 0; transition: opacity .2s; pointer-events: none;
+      color: #fff; font-size: 12px; font-weight: 600;
+    }
+    .dropzone:hover .dz-ov { opacity: 1; }
+    .dropzone .dz-ov svg { width: 16px; height: 16px; }
+    .dz-icon { font-size: 26px; opacity: .3; }
+    .dz-txt  { font-size: 11px; color: var(--ink-muted); font-weight: 500; text-align: center; padding: 0 10px; }
+    .foto-hint { font-size: 11px; color: var(--ink-subtle); line-height: 1.4; }
+    .btn-rm-foto {
+      display: none; background: none; border: none; cursor: pointer;
+      font-size: 12px; color: var(--danger); font-weight: 500; padding: 0; align-self: flex-start;
+    }
+    .btn-rm-foto.vis { display: block; }
+
+    /* ── TEXT FIELDS ── */
+    .text-fields { display: flex; flex-direction: column; gap: 14px; }
+    .form-group  { display: flex; flex-direction: column; gap: 5px; }
+    .field-header { display: flex; align-items: baseline; justify-content: space-between; }
+    .form-label { font-size: 11px; font-weight: 700; color: var(--ink-muted); text-transform: uppercase; letter-spacing: 0.3px; }
+    .char-count { font-size: 11px; color: var(--ink-subtle); font-variant-numeric: tabular-nums; }
+    .char-count.warn { color: #f59e0b; }
+    .char-count.over { color: var(--danger); }
+    .form-input {
+      background: var(--canvas-input); border: 1.5px solid transparent;
+      border-radius: var(--radius-md); padding: 10px 12px;
+      font-size: 14px; font-family: inherit; color: var(--ink); outline: none;
+      transition: border-color .15s, background .15s; width: 100%;
+    }
+    .form-input:focus { border-color: var(--primary); background: #fff; }
+    .form-input::placeholder { color: var(--ink-subtle); }
+    textarea.form-input { resize: none; }
+
+    /* ── ACTIONS ── */
+    .actions-bar {
+      background: var(--canvas); border: 1px solid var(--hairline);
+      border-radius: var(--radius-lg); padding: 18px 22px;
+      display: flex; align-items: center; gap: 14px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    }
+    .btn-save {
+      height: 40px; padding: 0 22px;
+      background: var(--primary); color: #fff; border: none;
+      border-radius: var(--radius-md); font-size: 14px; font-weight: 700;
+      font-family: inherit; cursor: pointer; display: flex; align-items: center; gap: 8px;
+      transition: background .15s, opacity .15s;
+    }
+    .btn-save:hover:not(:disabled) { background: var(--primary-dark); }
+    .btn-save:disabled { opacity: .55; cursor: not-allowed; }
+    .btn-preview {
+      height: 40px; padding: 0 18px;
+      background: transparent; color: var(--primary);
+      border: 1.5px solid var(--primary); border-radius: var(--radius-md);
+      font-size: 14px; font-weight: 600; font-family: inherit; cursor: pointer;
+      transition: background .15s;
+    }
+    .btn-preview:hover { background: rgba(139,92,246,0.06); }
+    .save-msg { font-size: 13px; font-weight: 500; display: none; align-items: center; gap: 5px; }
+    .save-msg.show { display: flex; }
+    .save-msg.ok  { color: var(--success); }
+    .save-msg.err { color: var(--danger); }
+
+    /* ── TOAST ── */
+    #toast { position:fixed; bottom:28px; left:50%; transform:translateX(-50%) translateY(12px); background:#1d1d1f; color:#fff; border-radius:var(--radius-pill); padding:10px 20px; font-size:14px; font-weight:500; opacity:0; pointer-events:none; transition:opacity 0.2s, transform 0.2s; z-index:999; white-space:nowrap; }
+    #toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+    #toast.error { background:var(--danger); }
+
+    @media (max-width: 900px) {
+      .sys-sidebar { display: none; }
+      .sys-main    { margin-left: 0; }
+      .slide-body  { grid-template-columns: 1fr; }
+      .dropzone    { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <aside class="sys-sidebar">
+    <div class="sys-sidebar-brand">
+      <div class="sys-brand-logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+      </div>
+      <div>
+        <div class="sys-brand-name">Hug Software</div>
+        <div class="sys-brand-tag">Sistema</div>
+      </div>
+    </div>
+
+    <nav class="sys-nav">
+      <a class="sys-nav-item" href="/painel-sistema">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Painel
+      </a>
+      <a class="sys-nav-item active" href="/configuracao-sistema">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Configurações
+      </a>
+    </nav>
+
+    <div class="sys-sidebar-footer">
+      <div class="sys-footer-user" id="sidebarUser"></div>
+      <button class="sys-btn-logout" onclick="fazerLogout()">Sair</button>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="sys-main">
+
+    <header class="topbar">
+      <span class="topbar-title">Configurações do Sistema</span>
+      <span class="topbar-user" id="topbarUser"></span>
+    </header>
+
+    <div class="page">
+
+      <div class="section-header">
+        <h1 class="section-title">Carrossel da Tela de Login</h1>
+        <p class="section-sub">Configure as 3 imagens e frases exibidas na página de login para todos os usuários do sistema.</p>
+      </div>
+
+      <div class="info-box">
+        As imagens são salvas no banco de dados e aplicadas globalmente na tela de login.
+        Recomendado: <strong>fotos horizontais</strong>, mínimo 800 × 500 px, máx. 2 MB cada.
+        Formatos aceitos: JPG, PNG ou WebP.
+      </div>
+
+      <div class="slides-grid" id="slides-grid">
+        <!-- Gerado pelo JS -->
+      </div>
+
+      <div class="actions-bar">
+        <button class="btn-save" id="btn-save" onclick="salvar()">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+            <polyline points="17 21 17 13 7 13 7 21"/>
+            <polyline points="7 3 7 8 15 8"/>
+          </svg>
+          Salvar alterações
+        </button>
+        <button class="btn-preview" onclick="window.open('/login', '_blank')">
+          Visualizar login
+        </button>
+        <span class="save-msg" id="save-msg"></span>
+      </div>
+
+    </div>
+  </div>
+
+  <div id="toast"></div>
+
+  <script src="/js/auth-fetch.js"></script>
+  <script>
+    // ── Estado ────────────────────────────────────────────────────────────────
+    const MAX_BYTES = 2 * 1024 * 1024
+    const ALLOWED   = ['image/jpeg', 'image/png', 'image/webp']
+    const LIMITS    = { frase: 120, autor: 50, cargo: 50 }
+    const state     = [
+      { file: null, atual: '' },
+      { file: null, atual: '' },
+      { file: null, atual: '' },
+    ]
+
+    // ── Init ──────────────────────────────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', async () => {
+      const user = JSON.parse(localStorage.getItem('usuario') || '{}')
+      if (user?.email) {
+        document.getElementById('topbarUser').textContent  = user.email
+        document.getElementById('sidebarUser').textContent = user.email
+      }
+      renderSlides()
+      await carregarConfig()
+    })
+
+    // ── Renderiza os 3 cards ──────────────────────────────────────────────────
+    function renderSlides() {
+      const grid = document.getElementById('slides-grid')
+      grid.innerHTML = ''
+      ;[1, 2, 3].forEach(n => {
+        grid.insertAdjacentHTML('beforeend', `
+          <div class="slide-card">
+            <div class="slide-card-header">
+              <div class="slide-num">${n}</div>
+              <div>
+                <h3>Slide ${n}</h3>
+                <p>Imagem + frase para o ${n}º quadro do carrossel</p>
+              </div>
+            </div>
+            <div class="slide-body">
+
+              <div class="foto-col">
+                <span class="foto-lbl">Foto</span>
+                <div class="dropzone" id="dz-${n}">
+                  <input type="file" id="fi-${n}" accept=".jpg,.jpeg,.png,.webp" onchange="handleFoto(${n}, this)">
+                  <span class="dz-icon">🖼️</span>
+                  <span class="dz-txt">Clique ou arraste<br>JPG · PNG · WebP</span>
+                  <div class="dz-ov">
+                    <svg fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                      <polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+                    </svg>
+                    Trocar foto
+                  </div>
+                </div>
+                <span class="foto-hint">Máx. 2 MB · JPG, PNG ou WebP</span>
+                <button type="button" class="btn-rm-foto" id="rm-${n}" onclick="removeFoto(${n})">✕ Remover foto</button>
+              </div>
+
+              <div class="text-fields">
+                <div class="form-group">
+                  <div class="field-header">
+                    <label class="form-label" for="frase-${n}">Frase</label>
+                    <span class="char-count" id="cc-frase-${n}">0 / 120</span>
+                  </div>
+                  <textarea class="form-input" id="frase-${n}" rows="3" maxlength="120"
+                    placeholder="Ex: Servir é uma alegria quando estamos no lugar certo."
+                    oninput="updateCount(${n}, 'frase', this.value)"></textarea>
+                </div>
+                <div class="form-group">
+                  <div class="field-header">
+                    <label class="form-label" for="autor-${n}">Autor</label>
+                    <span class="char-count" id="cc-autor-${n}">0 / 50</span>
+                  </div>
+                  <input class="form-input" type="text" id="autor-${n}" maxlength="50"
+                    placeholder="Ex: Pastor Rafael"
+                    oninput="updateCount(${n}, 'autor', this.value)">
+                </div>
+                <div class="form-group">
+                  <div class="field-header">
+                    <label class="form-label" for="cargo-${n}">Cargo</label>
+                    <span class="char-count" id="cc-cargo-${n}">0 / 50</span>
+                  </div>
+                  <input class="form-input" type="text" id="cargo-${n}" maxlength="50"
+                    placeholder="Ex: Líder de Ministério"
+                    oninput="updateCount(${n}, 'cargo', this.value)">
+                </div>
+              </div>
+
+            </div>
+          </div>
+        `)
+      })
+    }
+
+    // ── Contador de caracteres ────────────────────────────────────────────────
+    function updateCount(n, field, value) {
+      const limit = LIMITS[field], len = value.length
+      const el = document.getElementById(`cc-${field}-${n}`)
+      if (!el) return
+      el.textContent = `${len} / ${limit}`
+      el.className = 'char-count' + (len >= limit ? ' over' : len >= limit * 0.85 ? ' warn' : '')
+    }
+
+    // ── Foto: selecionar ──────────────────────────────────────────────────────
+    function handleFoto(n, input) {
+      const file = input.files[0]
+      if (!file) return
+      if (!ALLOWED.includes(file.type)) {
+        showMsg('Formato inválido. Use JPG, PNG ou WebP.', 'err')
+        input.value = ''; return
+      }
+      if (file.size > MAX_BYTES) {
+        showMsg('Foto muito grande. Máximo: 2 MB.', 'err')
+        input.value = ''; return
+      }
+      state[n - 1].file = file
+      const reader = new FileReader()
+      reader.onload = e => renderPreview(n, e.target.result)
+      reader.readAsDataURL(file)
+    }
+
+    function renderPreview(n, src) {
+      const dz = document.getElementById(`dz-${n}`)
+      dz.querySelectorAll('img').forEach(el => el.remove())
+      dz.querySelector('.dz-icon')?.remove()
+      dz.querySelector('.dz-txt')?.remove()
+      const img = document.createElement('img')
+      img.src = src
+      dz.insertBefore(img, dz.querySelector('.dz-ov'))
+      dz.classList.add('has-img')
+      document.getElementById(`rm-${n}`)?.classList.add('vis')
+    }
+
+    // ── Foto: remover ─────────────────────────────────────────────────────────
+    function removeFoto(n) {
+      state[n - 1].file  = null
+      state[n - 1].atual = ''
+      const dz = document.getElementById(`dz-${n}`)
+      dz.classList.remove('has-img')
+      dz.querySelectorAll('img').forEach(el => el.remove())
+      if (!dz.querySelector('.dz-icon')) {
+        dz.insertAdjacentHTML('afterbegin',
+          '<span class="dz-icon">🖼️</span><span class="dz-txt">Clique ou arraste<br>JPG · PNG · WebP</span>')
+      }
+      const fi = document.getElementById(`fi-${n}`)
+      if (fi) fi.value = ''
+      document.getElementById(`rm-${n}`)?.classList.remove('vis')
+    }
+
+    // ── Carregar config salva ─────────────────────────────────────────────────
+    async function carregarConfig() {
+      try {
+        const res  = await authFetch('/api/config/sistema/login-carousel')
+        if (!res.ok) return
+        const data = await res.json()
+        if (!data.slides) return
+        data.slides.forEach((slide, i) => {
+          const n = i + 1
+          state[i].atual = slide.foto || ''
+          if (slide.foto) renderPreview(n, slide.foto)
+          const frEl = document.getElementById(`frase-${n}`)
+          const auEl = document.getElementById(`autor-${n}`)
+          const caEl = document.getElementById(`cargo-${n}`)
+          if (frEl) { frEl.value = slide.frase || ''; updateCount(n, 'frase', frEl.value) }
+          if (auEl) { auEl.value = slide.autor || ''; updateCount(n, 'autor', auEl.value) }
+          if (caEl) { caEl.value = slide.cargo || ''; updateCount(n, 'cargo', caEl.value) }
+        })
+      } catch (err) { console.error('[carousel load]', err) }
+    }
+
+    // ── Base64 helper ─────────────────────────────────────────────────────────
+    function toBase64(file) {
+      return new Promise((resolve, reject) => {
+        const r = new FileReader()
+        r.onload  = e => resolve(e.target.result)
+        r.onerror = reject
+        r.readAsDataURL(file)
+      })
+    }
+
+    // ── Salvar ────────────────────────────────────────────────────────────────
+    async function salvar() {
+      const btn = document.getElementById('btn-save')
+      btn.disabled = true; btn.textContent = 'Salvando…'
+      try {
+        const slides = []
+        for (let n = 1; n <= 3; n++) {
+          const i = n - 1
+          slides.push({
+            frase:      document.getElementById(`frase-${n}`)?.value?.trim() || '',
+            autor:      document.getElementById(`autor-${n}`)?.value?.trim() || '',
+            cargo:      document.getElementById(`cargo-${n}`)?.value?.trim() || '',
+            foto_atual: state[i].atual,
+            foto_base64: state[i].file ? await toBase64(state[i].file) : null,
+          })
+        }
+
+        const res  = await authFetch('/api/config/sistema/login-carousel', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ slides }),
+        })
+        const data = await res.json()
+        if (!res.ok) throw new Error(data.error || 'Erro ao salvar')
+
+        data.slides?.forEach((s, i) => { state[i].atual = s.foto || ''; state[i].file = null })
+
+        showMsg('Carrossel salvo com sucesso ✓', 'ok')
+      } catch (err) {
+        showMsg(err.message, 'err')
+      } finally {
+        btn.disabled = false
+        btn.innerHTML = `<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Salvar alterações`
+      }
+    }
+
+    function showMsg(msg, type) {
+      const el = document.getElementById('save-msg')
+      el.textContent = msg
+      el.className = `save-msg show ${type}`
+      setTimeout(() => el.classList.remove('show'), 4000)
+    }
+
+    function fazerLogout() {
+      authFetch('/api/auth/logout', { method: 'POST' }).finally(() => { localStorage.clear(); window.location.href = '/' })
+    }
+  </script>
+</body>
+</html>

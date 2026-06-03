@@ -6,7 +6,6 @@
   <title>Hug Software — Painel do Sistema</title>
   <script src="/js/auth-check.js"></script>
   <script>
-    // Guard: apenas sistema_owner pode acessar esta página
     ;(function () {
       const perfil = localStorage.getItem('perfil_slug')
       if (perfil !== 'sistema_owner') {
@@ -44,7 +43,52 @@
       --gray-500:      #7A7772;
     }
 
-    body { min-height:100vh; background:var(--canvas-page); -webkit-font-smoothing:antialiased; }
+    body { min-height: 100vh; background: var(--canvas-page); display: flex; -webkit-font-smoothing: antialiased; }
+
+    /* ── SIDEBAR ── */
+    .sys-sidebar {
+      width: 220px; flex-shrink: 0;
+      background: #1c1c1c;
+      display: flex; flex-direction: column;
+      position: fixed; top: 0; left: 0; bottom: 0; z-index: 100;
+    }
+    .sys-sidebar-brand {
+      display: flex; align-items: center; gap: 10px;
+      padding: 22px 18px 18px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .sys-brand-logo {
+      width: 32px; height: 32px; border-radius: 8px;
+      background: var(--primary);
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .sys-brand-logo svg { width: 16px; height: 16px; color: #fff; }
+    .sys-brand-name { font-size: 13px; font-weight: 700; color: #fff; letter-spacing: -0.2px; }
+    .sys-brand-tag  { font-size: 10px; font-weight: 600; color: rgba(255,255,255,0.35); letter-spacing: 0.08em; text-transform: uppercase; margin-top: 1px; }
+    .sys-nav { flex: 1; padding: 14px 12px; display: flex; flex-direction: column; gap: 2px; }
+    .sys-nav-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px; border-radius: 10px;
+      font-size: 14px; font-weight: 500; color: rgba(255,255,255,0.55);
+      text-decoration: none; transition: background 0.15s, color 0.15s;
+    }
+    .sys-nav-item:hover { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.9); }
+    .sys-nav-item.active { background: #fff; color: #1a1a1a; font-weight: 600; }
+    .sys-nav-item svg { width: 18px; height: 18px; flex-shrink: 0; }
+    .sys-sidebar-footer {
+      padding: 16px 18px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+    .sys-footer-user { font-size: 12px; color: rgba(255,255,255,0.4); margin-bottom: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sys-btn-logout {
+      width: 100%; height: 32px; background: rgba(255,255,255,0.08); border: none;
+      border-radius: 8px; font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.6);
+      cursor: pointer; font-family: inherit; transition: background 0.15s, color 0.15s;
+    }
+    .sys-btn-logout:hover { background: rgba(255,255,255,0.15); color: #fff; }
+
+    /* ── MAIN ── */
+    .sys-main { margin-left: 220px; flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
 
     /* ── TOPBAR ── */
     .topbar {
@@ -54,18 +98,11 @@
       display: flex; align-items: center; justify-content: space-between;
       padding: 0 32px; height: 64px;
     }
-    .topbar-brand { display:flex; align-items:center; gap:10px; }
-    .topbar-logo { width:32px; height:32px; background:var(--primary); border-radius:8px; display:flex; align-items:center; justify-content:center; }
-    .topbar-logo svg { width:18px; height:18px; color:#fff; }
-    .topbar-title { font-size:16px; font-weight:700; color:var(--ink); letter-spacing:-0.3px; }
-    .topbar-badge { font-size:11px; font-weight:600; padding:2px 8px; background:rgba(139,92,246,0.12); color:var(--primary); border-radius:var(--radius-pill); }
-    .topbar-right { display:flex; align-items:center; gap:12px; }
-    .topbar-user { font-size:13px; color:var(--ink-muted); }
-    .btn-logout { height:34px; padding:0 14px; background:transparent; border:1.5px solid var(--hairline); border-radius:var(--radius-pill); font-size:13px; font-weight:600; color:var(--ink-muted); font-family:inherit; cursor:pointer; transition:background 0.15s; }
-    .btn-logout:hover { background:var(--canvas-input); color:var(--ink); }
+    .topbar-title { font-size: 16px; font-weight: 700; color: var(--ink); letter-spacing: -0.3px; }
+    .topbar-user  { font-size: 13px; color: var(--ink-muted); }
 
     /* ── PAGE ── */
-    .page { max-width: 1200px; margin: 0 auto; padding: 36px 32px 64px; }
+    .page { max-width: 1100px; margin: 0 auto; padding: 36px 32px 64px; width: 100%; }
 
     /* ── HERO ── */
     .hero { margin-bottom: 32px; }
@@ -113,7 +150,7 @@
 
     /* ── MODULE BADGES ── */
     .modulo-badge { display:inline-block; font-size:11px; font-weight:600; padding:2px 8px; border-radius:var(--radius-pill); background:rgba(139,92,246,0.08); color:var(--primary); margin:2px 2px 2px 0; white-space:nowrap; }
-    .modulos-cell { display:flex; flex-wrap:wrap; gap:0; }
+    .modulos-cell { display:flex; flex-wrap:wrap; }
 
     /* ── ACTION BUTTON ── */
     .btn-gerenciar { height:32px; padding:0 14px; background:var(--primary); color:#fff; border:none; border-radius:var(--radius-pill); font-size:13px; font-weight:600; font-family:inherit; cursor:pointer; transition:background 0.15s; white-space:nowrap; }
@@ -156,7 +193,7 @@
     .field input:focus, .field select:focus, .field textarea:focus { border-color:var(--primary); }
     .field input[readonly] { color:var(--ink-muted); cursor:default; }
 
-    /* ── MÓDULOS CHECKBOXES ── */
+    /* ── MÓDULOS ── */
     .modulos-grid { display:flex; flex-direction:column; gap:8px; }
     .modulo-row { display:flex; align-items:center; gap:12px; padding:10px 14px; border:1.5px solid var(--hairline); border-radius:var(--radius-md); transition:border-color 0.15s; }
     .modulo-row.checked { border-color:var(--primary); background:rgba(139,92,246,0.04); }
@@ -177,9 +214,7 @@
     .btn-primary:disabled { opacity:0.6; cursor:not-allowed; }
     .btn-secondary { height:40px; padding:0 18px; background:transparent; border:1.5px solid var(--hairline); border-radius:var(--radius-pill); font-size:14px; font-weight:600; color:var(--ink-muted); font-family:inherit; cursor:pointer; transition:background 0.15s; }
     .btn-secondary:hover { background:var(--canvas-input); color:var(--ink); }
-
-    /* ── STATUS SELECT COLORS ── */
-    .status-select { height:36px; padding:0 10px; border:1.5px solid var(--hairline); border-radius:var(--radius-pill); font-size:13px; font-family:inherit; color:var(--ink); background:var(--canvas-input); outline:none; cursor:pointer; }
+    .status-select { height:40px; padding:0 12px; border:1.5px solid transparent; border-radius:var(--radius-md); font-size:14px; font-family:inherit; color:var(--ink); background:var(--canvas-input); outline:none; cursor:pointer; width:100%; }
     .status-select:focus { border-color:var(--primary); }
 
     /* ── TOAST ── */
@@ -187,86 +222,103 @@
     #toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
     #toast.error { background:var(--danger-dark); }
 
-    @media (max-width: 768px) {
-      .page { padding: 20px 16px 48px; }
+    @media (max-width: 900px) {
+      .sys-sidebar { display: none; }
+      .sys-main { margin-left: 0; }
       .stats-row { grid-template-columns: repeat(2, 1fr); }
-      .form-row, .form-row.three { grid-template-columns: 1fr; }
-      .topbar { padding: 0 16px; }
-      .search-input { width: 160px; }
     }
   </style>
 </head>
 <body>
 
-  <!-- Topbar -->
-  <header class="topbar">
-    <div class="topbar-brand">
-      <div class="topbar-logo">
+  <!-- Sidebar -->
+  <aside class="sys-sidebar">
+    <div class="sys-sidebar-brand">
+      <div class="sys-brand-logo">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
       </div>
-      <span class="topbar-title">Hug Software</span>
-      <span class="topbar-badge">Sistema</span>
+      <div>
+        <div class="sys-brand-name">Hug Software</div>
+        <div class="sys-brand-tag">Sistema</div>
+      </div>
     </div>
-    <div class="topbar-right">
+
+    <nav class="sys-nav">
+      <a class="sys-nav-item active" href="/painel-sistema">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Painel
+      </a>
+      <a class="sys-nav-item" href="/configuracao-sistema">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Configurações
+      </a>
+    </nav>
+
+    <div class="sys-sidebar-footer">
+      <div class="sys-footer-user" id="sidebarUser"></div>
+      <button class="sys-btn-logout" onclick="fazerLogout()">Sair</button>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="sys-main">
+
+    <header class="topbar">
+      <span class="topbar-title">Painel do Sistema</span>
       <span class="topbar-user" id="topbarUser"></span>
-      <button class="btn-logout" onclick="fazerLogout()">Sair</button>
+    </header>
+
+    <div class="page">
+
+      <div class="hero">
+        <h1 class="hero-title">Igrejas & <span>Contratos</span></h1>
+        <p class="hero-sub">Gerencie igrejas, contratos e módulos contratados</p>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-value" id="statTotal">—</div>
+          <div class="stat-label">Total de igrejas</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="statAtivas">—</div>
+          <div class="stat-label">Ativas</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="statTrial">—</div>
+          <div class="stat-label">Em trial</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="statBloqueadas">—</div>
+          <div class="stat-label">Bloqueadas</div>
+        </div>
+      </div>
+
+      <div class="list-card">
+        <div class="list-header">
+          <span class="list-header-title">Igrejas cadastradas</span>
+          <input class="search-input" id="searchInput" type="text" placeholder="Buscar igreja..." oninput="filtrarIgrejas()">
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Igreja</th>
+                <th>Status</th>
+                <th>Vencimento</th>
+                <th>Módulos</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="igrejasTbody">
+              <tr><td colspan="5" class="table-empty"><span class="spinner"></span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
     </div>
-  </header>
-
-  <!-- Page -->
-  <div class="page">
-
-    <!-- Hero -->
-    <div class="hero">
-      <h1 class="hero-title">Painel do <span>Sistema</span></h1>
-      <p class="hero-sub">Gerencie igrejas, contratos e módulos contratados</p>
-    </div>
-
-    <!-- Stats -->
-    <div class="stats-row">
-      <div class="stat-card">
-        <div class="stat-value" id="statTotal">—</div>
-        <div class="stat-label">Total de igrejas</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value" id="statAtivas">—</div>
-        <div class="stat-label">Ativas</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value" id="statTrial">—</div>
-        <div class="stat-label">Em trial</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value" id="statBloqueadas">—</div>
-        <div class="stat-label">Bloqueadas</div>
-      </div>
-    </div>
-
-    <!-- Lista -->
-    <div class="list-card">
-      <div class="list-header">
-        <span class="list-header-title">Igrejas cadastradas</span>
-        <input class="search-input" id="searchInput" type="text" placeholder="Buscar igreja..." oninput="filtrarIgrejas()">
-      </div>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Igreja</th>
-              <th>Status</th>
-              <th>Vencimento</th>
-              <th>Módulos</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody id="igrejasTbody">
-            <tr><td colspan="5" class="table-empty"><span class="spinner"></span></td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-  </div><!-- /page -->
+  </div><!-- /sys-main -->
 
   <!-- Modal Gerenciar -->
   <div class="modal-overlay" id="modalOverlay" onclick="fecharModal(event)">
@@ -282,14 +334,12 @@
       </div>
 
       <div class="modal-body">
-
-        <!-- Status + periodicidade -->
         <div class="form-section">
           <div class="form-section-title">Contrato</div>
           <div class="form-row three">
             <div class="field">
               <label>Status</label>
-              <select id="fieldStatus" class="status-select" style="height:40px;border-radius:var(--radius-md);padding:0 12px;">
+              <select id="fieldStatus" class="status-select">
                 <option value="trial">Trial</option>
                 <option value="ativo">Ativo</option>
                 <option value="inadimplente">Inadimplente</option>
@@ -328,14 +378,12 @@
           </div>
         </div>
 
-        <!-- Módulos -->
         <div class="form-section">
           <div class="form-section-title">Módulos contratados</div>
           <div class="modulos-grid" id="modulosGrid">
             <div style="color:var(--ink-muted);font-size:13px;">Carregando módulos...</div>
           </div>
         </div>
-
       </div>
 
       <div class="modal-footer">
@@ -352,31 +400,26 @@
 
   <script src="/js/auth-fetch.js"></script>
   <script>
-    let _igrejas     = []
-    let _churchIdAtual = null
-    let _toastTimer  = null
+    let _igrejas = [], _churchIdAtual = null, _toastTimer = null
 
-    // ── Inicialização ──────────────────────────────────────────────────────
     document.addEventListener('DOMContentLoaded', async () => {
       const user = JSON.parse(localStorage.getItem('usuario') || '{}')
       if (user?.email) {
-        document.getElementById('topbarUser').textContent = user.email
+        document.getElementById('topbarUser').textContent  = user.email
+        document.getElementById('sidebarUser').textContent = user.email
       }
-
       await carregarIgrejas()
     })
 
-    // ── Carregar lista de igrejas ──────────────────────────────────────────
     async function carregarIgrejas() {
       try {
-        const res  = await authFetch('/api/contrato')
+        const res = await authFetch('/api/contrato')
         if (res.status === 403) {
           document.getElementById('igrejasTbody').innerHTML =
             '<tr><td colspan="5" class="table-empty">Acesso restrito ao dono do sistema.</td></tr>'
           return
         }
         if (!res.ok) throw new Error(await res.text())
-
         const { igrejas } = await res.json()
         _igrejas = igrejas || []
         atualizarStats()
@@ -388,44 +431,34 @@
       }
     }
 
-    // ── Stats ──────────────────────────────────────────────────────────────
     function atualizarStats() {
-      document.getElementById('statTotal').textContent     = _igrejas.length
-      document.getElementById('statAtivas').textContent    = _igrejas.filter(i => i.status === 'ativo').length
-      document.getElementById('statTrial').textContent     = _igrejas.filter(i => i.status === 'trial').length
+      document.getElementById('statTotal').textContent      = _igrejas.length
+      document.getElementById('statAtivas').textContent     = _igrejas.filter(i => i.status === 'ativo').length
+      document.getElementById('statTrial').textContent      = _igrejas.filter(i => i.status === 'trial').length
       document.getElementById('statBloqueadas').textContent = _igrejas.filter(i => i.status === 'bloqueado').length
     }
 
-    // ── Render tabela ──────────────────────────────────────────────────────
     function renderTabela(lista) {
       const tbody = document.getElementById('igrejasTbody')
       if (!lista.length) {
         tbody.innerHTML = '<tr><td colspan="5" class="table-empty">Nenhuma igreja cadastrada.</td></tr>'
         return
       }
-
       const hoje = new Date().toISOString().split('T')[0]
-
       tbody.innerHTML = lista.map(ig => {
         const statusBadge = ig.status
           ? `<span class="badge badge-${ig.status}"><span class="dot"></span>${labelStatus(ig.status)}</span>`
           : `<span class="badge badge-sem-contrato">Sem contrato</span>`
-
         let vencHtml = '—'
         if (ig.vencimento_em) {
           const alerta = ig.vencimento_em < hoje
           vencHtml = `<span class="vencimento-text ${alerta ? 'vencimento-alerta' : ''}">${formatarData(ig.vencimento_em)}</span>`
         }
-
         const modulosHtml = ig.modulos?.length
           ? `<div class="modulos-cell">${ig.modulos.map(m => `<span class="modulo-badge">${esc(m.name || m.slug)}</span>`).join('')}</div>`
           : '<span style="font-size:12px;color:var(--ink-subtle)">—</span>'
-
         return `<tr>
-          <td>
-            <div class="church-name">${esc(ig.church_name)}</div>
-            <div class="church-id">${ig.church_id}</div>
-          </td>
+          <td><div class="church-name">${esc(ig.church_name)}</div><div class="church-id">${ig.church_id}</div></td>
           <td>${statusBadge}</td>
           <td>${vencHtml}</td>
           <td>${modulosHtml}</td>
@@ -436,67 +469,50 @@
 
     function filtrarIgrejas() {
       const q = document.getElementById('searchInput').value.toLowerCase().trim()
-      const lista = q ? _igrejas.filter(i => i.church_name?.toLowerCase().includes(q)) : _igrejas
-      renderTabela(lista)
+      renderTabela(q ? _igrejas.filter(i => i.church_name?.toLowerCase().includes(q)) : _igrejas)
     }
 
-    // ── Modal ──────────────────────────────────────────────────────────────
     async function abrirModal(churchId) {
       _churchIdAtual = churchId
       document.getElementById('modalOverlay').classList.add('open')
       document.getElementById('modalChurchName').textContent = 'Carregando...'
       document.getElementById('modulosGrid').innerHTML = '<div style="color:var(--ink-muted);font-size:13px;">Carregando módulos...</div>'
-
       try {
         const res = await authFetch(`/api/contrato/${churchId}`)
         if (!res.ok) throw new Error()
         const { church, contrato, modulos, todos_modulos } = await res.json()
-
         document.getElementById('modalChurchName').textContent = church.name
-
-        // Preenche campos do contrato
-        document.getElementById('fieldStatus').value         = contrato?.status        || 'trial'
-        document.getElementById('fieldPeriodicidade').value  = contrato?.periodicidade || 'mensal'
-        document.getElementById('fieldValor').value          = contrato?.valor         || ''
-        document.getElementById('fieldVencimento').value     = contrato?.vencimento_em || ''
-        document.getElementById('fieldObservacoes').value    = contrato?.observacoes   || ''
-
-        // Bloqueio calculado
+        document.getElementById('fieldStatus').value        = contrato?.status        || 'trial'
+        document.getElementById('fieldPeriodicidade').value = contrato?.periodicidade || 'mensal'
+        document.getElementById('fieldValor').value         = contrato?.valor         || ''
+        document.getElementById('fieldVencimento').value    = contrato?.vencimento_em || ''
+        document.getElementById('fieldObservacoes').value   = contrato?.observacoes   || ''
         atualizarBloqueio()
-
-        // Módulos
-        const modulosContratadosMap = {}
-        ;(modulos || []).forEach(m => {
-          if (m.is_active) modulosContratadosMap[m.modulo_id] = m.limite
-        })
-
+        const modulosMap = {}
+        ;(modulos || []).forEach(m => { if (m.is_active) modulosMap[m.modulo_id] = m.limite })
         const grid = document.getElementById('modulosGrid')
         if (!todos_modulos?.length) {
-          grid.innerHTML = '<div style="color:var(--ink-muted);font-size:13px;">Nenhum módulo cadastrado no sistema.</div>'
+          grid.innerHTML = '<div style="color:var(--ink-muted);font-size:13px;">Nenhum módulo cadastrado.</div>'
           return
         }
-
         grid.innerHTML = todos_modulos.map(mod => {
-          const checked = modulosContratadosMap.hasOwnProperty(mod.id)
-          const limite  = checked ? (modulosContratadosMap[mod.id] ?? '') : ''
-          return `
-            <div class="modulo-row ${checked ? 'checked' : ''}" id="modulo-row-${mod.id}">
-              <label>
-                <input type="checkbox" ${checked ? 'checked' : ''} onchange="toggleModulo('${mod.id}', this)">
-                <div class="modulo-info">
-                  <div class="modulo-name">${esc(mod.name)}</div>
-                  ${mod.description ? `<div class="modulo-desc">${esc(mod.description)}</div>` : ''}
-                </div>
-              </label>
-              <div class="modulo-limite-wrap">
-                <input type="number" class="modulo-limite" id="limite-${mod.id}" value="${limite}" min="0" placeholder="∞">
-                <span class="modulo-limite-label">limite</span>
+          const checked = modulosMap.hasOwnProperty(mod.id)
+          const limite  = checked ? (modulosMap[mod.id] ?? '') : ''
+          return `<div class="modulo-row ${checked ? 'checked' : ''}" id="modulo-row-${mod.id}">
+            <label>
+              <input type="checkbox" ${checked ? 'checked' : ''} onchange="toggleModulo('${mod.id}', this)">
+              <div class="modulo-info">
+                <div class="modulo-name">${esc(mod.name)}</div>
+                ${mod.description ? `<div class="modulo-desc">${esc(mod.description)}</div>` : ''}
               </div>
-            </div>`
+            </label>
+            <div class="modulo-limite-wrap">
+              <input type="number" class="modulo-limite" id="limite-${mod.id}" value="${limite}" min="0" placeholder="∞">
+              <span class="modulo-limite-label">limite</span>
+            </div>
+          </div>`
         }).join('')
-
       } catch (e) {
-        console.error('[abrirModal]', e)
         showToast('Erro ao carregar dados da igreja', 'error')
         fecharModal()
       }
@@ -510,12 +526,8 @@
 
     function toggleModulo(moduloId, checkbox) {
       const row = document.getElementById(`modulo-row-${moduloId}`)
-      if (checkbox.checked) {
-        row.classList.add('checked')
-      } else {
-        row.classList.remove('checked')
-        document.getElementById(`limite-${moduloId}`).value = ''
-      }
+      if (checkbox.checked) { row.classList.add('checked') }
+      else { row.classList.remove('checked'); document.getElementById(`limite-${moduloId}`).value = '' }
     }
 
     function atualizarBloqueio() {
@@ -529,51 +541,35 @@
       document.getElementById('fieldVencimento')?.addEventListener('change', atualizarBloqueio)
     })
 
-    // ── Salvar contrato ────────────────────────────────────────────────────
     async function salvarContrato() {
       if (!_churchIdAtual) return
       const btn = document.getElementById('btnSalvar')
-      btn.disabled = true
-      btn.textContent = 'Salvando...'
-
+      btn.disabled = true; btn.textContent = 'Salvando...'
       try {
-        const vencimento_em   = document.getElementById('fieldVencimento').value
-        const periodicidade   = document.getElementById('fieldPeriodicidade').value
-        const valor           = parseFloat(document.getElementById('fieldValor').value) || null
-        const observacoes     = document.getElementById('fieldObservacoes').value.trim() || null
-        const novoStatus      = document.getElementById('fieldStatus').value
-
-        // Coleta módulos selecionados
-        const modulosRows = document.querySelectorAll('.modulo-row')
         const modulos = []
-        modulosRows.forEach(row => {
+        document.querySelectorAll('.modulo-row').forEach(row => {
           const cb    = row.querySelector('input[type=checkbox]')
           const rowId = row.id.replace('modulo-row-', '')
           if (cb?.checked) {
             const limiteEl = document.getElementById(`limite-${rowId}`)
-            const limite   = limiteEl?.value ? parseInt(limiteEl.value) : null
-            modulos.push({ modulo_id: rowId, limite })
+            modulos.push({ modulo_id: rowId, limite: limiteEl?.value ? parseInt(limiteEl.value) : null })
           }
         })
-
-        // Salva contrato + módulos
         const res = await authFetch(`/api/contrato/${_churchIdAtual}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ periodicidade, vencimento_em, valor, observacoes, modulos }),
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            periodicidade: document.getElementById('fieldPeriodicidade').value,
+            vencimento_em: document.getElementById('fieldVencimento').value,
+            valor:         parseFloat(document.getElementById('fieldValor').value) || null,
+            observacoes:   document.getElementById('fieldObservacoes').value.trim() || null,
+            modulos,
+          }),
         })
-        if (!res.ok) {
-          const d = await res.json()
-          throw new Error(d.error || 'Erro ao salvar')
-        }
-
-        // Atualiza status separadamente
+        if (!res.ok) { const d = await res.json(); throw new Error(d.error || 'Erro ao salvar') }
         await authFetch(`/api/contrato/${_churchIdAtual}/status`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ status: novoStatus }),
+          method: 'PUT', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: document.getElementById('fieldStatus').value }),
         })
-
         showToast('Contrato salvo com sucesso!')
         fecharModal()
         await carregarIgrejas()
@@ -585,33 +581,17 @@
       }
     }
 
-    // ── Utilitários ────────────────────────────────────────────────────────
-    const STATUS_LABEL = { trial: 'Trial', ativo: 'Ativo', inadimplente: 'Inadimplente', bloqueado: 'Bloqueado', cancelado: 'Cancelado' }
+    const STATUS_LABEL = { trial:'Trial', ativo:'Ativo', inadimplente:'Inadimplente', bloqueado:'Bloqueado', cancelado:'Cancelado' }
     function labelStatus(s) { return STATUS_LABEL[s] || s }
-
-    function formatarData(iso) {
-      if (!iso) return '—'
-      const [y, m, d] = iso.split('-')
-      return `${d}/${m}/${y}`
-    }
-
-    function esc(s) {
-      return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')
-    }
-
+    function formatarData(iso) { if (!iso) return '—'; const [y,m,d] = iso.split('-'); return `${d}/${m}/${y}` }
+    function esc(s) { return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') }
     function showToast(msg, type = '') {
       const t = document.getElementById('toast')
-      t.textContent = msg
-      t.className = 'show' + (type ? ' ' + type : '')
-      clearTimeout(_toastTimer)
-      _toastTimer = setTimeout(() => { t.className = '' }, 3000)
+      t.textContent = msg; t.className = 'show' + (type ? ' ' + type : '')
+      clearTimeout(_toastTimer); _toastTimer = setTimeout(() => { t.className = '' }, 3000)
     }
-
     function fazerLogout() {
-      authFetch('/api/auth/logout', { method: 'POST' }).finally(() => {
-        localStorage.clear()
-        window.location.href = '/'
-      })
+      authFetch('/api/auth/logout', { method: 'POST' }).finally(() => { localStorage.clear(); window.location.href = '/' })
     }
   </script>
 </body>

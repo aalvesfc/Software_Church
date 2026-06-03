@@ -272,7 +272,8 @@ router.get('/eventos-escalados', authMiddleware, async (req, res) => {
 
   const eventIds = [...new Set((escalas || []).map(e => e.event_id))]
   const deptIds  = [...new Set((escalas || []).map(e => e.department_id))]
-  const today    = new Date().toISOString().split('T')[0]
+  const _d = new Date()
+  const today = `${_d.getFullYear()}-${String(_d.getMonth()+1).padStart(2,'0')}-${String(_d.getDate()).padStart(2,'0')}`
 
   const [{ data: eventos }, { data: depts }] = await Promise.all([
     supabaseAdmin.from('db_event')

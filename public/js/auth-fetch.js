@@ -1,9 +1,24 @@
 /**
- * authFetch — wrapper sobre fetch que renova o access_token automaticamente
- * quando recebe 401, usando o refresh_token salvo no localStorage.
- * Usa mutex (_refreshing) para evitar múltiplos refreshes simultâneos.
- * Se o refresh falhar, redireciona para o login.
+ * authFetch — wrapper sobre fetch que:
+ * 1. Adiciona o Authorization header automaticamente
+ * 2. Renova o access_token via refresh quando recebe 401
+ * 3. Redireciona para /bloqueado quando recebe 403 com código de bloqueio de contrato
  */
+
+const _BLOQUEIO_CODES = ['sem_contrato', 'contrato_bloqueado', 'modulo_nao_contratado']
+
+// URLs que NUNCA devem disparar o redirecionamento de bloqueio
+const _BLOQUEIO_EXEMPT = [
+  '/api/auth/',          // login, refresh, logout, me
+  '/api/notificacao/nao-lidas',
+  '/api/contrato',       // painel sistema
+  '/api/config/sistema', // config do sistema
+]
+
+function _isExempt(url) {
+  return _BLOQUEIO_EXEMPT.some(p => url.includes(p))
+}
+
 let _refreshing = null
 
 async function authFetch(url, options = {}) {
@@ -15,8 +30,20 @@ async function authFetch(url, options = {}) {
 
   let res = await fetch(url, { ...options, headers: makeHeaders() })
 
+  // ── 403 com código de bloqueio de contrato → tela de bloqueio ────────────
+  if (res.status === 403 && !_isExempt(url)) {
+    try {
+      const clone = res.clone()
+      const data  = await clone.json()
+      if (_BLOQUEIO_CODES.includes(data.code)) {
+        window.location.href = `/bloqueado?code=${encodeURIComponent(data.code)}`
+        return res
+      }
+    } catch (_) { /* body não era JSON — deixa passar normalmente */ }
+  }
+
+  // ── 401 → tenta renovar token e repete a requisição ──────────────────────
   if (res.status === 401) {
-    // Se não há refresh em andamento, inicia um
     if (!_refreshing) {
       _refreshing = (async () => {
         const refreshToken = localStorage.getItem('refresh_token')
@@ -43,11 +70,9 @@ async function authFetch(url, options = {}) {
       })().finally(() => { _refreshing = null })
     }
 
-    // Todas as chamadas simultâneas aguardam o mesmo refresh
     const refreshed = await _refreshing
     if (!refreshed) return res
 
-    // Repete a requisição com o novo token
     res = await fetch(url, { ...options, headers: makeHeaders() })
   }
 
