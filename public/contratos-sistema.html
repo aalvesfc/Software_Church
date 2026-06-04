@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hug Software — Contratos</title>
+  <script src="/js/auth-check.js"></script>
+  <script>
+    ;(function () {
+      const perfil = localStorage.getItem('perfil_slug')
+      if (perfil !== 'sistema_owner') window.location.href = perfil ? '/dashboard' : '/'
+    })()
+  </script>
+  <link rel="icon" type="image/png" href="/IMG/logo.png">
+  <style>
+    * { font-family: 'Plus Jakarta Sans', sans-serif !important; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --primary:       #8B5CF6;
+      --primary-dark:  #7C3AED;
+      --primary-light: #DDD6FE;
+      --ink:           #1d1d1f;
+      --ink-muted:     #6e6e73;
+      --ink-subtle:    #aeaeb2;
+      --canvas:        #ffffff;
+      --canvas-page:   #ECE9E7;
+      --canvas-input:  #f2f2f7;
+      --hairline:      #e0e0e0;
+      --radius-sm:     8px;
+      --radius-md:     12px;
+      --radius-lg:     18px;
+      --radius-pill:   9999px;
+      --success-light: #F0FAE8;
+      --success-dark:  #5A9E2F;
+      --danger-light:  #FEE8EA;
+      --danger-dark:   #C0394A;
+      --warning-light: #FEF9C3;
+      --warning-dark:  #B45309;
+      --gray-100:      #F5F3F0;
+      --gray-400:      #9E9B96;
+      --gray-500:      #7A7772;
+    }
+
+    body { min-height: 100vh; background: var(--canvas-page); display: flex; -webkit-font-smoothing: antialiased; }
+
+    /* ── SIDEBAR ── */
+    .sys-sidebar { width: 220px; flex-shrink: 0; background: #1c1c1c; display: flex; flex-direction: column; position: fixed; top: 0; left: 0; bottom: 0; z-index: 100; }
+    .sys-sidebar-brand { display: flex; align-items: center; gap: 10px; padding: 22px 18px 18px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+    .sys-brand-logo { width: 32px; height: 32px; border-radius: 8px; background: var(--primary); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .sys-brand-logo svg { width: 16px; height: 16px; color: #fff; }
+    .sys-brand-name { font-size: 13px; font-weight: 700; color: #fff; letter-spacing: -0.2px; }
+    .sys-brand-tag  { font-size: 10px; font-weight: 600; color: rgba(255,255,255,0.35); letter-spacing: 0.08em; text-transform: uppercase; margin-top: 1px; }
+    .sys-nav { flex: 1; padding: 14px 12px; display: flex; flex-direction: column; gap: 2px; overflow-y: auto; scrollbar-width: none; }
+    .sys-nav::-webkit-scrollbar { display: none; }
+    .sys-nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; font-size: 14px; font-weight: 500; color: rgba(255,255,255,0.55); text-decoration: none; transition: background 0.15s, color 0.15s; cursor: pointer; }
+    .sys-nav-item:hover { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.9); }
+    .sys-nav-item.active { background: #fff; color: #1a1a1a; font-weight: 600; }
+    .sys-nav-item svg { width: 18px; height: 18px; flex-shrink: 0; }
+    .sys-sidebar-footer { padding: 16px 18px; border-top: 1px solid rgba(255,255,255,0.08); }
+    .sys-footer-user { font-size: 12px; color: rgba(255,255,255,0.4); margin-bottom: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sys-btn-logout { width: 100%; height: 32px; background: rgba(255,255,255,0.08); border: none; border-radius: 8px; font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.6); cursor: pointer; font-family: inherit; transition: background 0.15s, color 0.15s; }
+    .sys-btn-logout:hover { background: rgba(255,255,255,0.15); color: #fff; }
+    .nav-group { width: 100%; }
+    .nav-group-toggle { width: 100%; font-family: inherit; text-align: left; background: none; border: none; cursor: pointer; }
+    .nav-chevron { width: 14px; height: 14px; flex-shrink: 0; margin-left: auto; transition: transform 0.2s; opacity: 0.6; }
+    .nav-group.open .nav-chevron { transform: rotate(90deg); }
+    .nav-group-items { display: none; padding-left: 8px; margin-top: 2px; }
+    .nav-group.open .nav-group-items { display: flex; flex-direction: column; gap: 1px; }
+    .nav-subitem { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 8px; font-size: 13px; color: rgba(255,255,255,0.45); text-decoration: none; transition: background 0.15s, color 0.15s; }
+    .nav-subitem:hover { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.8); }
+    .nav-subitem.active { color: rgba(255,255,255,0.9); background: rgba(255,255,255,0.1); font-weight: 600; }
+
+    /* ── MAIN ── */
+    .sys-main { margin-left: 220px; flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+    .topbar { position: sticky; top: 0; z-index: 50; background: rgba(236,233,231,0.85); backdrop-filter: blur(12px); border-bottom: 1px solid var(--hairline); display: flex; align-items: center; justify-content: space-between; padding: 0 32px; height: 64px; }
+    .topbar-title { font-size: 16px; font-weight: 700; color: var(--ink); letter-spacing: -0.3px; }
+    .topbar-user  { font-size: 13px; color: var(--ink-muted); }
+    .page { max-width: 1100px; margin: 0 auto; padding: 36px 32px 64px; width: 100%; }
+
+    /* ── HERO ── */
+    .hero { margin-bottom: 28px; }
+    .hero-title { font-size: 28px; font-weight: 700; color: var(--ink); letter-spacing: -0.03em; }
+    .hero-title span { color: var(--primary); }
+    .hero-sub { font-size: 15px; color: var(--ink-muted); margin-top: 4px; }
+
+    /* ── STATS ── */
+    .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 28px; }
+    .stat-card { background: #fff; border-radius: var(--radius-lg); padding: 18px 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+    .stat-value { font-size: 1.8rem; font-weight: 700; color: var(--primary); letter-spacing: -0.04em; line-height: 1; }
+    .stat-label { font-size: 12px; font-weight: 500; color: var(--ink-muted); margin-top: 5px; }
+
+    /* ── TOOLBAR ── */
+    .toolbar { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+    .filter-tabs { display: flex; gap: 4px; }
+    .tab { height: 34px; padding: 0 14px; border: 1.5px solid var(--hairline); border-radius: var(--radius-pill); font-size: 13px; font-weight: 500; color: var(--ink-muted); background: #fff; cursor: pointer; transition: all 0.12s; white-space: nowrap; }
+    .tab:hover { border-color: var(--primary); color: var(--primary); }
+    .tab.active { background: var(--primary); color: #fff; border-color: var(--primary); font-weight: 600; }
+    .search-input { height: 34px; padding: 0 14px; background: #fff; border: 1.5px solid var(--hairline); border-radius: var(--radius-pill); font-size: 13px; font-family: inherit; color: var(--ink); outline: none; width: 200px; transition: border-color 0.15s; }
+    .search-input:focus { border-color: var(--primary); }
+    .search-input::placeholder { color: var(--ink-subtle); }
+
+    /* ── TABLE ── */
+    .list-card { background: #fff; border-radius: var(--radius-lg); box-shadow: 0 1px 3px rgba(0,0,0,0.06); overflow: hidden; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th { font-size: 11px; font-weight: 600; color: var(--ink-muted); text-align: left; padding: 10px 16px; background: var(--gray-100); border-bottom: 1px solid var(--hairline); white-space: nowrap; }
+    td { padding: 13px 16px; border-bottom: 1px solid #f5f3f0; vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #fafafa; }
+    .church-name { font-size: 14px; font-weight: 600; color: var(--ink); }
+
+    /* ── BADGES ── */
+    .badge { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: var(--radius-pill); font-size: 12px; font-weight: 600; white-space: nowrap; }
+    .badge .dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+    .badge-trial        { background: #F5F3F0; color: var(--gray-500); }
+    .badge-trial .dot   { background: var(--gray-400); }
+    .badge-ativo        { background: var(--success-light); color: var(--success-dark); }
+    .badge-ativo .dot   { background: var(--success-dark); }
+    .badge-inadimplente { background: var(--warning-light); color: var(--warning-dark); }
+    .badge-inadimplente .dot { background: #F59E0B; }
+    .badge-bloqueado    { background: var(--danger-light); color: var(--danger-dark); }
+    .badge-bloqueado .dot { background: var(--danger-dark); }
+    .badge-cancelado    { background: #1d1d1f; color: #fff; }
+    .badge-cancelado .dot { background: #6e6e73; }
+    .badge-sem-contrato { background: var(--canvas-input); color: var(--ink-muted); }
+
+    /* ── BUTTONS ── */
+    .btn-sm { height: 28px; padding: 0 10px; border: none; border-radius: var(--radius-pill); font-size: 12px; font-weight: 600; font-family: inherit; cursor: pointer; transition: background 0.15s; white-space: nowrap; }
+    .btn-sm-primary { background: var(--primary); color: #fff; }
+    .btn-sm-primary:hover { background: var(--primary-dark); }
+    .btn-sm-ghost { background: var(--canvas-input); color: var(--ink-muted); }
+    .btn-sm-ghost:hover { background: var(--hairline); color: var(--ink); }
+    .btn-primary { height: 38px; padding: 0 18px; background: var(--primary); color: #fff; border: none; border-radius: var(--radius-pill); font-size: 14px; font-weight: 600; font-family: inherit; cursor: pointer; transition: background 0.15s; display: inline-flex; align-items: center; gap: 6px; }
+    .btn-primary:hover { background: var(--primary-dark); }
+    .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+    .btn-secondary { height: 38px; padding: 0 16px; background: transparent; border: 1.5px solid var(--hairline); border-radius: var(--radius-pill); font-size: 14px; font-weight: 600; color: var(--ink-muted); font-family: inherit; cursor: pointer; transition: background 0.15s; }
+    .btn-secondary:hover { background: var(--canvas-input); }
+    .td-actions { display: flex; gap: 6px; }
+
+    /* ── EMPTY / LOADING ── */
+    .table-empty { padding: 52px 24px; text-align: center; color: var(--ink-muted); font-size: 14px; }
+    .spinner { display: inline-block; width: 20px; height: 20px; border: 2.5px solid var(--hairline); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.7s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── MODAL ── */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 200; display: none; align-items: center; justify-content: center; padding: 20px; }
+    .modal-overlay.open { display: flex; }
+    .modal { background: #fff; border-radius: var(--radius-lg); width: 100%; max-width: 440px; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 24px 64px rgba(0,0,0,0.18); }
+    .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 18px 22px 14px; border-bottom: 1px solid var(--hairline); }
+    .modal-title  { font-size: 16px; font-weight: 700; color: var(--ink); }
+    .modal-church { font-size: 13px; color: var(--ink-muted); margin-top: 2px; }
+    .modal-close  { width: 30px; height: 30px; background: var(--canvas-input); border: none; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .modal-close svg { width: 13px; height: 13px; color: var(--ink-muted); }
+    .modal-body   { padding: 20px 22px; }
+    .modal-footer { padding: 14px 22px; border-top: 1px solid var(--hairline); display: flex; align-items: center; justify-content: flex-end; gap: 8px; }
+    .field { display: flex; flex-direction: column; gap: 4px; margin-bottom: 14px; }
+    .field label { font-size: 12px; font-weight: 600; color: var(--ink-muted); }
+    .field input, .field select { height: 38px; padding: 0 11px; background: var(--canvas-input); border: 1.5px solid transparent; border-radius: var(--radius-md); font-size: 14px; font-family: inherit; color: var(--ink); outline: none; transition: border-color 0.15s; width: 100%; }
+    .field input:focus, .field select:focus { border-color: var(--primary); }
+
+    /* ── TOAST ── */
+    #toast { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(12px); background: #1d1d1f; color: #fff; border-radius: var(--radius-pill); padding: 10px 20px; font-size: 14px; font-weight: 500; opacity: 0; pointer-events: none; transition: opacity 0.2s, transform 0.2s; z-index: 999; white-space: nowrap; }
+    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    #toast.error { background: var(--danger-dark); }
+
+    .vencimento-alerta { color: var(--danger-dark); font-weight: 600; font-size: 13px; }
+    .val-text { font-size: 13px; color: var(--ink); }
+
+    @media (max-width: 900px) {
+      .sys-sidebar { display: none; }
+      .sys-main { margin-left: 0; }
+      .stats-row { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+
+  <aside class="sys-sidebar">
+    <div class="sys-sidebar-brand">
+      <div class="sys-brand-logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+      </div>
+      <div>
+        <div class="sys-brand-name">Hug Software</div>
+        <div class="sys-brand-tag">Sistema</div>
+      </div>
+    </div>
+    <nav class="sys-nav" id="sysNav">
+      <a class="sys-nav-item" href="/painel-sistema">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        <span>Dashboard</span>
+      </a>
+      <a class="sys-nav-item" href="/igrejas-sistema">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        <span>Igrejas</span>
+      </a>
+      <a class="sys-nav-item" href="/contratos-sistema">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        <span>Contratos</span>
+      </a>
+      <a class="sys-nav-item" href="/pagamentos-sistema">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+        <span>Pagamentos</span>
+      </a>
+      <div class="nav-group" id="groupConfig">
+        <button class="sys-nav-item nav-group-toggle" onclick="toggleGroup('groupConfig')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          <span>Configurações</span>
+          <svg class="nav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+        <div class="nav-group-items">
+          <a href="/configuracao-sistema" class="nav-subitem">Carrossel Login</a>
+        </div>
+      </div>
+    </nav>
+    <div class="sys-sidebar-footer">
+      <div class="sys-footer-user" id="sidebarUser"></div>
+      <button class="sys-btn-logout" onclick="fazerLogout()">Sair</button>
+    </div>
+  </aside>
+
+  <div class="sys-main">
+    <header class="topbar">
+      <span class="topbar-title">Contratos</span>
+      <span class="topbar-user" id="topbarUser"></span>
+    </header>
+
+    <div class="page">
+
+      <div class="hero">
+        <h1 class="hero-title">Gestão de <span>Contratos</span></h1>
+        <p class="hero-sub">Monitore vencimentos, inadimplências e renovações</p>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-value" id="statAtivos">—</div>
+          <div class="stat-label">Ativos</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="statVencendo">—</div>
+          <div class="stat-label">Vencendo em 7 dias</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="statInadim">—</div>
+          <div class="stat-label">Inadimplentes</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="statMRR">—</div>
+          <div class="stat-label">MRR mensal</div>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <div class="filter-tabs" id="filterTabs">
+          <button class="tab active" data-filter="todos">Todos</button>
+          <button class="tab" data-filter="ativo">Ativos</button>
+          <button class="tab" data-filter="vencendo">Vencendo</button>
+          <button class="tab" data-filter="inadimplente">Inadimplentes</button>
+          <button class="tab" data-filter="bloqueado">Bloqueados</button>
+        </div>
+        <input class="search-input" id="searchInput" type="text" placeholder="Buscar pelo nome..." oninput="aplicarFiltros()">
+      </div>
+
+      <div class="list-card">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Igreja</th>
+                <th>Periodicidade</th>
+                <th>Valor</th>
+                <th>Início</th>
+                <th>Vencimento</th>
+                <th>Status</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="contratosTbody">
+              <tr><td colspan="7" class="table-empty"><span class="spinner"></span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Modal renovar -->
+  <div class="modal-overlay" id="modalOverlay" onclick="fecharModal(event)">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <div>
+          <div class="modal-title">Renovar contrato</div>
+          <div class="modal-church" id="modalChurchName">—</div>
+        </div>
+        <button class="modal-close" onclick="fecharModal()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="field"><label>Novo vencimento</label><input type="date" id="novoVencimento"></div>
+        <div class="field"><label>Status após renovação</label>
+          <select id="novoStatus">
+            <option value="ativo">Ativo</option>
+            <option value="trial">Trial</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" onclick="fecharModal()">Cancelar</button>
+        <button class="btn-primary" id="btnRenovar" onclick="confirmarRenovacao()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+          Renovar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast"></div>
+  <script src="/js/auth-fetch.js"></script>
+  <script>
+    function toggleGroup(id) { document.getElementById(id)?.classList.toggle('open') }
+
+    document.querySelectorAll('#sysNav a.sys-nav-item, #sysNav .nav-subitem').forEach(el => {
+      if (el.getAttribute('href') === window.location.pathname) el.classList.add('active')
+    })
+    if (document.querySelector('#sysNav .nav-subitem.active')) document.getElementById('groupConfig')?.classList.add('open')
+
+    let _contratos = [], _filtroAtivo = 'todos', _churchIdAtual = null, _toastTimer = null
+
+    function esc(s) { return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') }
+    function formatarData(iso) { if (!iso) return '—'; const [y,m,d] = iso.split('-'); return `${d}/${m}/${y}` }
+    function formatarMoeda(v) { if (v == null) return '—'; return 'R$ ' + Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 2 }) }
+    const LABEL = { trial:'Trial', ativo:'Ativo', inadimplente:'Inadimplente', bloqueado:'Bloqueado', cancelado:'Cancelado' }
+    const PERIOD = { mensal:'Mensal', trimestral:'Trimestral', anual:'Anual' }
+    function showToast(msg, type = '') {
+      const t = document.getElementById('toast'); t.textContent = msg; t.className = 'show' + (type ? ' ' + type : '')
+      clearTimeout(_toastTimer); _toastTimer = setTimeout(() => { t.className = '' }, 3000)
+    }
+    function fazerLogout() { authFetch('/api/auth/logout',{method:'POST'}).finally(()=>{localStorage.clear();window.location.href='/'}) }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      const user = JSON.parse(localStorage.getItem('usuario') || '{}')
+      if (user?.email) { document.getElementById('topbarUser').textContent = user.email; document.getElementById('sidebarUser').textContent = user.email }
+
+      document.getElementById('filterTabs').addEventListener('click', e => {
+        const btn = e.target.closest('[data-filter]'); if (!btn) return
+        document.querySelectorAll('#filterTabs .tab').forEach(t => t.classList.remove('active'))
+        btn.classList.add('active'); _filtroAtivo = btn.dataset.filter; aplicarFiltros()
+      })
+
+      await carregarContratos()
+    })
+
+    async function carregarContratos() {
+      try {
+        const res = await authFetch('/api/contrato'); if (!res.ok) throw new Error()
+        const { igrejas } = await res.json()
+        _contratos = (igrejas || []).filter(i => i.contrato_id)
+        atualizarStats()
+        aplicarFiltros()
+      } catch (e) {
+        document.getElementById('contratosTbody').innerHTML = '<tr><td colspan="7" class="table-empty">Erro ao carregar contratos.</td></tr>'
+      }
+    }
+
+    function atualizarStats() {
+      const hoje = new Date().toISOString().split('T')[0]
+      const em7  = new Date(); em7.setDate(em7.getDate() + 7); const em7Str = em7.toISOString().split('T')[0]
+
+      document.getElementById('statAtivos').textContent  = _contratos.filter(i => i.status === 'ativo').length
+      document.getElementById('statVencendo').textContent = _contratos.filter(i => i.vencimento_em && i.vencimento_em >= hoje && i.vencimento_em <= em7Str && i.status === 'ativo').length
+      document.getElementById('statInadim').textContent  = _contratos.filter(i => i.status === 'inadimplente').length
+      const mrr = _contratos.filter(i => i.status === 'ativo' && i.periodicidade === 'mensal' && i.valor).reduce((a, i) => a + parseFloat(i.valor), 0)
+      document.getElementById('statMRR').textContent = mrr > 0 ? 'R$ ' + mrr.toLocaleString('pt-BR', { minimumFractionDigits: 0 }) : 'R$ 0'
+    }
+
+    function aplicarFiltros() {
+      const hoje = new Date().toISOString().split('T')[0]
+      const em7  = new Date(); em7.setDate(em7.getDate() + 7); const em7Str = em7.toISOString().split('T')[0]
+      const q = document.getElementById('searchInput').value.toLowerCase().trim()
+      let lista = _contratos
+
+      if (_filtroAtivo === 'ativo')       lista = lista.filter(i => i.status === 'ativo')
+      else if (_filtroAtivo === 'vencendo') lista = lista.filter(i => i.vencimento_em && i.vencimento_em >= hoje && i.vencimento_em <= em7Str)
+      else if (_filtroAtivo === 'inadimplente') lista = lista.filter(i => i.status === 'inadimplente')
+      else if (_filtroAtivo === 'bloqueado') lista = lista.filter(i => i.status === 'bloqueado')
+
+      if (q) lista = lista.filter(i => i.church_name?.toLowerCase().includes(q))
+      renderTabela(lista)
+    }
+
+    function renderTabela(lista) {
+      const tbody = document.getElementById('contratosTbody')
+      if (!lista.length) { tbody.innerHTML = '<tr><td colspan="7" class="table-empty">Nenhum contrato encontrado.</td></tr>'; return }
+      const hoje = new Date().toISOString().split('T')[0]
+      tbody.innerHTML = lista.map(ig => {
+        const badge = `<span class="badge badge-${ig.status}"><span class="dot"></span>${LABEL[ig.status] || ig.status}</span>`
+        const venc  = ig.vencimento_em
+          ? `<span class="${ig.vencimento_em < hoje ? 'vencimento-alerta' : 'val-text'}">${formatarData(ig.vencimento_em)}</span>`
+          : '—'
+        return `<tr>
+          <td><div class="church-name">${esc(ig.church_name)}</div></td>
+          <td><span style="font-size:13px">${PERIOD[ig.periodicidade] || ig.periodicidade || '—'}</span></td>
+          <td><span style="font-size:13px;font-weight:600">${formatarMoeda(ig.valor)}</span></td>
+          <td><span style="font-size:13px;color:var(--ink-muted)">${formatarData(ig.inicio_em)}</span></td>
+          <td>${venc}</td>
+          <td>${badge}</td>
+          <td>
+            <div class="td-actions">
+              <button class="btn-sm btn-sm-primary" onclick="abrirModalRenovar('${ig.church_id}','${esc(ig.church_name)}','${ig.vencimento_em||''}')">Renovar</button>
+              <a href="/pagamentos-sistema?church_id=${ig.church_id}" class="btn-sm btn-sm-ghost" style="display:inline-flex;align-items:center;text-decoration:none">Pagamentos</a>
+            </div>
+          </td>
+        </tr>`
+      }).join('')
+    }
+
+    // ── Modal renovar ─────────────────────────────────────────────────────────
+    function abrirModalRenovar(churchId, churchName, vencAtual) {
+      _churchIdAtual = churchId
+      document.getElementById('modalChurchName').textContent = churchName
+      const def = vencAtual ? (() => { const d = new Date(vencAtual); d.setFullYear(d.getFullYear() + 1); return d.toISOString().split('T')[0] })() : ''
+      document.getElementById('novoVencimento').value = def
+      document.getElementById('novoStatus').value     = 'ativo'
+      document.getElementById('modalOverlay').classList.add('open')
+    }
+
+    function fecharModal(e) {
+      if (e && e.target !== document.getElementById('modalOverlay')) return
+      document.getElementById('modalOverlay').classList.remove('open')
+      _churchIdAtual = null
+    }
+
+    async function confirmarRenovacao() {
+      if (!_churchIdAtual) return
+      const novoVenc = document.getElementById('novoVencimento').value
+      if (!novoVenc) { showToast('Informe o novo vencimento', 'error'); return }
+      const btn = document.getElementById('btnRenovar'); btn.disabled = true; btn.textContent = 'Salvando...'
+      try {
+        // Busca o contrato atual para manter dados e só atualizar o vencimento
+        const res0 = await authFetch(`/api/contrato/${_churchIdAtual}`); if (!res0.ok) throw new Error()
+        const { contrato, modulos } = await res0.json()
+        const modulosSalvar = (modulos || []).filter(m => m.is_active).map(m => ({ modulo_id: m.modulo_id, limite: m.limite }))
+
+        const venc = new Date(novoVenc)
+        const bloq = new Date(venc); bloq.setMonth(bloq.getMonth() + 3)
+
+        const r1 = await authFetch(`/api/contrato/${_churchIdAtual}`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ periodicidade: contrato?.periodicidade || 'mensal', vencimento_em: novoVenc, valor: contrato?.valor, observacoes: contrato?.observacoes, modulos: modulosSalvar }),
+        })
+        if (!r1.ok) throw new Error()
+        await authFetch(`/api/contrato/${_churchIdAtual}/status`, {
+          method: 'PUT', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: document.getElementById('novoStatus').value }),
+        })
+        showToast('Contrato renovado com sucesso!')
+        document.getElementById('modalOverlay').classList.remove('open')
+        _churchIdAtual = null
+        await carregarContratos()
+      } catch (e) {
+        showToast('Erro ao renovar contrato', 'error')
+      } finally {
+        btn.disabled = false
+        btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg> Renovar'
+      }
+    }
+  </script>
+</body>
+</html>

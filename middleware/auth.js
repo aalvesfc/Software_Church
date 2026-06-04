@@ -9,6 +9,7 @@ const ROTAS_LIBERADAS = [
   '/api/notificacao/nao-lidas',
   '/api/contrato',
   '/api/config/sistema',
+  '/api/pagamento',
 ]
 
 function _rotaLiberada(req) {

@@ -267,6 +267,10 @@ app.use('/api/checkin',          require('./routes/checkin'))
 app.use('/api/local-checkin',    require('./routes/local-checkin'))
 app.use('/api/contrato',         require('./routes/contrato'))
 app.use('/api/config/sistema',   require('./routes/configSistema'))
+app.use('/api/carousel',         require('./routes/carousel'))
+
+const pagamentoRoute = require('./routes/pagamento')
+app.use('/api/pagamento', pagamentoRoute)
 
 app.get('/checkin',  (req, res) => res.sendFile(path.join(__dirname, 'public', 'checkin.html')))
 app.get('/presenca', (req, res) => res.sendFile(path.join(__dirname, 'public', 'presenca.html')))
@@ -296,8 +300,15 @@ app.get('/escalacao/:eventId', (req, res) => res.sendFile(path.join(__dirname, '
 app.get('/indisponibilidade',  (req, res) => res.sendFile(path.join(__dirname, 'public', 'indisponibilidade.html')))
 app.get('/notificacoes',       (req, res) => res.sendFile(path.join(__dirname, 'public', 'notificacoes.html')))
 app.get('/painel-sistema',        (req, res) => res.sendFile(path.join(__dirname, 'public', 'painel-sistema.html')))
+app.get('/igrejas-sistema',       (req, res) => res.sendFile(path.join(__dirname, 'public', 'igrejas-sistema.html')))
+app.get('/contratos-sistema',     (req, res) => res.sendFile(path.join(__dirname, 'public', 'contratos-sistema.html')))
+app.get('/pagamentos-sistema',    (req, res) => res.sendFile(path.join(__dirname, 'public', 'pagamentos-sistema.html')))
 app.get('/configuracao-sistema',  (req, res) => res.sendFile(path.join(__dirname, 'public', 'configuracao-sistema.html')))
 app.get('/bloqueado',             (req, res) => res.sendFile(path.join(__dirname, 'public', 'bloqueado.html')))
 
 const PORT = process.env.PORT || 3000
-app.listen(PORT, () => console.log(`Servidor rodando em http://localhost:${PORT}`))
+app.listen(PORT, () => {
+  console.log(`Servidor rodando em http://localhost:${PORT}`)
+  pagamentoRoute.atualizarStatusPagamentos()
+  setInterval(pagamentoRoute.atualizarStatusPagamentos, 24 * 60 * 60 * 1000)
+})

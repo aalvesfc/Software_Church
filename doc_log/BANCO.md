@@ -48,8 +48,10 @@ db_church
 └── db_permissao
 └── db_log → db_user
 └── db_contrato → db_church
-    └── db_contrato_modulo → db_modulo
+    ├── db_contrato_modulo → db_modulo
+    └── db_pagamento
 └── db_modulo
+└── db_login_carousel
 ```
 
 ---
@@ -795,7 +797,7 @@ Voluntário  → Dashboard, Eventos (somente visualização), Músicas
 
 **Módulos cadastrados:**
 ```
-voluntariado → Voluntariado
+voluntarios  → Voluntários
 membresia    → Membresia
 kids         → Kids
 financeiro   → Financeiro
@@ -848,7 +850,7 @@ cancelado   → contrato encerrado
 **Exemplo:**
 ```
 Igreja X contratou:
-└── voluntariado → limite: 500
+└── voluntarios → limite: 500
 └── membresia   → limite: null (ilimitado)
 ```
 
@@ -875,4 +877,75 @@ async function temModulo(churchId, moduloSlug) {
 vencimento_em < hoje → status: 'inadimplente'
 vencimento_em + 3 meses < hoje → status: 'bloqueado' (automático)
 Dono pode reativar manualmente a qualquer momento
+```
+
+---
+
+### `db_pagamento` — Pagamentos das Igrejas
+| Campo | Tipo | Descrição |
+|---|---|---|
+| id | uuid PK | — |
+| church_id | uuid FK | → db_church |
+| contrato_id | uuid FK | → db_contrato |
+| referencia | text NOT NULL | Ex: 'Jun/2026' |
+| valor | numeric(10,2) | Valor da parcela |
+| vencimento | date NOT NULL | Data de vencimento |
+| status | text DEFAULT 'pendente' | pendente \| pago \| atrasado |
+| pago_em | date | Data do pagamento |
+| observacoes | text | Observações |
+| created_at | timestamptz | — |
+| updated_at | timestamptz | — |
+
+**Regras:**
+```
+Ao criar contrato → gera parcelas automaticamente:
+  mensal    → 12 parcelas
+  trimestral → 4 parcelas
+  anual     → 1 parcela
+
+Ao marcar como pago:
+  → pago_em = data atual
+  → status = 'pago'
+  → contrato.vencimento_em avança para próxima parcela não paga
+
+Atualização automática de status:
+  vencimento < hoje e status = 'pendente' → 'atrasado'
+
+Status:
+  pendente → ⏳ ainda não venceu
+  pago     → ✅ pago
+  atrasado → ⚠️ venceu e não pagou
+```
+
+---
+
+### `db_login_carousel` — Carrossel da Tela de Login
+| Campo | Tipo | Descrição |
+|---|---|---|
+| id | uuid PK | — |
+| church_id | uuid FK | → db_church (DEFAULT: 00000000-0000-0000-0000-000000000001) |
+| slide_index | int | 1, 2 ou 3 (índice fixo) |
+| foto_url | text | URL da foto do slide |
+| frase | text | Frase de destaque (máx 120 chars) |
+| autor | text | Nome do autor (máx 50 chars) |
+| cargo | text | Cargo/função do autor (máx 50 chars) |
+| is_active | boolean DEFAULT true | Slide ativo |
+| created_at | timestamptz | — |
+| updated_at | timestamptz | — |
+| UNIQUE | — | (church_id, slide_index) |
+
+**Regras:**
+```
+- Global do sistema — não tem church_id por cliente
+- Gerenciado apenas pelo sistema_owner via painel-sistema
+- Leitura pública (sem JWT) — necessário para tela de login
+- Escrita apenas via service_role (bypass RLS)
+- Sempre 3 slides fixos (índice 1, 2, 3)
+- Seed inicial: 3 slides vazios para church_id da Hug Software
+```
+
+**Rotas:**
+```
+GET /api/carousel         → público, retorna slides ativos
+PUT /api/carousel/:index  → sistema_owner, atualiza slide
 ```

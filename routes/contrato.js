@@ -1,24 +1,29 @@
 // MÓDULO: core (sistema)
-const router      = require('express').Router()
+const router          = require('express').Router()
 const { supabaseAdmin } = require('../lib/supabase')
-const authMiddleware    = require('../middleware/auth')
+const authMiddleware  = require('../middleware/auth')
 const { dbError, serverError } = require('../lib/apiError')
 
-// ── Guard: apenas o dono do sistema (email configurado em SYSTEM_OWNER_EMAIL) ──
+const CHURCH_SISTEMA = '00000000-0000-0000-0000-000000000001'
+
+// ── Guard: apenas sistema_owner ───────────────────────────────────────────────
+// Nota: /api/contrato está em ROTAS_LIBERADAS do authMiddleware (para que o
+// sistema_owner acesse sem contrato próprio). Por isso req.dbUser pode ser null
+// aqui — ownerGuard faz sua própria busca por perfil_slug.
 async function ownerGuard(req, res, next) {
   try {
     const userId = req.authUser?.id
     if (!userId) return res.status(401).json({ error: 'Não autenticado' })
 
-    const { data: authUser } = await supabaseAdmin.auth.admin.getUserById(userId)
-    const email = authUser?.user?.email?.toLowerCase()
+    const { data: dbUser } = await supabaseAdmin
+      .from('db_user')
+      .select('db_perfil:perfil_id(slug)')
+      .eq('user_id', userId)
+      .limit(1)
+      .maybeSingle()
 
-    const ownerEmail = (process.env.SYSTEM_OWNER_EMAIL || '').toLowerCase()
-    if (!ownerEmail) {
-      return res.status(500).json({ error: 'SYSTEM_OWNER_EMAIL não configurado' })
-    }
-    if (email !== ownerEmail) {
-      return res.status(403).json({ error: 'Acesso restrito ao dono do sistema' })
+    if (dbUser?.db_perfil?.slug !== 'sistema_owner') {
+      return res.status(403).json({ error: 'Acesso negado' })
     }
 
     next()
@@ -27,18 +32,16 @@ async function ownerGuard(req, res, next) {
   }
 }
 
-// ── Job: atualiza status de contratos vencidos/bloqueados ──────────────────
+// ── Job: atualiza status de contratos vencidos/bloqueados ─────────────────────
 async function rodarJobInadimplencia() {
   const hoje = new Date().toISOString().split('T')[0]
 
-  // Ativos → inadimplentes
   await supabaseAdmin
     .from('db_contrato')
     .update({ status: 'inadimplente' })
     .eq('status', 'ativo')
     .lt('vencimento_em', hoje)
 
-  // Inadimplentes → bloqueados
   await supabaseAdmin
     .from('db_contrato')
     .update({ status: 'bloqueado' })
@@ -46,36 +49,64 @@ async function rodarJobInadimplencia() {
     .lt('bloqueio_em', hoje)
 }
 
-// ── GET /api/contrato ── lista igrejas com status do contrato ──────────────
-router.get('/', authMiddleware, ownerGuard, async (req, res) => {
+// ── GET /api/contrato/modulos ── lista todos os módulos disponíveis ───────────
+// (registrado antes de /:churchId para não ser capturado como parâmetro)
+router.get('/modulos', authMiddleware, ownerGuard, async (req, res) => {
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('db_modulo')
+      .select('id, name, slug, description')
+      .eq('is_active', true)
+      .order('name')
+
+    if (error) return dbError(res, error, 'modulos GET')
+    res.json({ modulos: data || [] })
+  } catch (e) {
+    return serverError(res, e, 'modulos GET')
+  }
+})
+
+// ── POST /api/contrato/job-inadimplencia ── dispara job manualmente ──────────
+router.post('/job-inadimplencia', authMiddleware, ownerGuard, async (req, res) => {
   try {
     await rodarJobInadimplencia()
+    res.json({ ok: true })
+  } catch (e) {
+    return serverError(res, e, 'job-inadimplencia')
+  }
+})
 
-    const { data: churches, error: cErr } = await supabaseAdmin
+// ── GET /api/contrato ── lista igrejas com contratos e módulos ────────────────
+router.get('/', authMiddleware, ownerGuard, async (req, res) => {
+  try {
+
+    // Busca todas as igrejas exceto a virtual do sistema
+    const { data: igrejas, error: cErr } = await supabaseAdmin
       .from('db_church')
-      .select('id, name')
-      .order('name', { ascending: true })
+      .select('id, name, slug, logo_url, is_active')
+      .neq('id', CHURCH_SISTEMA)
+      .order('name')
 
     if (cErr) return dbError(res, cErr, 'contrato GET churches')
 
-    const churchIds = (churches || []).map(c => c.id)
+    const churchIds = (igrejas || []).map(c => c.id)
+    if (!churchIds.length) return res.json({ igrejas: [] })
 
-    const { data: contratos, error: conErr } = await supabaseAdmin
+    // Busca contratos de todas as igrejas de uma vez
+    const { data: contratos } = await supabaseAdmin
       .from('db_contrato')
-      .select('id, church_id, status, periodicidade, inicio_em, vencimento_em, bloqueio_em, valor, observacoes')
+      .select('id, church_id, status, periodicidade, inicio_em, vencimento_em, bloqueio_em, valor')
       .in('church_id', churchIds)
-
-    if (conErr) return dbError(res, conErr, 'contrato GET contratos')
 
     const contratoMap = {}
     ;(contratos || []).forEach(c => { contratoMap[c.church_id] = c })
 
-    // Busca modulos de cada contrato
+    // Busca módulos de todos os contratos de uma vez
     const contratoIds = (contratos || []).map(c => c.id)
     const { data: modulos } = contratoIds.length
       ? await supabaseAdmin
           .from('db_contrato_modulo')
-          .select('contrato_id, limite, is_active, db_modulo:modulo_id(slug, name)')
+          .select('contrato_id, limite, is_active, db_modulo:modulo_id(id, slug, name)')
           .in('contrato_id', contratoIds)
           .eq('is_active', true)
       : { data: [] }
@@ -83,10 +114,14 @@ router.get('/', authMiddleware, ownerGuard, async (req, res) => {
     const moduloMap = {}
     ;(modulos || []).forEach(m => {
       if (!moduloMap[m.contrato_id]) moduloMap[m.contrato_id] = []
-      moduloMap[m.contrato_id].push({ slug: m.db_modulo?.slug, name: m.db_modulo?.name, limite: m.limite })
+      moduloMap[m.contrato_id].push({
+        slug:   m.db_modulo?.slug,
+        name:   m.db_modulo?.name,
+        limite: m.limite,
+      })
     })
 
-    const result = (churches || []).map(church => {
+    const result = (igrejas || []).map(church => {
       const contrato = contratoMap[church.id] || null
       return {
         church_id:     church.id,
@@ -107,14 +142,14 @@ router.get('/', authMiddleware, ownerGuard, async (req, res) => {
   }
 })
 
-// ── GET /api/contrato/:churchId ── detalhe do contrato de uma igreja ────────
+// ── GET /api/contrato/:churchId ── detalhe de uma igreja ─────────────────────
 router.get('/:churchId', authMiddleware, ownerGuard, async (req, res) => {
   try {
     const { churchId } = req.params
 
     const { data: church, error: cErr } = await supabaseAdmin
       .from('db_church')
-      .select('id, name')
+      .select('id, name, slug, logo_url')
       .eq('id', churchId)
       .maybeSingle()
 
@@ -149,12 +184,12 @@ router.get('/:churchId', authMiddleware, ownerGuard, async (req, res) => {
       }))
     }
 
-    // Lista todos os módulos disponíveis
+    // Todos os módulos disponíveis para o modal
     const { data: todosModulos } = await supabaseAdmin
       .from('db_modulo')
       .select('id, slug, name, description')
       .eq('is_active', true)
-      .order('name', { ascending: true })
+      .order('name')
 
     res.json({
       church,
@@ -167,7 +202,7 @@ router.get('/:churchId', authMiddleware, ownerGuard, async (req, res) => {
   }
 })
 
-// ── POST /api/contrato/:churchId ── cria ou atualiza contrato ───────────────
+// ── POST /api/contrato/:churchId ── cria ou atualiza contrato ────────────────
 router.post('/:churchId', authMiddleware, ownerGuard, async (req, res) => {
   try {
     const { churchId } = req.params
@@ -183,73 +218,56 @@ router.post('/:churchId', authMiddleware, ownerGuard, async (req, res) => {
     bloqueioAt.setMonth(bloqueioAt.getMonth() + 3)
     const bloqueio_em = bloqueioAt.toISOString().split('T')[0]
 
-    // Busca contrato existente
-    const { data: existente } = await supabaseAdmin
+    // Upsert contrato (cria se não existe, atualiza se existe)
+    const { error: uErr } = await supabaseAdmin
       .from('db_contrato')
-      .select('id, status')
+      .upsert(
+        { church_id: churchId, periodicidade, vencimento_em, bloqueio_em, valor: valor || null, observacoes: observacoes || null },
+        { onConflict: 'church_id' }
+      )
+
+    if (uErr) return dbError(res, uErr, 'contrato POST upsert')
+
+    // Busca o contrato_id após upsert
+    const { data: contratoSalvo, error: selErr } = await supabaseAdmin
+      .from('db_contrato')
+      .select('id')
       .eq('church_id', churchId)
       .order('created_at', { ascending: false })
       .limit(1)
-      .maybeSingle()
+      .single()
 
-    let contratoId
-    if (existente?.id) {
-      // Atualiza contrato existente
-      const { data: updated, error: uErr } = await supabaseAdmin
-        .from('db_contrato')
-        .update({ periodicidade, vencimento_em, bloqueio_em, valor: valor || null, observacoes: observacoes || null })
-        .eq('id', existente.id)
-        .select('id')
-        .single()
+    if (selErr || !contratoSalvo) return dbError(res, selErr, 'contrato POST select')
 
-      if (uErr) return dbError(res, uErr, 'contrato POST update')
-      contratoId = updated.id
-    } else {
-      // Cria novo contrato
-      const { data: authUserInfo } = await supabaseAdmin.auth.admin.getUserById(req.authUser.id)
-      const ownerEmail = authUserInfo?.user?.email
+    const contratoId = contratoSalvo.id
 
-      const { data: created, error: iErr } = await supabaseAdmin
-        .from('db_contrato')
-        .insert({
-          church_id:     churchId,
-          periodicidade,
-          status:        'trial',
-          inicio_em:     new Date().toISOString().split('T')[0],
-          vencimento_em,
-          bloqueio_em,
-          valor:         valor || null,
-          observacoes:   observacoes || null,
-          created_by:    ownerEmail || 'system',
-        })
-        .select('id')
-        .single()
-
-      if (iErr) return dbError(res, iErr, 'contrato POST insert')
-      contratoId = created.id
-    }
-
-    // Sincroniza módulos: desativa todos e reinsere os selecionados
+    // Remove módulos antigos e insere os novos selecionados
     await supabaseAdmin
       .from('db_contrato_modulo')
-      .update({ is_active: false })
+      .delete()
       .eq('contrato_id', contratoId)
 
     if (modulos.length) {
-      const rows = modulos.map(m => ({
-        contrato_id: contratoId,
-        church_id:   churchId,
-        modulo_id:   m.modulo_id,
-        limite:      m.limite || null,
-        is_active:   true,
-      }))
-
       const { error: mErr } = await supabaseAdmin
         .from('db_contrato_modulo')
-        .upsert(rows, { onConflict: 'contrato_id,modulo_id' })
+        .insert(modulos.map(m => ({
+          contrato_id: contratoId,
+          church_id:   churchId,
+          modulo_id:   m.modulo_id,
+          limite:      m.limite || null,
+          is_active:   true,
+        })))
 
       if (mErr) return dbError(res, mErr, 'contrato POST modulos')
     }
+
+    // Gera parcelas do contrato recém criado/renovado (sem bloquear a resposta)
+    try {
+      const { gerarParcelasParaContrato } = require('./pagamento')
+      gerarParcelasParaContrato(churchId).catch(err =>
+        console.error('[contrato POST] gerarParcelas falhou:', err.message)
+      )
+    } catch (_) { /* pagamento module não disponível ainda */ }
 
     res.json({ ok: true, contrato_id: contratoId })
   } catch (e) {
@@ -257,7 +275,7 @@ router.post('/:churchId', authMiddleware, ownerGuard, async (req, res) => {
   }
 })
 
-// ── PUT /api/contrato/:churchId/status ── muda status manualmente ───────────
+// ── PUT /api/contrato/:churchId/status ── muda status manualmente ────────────
 router.put('/:churchId/status', authMiddleware, ownerGuard, async (req, res) => {
   try {
     const { churchId } = req.params

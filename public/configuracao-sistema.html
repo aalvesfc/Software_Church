@@ -56,7 +56,8 @@
     .sys-brand-logo svg { width: 16px; height: 16px; color: #fff; }
     .sys-brand-name { font-size: 13px; font-weight: 700; color: #fff; letter-spacing: -0.2px; }
     .sys-brand-tag  { font-size: 10px; font-weight: 600; color: rgba(255,255,255,0.35); letter-spacing: 0.08em; text-transform: uppercase; margin-top: 1px; }
-    .sys-nav { flex: 1; padding: 14px 12px; display: flex; flex-direction: column; gap: 2px; }
+    .sys-nav { flex: 1; padding: 14px 12px; display: flex; flex-direction: column; gap: 2px; overflow-y: auto; scrollbar-width: none; }
+    .sys-nav::-webkit-scrollbar { display: none; }
     .sys-nav-item {
       display: flex; align-items: center; gap: 10px;
       padding: 10px 12px; border-radius: 10px;
@@ -77,6 +78,28 @@
       cursor: pointer; font-family: inherit; transition: background 0.15s, color 0.15s;
     }
     .sys-btn-logout:hover { background: rgba(255,255,255,0.15); color: #fff; }
+
+    /* ── Nav accordion ── */
+    .nav-group { width: 100%; }
+    .nav-group-toggle {
+      width: 100%; font-family: inherit; text-align: left;
+      background: none; border: none; cursor: pointer;
+    }
+    .nav-chevron {
+      width: 14px; height: 14px; flex-shrink: 0; margin-left: auto;
+      transition: transform 0.2s; opacity: 0.6;
+    }
+    .nav-group.open .nav-chevron { transform: rotate(90deg); }
+    .nav-group-items { display: none; padding-left: 8px; margin-top: 2px; }
+    .nav-group.open .nav-group-items { display: flex; flex-direction: column; gap: 1px; }
+    .nav-subitem {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 12px; border-radius: 8px;
+      font-size: 13px; color: rgba(255,255,255,0.45);
+      text-decoration: none; transition: background 0.15s, color 0.15s;
+    }
+    .nav-subitem:hover { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.8); }
+    .nav-subitem.active { color: rgba(255,255,255,0.9); background: rgba(255,255,255,0.1); font-weight: 600; }
 
     /* ── MAIN ── */
     .sys-main { margin-left: 220px; flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
@@ -243,15 +266,39 @@
       </div>
     </div>
 
-    <nav class="sys-nav">
+    <nav class="sys-nav" id="sysNav">
+
       <a class="sys-nav-item" href="/painel-sistema">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-        Painel
+        <span>Dashboard</span>
       </a>
-      <a class="sys-nav-item active" href="/configuracao-sistema">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-        Configurações
+
+      <a class="sys-nav-item" href="/igrejas-sistema">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        <span>Igrejas</span>
       </a>
+
+      <a class="sys-nav-item" href="/contratos-sistema">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        <span>Contratos</span>
+      </a>
+
+      <a class="sys-nav-item" href="/pagamentos-sistema">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+        <span>Pagamentos</span>
+      </a>
+
+      <div class="nav-group" id="groupConfig">
+        <button class="sys-nav-item nav-group-toggle" onclick="toggleGroup('groupConfig')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          <span>Configurações</span>
+          <svg class="nav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+        <div class="nav-group-items">
+          <a href="/configuracao-sistema" class="nav-subitem">Carrossel Login</a>
+        </div>
+      </div>
+
     </nav>
 
     <div class="sys-sidebar-footer">
@@ -307,6 +354,17 @@
 
   <script src="/js/auth-fetch.js"></script>
   <script>
+    function toggleGroup(id) {
+      document.getElementById(id)?.classList.toggle('open')
+    }
+
+    document.querySelectorAll('#sysNav a.sys-nav-item, #sysNav .nav-subitem').forEach(el => {
+      if (el.getAttribute('href') === window.location.pathname) el.classList.add('active')
+    })
+    if (document.querySelector('#sysNav .nav-subitem.active')) {
+      document.getElementById('groupConfig')?.classList.add('open')
+    }
+
     // ── Estado ────────────────────────────────────────────────────────────────
     const MAX_BYTES = 2 * 1024 * 1024
     const ALLOWED   = ['image/jpeg', 'image/png', 'image/webp']
@@ -456,7 +514,7 @@
     // ── Carregar config salva ─────────────────────────────────────────────────
     async function carregarConfig() {
       try {
-        const res  = await authFetch('/api/config/sistema/login-carousel')
+        const res  = await fetch('/api/carousel')
         if (!res.ok) return
         const data = await res.json()
         if (!data.slides) return
@@ -489,27 +547,30 @@
       const btn = document.getElementById('btn-save')
       btn.disabled = true; btn.textContent = 'Salvando…'
       try {
-        const slides = []
         for (let n = 1; n <= 3; n++) {
-          const i = n - 1
-          slides.push({
-            frase:      document.getElementById(`frase-${n}`)?.value?.trim() || '',
-            autor:      document.getElementById(`autor-${n}`)?.value?.trim() || '',
-            cargo:      document.getElementById(`cargo-${n}`)?.value?.trim() || '',
-            foto_atual: state[i].atual,
-            foto_base64: state[i].file ? await toBase64(state[i].file) : null,
+          const i   = n - 1
+          const body = {
+            frase:    document.getElementById(`frase-${n}`)?.value?.trim() || '',
+            autor:    document.getElementById(`autor-${n}`)?.value?.trim() || '',
+            cargo:    document.getElementById(`cargo-${n}`)?.value?.trim() || '',
+            foto_url: state[i].atual || null,
+            is_active: true,
+          }
+          if (state[i].file) {
+            body.foto_base64 = await toBase64(state[i].file)
+          }
+
+          const res  = await authFetch(`/api/carousel/${n}`, {
+            method:  'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify(body),
           })
+          const data = await res.json()
+          if (!res.ok) throw new Error(data.error || `Erro ao salvar slide ${n}`)
+
+          state[i].atual = data.slide?.foto || state[i].atual
+          state[i].file  = null
         }
-
-        const res  = await authFetch('/api/config/sistema/login-carousel', {
-          method:  'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body:    JSON.stringify({ slides }),
-        })
-        const data = await res.json()
-        if (!res.ok) throw new Error(data.error || 'Erro ao salvar')
-
-        data.slides?.forEach((s, i) => { state[i].atual = s.foto || ''; state[i].file = null })
 
         showMsg('Carrossel salvo com sucesso ✓', 'ok')
       } catch (err) {

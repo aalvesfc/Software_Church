@@ -3,14 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Hug Software — Painel do Sistema</title>
+  <title>Hug Software — Dashboard</title>
   <script src="/js/auth-check.js"></script>
   <script>
     ;(function () {
       const perfil = localStorage.getItem('perfil_slug')
-      if (perfil !== 'sistema_owner') {
-        window.location.href = perfil ? '/dashboard' : '/'
-      }
+      if (perfil !== 'sistema_owner') window.location.href = perfil ? '/dashboard' : '/'
     })()
   </script>
   <link rel="icon" type="image/png" href="/IMG/logo.png">
@@ -46,62 +44,37 @@
     body { min-height: 100vh; background: var(--canvas-page); display: flex; -webkit-font-smoothing: antialiased; }
 
     /* ── SIDEBAR ── */
-    .sys-sidebar {
-      width: 220px; flex-shrink: 0;
-      background: #1c1c1c;
-      display: flex; flex-direction: column;
-      position: fixed; top: 0; left: 0; bottom: 0; z-index: 100;
-    }
-    .sys-sidebar-brand {
-      display: flex; align-items: center; gap: 10px;
-      padding: 22px 18px 18px;
-      border-bottom: 1px solid rgba(255,255,255,0.08);
-    }
-    .sys-brand-logo {
-      width: 32px; height: 32px; border-radius: 8px;
-      background: var(--primary);
-      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-    }
+    .sys-sidebar { width: 220px; flex-shrink: 0; background: #1c1c1c; display: flex; flex-direction: column; position: fixed; top: 0; left: 0; bottom: 0; z-index: 100; }
+    .sys-sidebar-brand { display: flex; align-items: center; gap: 10px; padding: 22px 18px 18px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+    .sys-brand-logo { width: 32px; height: 32px; border-radius: 8px; background: var(--primary); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
     .sys-brand-logo svg { width: 16px; height: 16px; color: #fff; }
     .sys-brand-name { font-size: 13px; font-weight: 700; color: #fff; letter-spacing: -0.2px; }
     .sys-brand-tag  { font-size: 10px; font-weight: 600; color: rgba(255,255,255,0.35); letter-spacing: 0.08em; text-transform: uppercase; margin-top: 1px; }
-    .sys-nav { flex: 1; padding: 14px 12px; display: flex; flex-direction: column; gap: 2px; }
-    .sys-nav-item {
-      display: flex; align-items: center; gap: 10px;
-      padding: 10px 12px; border-radius: 10px;
-      font-size: 14px; font-weight: 500; color: rgba(255,255,255,0.55);
-      text-decoration: none; transition: background 0.15s, color 0.15s;
-    }
+    .sys-nav { flex: 1; padding: 14px 12px; display: flex; flex-direction: column; gap: 2px; overflow-y: auto; scrollbar-width: none; }
+    .sys-nav::-webkit-scrollbar { display: none; }
+    .sys-nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; font-size: 14px; font-weight: 500; color: rgba(255,255,255,0.55); text-decoration: none; transition: background 0.15s, color 0.15s; cursor: pointer; }
     .sys-nav-item:hover { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.9); }
     .sys-nav-item.active { background: #fff; color: #1a1a1a; font-weight: 600; }
     .sys-nav-item svg { width: 18px; height: 18px; flex-shrink: 0; }
-    .sys-sidebar-footer {
-      padding: 16px 18px;
-      border-top: 1px solid rgba(255,255,255,0.08);
-    }
+    .sys-sidebar-footer { padding: 16px 18px; border-top: 1px solid rgba(255,255,255,0.08); }
     .sys-footer-user { font-size: 12px; color: rgba(255,255,255,0.4); margin-bottom: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .sys-btn-logout {
-      width: 100%; height: 32px; background: rgba(255,255,255,0.08); border: none;
-      border-radius: 8px; font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.6);
-      cursor: pointer; font-family: inherit; transition: background 0.15s, color 0.15s;
-    }
+    .sys-btn-logout { width: 100%; height: 32px; background: rgba(255,255,255,0.08); border: none; border-radius: 8px; font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.6); cursor: pointer; font-family: inherit; transition: background 0.15s, color 0.15s; }
     .sys-btn-logout:hover { background: rgba(255,255,255,0.15); color: #fff; }
+    .nav-group { width: 100%; }
+    .nav-group-toggle { width: 100%; font-family: inherit; text-align: left; background: none; border: none; cursor: pointer; }
+    .nav-chevron { width: 14px; height: 14px; flex-shrink: 0; margin-left: auto; transition: transform 0.2s; opacity: 0.6; }
+    .nav-group.open .nav-chevron { transform: rotate(90deg); }
+    .nav-group-items { display: none; padding-left: 8px; margin-top: 2px; }
+    .nav-group.open .nav-group-items { display: flex; flex-direction: column; gap: 1px; }
+    .nav-subitem { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 8px; font-size: 13px; color: rgba(255,255,255,0.45); text-decoration: none; transition: background 0.15s, color 0.15s; }
+    .nav-subitem:hover { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.8); }
+    .nav-subitem.active { color: rgba(255,255,255,0.9); background: rgba(255,255,255,0.1); font-weight: 600; }
 
     /* ── MAIN ── */
     .sys-main { margin-left: 220px; flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
-
-    /* ── TOPBAR ── */
-    .topbar {
-      position: sticky; top: 0; z-index: 50;
-      background: rgba(236,233,231,0.85); backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--hairline);
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 0 32px; height: 64px;
-    }
+    .topbar { position: sticky; top: 0; z-index: 50; background: rgba(236,233,231,0.85); backdrop-filter: blur(12px); border-bottom: 1px solid var(--hairline); display: flex; align-items: center; justify-content: space-between; padding: 0 32px; height: 64px; }
     .topbar-title { font-size: 16px; font-weight: 700; color: var(--ink); letter-spacing: -0.3px; }
     .topbar-user  { font-size: 13px; color: var(--ink-muted); }
-
-    /* ── PAGE ── */
     .page { max-width: 1100px; margin: 0 auto; padding: 36px 32px 64px; width: 100%; }
 
     /* ── HERO ── */
@@ -110,128 +83,67 @@
     .hero-title span { color: var(--primary); }
     .hero-sub { font-size: 15px; color: var(--ink-muted); margin-top: 4px; }
 
-    /* ── STATS ── */
-    .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 32px; }
+    /* ── KPI CARDS ── */
+    .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 28px; }
     .stat-card { background: #fff; border-radius: var(--radius-lg); padding: 20px 22px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
     .stat-value { font-size: 2rem; font-weight: 700; color: var(--primary); letter-spacing: -0.04em; line-height: 1; }
+    .stat-value.green  { color: var(--success-dark); }
+    .stat-value.red    { color: var(--danger-dark); }
     .stat-label { font-size: 12px; font-weight: 500; color: var(--ink-muted); margin-top: 6px; }
 
-    /* ── LIST CARD ── */
-    .list-card { background: #fff; border-radius: var(--radius-lg); box-shadow: 0 1px 3px rgba(0,0,0,0.06); overflow: hidden; }
-    .list-header { display:flex; align-items:center; justify-content:space-between; padding: 20px 24px 16px; border-bottom: 1px solid var(--hairline); }
-    .list-header-title { font-size: 15px; font-weight: 700; color: var(--ink); }
-    .search-input { height: 36px; padding: 0 14px; background: var(--canvas-input); border: none; border-radius: var(--radius-pill); font-size: 13px; font-family: inherit; color: var(--ink); outline: none; width: 220px; }
-    .search-input::placeholder { color: var(--ink-subtle); }
+    /* ── CARDS DASHBOARD ── */
+    .cards-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .dash-card { background: #fff; border-radius: var(--radius-lg); box-shadow: 0 1px 3px rgba(0,0,0,0.06); overflow: hidden; }
+    .dash-card-header { display: flex; align-items: center; justify-content: space-between; padding: 18px 22px 14px; border-bottom: 1px solid var(--hairline); }
+    .dash-card-title { font-size: 14px; font-weight: 700; color: var(--ink); letter-spacing: -0.01em; }
+    .dash-card-link { font-size: 13px; color: var(--primary); text-decoration: none; font-weight: 500; }
+    .dash-card-link:hover { text-decoration: underline; }
+    .dash-card-body { padding: 16px 22px; }
 
-    /* ── TABLE ── */
-    .table-wrap { overflow-x: auto; }
-    table { width: 100%; border-collapse: collapse; }
-    th { font-size: 11px; font-weight: 600; color: var(--ink-muted); text-align: left; padding: 10px 16px; background: var(--gray-100); border-bottom: 1px solid var(--hairline); white-space: nowrap; }
-    td { padding: 14px 16px; border-bottom: 1px solid #f5f3f0; vertical-align: middle; }
-    tr:last-child td { border-bottom: none; }
-    tr:hover td { background: #fafafa; }
-    .church-name { font-size: 14px; font-weight: 600; color: var(--ink); }
-    .church-id { font-size: 11px; color: var(--ink-subtle); margin-top: 1px; font-family: monospace; }
+    /* ── ALERTAS ── */
+    .alert-item { display: flex; align-items: flex-start; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--hairline); }
+    .alert-item:last-child { border-bottom: none; }
+    .alert-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+    .alert-dot.warning { background: #F59E0B; }
+    .alert-dot.danger  { background: var(--danger-dark); }
+    .alert-dot.info    { background: var(--primary); }
+    .alert-dot.success { background: var(--success-dark); }
+    .alert-text { font-size: 13px; color: var(--ink); flex: 1; line-height: 1.4; }
+    .alert-text a { color: var(--primary); text-decoration: none; font-weight: 500; }
+    .alert-text a:hover { text-decoration: underline; }
+    .alert-ok { display: flex; align-items: center; gap: 8px; padding: 12px 0; font-size: 14px; color: var(--success-dark); font-weight: 500; }
 
-    /* ── STATUS BADGES ── */
-    .badge { display:inline-flex; align-items:center; gap:5px; padding:3px 10px; border-radius:var(--radius-pill); font-size:12px; font-weight:600; white-space:nowrap; }
-    .badge .dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
-    .badge-trial        { background:#F5F3F0; color:var(--gray-500); }
-    .badge-trial .dot   { background:var(--gray-400); }
-    .badge-ativo        { background:var(--success-light); color:var(--success-dark); }
-    .badge-ativo .dot   { background:var(--success-dark); }
-    .badge-inadimplente { background:var(--warning-light); color:var(--warning-dark); }
-    .badge-inadimplente .dot { background:#F59E0B; }
-    .badge-bloqueado    { background:var(--danger-light); color:var(--danger-dark); }
-    .badge-bloqueado .dot { background:var(--danger-dark); }
-    .badge-cancelado    { background:#1d1d1f; color:#fff; }
-    .badge-cancelado .dot { background:#6e6e73; }
-    .badge-sem-contrato { background:var(--canvas-input); color:var(--ink-muted); }
-
-    /* ── MODULE BADGES ── */
-    .modulo-badge { display:inline-block; font-size:11px; font-weight:600; padding:2px 8px; border-radius:var(--radius-pill); background:rgba(139,92,246,0.08); color:var(--primary); margin:2px 2px 2px 0; white-space:nowrap; }
-    .modulos-cell { display:flex; flex-wrap:wrap; }
-
-    /* ── ACTION BUTTON ── */
-    .btn-gerenciar { height:32px; padding:0 14px; background:var(--primary); color:#fff; border:none; border-radius:var(--radius-pill); font-size:13px; font-weight:600; font-family:inherit; cursor:pointer; transition:background 0.15s; white-space:nowrap; }
-    .btn-gerenciar:hover { background:var(--primary-dark); }
-    .vencimento-text { font-size:13px; color:var(--ink); }
-    .vencimento-alerta { color:var(--danger-dark); font-weight:600; }
-
-    /* ── EMPTY / LOADING ── */
-    .table-empty { padding: 56px 24px; text-align: center; color: var(--ink-muted); font-size: 14px; }
-    .spinner { display:inline-block; width:20px; height:20px; border:2.5px solid var(--hairline); border-top-color:var(--primary); border-radius:50%; animation:spin 0.7s linear infinite; }
-    @keyframes spin { to { transform:rotate(360deg); } }
-
-    /* ── MODAL ── */
-    .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:200; display:none; align-items:center; justify-content:center; padding:20px; }
-    .modal-overlay.open { display:flex; }
-    .modal { background:#fff; border-radius:var(--radius-lg); width:100%; max-width:640px; max-height:90vh; overflow:hidden; display:flex; flex-direction:column; box-shadow:0 24px 64px rgba(0,0,0,0.18); }
-    .modal-header { display:flex; align-items:center; justify-content:space-between; padding:20px 24px 16px; border-bottom:1px solid var(--hairline); flex-shrink:0; }
-    .modal-title { font-size:16px; font-weight:700; color:var(--ink); letter-spacing:-0.02em; }
-    .modal-church { font-size:13px; color:var(--ink-muted); margin-top:2px; }
-    .modal-close { width:32px; height:32px; background:var(--canvas-input); border:none; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:background 0.15s; }
-    .modal-close:hover { background:var(--hairline); }
-    .modal-close svg { width:14px; height:14px; color:var(--ink-muted); }
-    .modal-body { padding:24px; overflow-y:auto; flex:1; }
-    .modal-footer { padding:16px 24px; border-top:1px solid var(--hairline); display:flex; align-items:center; justify-content:flex-end; gap:10px; flex-shrink:0; }
-
-    /* ── FORM ── */
-    .form-section { margin-bottom:24px; }
-    .form-section-title { font-size:12px; font-weight:700; color:var(--ink-muted); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:14px; padding-bottom:8px; border-bottom:1px solid var(--hairline); }
-    .form-row { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
-    .form-row.single { grid-template-columns:1fr; }
-    .form-row.three { grid-template-columns:1fr 1fr 1fr; }
-    .field { display:flex; flex-direction:column; gap:5px; }
-    .field label { font-size:12px; font-weight:600; color:var(--ink-muted); }
-    .field input, .field select, .field textarea {
-      height:40px; padding:0 12px; background:var(--canvas-input); border:1.5px solid transparent;
-      border-radius:var(--radius-md); font-size:14px; font-family:inherit; color:var(--ink);
-      outline:none; transition:border-color 0.15s; width:100%;
-    }
-    .field textarea { height:auto; padding:10px 12px; resize:vertical; }
-    .field input:focus, .field select:focus, .field textarea:focus { border-color:var(--primary); }
-    .field input[readonly] { color:var(--ink-muted); cursor:default; }
-
-    /* ── MÓDULOS ── */
-    .modulos-grid { display:flex; flex-direction:column; gap:8px; }
-    .modulo-row { display:flex; align-items:center; gap:12px; padding:10px 14px; border:1.5px solid var(--hairline); border-radius:var(--radius-md); transition:border-color 0.15s; }
-    .modulo-row.checked { border-color:var(--primary); background:rgba(139,92,246,0.04); }
-    .modulo-row label { display:flex; align-items:center; gap:10px; cursor:pointer; flex:1; min-width:0; }
-    .modulo-row input[type=checkbox] { width:16px; height:16px; accent-color:var(--primary); cursor:pointer; flex-shrink:0; }
-    .modulo-info { flex:1; min-width:0; }
-    .modulo-name { font-size:14px; font-weight:600; color:var(--ink); }
-    .modulo-desc { font-size:12px; color:var(--ink-muted); }
-    .modulo-limite-wrap { display:none; align-items:center; gap:6px; flex-shrink:0; }
-    .modulo-row.checked .modulo-limite-wrap { display:flex; }
-    .modulo-limite { width:80px; height:32px; padding:0 10px; background:#fff; border:1.5px solid var(--hairline); border-radius:var(--radius-md); font-size:13px; font-family:inherit; color:var(--ink); outline:none; text-align:center; }
-    .modulo-limite:focus { border-color:var(--primary); }
-    .modulo-limite-label { font-size:12px; color:var(--ink-muted); white-space:nowrap; }
-
-    /* ── BUTTONS ── */
-    .btn-primary { height:40px; padding:0 20px; background:var(--primary); color:#fff; border:none; border-radius:var(--radius-pill); font-size:14px; font-weight:600; font-family:inherit; cursor:pointer; transition:background 0.15s; display:inline-flex; align-items:center; gap:7px; }
-    .btn-primary:hover { background:var(--primary-dark); }
-    .btn-primary:disabled { opacity:0.6; cursor:not-allowed; }
-    .btn-secondary { height:40px; padding:0 18px; background:transparent; border:1.5px solid var(--hairline); border-radius:var(--radius-pill); font-size:14px; font-weight:600; color:var(--ink-muted); font-family:inherit; cursor:pointer; transition:background 0.15s; }
-    .btn-secondary:hover { background:var(--canvas-input); color:var(--ink); }
-    .status-select { height:40px; padding:0 12px; border:1.5px solid transparent; border-radius:var(--radius-md); font-size:14px; font-family:inherit; color:var(--ink); background:var(--canvas-input); outline:none; cursor:pointer; width:100%; }
-    .status-select:focus { border-color:var(--primary); }
+    /* ── ATIVIDADES ── */
+    .ativ-item { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--hairline); }
+    .ativ-item:last-child { border-bottom: none; }
+    .ativ-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .ativ-icon.pago    { background: var(--success-light); color: var(--success-dark); }
+    .ativ-icon.contrato{ background: rgba(139,92,246,0.1); color: var(--primary); }
+    .ativ-icon svg { width: 15px; height: 15px; }
+    .ativ-body { flex: 1; min-width: 0; }
+    .ativ-desc { font-size: 13px; color: var(--ink); font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .ativ-when { font-size: 12px; color: var(--ink-muted); margin-top: 1px; }
+    .empty-state { padding: 28px 0; text-align: center; font-size: 13px; color: var(--ink-muted); }
 
     /* ── TOAST ── */
-    #toast { position:fixed; bottom:28px; left:50%; transform:translateX(-50%) translateY(12px); background:#1d1d1f; color:#fff; border-radius:var(--radius-pill); padding:10px 20px; font-size:14px; font-weight:500; opacity:0; pointer-events:none; transition:opacity 0.2s, transform 0.2s; z-index:999; white-space:nowrap; }
-    #toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
-    #toast.error { background:var(--danger-dark); }
+    #toast { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(12px); background: #1d1d1f; color: #fff; border-radius: var(--radius-pill); padding: 10px 20px; font-size: 14px; font-weight: 500; opacity: 0; pointer-events: none; transition: opacity 0.2s, transform 0.2s; z-index: 999; white-space: nowrap; }
+    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    #toast.error { background: var(--danger-dark); }
+
+    /* ── SPINNER ── */
+    .spinner { display: inline-block; width: 18px; height: 18px; border: 2px solid var(--hairline); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.7s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
     @media (max-width: 900px) {
       .sys-sidebar { display: none; }
       .sys-main { margin-left: 0; }
       .stats-row { grid-template-columns: repeat(2, 1fr); }
+      .cards-row { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
 
-  <!-- Sidebar -->
   <aside class="sys-sidebar">
     <div class="sys-sidebar-brand">
       <div class="sys-brand-logo">
@@ -242,349 +154,111 @@
         <div class="sys-brand-tag">Sistema</div>
       </div>
     </div>
-
-    <nav class="sys-nav">
-      <a class="sys-nav-item active" href="/painel-sistema">
+    <nav class="sys-nav" id="sysNav">
+      <a class="sys-nav-item" href="/painel-sistema">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-        Painel
+        <span>Dashboard</span>
       </a>
-      <a class="sys-nav-item" href="/configuracao-sistema">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-        Configurações
+      <a class="sys-nav-item" href="/igrejas-sistema">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        <span>Igrejas</span>
       </a>
+      <a class="sys-nav-item" href="/contratos-sistema">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        <span>Contratos</span>
+      </a>
+      <a class="sys-nav-item" href="/pagamentos-sistema">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+        <span>Pagamentos</span>
+      </a>
+      <div class="nav-group" id="groupConfig">
+        <button class="sys-nav-item nav-group-toggle" onclick="toggleGroup('groupConfig')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          <span>Configurações</span>
+          <svg class="nav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+        <div class="nav-group-items">
+          <a href="/configuracao-sistema" class="nav-subitem">Carrossel Login</a>
+        </div>
+      </div>
     </nav>
-
     <div class="sys-sidebar-footer">
       <div class="sys-footer-user" id="sidebarUser"></div>
       <button class="sys-btn-logout" onclick="fazerLogout()">Sair</button>
     </div>
   </aside>
 
-  <!-- Main -->
   <div class="sys-main">
-
     <header class="topbar">
-      <span class="topbar-title">Painel do Sistema</span>
+      <span class="topbar-title">Dashboard</span>
       <span class="topbar-user" id="topbarUser"></span>
     </header>
 
     <div class="page">
 
       <div class="hero">
-        <h1 class="hero-title">Igrejas & <span>Contratos</span></h1>
-        <p class="hero-sub">Gerencie igrejas, contratos e módulos contratados</p>
+        <h1 class="hero-title">Visão <span>Geral</span></h1>
+        <p class="hero-sub" id="heroSemana">Carregando...</p>
       </div>
 
       <div class="stats-row">
         <div class="stat-card">
-          <div class="stat-value" id="statTotal">—</div>
+          <div class="stat-value" id="kpiTotal">—</div>
           <div class="stat-label">Total de igrejas</div>
         </div>
         <div class="stat-card">
-          <div class="stat-value" id="statAtivas">—</div>
+          <div class="stat-value green" id="kpiAtivas">—</div>
           <div class="stat-label">Ativas</div>
         </div>
         <div class="stat-card">
-          <div class="stat-value" id="statTrial">—</div>
-          <div class="stat-label">Em trial</div>
+          <div class="stat-value" id="kpiMRR">—</div>
+          <div class="stat-label">MRR mensal</div>
         </div>
         <div class="stat-card">
-          <div class="stat-value" id="statBloqueadas">—</div>
+          <div class="stat-value red" id="kpiBloqueadas">—</div>
           <div class="stat-label">Bloqueadas</div>
         </div>
       </div>
 
-      <div class="list-card">
-        <div class="list-header">
-          <span class="list-header-title">Igrejas cadastradas</span>
-          <input class="search-input" id="searchInput" type="text" placeholder="Buscar igreja..." oninput="filtrarIgrejas()">
-        </div>
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Igreja</th>
-                <th>Status</th>
-                <th>Vencimento</th>
-                <th>Módulos</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody id="igrejasTbody">
-              <tr><td colspan="5" class="table-empty"><span class="spinner"></span></td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <div class="cards-row">
 
-    </div>
-  </div><!-- /sys-main -->
-
-  <!-- Modal Gerenciar -->
-  <div class="modal-overlay" id="modalOverlay" onclick="fecharModal(event)">
-    <div class="modal" onclick="event.stopPropagation()">
-      <div class="modal-header">
-        <div>
-          <div class="modal-title">Gerenciar contrato</div>
-          <div class="modal-church" id="modalChurchName">—</div>
-        </div>
-        <button class="modal-close" onclick="fecharModal()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
-      </div>
-
-      <div class="modal-body">
-        <div class="form-section">
-          <div class="form-section-title">Contrato</div>
-          <div class="form-row three">
-            <div class="field">
-              <label>Status</label>
-              <select id="fieldStatus" class="status-select">
-                <option value="trial">Trial</option>
-                <option value="ativo">Ativo</option>
-                <option value="inadimplente">Inadimplente</option>
-                <option value="bloqueado">Bloqueado</option>
-                <option value="cancelado">Cancelado</option>
-              </select>
-            </div>
-            <div class="field">
-              <label>Periodicidade</label>
-              <select id="fieldPeriodicidade">
-                <option value="mensal">Mensal</option>
-                <option value="trimestral">Trimestral</option>
-                <option value="anual">Anual</option>
-              </select>
-            </div>
-            <div class="field">
-              <label>Valor (R$)</label>
-              <input type="number" id="fieldValor" placeholder="0,00" min="0" step="0.01">
-            </div>
+        <div class="dash-card">
+          <div class="dash-card-header">
+            <span class="dash-card-title">Alertas da semana</span>
+            <a href="/contratos-sistema" class="dash-card-link">Ver contratos</a>
           </div>
-          <div class="form-row" style="margin-top:14px;">
-            <div class="field">
-              <label>Vencimento</label>
-              <input type="date" id="fieldVencimento">
-            </div>
-            <div class="field">
-              <label>Bloqueio automático</label>
-              <input type="text" id="fieldBloqueio" readonly placeholder="Calculado automaticamente">
-            </div>
-          </div>
-          <div class="form-row single" style="margin-top:14px;">
-            <div class="field">
-              <label>Observações</label>
-              <textarea id="fieldObservacoes" rows="2" placeholder="Notas internas sobre o contrato..."></textarea>
-            </div>
+          <div class="dash-card-body" id="alertasBody">
+            <div class="empty-state"><span class="spinner"></span></div>
           </div>
         </div>
 
-        <div class="form-section">
-          <div class="form-section-title">Módulos contratados</div>
-          <div class="modulos-grid" id="modulosGrid">
-            <div style="color:var(--ink-muted);font-size:13px;">Carregando módulos...</div>
+        <div class="dash-card">
+          <div class="dash-card-header">
+            <span class="dash-card-title">Últimas atividades</span>
+            <a href="/pagamentos-sistema" class="dash-card-link">Ver pagamentos</a>
+          </div>
+          <div class="dash-card-body" id="atividadesBody">
+            <div class="empty-state"><span class="spinner"></span></div>
           </div>
         </div>
-      </div>
 
-      <div class="modal-footer">
-        <button class="btn-secondary" onclick="fecharModal()">Cancelar</button>
-        <button class="btn-primary" id="btnSalvar" onclick="salvarContrato()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><polyline points="20 6 9 17 4 12"/></svg>
-          Salvar contrato
-        </button>
       </div>
     </div>
   </div>
 
   <div id="toast"></div>
-
   <script src="/js/auth-fetch.js"></script>
   <script>
-    let _igrejas = [], _churchIdAtual = null, _toastTimer = null
+    function toggleGroup(id) { document.getElementById(id)?.classList.toggle('open') }
 
-    document.addEventListener('DOMContentLoaded', async () => {
-      const user = JSON.parse(localStorage.getItem('usuario') || '{}')
-      if (user?.email) {
-        document.getElementById('topbarUser').textContent  = user.email
-        document.getElementById('sidebarUser').textContent = user.email
-      }
-      await carregarIgrejas()
+    document.querySelectorAll('#sysNav a.sys-nav-item, #sysNav .nav-subitem').forEach(el => {
+      if (el.getAttribute('href') === window.location.pathname) el.classList.add('active')
     })
-
-    async function carregarIgrejas() {
-      try {
-        const res = await authFetch('/api/contrato')
-        if (res.status === 403) {
-          document.getElementById('igrejasTbody').innerHTML =
-            '<tr><td colspan="5" class="table-empty">Acesso restrito ao dono do sistema.</td></tr>'
-          return
-        }
-        if (!res.ok) throw new Error(await res.text())
-        const { igrejas } = await res.json()
-        _igrejas = igrejas || []
-        atualizarStats()
-        renderTabela(_igrejas)
-      } catch (e) {
-        console.error('[carregarIgrejas]', e)
-        document.getElementById('igrejasTbody').innerHTML =
-          '<tr><td colspan="5" class="table-empty">Erro ao carregar igrejas.</td></tr>'
-      }
+    if (document.querySelector('#sysNav .nav-subitem.active')) {
+      document.getElementById('groupConfig')?.classList.add('open')
     }
 
-    function atualizarStats() {
-      document.getElementById('statTotal').textContent      = _igrejas.length
-      document.getElementById('statAtivas').textContent     = _igrejas.filter(i => i.status === 'ativo').length
-      document.getElementById('statTrial').textContent      = _igrejas.filter(i => i.status === 'trial').length
-      document.getElementById('statBloqueadas').textContent = _igrejas.filter(i => i.status === 'bloqueado').length
-    }
-
-    function renderTabela(lista) {
-      const tbody = document.getElementById('igrejasTbody')
-      if (!lista.length) {
-        tbody.innerHTML = '<tr><td colspan="5" class="table-empty">Nenhuma igreja cadastrada.</td></tr>'
-        return
-      }
-      const hoje = new Date().toISOString().split('T')[0]
-      tbody.innerHTML = lista.map(ig => {
-        const statusBadge = ig.status
-          ? `<span class="badge badge-${ig.status}"><span class="dot"></span>${labelStatus(ig.status)}</span>`
-          : `<span class="badge badge-sem-contrato">Sem contrato</span>`
-        let vencHtml = '—'
-        if (ig.vencimento_em) {
-          const alerta = ig.vencimento_em < hoje
-          vencHtml = `<span class="vencimento-text ${alerta ? 'vencimento-alerta' : ''}">${formatarData(ig.vencimento_em)}</span>`
-        }
-        const modulosHtml = ig.modulos?.length
-          ? `<div class="modulos-cell">${ig.modulos.map(m => `<span class="modulo-badge">${esc(m.name || m.slug)}</span>`).join('')}</div>`
-          : '<span style="font-size:12px;color:var(--ink-subtle)">—</span>'
-        return `<tr>
-          <td><div class="church-name">${esc(ig.church_name)}</div><div class="church-id">${ig.church_id}</div></td>
-          <td>${statusBadge}</td>
-          <td>${vencHtml}</td>
-          <td>${modulosHtml}</td>
-          <td><button class="btn-gerenciar" onclick="abrirModal('${ig.church_id}')">Gerenciar</button></td>
-        </tr>`
-      }).join('')
-    }
-
-    function filtrarIgrejas() {
-      const q = document.getElementById('searchInput').value.toLowerCase().trim()
-      renderTabela(q ? _igrejas.filter(i => i.church_name?.toLowerCase().includes(q)) : _igrejas)
-    }
-
-    async function abrirModal(churchId) {
-      _churchIdAtual = churchId
-      document.getElementById('modalOverlay').classList.add('open')
-      document.getElementById('modalChurchName').textContent = 'Carregando...'
-      document.getElementById('modulosGrid').innerHTML = '<div style="color:var(--ink-muted);font-size:13px;">Carregando módulos...</div>'
-      try {
-        const res = await authFetch(`/api/contrato/${churchId}`)
-        if (!res.ok) throw new Error()
-        const { church, contrato, modulos, todos_modulos } = await res.json()
-        document.getElementById('modalChurchName').textContent = church.name
-        document.getElementById('fieldStatus').value        = contrato?.status        || 'trial'
-        document.getElementById('fieldPeriodicidade').value = contrato?.periodicidade || 'mensal'
-        document.getElementById('fieldValor').value         = contrato?.valor         || ''
-        document.getElementById('fieldVencimento').value    = contrato?.vencimento_em || ''
-        document.getElementById('fieldObservacoes').value   = contrato?.observacoes   || ''
-        atualizarBloqueio()
-        const modulosMap = {}
-        ;(modulos || []).forEach(m => { if (m.is_active) modulosMap[m.modulo_id] = m.limite })
-        const grid = document.getElementById('modulosGrid')
-        if (!todos_modulos?.length) {
-          grid.innerHTML = '<div style="color:var(--ink-muted);font-size:13px;">Nenhum módulo cadastrado.</div>'
-          return
-        }
-        grid.innerHTML = todos_modulos.map(mod => {
-          const checked = modulosMap.hasOwnProperty(mod.id)
-          const limite  = checked ? (modulosMap[mod.id] ?? '') : ''
-          return `<div class="modulo-row ${checked ? 'checked' : ''}" id="modulo-row-${mod.id}">
-            <label>
-              <input type="checkbox" ${checked ? 'checked' : ''} onchange="toggleModulo('${mod.id}', this)">
-              <div class="modulo-info">
-                <div class="modulo-name">${esc(mod.name)}</div>
-                ${mod.description ? `<div class="modulo-desc">${esc(mod.description)}</div>` : ''}
-              </div>
-            </label>
-            <div class="modulo-limite-wrap">
-              <input type="number" class="modulo-limite" id="limite-${mod.id}" value="${limite}" min="0" placeholder="∞">
-              <span class="modulo-limite-label">limite</span>
-            </div>
-          </div>`
-        }).join('')
-      } catch (e) {
-        showToast('Erro ao carregar dados da igreja', 'error')
-        fecharModal()
-      }
-    }
-
-    function fecharModal(e) {
-      if (e && e.target !== document.getElementById('modalOverlay')) return
-      document.getElementById('modalOverlay').classList.remove('open')
-      _churchIdAtual = null
-    }
-
-    function toggleModulo(moduloId, checkbox) {
-      const row = document.getElementById(`modulo-row-${moduloId}`)
-      if (checkbox.checked) { row.classList.add('checked') }
-      else { row.classList.remove('checked'); document.getElementById(`limite-${moduloId}`).value = '' }
-    }
-
-    function atualizarBloqueio() {
-      const venc = document.getElementById('fieldVencimento').value
-      if (!venc) { document.getElementById('fieldBloqueio').value = ''; return }
-      const d = new Date(venc)
-      d.setMonth(d.getMonth() + 3)
-      document.getElementById('fieldBloqueio').value = formatarData(d.toISOString().split('T')[0])
-    }
-    document.addEventListener('DOMContentLoaded', () => {
-      document.getElementById('fieldVencimento')?.addEventListener('change', atualizarBloqueio)
-    })
-
-    async function salvarContrato() {
-      if (!_churchIdAtual) return
-      const btn = document.getElementById('btnSalvar')
-      btn.disabled = true; btn.textContent = 'Salvando...'
-      try {
-        const modulos = []
-        document.querySelectorAll('.modulo-row').forEach(row => {
-          const cb    = row.querySelector('input[type=checkbox]')
-          const rowId = row.id.replace('modulo-row-', '')
-          if (cb?.checked) {
-            const limiteEl = document.getElementById(`limite-${rowId}`)
-            modulos.push({ modulo_id: rowId, limite: limiteEl?.value ? parseInt(limiteEl.value) : null })
-          }
-        })
-        const res = await authFetch(`/api/contrato/${_churchIdAtual}`, {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            periodicidade: document.getElementById('fieldPeriodicidade').value,
-            vencimento_em: document.getElementById('fieldVencimento').value,
-            valor:         parseFloat(document.getElementById('fieldValor').value) || null,
-            observacoes:   document.getElementById('fieldObservacoes').value.trim() || null,
-            modulos,
-          }),
-        })
-        if (!res.ok) { const d = await res.json(); throw new Error(d.error || 'Erro ao salvar') }
-        await authFetch(`/api/contrato/${_churchIdAtual}/status`, {
-          method: 'PUT', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ status: document.getElementById('fieldStatus').value }),
-        })
-        showToast('Contrato salvo com sucesso!')
-        fecharModal()
-        await carregarIgrejas()
-      } catch (e) {
-        showToast(e.message || 'Erro ao salvar contrato', 'error')
-      } finally {
-        btn.disabled = false
-        btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><polyline points="20 6 9 17 4 12"/></svg> Salvar contrato'
-      }
-    }
-
-    const STATUS_LABEL = { trial:'Trial', ativo:'Ativo', inadimplente:'Inadimplente', bloqueado:'Bloqueado', cancelado:'Cancelado' }
-    function labelStatus(s) { return STATUS_LABEL[s] || s }
-    function formatarData(iso) { if (!iso) return '—'; const [y,m,d] = iso.split('-'); return `${d}/${m}/${y}` }
-    function esc(s) { return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') }
+    let _toastTimer = null
     function showToast(msg, type = '') {
       const t = document.getElementById('toast')
       t.textContent = msg; t.className = 'show' + (type ? ' ' + type : '')
@@ -593,6 +267,129 @@
     function fazerLogout() {
       authFetch('/api/auth/logout', { method: 'POST' }).finally(() => { localStorage.clear(); window.location.href = '/' })
     }
+    function formatarData(iso) {
+      if (!iso) return '—'
+      const [y, m, d] = iso.split('-')
+      return `${d}/${m}/${y}`
+    }
+    function formatarMoeda(v) {
+      if (v == null) return '—'
+      return 'R$ ' + Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+    }
+    function tempoAtras(iso) {
+      if (!iso) return ''
+      const diff = Date.now() - new Date(iso).getTime()
+      const dias = Math.floor(diff / 86400000)
+      if (dias === 0) return 'hoje'
+      if (dias === 1) return 'há 1 dia'
+      return `há ${dias} dias`
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      const user = JSON.parse(localStorage.getItem('usuario') || '{}')
+      if (user?.email) {
+        document.getElementById('topbarUser').textContent  = user.email
+        document.getElementById('sidebarUser').textContent = user.email
+      }
+
+      // Subtítulo com semana atual
+      const hoje = new Date()
+      const inicioSemana = new Date(hoje)
+      inicioSemana.setDate(hoje.getDate() - hoje.getDay())
+      const fimSemana = new Date(inicioSemana)
+      fimSemana.setDate(inicioSemana.getDate() + 6)
+      const opts = { day: '2-digit', month: 'short' }
+      document.getElementById('heroSemana').textContent =
+        `Semana de ${inicioSemana.toLocaleDateString('pt-BR', opts)} a ${fimSemana.toLocaleDateString('pt-BR', opts)}`
+
+      await Promise.all([carregarKPIs(), carregarAtividades()])
+    })
+
+    async function carregarKPIs() {
+      try {
+        const res = await authFetch('/api/contrato')
+        if (!res.ok) throw new Error()
+        const { igrejas } = await res.json()
+        const lista = igrejas || []
+
+        document.getElementById('kpiTotal').textContent = lista.length
+        document.getElementById('kpiAtivas').textContent = lista.filter(i => i.status === 'ativo').length
+        document.getElementById('kpiBloqueadas').textContent = lista.filter(i => i.status === 'bloqueado').length
+
+        const mrr = lista
+          .filter(i => i.status === 'ativo' && i.periodicidade === 'mensal' && i.valor)
+          .reduce((acc, i) => acc + parseFloat(i.valor), 0)
+        document.getElementById('kpiMRR').textContent = mrr > 0
+          ? 'R$ ' + mrr.toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })
+          : 'R$ 0'
+
+        renderAlertas(lista)
+      } catch (e) {
+        document.getElementById('alertasBody').innerHTML = '<div class="empty-state">Erro ao carregar alertas.</div>'
+      }
+    }
+
+    function renderAlertas(lista) {
+      const hoje = new Date()
+      const em7Dias = new Date(hoje); em7Dias.setDate(hoje.getDate() + 7)
+      const hojeStr = hoje.toISOString().split('T')[0]
+      const em7Str  = em7Dias.toISOString().split('T')[0]
+
+      const vencendo     = lista.filter(i => i.vencimento_em && i.vencimento_em >= hojeStr && i.vencimento_em <= em7Str && i.status === 'ativo')
+      const inadimplentes = lista.filter(i => i.status === 'inadimplente')
+      const semContrato  = lista.filter(i => !i.contrato_id)
+
+      const alertas = []
+
+      if (vencendo.length)
+        alertas.push({ cor: 'warning', texto: `<strong>${vencendo.length} igrejas</strong> vencem nos próximos 7 dias — <a href="/contratos-sistema">ver contratos</a>` })
+      if (inadimplentes.length)
+        alertas.push({ cor: 'danger', texto: `<strong>${inadimplentes.length} igrejas inadimplentes</strong> — <a href="/contratos-sistema">ver contratos</a>` })
+      if (semContrato.length)
+        alertas.push({ cor: 'info', texto: `<strong>${semContrato.length} novos cadastros</strong> sem contrato — <a href="/igrejas-sistema">ver igrejas</a>` })
+
+      const el = document.getElementById('alertasBody')
+      if (!alertas.length) {
+        el.innerHTML = `<div class="alert-ok"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Tudo em ordem esta semana</div>`
+        return
+      }
+      el.innerHTML = alertas.map(a =>
+        `<div class="alert-item">
+          <span class="alert-dot ${a.cor}"></span>
+          <span class="alert-text">${a.texto}</span>
+        </div>`
+      ).join('')
+    }
+
+    async function carregarAtividades() {
+      try {
+        const res = await authFetch('/api/pagamento?status=pago')
+        if (!res.ok) throw new Error()
+        const { pagamentos } = await res.json()
+        const recentes = (pagamentos || []).slice(0, 10)
+
+        const el = document.getElementById('atividadesBody')
+        if (!recentes.length) {
+          el.innerHTML = '<div class="empty-state">Nenhuma atividade recente.</div>'
+          return
+        }
+        el.innerHTML = recentes.map(p => `
+          <div class="ativ-item">
+            <div class="ativ-icon pago">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <div class="ativ-body">
+              <div class="ativ-desc">${esc(p.church_name)} pagou ${esc(p.referencia)}</div>
+              <div class="ativ-when">${tempoAtras(p.pago_em) || formatarData(p.pago_em)} · ${formatarMoeda(p.valor)}</div>
+            </div>
+          </div>`
+        ).join('')
+      } catch (e) {
+        document.getElementById('atividadesBody').innerHTML = '<div class="empty-state">Erro ao carregar atividades.</div>'
+      }
+    }
+
+    function esc(s) { return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') }
   </script>
 </body>
 </html>

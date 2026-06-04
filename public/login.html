@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Hug Software — Login</title>
+<title>Nexora — Login</title>
 <link rel="icon" type="image/png" href="/IMG/logo.png">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -28,12 +28,13 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    padding: 32px 24px;
   }
 
   .card {
     display: flex;
-    width: min(960px, 96vw);
-    min-height: 580px;
+    width: min(880px, 100%);
+    min-height: 540px;
     background: var(--white);
     border-radius: 24px;
     overflow: hidden;
@@ -63,13 +64,11 @@
     margin-bottom: 36px;
   }
   .logo-icon {
-    width: 36px; height: 36px;
-    background: linear-gradient(135deg, var(--primary), var(--dark));
-    border-radius: 10px;
+    width: 40px; height: 40px;
     display: grid; place-items: center;
-    color: #fff; font-weight: 800; font-size: 16px;
-    letter-spacing: -1px;
+    flex-shrink: 0;
   }
+  .logo-icon img { width: 100%; height: 100%; object-fit: contain; }
   .logo-name { font-size: 18px; font-weight: 700; color: var(--dark); }
 
   .form-side h1 {
@@ -123,7 +122,7 @@
 
   .btn-primary {
     width: 100%; padding: 14px;
-    background: linear-gradient(135deg, #E85D6A 0%, var(--primary) 100%);
+    background: var(--primary);
     color: #fff; font-family: inherit; font-size: 15px; font-weight: 700;
     border: none; border-radius: 12px; cursor: pointer;
     transition: opacity .2s, transform .1s;
@@ -293,10 +292,6 @@
   <!-- ════ FORMULÁRIO ════ -->
   <div class="form-side">
 
-    <div class="logo-row">
-      <div class="logo-icon">H</div>
-      <span class="logo-name">Hug Software</span>
-    </div>
 
     <h1>Bem-vindo</h1>
     <p class="sub">Entre com suas credenciais para acessar</p>
@@ -352,52 +347,52 @@
 
     <div class="slides" id="slides">
 
-      <div class="slide">
-        <!-- <img src="/IMG/foto-igreja-1.jpg" alt=""> -->
+      <div class="slide" id="slide-1">
+        <img id="slide-img-1" src="" alt="" style="display:none">
         <div class="slide-top">
-          <span class="slide-brand">Hug Software</span>
+          <span class="slide-brand">Nexora</span>
         </div>
         <div class="slide-content">
-          <p class="slide-quote">Servir é uma alegria quando estamos no lugar certo, com as pessoas certas.</p>
+          <p class="slide-quote" id="quote-1">Servir é uma alegria quando estamos no lugar certo, com as pessoas certas.</p>
           <div class="slide-author">
-            <div class="author-avatar">P</div>
+            <div class="author-avatar" id="avatar-1">P</div>
             <div>
-              <div class="author-name">Pastor Rafael</div>
-              <div class="author-role">Líder de Ministério</div>
+              <div class="author-name" id="name-1">Pastor Rafael</div>
+              <div class="author-role" id="role-1">Líder de Ministério</div>
             </div>
           </div>
         </div>
       </div>
 
-      <div class="slide">
-        <!-- <img src="/IMG/foto-igreja-2.jpg" alt=""> -->
+      <div class="slide" id="slide-2">
+        <img id="slide-img-2" src="" alt="" style="display:none">
         <div class="slide-top">
-          <span class="slide-brand">Hug Software</span>
+          <span class="slide-brand">Nexora</span>
         </div>
         <div class="slide-content">
-          <p class="slide-quote">Unidos em propósito, crescemos juntos em fé e dedicação.</p>
+          <p class="slide-quote" id="quote-2">Unidos em propósito, crescemos juntos em fé e dedicação.</p>
           <div class="slide-author">
-            <div class="author-avatar">A</div>
+            <div class="author-avatar" id="avatar-2">A</div>
             <div>
-              <div class="author-name">Ana Beatriz</div>
-              <div class="author-role">Líder de Louvor</div>
+              <div class="author-name" id="name-2">Ana Beatriz</div>
+              <div class="author-role" id="role-2">Líder de Louvor</div>
             </div>
           </div>
         </div>
       </div>
 
-      <div class="slide">
-        <!-- <img src="/IMG/foto-igreja-3.jpg" alt=""> -->
+      <div class="slide" id="slide-3">
+        <img id="slide-img-3" src="" alt="" style="display:none">
         <div class="slide-top">
-          <span class="slide-brand">Hug Software</span>
+          <span class="slide-brand">Nexora</span>
         </div>
         <div class="slide-content">
-          <p class="slide-quote">Cada voluntário faz parte de algo maior — e isso transforma vidas.</p>
+          <p class="slide-quote" id="quote-3">Cada voluntário faz parte de algo maior — e isso transforma vidas.</p>
           <div class="slide-author">
-            <div class="author-avatar">M</div>
+            <div class="author-avatar" id="avatar-3">M</div>
             <div>
-              <div class="author-name">Marcos Oliveira</div>
-              <div class="author-role">Coordenador de Voluntariado</div>
+              <div class="author-name" id="name-3">Marcos Oliveira</div>
+              <div class="author-role" id="role-3">Coordenador de Voluntariado</div>
             </div>
           </div>
         </div>
@@ -425,7 +420,46 @@
   // SEC-005: escape HTML para prevenir XSS em innerHTML
   function esc(s) { return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') }
 
-  /* ── Carrossel ── */
+  /* ── Carrossel — carrega dados do banco ── */
+  async function loadCarousel() {
+    try {
+      const res = await fetch('/api/carousel')
+      if (!res.ok) return
+      const { slides } = await res.json()
+      if (!slides?.length) return
+
+      slides.forEach((slide, i) => {
+        const n = i + 1
+        if (slide.frase) {
+          const el = document.getElementById(`quote-${n}`)
+          if (el) el.textContent = slide.frase
+        }
+        if (slide.autor) {
+          const nameEl   = document.getElementById(`name-${n}`)
+          const avatarEl = document.getElementById(`avatar-${n}`)
+          if (nameEl)   nameEl.textContent   = slide.autor
+          if (avatarEl) avatarEl.textContent = slide.autor.trim()[0]?.toUpperCase() || avatarEl.textContent
+        }
+        if (slide.cargo) {
+          const el = document.getElementById(`role-${n}`)
+          if (el) el.textContent = slide.cargo
+        }
+        if (slide.foto) {
+          const imgEl   = document.getElementById(`slide-img-${n}`)
+          const slideEl = document.getElementById(`slide-${n}`)
+          if (imgEl) {
+            imgEl.src             = slide.foto
+            imgEl.style.display   = 'block'
+            // remove gradient background quando há foto real
+            if (slideEl) slideEl.style.background = 'none'
+          }
+        }
+      })
+    } catch (_) { /* fallback: conteúdo estático já está no HTML */ }
+  }
+  loadCarousel()
+
+  /* ── Carrossel (controles) ── */
   let current = 0;
   const TOTAL = 3;
   let autoTimer;
