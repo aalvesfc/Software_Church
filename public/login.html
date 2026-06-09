@@ -3,616 +3,651 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Nexora — Login</title>
+<title>Hug — Login</title>
 <link rel="icon" type="image/png" href="/IMG/logo.png">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  :root {
-    --primary: #9156F1;
-    --dark:    #201E4B;
-    --carbon:  #1C1C1C;
-    --bg:      #ECE9E7;
-    --white:   #FFFFFF;
-    --danger:  #E85D6A;
-    --muted:   #6B7280;
-    --border:  #E5E7EB;
-    --input-bg:#F3F4F6;
-  }
-
   html, body {
     height: 100%;
     font-family: 'Plus Jakarta Sans', sans-serif;
-    background: var(--bg);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 32px 24px;
+    background: #fff;
+    -webkit-font-smoothing: antialiased;
   }
 
-  .card {
+  /* ══════════════════════════════════════════
+     WRAP — split full-viewport
+  ══════════════════════════════════════════ */
+  .login-wrap {
     display: flex;
-    width: min(880px, 100%);
-    min-height: 540px;
-    background: var(--white);
-    border-radius: 24px;
+    height: 100vh;
     overflow: hidden;
-    box-shadow: 0 24px 80px rgba(32,30,75,0.14), 0 4px 16px rgba(32,30,75,0.06);
-    animation: fadeUp .5s ease both;
-  }
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to   { opacity: 1; transform: translateY(0); }
   }
 
-  /* ═══════════════════════════════════
+  /* ══════════════════════════════════════════
      ESQUERDA — FORMULÁRIO
-  ═══════════════════════════════════ */
-  .form-side {
-    flex: 0 0 440px;
-    padding: 52px 48px;
+  ══════════════════════════════════════════ */
+  .form-panel {
+    width: 440px;
+    flex-shrink: 0;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    padding: 40px 48px;
+    background: #fff;
+    overflow-y: auto;
   }
 
-  .logo-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 36px;
-  }
-  .logo-icon {
-    width: 40px; height: 40px;
-    display: grid; place-items: center;
-    flex-shrink: 0;
-  }
-  .logo-icon img { width: 100%; height: 100%; object-fit: contain; }
-  .logo-name { font-size: 18px; font-weight: 700; color: var(--dark); }
+  /* Heading */
+  .form-body { flex: 1; display: flex; flex-direction: column; justify-content: center; }
 
-  .form-side h1 {
-    font-size: 28px; font-weight: 800;
-    color: var(--carbon); line-height: 1.2;
+  .form-body h1 {
+    font-size: 30px; font-weight: 700;
+    color: #101828; line-height: 1.22;
+    letter-spacing: -0.5px;
+    margin-bottom: 8px;
+  }
+  .form-body .subtitle {
+    font-size: 14px; color: #667085;
+    line-height: 1.55;
+    margin-bottom: 32px;
+  }
+
+  /* Fields — underline style */
+  .field { margin-bottom: 24px; }
+  .field label {
+    display: block;
+    font-size: 13px; font-weight: 500;
+    color: #344054;
     margin-bottom: 6px;
   }
-  .form-side p.sub {
-    font-size: 14px; color: var(--muted); margin-bottom: 32px;
+  .field-input-wrap { position: relative; }
+  .field-input-wrap input {
+    width: 100%;
+    background: #F9FAFB;
+    border: 1.5px solid #D0D5DD;
+    border-radius: 10px;
+    padding: 12px 42px 12px 14px;
+    font-family: inherit; font-size: 15px;
+    color: #101828;
+    outline: none;
+    transition: border-color .18s, background .18s;
   }
-
-  .field { margin-bottom: 18px; }
-  .field label {
-    display: block; font-size: 13px; font-weight: 600;
-    color: var(--carbon); margin-bottom: 7px;
+  .field-input-wrap input:focus {
+    border-color: #101828;
+    background: #fff;
   }
-  .input-wrap { position: relative; }
-  .input-wrap input {
-    width: 100%; padding: 13px 16px;
-    background: var(--input-bg); border: 1.5px solid transparent;
-    border-radius: 12px; font-family: inherit; font-size: 14px;
-    color: var(--carbon); outline: none; transition: border-color .2s, background .2s;
-  }
-  .input-wrap input:focus {
-    border-color: var(--primary); background: #fff;
-  }
-  .input-wrap input::placeholder { color: #9CA3AF; }
+  .field-input-wrap input::placeholder { color: #98A2B3; }
   .eye-btn {
     position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
-    background: none; border: none; cursor: pointer; color: var(--muted);
-    display: grid; place-items: center; padding: 0;
+    background: none; border: none; cursor: pointer; color: #98A2B3;
+    display: flex; align-items: center; padding: 0;
+    transition: color .15s;
   }
+  .eye-btn:hover { color: #667085; }
 
-  .forgot {
-    text-align: right; margin-top: -10px; margin-bottom: 24px;
-    font-size: 13px; color: var(--primary); text-decoration: none; font-weight: 500;
-    display: block;
-  }
-  .forgot:hover { text-decoration: underline; }
-
+  /* Error */
   .msg-erro {
     display: none;
-    margin-bottom: 16px;
+    margin-bottom: 18px;
     padding: 10px 14px;
-    background: rgba(232, 93, 106, 0.08);
-    border-radius: 10px;
+    background: #FFF1F3;
+    border-radius: 8px;
     font-size: 13px;
-    color: #c0392b;
-    letter-spacing: -0.1px;
+    color: #C01048;
   }
 
+  /* Buttons */
   .btn-primary {
-    width: 100%; padding: 14px;
-    background: var(--primary);
-    color: #fff; font-family: inherit; font-size: 15px; font-weight: 700;
-    border: none; border-radius: 12px; cursor: pointer;
-    transition: opacity .2s, transform .1s;
+    width: 100%; height: 48px;
+    background: #101828;
+    color: #fff; font-family: inherit; font-size: 15px; font-weight: 600;
+    border: none; border-radius: 8px; cursor: pointer;
+    transition: background .18s, transform .1s;
+    letter-spacing: -0.1px;
+    margin-bottom: 12px;
   }
-  .btn-primary:hover:not(:disabled) { opacity: .92; }
+  .btn-primary:hover:not(:disabled) { background: #1D2939; }
   .btn-primary:active:not(:disabled) { transform: scale(.98); }
-  .btn-primary:disabled { opacity: .6; cursor: not-allowed; }
+  .btn-primary:disabled { opacity: .55; cursor: not-allowed; }
 
-  .divider {
-    display: flex; align-items: center; gap: 12px;
-    margin: 20px 0; color: var(--muted); font-size: 13px;
-  }
-  .divider::before, .divider::after {
-    content: ''; flex: 1; height: 1px; background: var(--border);
-  }
-
-  .btn-google {
-    width: 100%; padding: 13px;
-    background: #fff; border: 1.5px solid var(--border);
-    border-radius: 12px; font-family: inherit; font-size: 14px; font-weight: 600;
-    color: var(--carbon); cursor: pointer;
+  .btn-social {
+    width: 100%; height: 48px;
+    background: #fff; border: 1.5px solid #D0D5DD;
+    border-radius: 8px; font-family: inherit; font-size: 15px; font-weight: 600;
+    color: #344054; cursor: pointer;
     display: flex; align-items: center; justify-content: center; gap: 10px;
-    transition: background .2s, border-color .2s;
+    transition: background .15s, border-color .15s;
+    margin-bottom: 12px;
   }
-  .btn-google:hover:not(:disabled) { background: #F9FAFB; border-color: #D1D5DB; }
-  .btn-google:disabled { opacity: .6; cursor: not-allowed; }
-  .btn-google svg { width: 18px; height: 18px; flex-shrink: 0; }
+  .btn-social:hover:not(:disabled) { background: #F9FAFB; border-color: #B2BBCA; }
+  .btn-social:disabled { opacity: .55; cursor: not-allowed; }
+  .btn-social svg { width: 18px; height: 18px; flex-shrink: 0; }
 
-  /* ═══════════════════════════════════
-     DIREITA — CARROSSEL
-  ═══════════════════════════════════ */
-  .carousel-side {
+  /* Footer link */
+  .form-footer {
+    margin-top: auto;
+    padding-top: 32px;
+    text-align: center;
+    font-size: 13px; color: #667085;
+  }
+  .form-footer a {
+    color: #101828; font-weight: 600; text-decoration: none;
+  }
+  .form-footer a:hover { text-decoration: underline; }
+
+  /* ══════════════════════════════════════════
+     DIREITA — CARROSSEL (card inset)
+  ══════════════════════════════════════════ */
+  .carousel-outer {
     flex: 1;
-    position: relative;
-    overflow: hidden;
-    border-radius: 0 24px 24px 0;
+    padding: 14px 14px 14px 14px;
+    background: #fff;
+    min-width: 0;
   }
 
+  .carousel-inner {
+    width: 100%; height: 100%;
+    border-radius: 22px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* Slides */
   .slides {
     display: flex;
     height: 100%;
-    transition: transform .6s cubic-bezier(.4,0,.2,1);
+    transition: transform .65s cubic-bezier(.4,0,.2,1);
   }
-
   .slide {
     flex: 0 0 100%;
     height: 100%;
     position: relative;
     overflow: hidden;
+    background: #7e40bf;
   }
-
-  .slide:nth-child(1) { background: linear-gradient(160deg, #201E4B 0%, #4A2C8A 50%, #9156F1 100%); }
-  .slide:nth-child(2) { background: linear-gradient(160deg, #1a3a5c 0%, #2563EB 50%, #7C3AED 100%); }
-  .slide:nth-child(3) { background: linear-gradient(160deg, #1C1C3A 0%, #9156F1 50%, #E85D6A 100%); }
-
   .slide img {
     width: 100%; height: 100%;
-    object-fit: cover; object-position: center;
+    object-fit: cover; object-position: center top;
     display: block;
   }
-
   .slide::after {
     content: '';
     position: absolute; inset: 0;
     background: linear-gradient(
       to top,
-      rgba(15, 10, 40, .90) 0%,
-      rgba(15, 10, 40, .40) 45%,
-      rgba(15, 10, 40, .10) 100%
+      rgba(5, 5, 15, .88) 0%,
+      rgba(5, 5, 15, .38) 42%,
+      rgba(5, 5, 15, .06) 100%
     );
+    pointer-events: none;
   }
 
-  .slide-top {
+  /* Top bar inside slide */
+  .slide-topbar {
     position: absolute; top: 24px; left: 24px; right: 24px;
-    z-index: 2;
+    z-index: 3;
     display: flex; align-items: center; justify-content: space-between;
   }
-  .slide-brand {
-    font-size: 12px; font-weight: 700; color: rgba(255,255,255,.65);
-    letter-spacing: .1em; text-transform: uppercase;
+  .slide-app-name {
+    font-size: 14px; font-weight: 700;
+    color: rgba(255,255,255,.75);
+    letter-spacing: 0.02em;
   }
-  .slide-counter {
-    font-size: 12px; color: rgba(255,255,255,.45); font-weight: 500;
+  .slide-counter-badge {
+    font-size: 12px; font-weight: 500;
+    color: rgba(255,255,255,.45);
+    letter-spacing: 0.04em;
   }
 
+  /* Quote area */
   .slide-content {
     position: absolute; bottom: 0; left: 0; right: 0;
-    z-index: 2;
-    padding: 0 28px 32px;
+    z-index: 3;
+    padding: 0 28px 28px;
   }
 
-  .slide-content::before {
-    content: '\201C';
+  .quote-mark {
+    font-size: 64px; line-height: .75;
+    color: rgba(255,255,255,.9);
+    font-family: Georgia, 'Times New Roman', serif;
+    margin-bottom: 10px;
     display: block;
-    font-size: 72px; line-height: .8;
-    color: var(--primary);
-    font-family: Georgia, serif;
-    margin-bottom: 4px;
-    opacity: .75;
+    font-weight: 700;
   }
 
   .slide-quote {
-    font-size: 17px; font-weight: 600; color: #fff;
-    line-height: 1.5; margin-bottom: 18px;
+    font-size: 18px; font-weight: 600;
+    color: #fff; line-height: 1.5;
+    margin-bottom: 20px;
+    letter-spacing: -0.2px;
   }
 
-  .slide-author {
-    display: flex; align-items: center; gap: 12px;
+  .slide-author-name {
+    font-size: 15px; font-weight: 700;
+    color: #fff;
+    margin-bottom: 2px;
   }
-  .author-avatar {
-    width: 38px; height: 38px; border-radius: 50%;
-    background: rgba(255,255,255,.15);
-    border: 2px solid rgba(255,255,255,.3);
-    display: grid; place-items: center;
-    font-size: 14px; font-weight: 700; color: #fff;
-    flex-shrink: 0;
-  }
-  .author-name { font-size: 14px; font-weight: 600; color: #fff; }
-  .author-role { font-size: 12px; color: rgba(255,255,255,.5); margin-top: 2px; }
-
-  .carousel-counter {
-    position: absolute; top: 24px; right: 24px;
-    z-index: 3;
-    font-size: 12px; color: rgba(255,255,255,.45); font-weight: 500;
+  .slide-author-role {
+    font-size: 13px; font-weight: 400;
+    color: rgba(255,255,255,.55);
   }
 
+  /* Arrow nav */
   .carousel-nav {
-    position: absolute; bottom: 28px; right: 24px;
-    z-index: 3; display: flex; gap: 8px;
+    position: absolute; bottom: 24px; right: 24px;
+    z-index: 4; display: flex; gap: 10px;
   }
-  .ctrl-btn {
-    width: 36px; height: 36px; border-radius: 50%;
-    background: rgba(255,255,255,.10);
-    border: 1.5px solid rgba(255,255,255,.20);
-    color: rgba(255,255,255,.8); cursor: pointer; font-size: 14px;
-    display: grid; place-items: center;
+  .nav-arrow {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: rgba(255,255,255,.08);
+    border: 1.5px solid rgba(255,255,255,.22);
+    color: rgba(255,255,255,.85); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
     backdrop-filter: blur(8px);
-    transition: background .2s, border-color .2s;
+    transition: background .18s, border-color .18s;
   }
-  .ctrl-btn:hover {
-    background: rgba(255,255,255,.22);
-    border-color: rgba(255,255,255,.4);
+  .nav-arrow:hover {
+    background: rgba(255,255,255,.18);
+    border-color: rgba(255,255,255,.45);
     color: #fff;
   }
+  .nav-arrow svg { width: 16px; height: 16px; }
 
+  /* Dots */
   .carousel-dots {
-    position: absolute; bottom: 38px; left: 50%; transform: translateX(-50%);
-    z-index: 3; display: flex; gap: 6px;
+    position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
+    z-index: 4; display: flex; align-items: center; gap: 6px;
   }
   .dot {
     width: 6px; height: 6px; border-radius: 3px;
     background: rgba(255,255,255,.3); cursor: pointer;
-    transition: width .3s, background .3s;
+    transition: width .3s ease, background .3s ease;
+    border: none; padding: 0;
   }
-  .dot.active { width: 20px; background: var(--primary); }
+  .dot.active { width: 22px; background: rgba(255,255,255,.85); }
 
-  @media (max-width: 700px) {
-    .carousel-side { display: none; }
-    .form-side { flex: 1; padding: 40px 28px; }
+  /* ── Login Loader ── */
+  #loginLoader {
+    position: fixed;
+    inset: 0;
+    background: #111;
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+  }
+  #loginLoader .card {
+    --bg-color: #111;
+    background-color: var(--bg-color);
+    padding: 1rem 2rem;
+    border-radius: 1.25rem;
+  }
+  #loginLoader .loader {
+    color: rgb(124, 124, 124);
+    font-family: "Plus Jakarta Sans", sans-serif;
+    font-weight: 500;
+    font-size: 25px;
+    box-sizing: content-box;
+    height: 40px;
+    padding: 10px 10px;
+    display: flex;
+    border-radius: 8px;
+  }
+  #loginLoader .words {
+    overflow: hidden;
+    position: relative;
+  }
+  #loginLoader .words::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      var(--bg-color) 10%,
+      transparent 30%,
+      transparent 70%,
+      var(--bg-color) 90%
+    );
+    z-index: 20;
+  }
+  #loginLoader .word {
+    display: block;
+    height: 100%;
+    padding-left: 6px;
+    color: #956afa;
+    animation: spin_4991 4s infinite;
+  }
+  @keyframes spin_4991 {
+    10%  { transform: translateY(-102%) }
+    25%  { transform: translateY(-100%) }
+    35%  { transform: translateY(-202%) }
+    50%  { transform: translateY(-200%) }
+    60%  { transform: translateY(-302%) }
+    75%  { transform: translateY(-300%) }
+    85%  { transform: translateY(-402%) }
+    100% { transform: translateY(-400%) }
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .carousel-outer { display: none; }
+    .form-panel { width: 100%; padding: 40px 28px; }
+  }
+
+  @media (max-width: 420px) {
+    .form-panel { padding: 32px 20px; }
+    .form-body h1 { font-size: 26px; }
   }
 </style>
 </head>
 <body>
 
-<div class="card">
+<div class="login-wrap">
 
-  <!-- ════ FORMULÁRIO ════ -->
-  <div class="form-side">
+  <!-- ══════ ESQUERDA — FORMULÁRIO ══════ -->
+  <div class="form-panel">
 
+    <div class="form-body">
 
-    <h1>Bem-vindo</h1>
-    <p class="sub">Entre com suas credenciais para acessar</p>
+      <h1>Bem-vindo de volta</h1>
+      <p class="subtitle">Entre com suas credenciais para acessar sua conta.</p>
 
-    <form onsubmit="return false;">
+      <form onsubmit="return false;">
 
-      <div class="field">
-        <label for="email">E-mail</label>
-        <div class="input-wrap">
-          <input type="email" id="email" placeholder="seu@email.com" autocomplete="email">
+        <div class="field">
+          <label for="email">E-mail</label>
+          <div class="field-input-wrap">
+            <input type="email" id="email" placeholder="seu@email.com" autocomplete="email">
+          </div>
         </div>
-      </div>
 
-      <div class="field">
-        <label for="senha">Senha</label>
-        <div class="input-wrap">
-          <input type="password" id="senha" placeholder="••••••••" autocomplete="current-password">
-          <button class="eye-btn" onclick="toggleSenha()" type="button" aria-label="Mostrar senha">
-            <svg id="eye-icon" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-              <circle cx="12" cy="12" r="3"/>
-            </svg>
-          </button>
+        <div class="field">
+          <label for="senha">Senha</label>
+          <div class="field-input-wrap">
+            <input type="password" id="senha" placeholder="••••••••" autocomplete="current-password">
+            <button class="eye-btn" onclick="toggleSenha()" type="button" aria-label="Mostrar senha">
+              <svg id="eye-icon" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
         </div>
-      </div>
 
-      <a href="#" class="forgot">Esqueceu a senha?</a>
+        <div class="msg-erro" id="msg-erro"></div>
 
-      <div class="msg-erro" id="msg-erro"></div>
+        <button class="btn-primary" id="btn-entrar" type="submit" onclick="handleLogin()">Entrar</button>
 
-      <button class="btn-primary" id="btn-entrar" type="submit" onclick="handleLogin()">Entrar</button>
+        <button class="btn-social" id="btn-google" type="button" onclick="handleGoogle()">
+          <svg viewBox="0 0 48 48">
+            <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+            <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+            <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+            <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+          </svg>
+          Entrar com Google
+        </button>
 
-      <div class="divider">ou</div>
+      </form>
 
-      <button class="btn-google" id="btn-google" type="button" onclick="handleGoogle()">
-        <svg viewBox="0 0 48 48">
-          <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
-          <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
-          <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
-          <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
-        </svg>
-        Entrar com Google
-      </button>
+    </div>
 
-    </form>
+    <div class="form-footer">
+      Esqueceu sua senha? <a href="#">Recuperar acesso</a>
+    </div>
 
   </div>
 
-  <!-- ════ CARROSSEL ════ -->
-  <div class="carousel-side">
+  <!-- ══════ DIREITA — CARROSSEL ══════ -->
+  <div class="carousel-outer">
+    <div class="carousel-inner">
 
-    <span class="carousel-counter" id="counter">1 / 3</span>
+      <div class="slides" id="slides">
 
-    <div class="slides" id="slides">
-
-      <div class="slide" id="slide-1">
-        <img id="slide-img-1" src="" alt="" style="display:none">
-        <div class="slide-top">
-          <span class="slide-brand">Nexora</span>
-        </div>
-        <div class="slide-content">
-          <p class="slide-quote" id="quote-1">Servir é uma alegria quando estamos no lugar certo, com as pessoas certas.</p>
-          <div class="slide-author">
-            <div class="author-avatar" id="avatar-1">P</div>
-            <div>
-              <div class="author-name" id="name-1">Pastor Rafael</div>
-              <div class="author-role" id="role-1">Líder de Ministério</div>
-            </div>
+        <div class="slide" id="slide-1">
+          <img id="slide-img-1" src="" alt="" style="display:none">
+          <div class="slide-topbar">
+            <span class="slide-app-name">Nexora</span>
+            <span class="slide-counter-badge" id="counter">1 / 3</span>
+          </div>
+          <div class="slide-content">
+            <span class="quote-mark">"</span>
+            <p class="slide-quote" id="quote-1">Servir é uma alegria quando estamos no lugar certo, com as pessoas certas.</p>
+            <div class="slide-author-name" id="name-1">Pastor Rafael</div>
+            <div class="slide-author-role" id="role-1">Líder de Ministério</div>
           </div>
         </div>
+
+        <div class="slide" id="slide-2">
+          <img id="slide-img-2" src="" alt="" style="display:none">
+          <div class="slide-topbar">
+            <span class="slide-app-name">Nexora</span>
+            <span class="slide-counter-badge">2 / 3</span>
+          </div>
+          <div class="slide-content">
+            <span class="quote-mark">"</span>
+            <p class="slide-quote" id="quote-2">Unidos em propósito, crescemos juntos em fé e dedicação.</p>
+            <div class="slide-author-name" id="name-2">Ana Beatriz</div>
+            <div class="slide-author-role" id="role-2">Líder de Louvor</div>
+          </div>
+        </div>
+
+        <div class="slide" id="slide-3">
+          <img id="slide-img-3" src="" alt="" style="display:none">
+          <div class="slide-topbar">
+            <span class="slide-app-name">Nexora</span>
+            <span class="slide-counter-badge">3 / 3</span>
+          </div>
+          <div class="slide-content">
+            <span class="quote-mark">"</span>
+            <p class="slide-quote" id="quote-3">Cada voluntário faz parte de algo maior — e isso transforma vidas.</p>
+            <div class="slide-author-name" id="name-3">Marcos Oliveira</div>
+            <div class="slide-author-role" id="role-3">Coordenador de Voluntariado</div>
+          </div>
+        </div>
+
       </div>
 
-      <div class="slide" id="slide-2">
-        <img id="slide-img-2" src="" alt="" style="display:none">
-        <div class="slide-top">
-          <span class="slide-brand">Nexora</span>
-        </div>
-        <div class="slide-content">
-          <p class="slide-quote" id="quote-2">Unidos em propósito, crescemos juntos em fé e dedicação.</p>
-          <div class="slide-author">
-            <div class="author-avatar" id="avatar-2">A</div>
-            <div>
-              <div class="author-name" id="name-2">Ana Beatriz</div>
-              <div class="author-role" id="role-2">Líder de Louvor</div>
-            </div>
-          </div>
-        </div>
+      <!-- Nav arrows -->
+      <div class="carousel-nav">
+        <button class="nav-arrow" onclick="prev()" aria-label="Anterior">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <button class="nav-arrow" onclick="next()" aria-label="Próximo">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
       </div>
 
-      <div class="slide" id="slide-3">
-        <img id="slide-img-3" src="" alt="" style="display:none">
-        <div class="slide-top">
-          <span class="slide-brand">Nexora</span>
-        </div>
-        <div class="slide-content">
-          <p class="slide-quote" id="quote-3">Cada voluntário faz parte de algo maior — e isso transforma vidas.</p>
-          <div class="slide-author">
-            <div class="author-avatar" id="avatar-3">M</div>
-            <div>
-              <div class="author-name" id="name-3">Marcos Oliveira</div>
-              <div class="author-role" id="role-3">Coordenador de Voluntariado</div>
-            </div>
-          </div>
-        </div>
+      <!-- Dots -->
+      <div class="carousel-dots" id="dots">
+        <button class="dot active" onclick="goTo(0)" aria-label="Slide 1"></button>
+        <button class="dot" onclick="goTo(1)" aria-label="Slide 2"></button>
+        <button class="dot" onclick="goTo(2)" aria-label="Slide 3"></button>
       </div>
 
     </div>
-
-    <div class="carousel-dots" id="dots">
-      <div class="dot active" onclick="goTo(0)"></div>
-      <div class="dot" onclick="goTo(1)"></div>
-      <div class="dot" onclick="goTo(2)"></div>
-    </div>
-
-    <div class="carousel-nav">
-      <button class="ctrl-btn" onclick="prev()" aria-label="Anterior">&#8592;</button>
-      <button class="ctrl-btn" onclick="next()" aria-label="Próximo">&#8594;</button>
-    </div>
-
   </div>
 
 </div>
 
+<div id="loginLoader">
+  <div class="card">
+    <div class="loader">
+      <p>loading</p>
+      <div class="words">
+        <span class="word">voluntários</span>
+        <span class="word">escalas</span>
+        <span class="word">membros</span>
+        <span class="word">eventos</span>
+        <span class="word">voluntários</span>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script src="/js/supabase.js"></script>
 <script>
-  // SEC-005: escape HTML para prevenir XSS em innerHTML
   function esc(s) { return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') }
 
-  /* ── Carrossel — carrega dados do banco ── */
+  /* ── Carrossel ── */
+  let current = 0
+  const TOTAL = 3
+  let autoTimer
+
+  function goTo(n) {
+    current = (n + TOTAL) % TOTAL
+    document.getElementById('slides').style.transform = `translateX(-${current * 100}%)`
+    document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === current))
+    document.getElementById('counter').textContent = `${current + 1} / ${TOTAL}`
+  }
+  function next() { goTo(current + 1); resetAuto() }
+  function prev() { goTo(current - 1); resetAuto() }
+  function resetAuto() {
+    clearInterval(autoTimer)
+    autoTimer = setInterval(() => goTo(current + 1), 5500)
+  }
+  resetAuto()
+
   async function loadCarousel() {
     try {
       const res = await fetch('/api/carousel')
       if (!res.ok) return
       const { slides } = await res.json()
       if (!slides?.length) return
-
       slides.forEach((slide, i) => {
         const n = i + 1
-        if (slide.frase) {
-          const el = document.getElementById(`quote-${n}`)
-          if (el) el.textContent = slide.frase
-        }
-        if (slide.autor) {
-          const nameEl   = document.getElementById(`name-${n}`)
-          const avatarEl = document.getElementById(`avatar-${n}`)
-          if (nameEl)   nameEl.textContent   = slide.autor
-          if (avatarEl) avatarEl.textContent = slide.autor.trim()[0]?.toUpperCase() || avatarEl.textContent
-        }
-        if (slide.cargo) {
-          const el = document.getElementById(`role-${n}`)
-          if (el) el.textContent = slide.cargo
-        }
+        if (slide.frase) { const el = document.getElementById(`quote-${n}`); if (el) el.textContent = slide.frase }
+        if (slide.autor) { const el = document.getElementById(`name-${n}`);  if (el) el.textContent = slide.autor }
+        if (slide.cargo) { const el = document.getElementById(`role-${n}`);  if (el) el.textContent = slide.cargo }
         if (slide.foto) {
           const imgEl   = document.getElementById(`slide-img-${n}`)
           const slideEl = document.getElementById(`slide-${n}`)
-          if (imgEl) {
-            imgEl.src             = slide.foto
-            imgEl.style.display   = 'block'
-            // remove gradient background quando há foto real
-            if (slideEl) slideEl.style.background = 'none'
-          }
+          if (imgEl) { imgEl.src = slide.foto; imgEl.style.display = 'block' }
+          if (slideEl) slideEl.style.background = '#0f0f14'
         }
       })
-    } catch (_) { /* fallback: conteúdo estático já está no HTML */ }
+    } catch (_) {}
   }
   loadCarousel()
 
-  /* ── Carrossel (controles) ── */
-  let current = 0;
-  const TOTAL = 3;
-  let autoTimer;
-
-  function goTo(n) {
-    current = (n + TOTAL) % TOTAL;
-    document.getElementById('slides').style.transform = `translateX(-${current * 100}%)`;
-    document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === current));
-    document.getElementById('counter').textContent = `${current + 1} / ${TOTAL}`;
-  }
-  function next() { goTo(current + 1); resetAuto(); }
-  function prev() { goTo(current - 1); resetAuto(); }
-  function resetAuto() {
-    clearInterval(autoTimer);
-    autoTimer = setInterval(() => goTo(current + 1), 5500);
-  }
-  resetAuto();
-
   /* ── Toggle senha ── */
   function toggleSenha() {
-    const inp  = document.getElementById('senha');
-    const icon = document.getElementById('eye-icon');
-    const show = inp.type === 'password';
-    inp.type = show ? 'text' : 'password';
+    const inp  = document.getElementById('senha')
+    const icon = document.getElementById('eye-icon')
+    const show = inp.type === 'password'
+    inp.type = show ? 'text' : 'password'
     icon.innerHTML = show
       ? '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>'
-      : '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+      : '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>'
   }
 
-  /* ── Error display ── */
+  /* ── Erros ── */
   function mostrarErro(msg) {
-    const el = document.getElementById('msg-erro');
-    el.textContent = msg;
-    el.style.display = 'block';
+    const el = document.getElementById('msg-erro')
+    el.textContent = msg
+    el.style.display = 'block'
   }
-  function limparErro() {
-    document.getElementById('msg-erro').style.display = 'none';
-  }
+  function limparErro() { document.getElementById('msg-erro').style.display = 'none' }
 
-  /* ── Supabase / OAuth ── */
-  let supabaseClient = null;
-
+  /* ── Supabase OAuth ── */
+  let supabaseClient = null
   async function initSupabase() {
     try {
-      const cfg = await fetch('/api/auth/config').then(r => r.json());
-      if (cfg.url && cfg.anon_key) {
-        supabaseClient = supabase.createClient(cfg.url, cfg.anon_key);
-      }
+      const cfg = await fetch('/api/auth/config').then(r => r.json())
+      if (cfg.url && cfg.anon_key) supabaseClient = supabase.createClient(cfg.url, cfg.anon_key)
     } catch (_) {}
   }
 
   async function handleGoogle() {
-    if (!supabaseClient) { mostrarErro('Google não disponível no momento.'); return; }
-    const btn = document.getElementById('btn-google');
-    btn.disabled = true;
-    btn.textContent = 'Redirecionando…';
+    if (!supabaseClient) { mostrarErro('Google não disponível no momento.'); return }
+    const btn = document.getElementById('btn-google')
+    btn.disabled = true; btn.textContent = 'Redirecionando…'
     await supabaseClient.auth.signInWithOAuth({
       provider: 'google',
       options: { redirectTo: `${location.origin}/login?oauth=google` }
-    });
+    })
   }
 
   async function checkOAuthCallback() {
-    if (!supabaseClient) return false;
-    if (!location.search.includes('oauth=google') && !location.search.includes('code=')) return false;
-    const { data: { session } } = await supabaseClient.auth.getSession();
-    if (!session) return false;
-    await finalizarSessao(session);
-    return true;
+    if (!supabaseClient) return false
+    if (!location.search.includes('oauth=google') && !location.search.includes('code=')) return false
+    const { data: { session } } = await supabaseClient.auth.getSession()
+    if (!session) return false
+    await finalizarSessao(session)
+    return true
   }
 
   async function finalizarSessao(session) {
-    const res = await fetch('/api/auth/me', {
-      headers: { Authorization: `Bearer ${session.access_token}` }
-    });
+    const res = await fetch('/api/auth/me', { headers: { Authorization: `Bearer ${session.access_token}` } })
     if (!res.ok) {
-      history.replaceState(null, '', '/login');
-      mostrarErro('Conta não encontrada no sistema. Solicite cadastro ao seu líder.');
-      return;
+      history.replaceState(null, '', '/login')
+      mostrarErro('Conta não encontrada. Solicite cadastro ao seu líder.')
+      return
     }
-    const { usuario, igreja } = await res.json();
-    salvarSessao({ access_token: session.access_token, refresh_token: session.refresh_token, expires_at: session.expires_at }, usuario, igreja);
-    window.location.href = usuario.perfil_slug === 'sistema_owner' ? '/painel-sistema' : '/dashboard';
+    const { usuario, igreja } = await res.json()
+    salvarSessao({ access_token: session.access_token, refresh_token: session.refresh_token, expires_at: session.expires_at }, usuario, igreja)
+    window.location.href = usuario.perfil_slug === 'sistema_owner' ? '/painel-sistema' : '/dashboard'
   }
 
-  /* ── Salvar sessão no localStorage ── */
+  /* ── Salvar sessão ── */
   function salvarSessao(tokens, usuario, igreja) {
-    localStorage.setItem('access_token',   tokens.access_token);
-    localStorage.setItem('refresh_token',  tokens.refresh_token);
-    localStorage.setItem('expires_at',     tokens.expires_at);
-    localStorage.setItem('usuario',        JSON.stringify(usuario));
-    localStorage.setItem('igreja',         JSON.stringify(igreja));
-    localStorage.setItem('permissions',    JSON.stringify(usuario.permissions || []));
-    localStorage.setItem('perfil_slug',    usuario.perfil_slug || '');
-    localStorage.setItem('permissions_at', Date.now().toString());
-    if (['lider_departamento', 'lider_ministerio'].includes(usuario.perfil_slug)) {
-      localStorage.setItem('modulo_ativo', 'lider');
+    localStorage.setItem('access_token',   tokens.access_token)
+    localStorage.setItem('refresh_token',  tokens.refresh_token)
+    localStorage.setItem('expires_at',     tokens.expires_at)
+    localStorage.setItem('usuario',        JSON.stringify(usuario))
+    localStorage.setItem('igreja',         JSON.stringify(igreja))
+    localStorage.setItem('permissions',    JSON.stringify(usuario.permissions || []))
+    localStorage.setItem('perfil_slug',    usuario.perfil_slug || '')
+    localStorage.setItem('permissions_at', Date.now().toString())
+    if (['lider', 'lider_departamento', 'lider_ministerio'].includes(usuario.perfil_slug)) {
+      localStorage.setItem('modulo_ativo', 'lider')
     }
   }
+
+  /* ── Login Loader helpers ── */
+  function mostrarLoginLoader() { document.getElementById('loginLoader').style.display = 'flex' }
+  function esconderLoginLoader() { document.getElementById('loginLoader').style.display = 'none' }
 
   /* ── Login ── */
   async function handleLogin() {
-    const email = document.getElementById('email').value.trim();
-    const senha = document.getElementById('senha').value;
-    const btn   = document.getElementById('btn-entrar');
+    const email = document.getElementById('email').value.trim()
+    const senha = document.getElementById('senha').value
+    const btn   = document.getElementById('btn-entrar')
 
-    limparErro();
+    limparErro()
+    if (!email || !senha) { mostrarErro('Preencha e-mail e senha.'); return }
 
-    if (!email || !senha) {
-      mostrarErro('Preencha e-mail e senha.');
-      return;
-    }
-
-    btn.disabled = true;
-    btn.textContent = 'Entrando…';
+    mostrarLoginLoader()
+    btn.disabled = true; btn.textContent = 'Entrando…'
 
     try {
-      const res = await fetch('/api/auth/login', {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ email, senha })
-      });
-
-      const dados = await res.json();
-
+      const res  = await fetch('/api/auth/login', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, senha })
+      })
+      const dados = await res.json()
       if (!res.ok) {
-        mostrarErro(dados.error || 'Erro ao fazer login.');
-        return;
+        esconderLoginLoader()
+        mostrarErro(dados.error || 'Erro ao fazer login.')
+        return
       }
-
-      salvarSessao(dados, dados.usuario, dados.igreja);
-      window.location.href = dados.redirect || (dados.usuario.perfil_slug === 'sistema_owner' ? '/painel-sistema' : '/dashboard');
-
+      salvarSessao(dados, dados.usuario, dados.igreja)
+      sessionStorage.setItem('from_login', '1')
+      window.location.href = dados.redirect || (dados.usuario.perfil_slug === 'sistema_owner' ? '/painel-sistema' : '/dashboard')
     } catch {
-      mostrarErro('Não foi possível conectar ao servidor.');
+      esconderLoginLoader()
+      mostrarErro('Não foi possível conectar ao servidor.')
     } finally {
-      btn.disabled = false;
-      btn.textContent = 'Entrar';
+      btn.disabled = false; btn.textContent = 'Entrar'
     }
   }
 
-  document.getElementById('senha').addEventListener('keydown', e => {
-    if (e.key === 'Enter') handleLogin();
-  });
+  document.getElementById('email').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('senha').focus() })
+  document.getElementById('senha').addEventListener('keydown', e => { if (e.key === 'Enter') handleLogin() })
 
   /* ── Boot ── */
   ;(async () => {
-    await initSupabase();
-    const isOAuth = await checkOAuthCallback();
-    if (!isOAuth && localStorage.getItem('access_token')) {
-      window.location.href = '/dashboard';
-    }
-  })();
+    await initSupabase()
+    const isOAuth = await checkOAuthCallback()
+    if (!isOAuth && localStorage.getItem('access_token')) window.location.href = '/dashboard'
+  })()
 </script>
 
 </body>

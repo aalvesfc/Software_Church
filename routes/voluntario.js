@@ -7,6 +7,7 @@ const checkModulo = require('../middleware/checkModulo')
 const checkLimiteVoluntarios = require('../middleware/checkLimiteVoluntarios')
 const { uploadPhoto } = require('../lib/uploadUtils') // SEC-001: upload seguro centralizado
 const { dbError, serverError } = require('../lib/apiError') // SEC-006
+const { registrarLog } = require('../lib/logger')
 
 router.use(authMiddleware)
 router.use(checkModulo('voluntariado'))
@@ -111,6 +112,9 @@ router.get('/pendentes', authMiddleware, checkPermissao('voluntario', 'ver'), as
 // PUT /api/voluntario/:id/aprovar
 router.put('/:id/aprovar', authMiddleware, checkPermissao('voluntario', 'editar'), async (req, res) => {
   const churchId = req.churchId
+  const { data: targetUser } = await supabaseAdmin
+    .from('db_user').select('id, full_name, email').eq('id', req.params.id).eq('church_id', churchId).maybeSingle()
+
   const { error } = await supabaseAdmin
     .from('db_user')
     .update({ is_active: true })
@@ -118,6 +122,8 @@ router.put('/:id/aprovar', authMiddleware, checkPermissao('voluntario', 'editar'
     .eq('church_id', churchId)
 
   if (error) return dbError(res, error, 'voluntario')
+
+  registrarLog({ churchId, userId: req.dbUser?.id, action: 'approved', entity: 'voluntario', entityId: req.params.id, description: `${req.dbUser?.full_name || 'Usuário'} aprovou cadastro de ${targetUser?.full_name || ''}`.trim(), ipAddress: req.ip })
   res.json({ ok: true })
 })
 
@@ -125,29 +131,30 @@ router.put('/:id/aprovar', authMiddleware, checkPermissao('voluntario', 'editar'
 router.put('/:id/rejeitar', authMiddleware, checkPermissao('voluntario', 'editar'), async (req, res) => {
   const churchId = req.churchId
 
-  const { data: dbUser } = await supabaseAdmin
+  const { data: targetUser } = await supabaseAdmin
     .from('db_user')
-    .select('id, user_id, email')
+    .select('id, user_id, email, full_name')
     .eq('id', req.params.id)
     .eq('church_id', churchId)
     .single()
 
-  if (!dbUser) return res.status(404).json({ error: 'Usuário não encontrado' })
+  if (!targetUser) return res.status(404).json({ error: 'Usuário não encontrado' })
 
-  if (dbUser.email) {
+  if (targetUser.email) {
     await supabaseAdmin
       .from('db_member')
       .update({ is_active: false })
       .eq('church_id', churchId)
-      .eq('email', dbUser.email)
+      .eq('email', targetUser.email)
   }
 
-  await supabaseAdmin.from('db_user').delete().eq('id', dbUser.id)
+  await supabaseAdmin.from('db_user').delete().eq('id', targetUser.id)
 
-  if (dbUser.user_id) {
-    await supabaseAdmin.auth.admin.deleteUser(dbUser.user_id).catch(() => {})
+  if (targetUser.user_id) {
+    await supabaseAdmin.auth.admin.deleteUser(targetUser.user_id).catch(() => {})
   }
 
+  registrarLog({ churchId, userId: req.dbUser?.id, action: 'rejected', entity: 'voluntario', entityId: req.params.id, description: `${req.dbUser?.full_name || 'Usuário'} rejeitou cadastro de ${targetUser.full_name || ''}`.trim(), ipAddress: req.ip })
   res.json({ ok: true })
 })
 
@@ -310,6 +317,7 @@ router.post('/', authMiddleware, checkPermissao('voluntario', 'criar'), checkLim
   if (error) return dbError(res, error, 'voluntario')
 
   const [voluntario] = await attachDepts([data])
+  registrarLog({ churchId, userId: req.dbUser?.id, action: 'created', entity: 'voluntario', entityId: created.id, description: `${req.dbUser?.full_name || 'Usuário'} cadastrou voluntário ${data.full_name}`, ipAddress: req.ip })
   res.status(201).json({ voluntario })
 })
 
@@ -361,6 +369,7 @@ router.put('/:id', authMiddleware, checkPermissao('voluntario', 'editar'), async
   if (!data) return res.status(404).json({ error: 'Voluntário não encontrado' })
 
   const [voluntario] = await attachDepts([data])
+  registrarLog({ churchId, userId: req.dbUser?.id, action: 'updated', entity: 'voluntario', entityId: req.params.id, description: `${req.dbUser?.full_name || 'Usuário'} atualizou voluntário ${data.full_name}`, ipAddress: req.ip })
   res.json({ voluntario })
 })
 
@@ -499,6 +508,8 @@ router.delete('/:id', authMiddleware, checkPermissao('voluntario', 'excluir'), a
   const churchId = req.churchId
   if (!churchId) return res.status(404).json({ error: 'Igreja não encontrada' })
 
+  const { data: target } = await supabaseAdmin.from('db_member').select('full_name').eq('id', req.params.id).eq('church_id', churchId).maybeSingle()
+
   await supabaseAdmin.from('db_member_dept').delete().eq('member_id', req.params.id)
 
   const { error } = await supabaseAdmin
@@ -508,6 +519,7 @@ router.delete('/:id', authMiddleware, checkPermissao('voluntario', 'excluir'), a
     .eq('church_id', churchId)
 
   if (error) { console.error('[voluntario DELETE]', error); return dbError(res, error, 'voluntario') }
+  registrarLog({ churchId, userId: req.dbUser?.id, action: 'deleted', entity: 'voluntario', entityId: req.params.id, description: `${req.dbUser?.full_name || 'Usuário'} excluiu voluntário ${target?.full_name || req.params.id}`, ipAddress: req.ip })
   res.json({ ok: true })
 })
 

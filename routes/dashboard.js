@@ -268,4 +268,93 @@ router.get('/lider-departamento', authMiddleware, checkPermissao('escala', 'ver'
   }
 })
 
+// ── GET /api/dashboard/resumo-escalas ── resumo mensal de escalas para o dono
+router.get('/resumo-escalas', authMiddleware, async (req, res) => {
+  try {
+    const churchId = req.churchId
+    console.log('[resumo-escalas] hit churchId=%s', churchId)
+    if (!churchId) return res.status(404).json({ error: 'Igreja não encontrada' })
+
+    const now   = new Date()
+    const year  = now.getFullYear()
+    const month = String(now.getMonth() + 1).padStart(2, '0')
+    const MESES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro']
+
+    const startDate = `${year}-${month}-01`
+    const endDate   = `${year}-${month}-31`
+
+    // Eventos do mês
+    const { data: eventos } = await supabaseAdmin
+      .from('db_event')
+      .select('id')
+      .eq('church_id', churchId)
+      .gte('start_date', startDate)
+      .lte('start_date', endDate)
+
+    if (!eventos?.length) {
+      return res.json({ confirmados: 0, pendentes: 0, recusas: 0, total: 0, vagasEmAberto: 0, mes: `${MESES[now.getMonth()]} ${year}` })
+    }
+
+    const eventIds = eventos.map(e => e.id)
+
+    const { data: escalas } = await supabaseAdmin
+      .from('db_escala')
+      .select('id')
+      .in('event_id', eventIds)
+      .eq('church_id', churchId)
+
+    if (!escalas?.length) {
+      return res.json({ confirmados: 0, pendentes: 0, recusas: 0, total: 0, vagasEmAberto: 0, mes: `${MESES[now.getMonth()]} ${year}` })
+    }
+
+    const escalaIds = escalas.map(e => e.id)
+
+    const { data: items } = await supabaseAdmin
+      .from('db_escala_item')
+      .select('id, member_id, status, funcao_id, escala_id')
+      .in('escala_id', escalaIds)
+      .eq('church_id', churchId)
+
+    const all        = items || []
+    const confirmados = all.filter(i => i.status === 'confirmado' || i.status === 'presente').length
+    const pendentes   = all.filter(i => !i.status || i.status === 'pendente').length
+    const recusas     = all.filter(i => i.status === 'recusado' || i.status === 'cancelado').length
+    const total       = new Set(all.map(i => i.member_id)).size
+
+    // Vagas em aberto: recusas sem substituto confirmado na mesma função/escala
+    const recusaItems = all.filter(i => i.status === 'recusado' || i.status === 'cancelado')
+    let vagasEmAberto = 0
+    for (const r of recusaItems) {
+      const temSubstituto = all.some(i =>
+        i.escala_id === r.escala_id &&
+        i.funcao_id === r.funcao_id &&
+        i.member_id !== r.member_id &&
+        (i.status === 'confirmado' || i.status === 'presente')
+      )
+      if (!temSubstituto) vagasEmAberto++
+    }
+
+    res.json({ confirmados, pendentes, recusas, total, vagasEmAberto, mes: `${MESES[now.getMonth()]} ${year}` })
+  } catch (err) {
+    console.error('[GET /api/dashboard/resumo-escalas]', err)
+    res.status(500).json({ error: 'Erro interno' })
+  }
+})
+
+// ── GET /api/dashboard/atividades ── feed de atividades recentes da igreja
+router.get('/atividades', authMiddleware, async (req, res) => {
+  try {
+    const { data } = await supabaseAdmin
+      .from('db_log')
+      .select('id, user_id, action, entity, entity_id, description, created_at, actor:user_id(full_name, nickname)')
+      .eq('church_id', req.churchId)
+      .order('created_at', { ascending: false })
+      .limit(10)
+    res.json({ atividades: data || [] })
+  } catch (err) {
+    console.error('[GET /api/dashboard/atividades]', err)
+    res.status(500).json({ error: 'Erro interno' })
+  }
+})
+
 module.exports = router

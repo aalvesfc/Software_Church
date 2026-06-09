@@ -24,7 +24,7 @@
       --ink-muted:    #6e6e73;
       --ink-subtle:   #aeaeb2;
       --canvas:       #ffffff;
-      --canvas-page:  #ECE9E7;
+      --canvas-page: #EEEEEE;
       --canvas-input: #f2f2f7;
       --hairline:     #e0e0e0;
       --radius-sm:    8px;
@@ -40,14 +40,15 @@
     /* ── SIDEBAR ── */
     .sys-sidebar {
       width: 220px; flex-shrink: 0;
-      background: #1c1c1c;
+      background: #ffffff;
+      border-right: 1px solid #EEEEEE;
       display: flex; flex-direction: column;
       position: fixed; top: 0; left: 0; bottom: 0; z-index: 100;
     }
     .sys-sidebar-brand {
       display: flex; align-items: center; gap: 10px;
       padding: 22px 18px 18px;
-      border-bottom: 1px solid rgba(255,255,255,0.08);
+      border-bottom: 1px solid #EEEEEE;
     }
     .sys-brand-logo {
       width: 32px; height: 32px; border-radius: 8px; background: var(--primary);
@@ -107,7 +108,7 @@
     /* ── TOPBAR ── */
     .topbar {
       position: sticky; top: 0; z-index: 50;
-      background: rgba(236,233,231,0.85); backdrop-filter: blur(12px);
+      background: #EEEEEE; backdrop-filter: blur(12px);
       border-bottom: 1px solid var(--hairline);
       display: flex; align-items: center; justify-content: space-between;
       padding: 0 32px; height: 64px;

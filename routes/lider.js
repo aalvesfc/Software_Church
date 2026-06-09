@@ -4,6 +4,7 @@ const { supabaseAdmin } = require('../lib/supabase')
 const authMiddleware = require('../middleware/auth')
 const checkPermissao = require('../middleware/checkPermissao')
 const { dbError, serverError } = require('../lib/apiError') // SEC-006
+const { registrarLog } = require('../lib/logger')
 
 const USER_SELECT = 'id, full_name, email, avatar_url'
 
@@ -131,6 +132,8 @@ router.post('/ministerio/:ministryId', authMiddleware, checkPermissao('ministeri
   // Promove para 'lider' se ainda for 'voluntario'
   await promoverParaLider(user_id, churchId)
 
+  const { data: min } = await supabaseAdmin.from('db_ministry').select('name').eq('id', req.params.ministryId).maybeSingle()
+  registrarLog({ churchId, userId: req.dbUser?.id, action: 'created', entity: 'lider', entityId: data.id, description: `${req.dbUser?.full_name || 'Usuário'} vinculou ${data.db_user?.full_name || user_id} como líder de ${min?.name || req.params.ministryId}`, ipAddress: req.ip })
   res.status(201).json({ lider: flattenLider(data) })
 })
 
@@ -138,6 +141,11 @@ router.post('/ministerio/:ministryId', authMiddleware, checkPermissao('ministeri
 router.delete('/ministerio/:ministryId/:userId', authMiddleware, checkPermissao('ministerio', 'editar'), async (req, res) => {
   const churchId = req.churchId
   const userId   = req.params.userId
+
+  const [{ data: targetUser }, { data: min }] = await Promise.all([
+    supabaseAdmin.from('db_user').select('full_name').eq('id', userId).maybeSingle(),
+    supabaseAdmin.from('db_ministry').select('name').eq('id', req.params.ministryId).maybeSingle(),
+  ])
 
   const { error } = await supabaseAdmin
     .from('db_ministry_lider')
@@ -151,6 +159,7 @@ router.delete('/ministerio/:ministryId/:userId', authMiddleware, checkPermissao(
   // Rebaixa para 'voluntario' se não for mais líder em nenhum lugar
   await rebaixarSeNaoEhMaisLider(userId, churchId)
 
+  registrarLog({ churchId, userId: req.dbUser?.id, action: 'deleted', entity: 'lider', entityId: userId, description: `${req.dbUser?.full_name || 'Usuário'} removeu ${targetUser?.full_name || userId} como líder de ${min?.name || req.params.ministryId}`, ipAddress: req.ip })
   res.json({ ok: true })
 })
 
@@ -196,6 +205,8 @@ router.post('/departamento/:departmentId', authMiddleware, checkPermissao('depar
   // Promove para 'lider' se ainda for 'voluntario'
   await promoverParaLider(user_id, churchId)
 
+  const { data: dept } = await supabaseAdmin.from('db_department').select('name').eq('id', req.params.departmentId).maybeSingle()
+  registrarLog({ churchId, userId: req.dbUser?.id, action: 'created', entity: 'lider', entityId: data.id, description: `${req.dbUser?.full_name || 'Usuário'} vinculou ${data.db_user?.full_name || user_id} como líder de ${dept?.name || req.params.departmentId}`, ipAddress: req.ip })
   res.status(201).json({ lider: flattenLider(data) })
 })
 
@@ -203,6 +214,11 @@ router.post('/departamento/:departmentId', authMiddleware, checkPermissao('depar
 router.delete('/departamento/:departmentId/:userId', authMiddleware, checkPermissao('departamento', 'editar'), async (req, res) => {
   const churchId = req.churchId
   const userId   = req.params.userId
+
+  const [{ data: targetUser }, { data: dept }] = await Promise.all([
+    supabaseAdmin.from('db_user').select('full_name').eq('id', userId).maybeSingle(),
+    supabaseAdmin.from('db_department').select('name').eq('id', req.params.departmentId).maybeSingle(),
+  ])
 
   const { error } = await supabaseAdmin
     .from('db_department_lider')
@@ -216,6 +232,7 @@ router.delete('/departamento/:departmentId/:userId', authMiddleware, checkPermis
   // Rebaixa para 'voluntario' se não for mais líder em nenhum lugar
   await rebaixarSeNaoEhMaisLider(userId, churchId)
 
+  registrarLog({ churchId, userId: req.dbUser?.id, action: 'deleted', entity: 'lider', entityId: userId, description: `${req.dbUser?.full_name || 'Usuário'} removeu ${targetUser?.full_name || userId} como líder de ${dept?.name || req.params.departmentId}`, ipAddress: req.ip })
   res.json({ ok: true })
 })
 

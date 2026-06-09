@@ -4,6 +4,7 @@ const { supabaseAdmin } = require('../lib/supabase')
 const authMiddleware = require('../middleware/auth')
 const checkPermissao = require('../middleware/checkPermissao')
 const { dbError, serverError } = require('../lib/apiError') // SEC-006
+const { registrarLog } = require('../lib/logger')
 
 
 // GET /api/department — lista departamentos (opcional: ?ministry_id=)
@@ -133,6 +134,7 @@ router.post('/', authMiddleware, checkPermissao('departamento', 'criar'), async 
     return dbError(res, error, 'department')
   }
 
+  registrarLog({ churchId, userId: req.dbUser?.id, action: 'created', entity: 'departamento', entityId: data.id, description: `${req.dbUser?.full_name || 'Usuário'} criou departamento ${data.name}`, ipAddress: req.ip })
   res.status(201).json({ department: data })
 })
 
@@ -165,6 +167,8 @@ router.put('/:id', authMiddleware, checkPermissao('departamento', 'editar'), asy
     return res.status(404).json({ error: 'Departamento não encontrado' })
   }
 
+  const action = data[0].is_active === false ? 'deleted' : 'updated'
+  registrarLog({ churchId, userId: req.dbUser?.id, action, entity: 'departamento', entityId: req.params.id, description: `${req.dbUser?.full_name || 'Usuário'} ${action === 'deleted' ? 'arquivou' : 'atualizou'} departamento ${data[0].name}`, ipAddress: req.ip })
   res.json({ department: data[0] })
 })
 
@@ -172,6 +176,8 @@ router.put('/:id', authMiddleware, checkPermissao('departamento', 'editar'), asy
 router.delete('/:id', authMiddleware, checkPermissao('departamento', 'arquivar'), async (req, res) => {
   const churchId = req.churchId
   if (!churchId) return res.status(404).json({ error: 'Igreja não encontrada' })
+
+  const { data: target } = await supabaseAdmin.from('db_department').select('name').eq('id', req.params.id).eq('church_id', churchId).maybeSingle()
 
   const { error } = await supabaseAdmin
     .from('db_department')
@@ -184,6 +190,7 @@ router.delete('/:id', authMiddleware, checkPermissao('departamento', 'arquivar')
     return dbError(res, error, 'department')
   }
 
+  registrarLog({ churchId, userId: req.dbUser?.id, action: 'deleted', entity: 'departamento', entityId: req.params.id, description: `${req.dbUser?.full_name || 'Usuário'} excluiu departamento ${target?.name || req.params.id}`, ipAddress: req.ip })
   res.json({ ok: true })
 })
 

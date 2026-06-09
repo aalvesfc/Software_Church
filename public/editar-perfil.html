@@ -25,7 +25,7 @@
       --ink-muted:       #6e6e73;
       --ink-subtle:      #aeaeb2;
       --canvas:          #ffffff;
-      --canvas-page: #ECE9E7;
+      --canvas-page: #EEEEEE;
       --canvas-input:    #f2f2f7;
       --hairline:        #e0e0e0;
       --on-dark:         #ffffff;
@@ -50,7 +50,8 @@
     .sidebar {
       width: var(--sidebar-w);
       min-height: unset;
-      background: #1c1c1c;
+      background: #ffffff;
+      border-right: 1px solid #EEEEEE;
       display: flex;
       flex-direction: column;
       flex-shrink: 0;
@@ -66,7 +67,7 @@
       align-items: center;
       gap: 12px;
       padding: 24px 20px 28px;
-      border-bottom: 1px solid rgba(255,255,255,0.08);
+      border-bottom: 1px solid #EEEEEE;
       transition: padding 0.22s, gap 0.22s;
     }
 
@@ -84,7 +85,7 @@
       font-family: sans-serif;
       font-size: 15px;
       font-weight: 700;
-      color: var(--on-dark);
+      color: #1A1A1A;
       letter-spacing: 0.6px;
       line-height: 1;
       white-space: nowrap;
@@ -92,7 +93,7 @@
       opacity: 1;
       transition: opacity 0.15s, width 0.22s;
     }
-    .logo-text span { color: var(--primary-light); }
+    .logo-text span { color: #8054FF; }
 
     .sidebar-nav {
       flex: 1;
@@ -109,7 +110,7 @@
       padding: 11px 20px;
       font-size: 14px;
       font-weight: 400;
-      color: var(--on-dark-muted);
+      color: #8A8A8A;
       text-decoration: none;
       letter-spacing: -0.224px;
       border-radius: 0;
@@ -117,14 +118,14 @@
       cursor: pointer;
       white-space: nowrap;
     }
-    .nav-item:hover { color: var(--on-dark); background: rgba(255,255,255,0.07); }
+    .nav-item:hover { color: #1A1A1A; background: rgba(128,84,255,0.06); }
     .nav-item.active {
-      color: var(--on-dark);
-      background: rgba(255,255,255,0.13);
+      color: #8054FF;
+      background: rgba(128,84,255,0.08);
       font-weight: 600;
     }
-    .nav-item svg { width: 18px; height: 18px; flex-shrink: 0; opacity: 0.85; }
-    .nav-item.active svg { opacity: 1; }
+    .nav-item svg { width: 18px; height: 18px; flex-shrink: 0; color: #8054FF; }
+    .nav-item.active svg { color: #8054FF; }
     .nav-item span { overflow: hidden; opacity: 1; transition: opacity 0.15s; }
 
     /* ── Estado colapsado ── */
@@ -200,7 +201,7 @@
       position: sticky;
       top: 0;
       z-index: 50;
-      background: linear-gradient(135deg, #ECE9E700 0%, #ECE9E7 100%);
+      background: #EEEEEE;
       backdrop-filter: blur(1px);
       -webkit-backdrop-filter: blur(1px);
     }
@@ -585,7 +586,7 @@
     .badge-role.role-admin            { background: rgba(109,31,214,0.10); color: var(--primary-dark); }
     .badge-role.role-lider            { background: #fff3e0; color: #e07400; }
     .badge-role.role-lider_departamento { background: #fff3e0; color: #e07400; }
-    .badge-role.role-secretario       { background: #ECE9E7; color: var(--primary); }
+    .badge-role.role-secretario       { background: #EEEEEE; color: var(--primary); }
     .badge-role.role-voluntario       { background: var(--canvas-input); color: var(--ink-muted); }
 
     .profile-stats {
@@ -1145,8 +1146,8 @@
        ══════════════════════════════════════════════════════ */
 
     /* ── Fundo da página ── */
-    :root { --canvas-page: #ECE9E7; }
-    body  { background: #ECE9E7; }
+    :root { --canvas-page: #EEEEEE; }
+    body  { background: #EEEEEE; }
 
     /* ── Hero banner ── */
     .hero {
@@ -1231,7 +1232,7 @@
 
     /* ── Escalação: cards de departamento ── */
     .dept-card-header {
-      background: #ECE9E7 !important;
+      background: #EEEEEE !important;
       border-bottom: 1px solid #EEEEEE !important;
       border-radius: 20px 20px 0 0 !important;
     }
@@ -1256,7 +1257,7 @@
       color: #8A8A8A !important;
       text-transform: uppercase !important;
       letter-spacing: 0.5px !important;
-      background: #ECE9E7 !important;
+      background: #EEEEEE !important;
     }
 
     /* ── Painel lateral (detalhe) ── */
@@ -1276,7 +1277,7 @@
     /* ── Estrutura base ── */
     .sidebar {
       width: 60px !important;
-      background: #1c1c1c !important;
+      background: #ffffff !important;
       border-radius: 24px !important;
       top: 16px !important;
       bottom: 16px !important;
@@ -1286,7 +1287,7 @@
       padding: 16px 8px !important;
       align-items: center !important;
       overflow: visible !important;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.18) !important;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.10) !important;
       border-right: none !important;
     }
 
@@ -1307,7 +1308,7 @@
       min-height: 44px !important;
       padding: 10px !important;
       border-radius: 14px !important;
-      color: rgba(255,255,255,0.5) !important;
+      color: #8A8A8A !important;
       justify-content: center !important;
       gap: 0 !important;
       background: none !important;
@@ -1319,12 +1320,12 @@
       opacity: 1 !important; flex-shrink: 0 !important;
     }
     .nav-item:hover {
-      background: rgba(255,255,255,0.1) !important;
-      color: rgba(255,255,255,0.9) !important;
+      background: rgba(128,84,255,0.06) !important;
+      color: #1A1A1A !important;
     }
     .nav-item.active {
-      background: #FFFFFF !important;
-      color: #1A1A1A !important;
+      background: rgba(128,84,255,0.08) !important;
+      color: #8054FF !important;
     }
     .nav-item.active svg { opacity: 1 !important; }
 
@@ -1355,7 +1356,8 @@
       top: 20px; left: 16px;
       width: 40px; height: 40px;
       border-radius: 50%;
-      background: #1c1c1c;
+      background: #ffffff;
+      border-right: 1px solid #EEEEEE;
       color: #fff;
       border: none;
       cursor: pointer;
@@ -1364,7 +1366,7 @@
       box-shadow: 0 4px 12px rgba(0,0,0,0.2);
       transition: background 0.15s;
     }
-    .sidebar-restore-btn:hover { background: #333; }
+    .sidebar-restore-btn:hover { background: #F5F3FF; }
     .sidebar-restore-btn svg { width: 18px; height: 18px; }
     body.sidebar-collapsed .sidebar-restore-btn { display: flex; }
 
@@ -1387,21 +1389,21 @@
     .sidebar .icon-btn {
       width: 40px !important; height: 40px !important;
       border-radius: 50% !important;
-      color: rgba(255,255,255,0.7) !important;
-      background: rgba(255,255,255,0.08) !important;
+      color: #8054FF !important;
+      background: rgba(128,84,255,0.06) !important;
       border: none !important;
       flex-shrink: 0 !important;
     }
     .sidebar .icon-btn:hover {
-      background: rgba(255,255,255,0.16) !important;
-      color: #FFFFFF !important;
+      background: rgba(128,84,255,0.12) !important;
+      color: #8054FF !important;
     }
     /* ══════════════════════════════════════════════════════ */
 
     /* ── Avatar no rodapé da sidebar ── */
     .sidebar-footer {
       padding-top: 8px !important;
-      border-top: 1px solid rgba(255,255,255,0.08) !important;
+      border-top: 1px solid #EEEEEE !important;
     }
     .sidebar .avatar-menu-wrap {
       position: relative !important;
@@ -1514,9 +1516,7 @@
         <!-- Search pill + botão -->
         <div class="search-wrap">
           <input type="text" placeholder="Search..." id="topSearch" />
-          <button class="search-btn" title="Buscar">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          </button>
+          
         </div>
 
         <!-- Notificações -->
@@ -1826,6 +1826,7 @@
   <div class="toast" id="toast"></div>
 
   <script src="/js/auth-fetch.js"></script>
+  <script src="/js/topbar-date.js"></script>
   <script src="/js/sidebar-permissions.js"></script>
   <script src="/js/trocar-perfil.js"></script>
     <script src="/js/sidebar-ui.js"></script>

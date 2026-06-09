@@ -5,6 +5,45 @@ const authMiddleware = require("../middleware/auth")
 const { uploadPhoto } = require("../lib/uploadUtils") // SEC-001: upload seguro centralizado
 const { dbError, serverError } = require('../lib/apiError') // SEC-006
 
+// ── Helper: resolve perfil_slug considerando liderança ───────────────────────
+// Retorna 'lider_ministerio' ou 'lider_departamento' quando o usuário está
+// nas tabelas de liderança, mesmo que o perfil base seja 'voluntario' ou 'lider'.
+async function resolverLideranca(dbUser) {
+  const base = dbUser.db_perfil?.slug
+  if (!['lider', 'voluntario'].includes(base)) {
+    return { perfil_slug: base, liderPerfilId: null }
+  }
+
+  const [{ count: cMin }, { count: cDept }] = await Promise.all([
+    supabaseAdmin.from('db_ministry_lider')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', dbUser.id)
+      .eq('church_id', dbUser.church_id),
+    supabaseAdmin.from('db_department_lider')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', dbUser.id)
+      .eq('church_id', dbUser.church_id),
+  ])
+
+  let perfil_slug = base
+  if (cMin  > 0) perfil_slug = 'lider_ministerio'
+  else if (cDept > 0) perfil_slug = 'lider_departamento'
+
+  // Voluntário que virou líder precisa das permissões do perfil 'lider'
+  let liderPerfilId = null
+  if (base === 'voluntario' && perfil_slug !== 'voluntario') {
+    const { data } = await supabaseAdmin
+      .from('db_perfil')
+      .select('id')
+      .eq('church_id', dbUser.church_id)
+      .eq('slug', 'lider')
+      .maybeSingle()
+    liderPerfilId = data?.id || null
+  }
+
+  return { perfil_slug, liderPerfilId }
+}
+
 // POST /api/auth/login
 router.post('/login', async (req, res) => {
   const { email, senha } = req.body
@@ -97,18 +136,21 @@ router.post('/login', async (req, res) => {
     supabaseAdmin.from('db_member').select('photo_url').eq('email', dbUser.email).eq('church_id', dbUser.church_id).maybeSingle()
   ])
 
-  // 4. Busca permissões do perfil
-  const { data: permissoes } = await supabaseAdmin
-    .from('db_perfil_permissao')
-    .select('db_permissao(module, action)')
-    .eq('perfil_id', dbUser.perfil_id)
+  // 4. Resolve liderança + permissões efetivas
+  const { perfil_slug, liderPerfilId } = await resolverLideranca(dbUser)
 
   const isAdmin = ['owner', 'admin'].includes(dbUser.db_perfil?.slug)
-  const permissions = isAdmin
-    ? ['*']
-    : (permissoes || []).filter(p => p.db_permissao).map(p => `${p.db_permissao.module}:${p.db_permissao.action}`)
-
-  const perfil_slug = dbUser.db_perfil?.slug || null
+  let permissions
+  if (isAdmin) {
+    permissions = ['*']
+  } else {
+    const perfil_id_perm = liderPerfilId || dbUser.perfil_id
+    const { data: permissoes } = await supabaseAdmin
+      .from('db_perfil_permissao')
+      .select('db_permissao(module, action)')
+      .eq('perfil_id', perfil_id_perm)
+    permissions = (permissoes || []).filter(p => p.db_permissao).map(p => `${p.db_permissao.module}:${p.db_permissao.action}`)
+  }
 
 
   const generoNome = dbUser.db_genero?.name || ''
@@ -156,20 +198,27 @@ router.get('/me', authMiddleware, async (req, res) => {
       return res.status(404).json({ error: 'Usuário não encontrado' })
     }
 
-    const [{ data: dbExtra }, { data: dbMemberMe }, { data: permissoes }] = await Promise.all([
+    const [{ data: dbExtra }, { data: dbMemberMe }] = await Promise.all([
       supabaseAdmin.from('db_user').select('genero_id, status_civil_id, birth_date').eq('user_id', req.authUser.id).limit(1).maybeSingle(),
       supabaseAdmin.from('db_member').select('photo_url').eq('email', dbUser.email).eq('church_id', dbUser.church_id).maybeSingle(),
-      supabaseAdmin.from('db_perfil_permissao').select('db_permissao(module, action)').eq('perfil_id', dbUser.perfil_id)
     ])
 
-    const perfil_slug = dbUser.db_perfil?.slug || null
-    const isAdmin     = ['owner', 'admin', 'sistema_owner'].includes(perfil_slug)
-    const permissions = isAdmin
-      ? ['*']
-      : (permissoes || []).filter(p => p.db_permissao).map(p => `${p.db_permissao.module}:${p.db_permissao.action}`)
+    // Resolve liderança (ministry / dept) → perfil_slug efetivo
+    const { perfil_slug, liderPerfilId } = await resolverLideranca(dbUser)
 
-    console.log('[me] email=%s perfil_slug=%s permissions_count=%d permissions=%j',
-      dbUser.email, perfil_slug, permissions.length, permissions)
+    const isAdmin = ['owner', 'admin', 'sistema_owner'].includes(dbUser.db_perfil?.slug)
+    let permissions
+    if (isAdmin) {
+      permissions = ['*']
+    } else {
+      const perfil_id_perm = liderPerfilId || dbUser.perfil_id
+      const { data: permissoes } = await supabaseAdmin
+        .from('db_perfil_permissao').select('db_permissao(module, action)').eq('perfil_id', perfil_id_perm)
+      permissions = (permissoes || []).filter(p => p.db_permissao).map(p => `${p.db_permissao.module}:${p.db_permissao.action}`)
+    }
+
+    console.log('[me] email=%s perfil_slug=%s permissions_count=%d',
+      dbUser.email, perfil_slug, permissions.length)
 
     const generoNome  = dbUser.db_genero?.name || ''
     const prefixo     = generoNome === 'Masculino' ? 'Sr.' : generoNome === 'Feminino' ? 'Sra.' : ''

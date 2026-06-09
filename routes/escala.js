@@ -5,6 +5,7 @@ const authMiddleware = require('../middleware/auth')
 const checkPermissao = require('../middleware/checkPermissao')
 const checkModulo = require('../middleware/checkModulo')
 const { dbError, serverError } = require('../lib/apiError') // SEC-006
+const { registrarLog } = require('../lib/logger')
 
 router.use(authMiddleware)
 router.use(checkModulo('voluntariado'))
@@ -442,6 +443,8 @@ router.put('/:eventId/status', authMiddleware, checkPermissao('escala', 'editar'
           .update({ status: 'escalado' })
           .eq('escala_id', escRow.id).eq('church_id', churchId).eq('status', 'pendente')
       }
+      const { data: evtRow } = await supabaseAdmin.from('db_event').select('name').eq('id', req.params.eventId).maybeSingle()
+      registrarLog({ churchId, userId: req.dbUser?.id, action: 'published', entity: 'escala', entityId: req.params.eventId, description: `${req.dbUser?.full_name || 'Usuário'} publicou a escala do evento ${evtRow?.name || ''}`.trim(), ipAddress: req.ip })
     }
 
     return res.json({ ok: true, status })
@@ -488,6 +491,7 @@ router.put('/:eventId/status', authMiddleware, checkPermissao('escala', 'editar'
       // Busca evento
       const { data: evento } = await supabaseAdmin
         .from('db_event').select('id, name').eq('id', req.params.eventId).single()
+      registrarLog({ churchId, userId: req.dbUser?.id, action: 'published', entity: 'escala', entityId: req.params.eventId, description: `${req.dbUser?.full_name || 'Usuário'} publicou a escala do evento ${evento?.name || ''}`.trim(), ipAddress: req.ip })
 
       // Busca todas as escalas do evento
       const { data: escalas } = await supabaseAdmin

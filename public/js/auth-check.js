@@ -49,7 +49,8 @@ async function checkContrato() {
 // ── checkPermissionsCache ─────────────────────────────────────────────────────
 // Sempre chama /api/auth/me (uma vez por page load) para:
 //  a) Verificar bloqueio de contrato (sempre)
-//  b) Atualizar permissões no localStorage (só quando o cache expirou)
+//  b) Detectar mudança de perfil imediatamente (ex: voluntário → líder)
+//  c) Atualizar permissões completas no localStorage (só quando o cache expirou)
 async function checkPermissionsCache() {
   const permissions_at = parseInt(localStorage.getItem('permissions_at') || '0')
   const cacheExpirado  = Date.now() - permissions_at > PERMISSIONS_TTL
@@ -66,7 +67,6 @@ async function checkPermissionsCache() {
         window.location.href = '/bloqueado?code=' + encodeURIComponent(data.code)
         return
       }
-      // 403 por outro motivo (ex: sem permissão) → encerra sessão
       clearSession()
       return
     }
@@ -76,15 +76,38 @@ async function checkPermissionsCache() {
       return
     }
 
-    // ── Atualiza permissões somente quando cache expirou ──────────────────
+    // Sempre lê o body — necessário para detectar mudança de perfil em tempo real
+    const dados = await res.json()
+    const perfilNovo     = dados.usuario?.perfil_slug
+    const perfilAnterior = localStorage.getItem('perfil_slug')
+
+    // ── Detecta transição de perfil (ex: voluntário promovido a líder) ─────
+    if (perfilNovo && perfilNovo !== perfilAnterior) {
+      localStorage.setItem('perfil_slug', perfilNovo)
+
+      // Garante modulo_ativo quando transiciona para tipo líder
+      const tiposLider = ['lider', 'lider_departamento', 'lider_ministerio']
+      if (tiposLider.includes(perfilNovo) && !localStorage.getItem('modulo_ativo')) {
+        localStorage.setItem('modulo_ativo', 'lider')
+      }
+
+      // Atualiza botão de troca de perfil imediatamente
+      if (typeof window.atualizarBotaoTrocarPerfil === 'function') {
+        window.atualizarBotaoTrocarPerfil()
+      }
+    }
+
+    // ── Atualiza permissões completas somente quando cache expirou ────────
     if (cacheExpirado) {
-      const dados = await res.json()
       localStorage.setItem('permissions',    JSON.stringify(dados.usuario.permissions))
-      localStorage.setItem('perfil_slug',    dados.usuario.perfil_slug)
+      localStorage.setItem('perfil_slug',    perfilNovo)
       localStorage.setItem('permissions_at', Date.now().toString())
 
-      if (window.aplicarMenuPermissoes) {
+      if (typeof window.aplicarMenuPermissoes === 'function') {
         window.aplicarMenuPermissoes()
+      }
+      if (typeof window.atualizarBotaoTrocarPerfil === 'function') {
+        window.atualizarBotaoTrocarPerfil()
       }
     }
   } catch (err) {

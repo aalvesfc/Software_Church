@@ -1,5 +1,5 @@
 ;(function () {
-  const PERFIS_COM_ALTERNANCIA = ['lider_departamento', 'lider_ministerio']
+  const PERFIS_COM_ALTERNANCIA = ['lider', 'lider_departamento', 'lider_ministerio']
 
   // ── Injetar CSS ────────────────────────────────────────────────────────────
   const style = document.createElement('style')
@@ -79,7 +79,7 @@
         <div class="tp-opcao" id="tpOpcaoLider" data-perfil="lider">
           <div class="tp-icone">👔</div>
           <div class="tp-info">
-            <strong>Líder de Departamento</strong>
+            <strong id="tpLiderLabel">Líder</strong>
             <p>Gerenciar escalas, voluntários e departamento</p>
           </div>
         </div>
@@ -122,13 +122,21 @@
     })
   }
 
-  // ── Visibilidade do botão ─────────────────────────────────────────────────
+  // ── Visibilidade do botão + label correto ────────────────────────────────
   function atualizarBotao() {
-    const perfil_slug = localStorage.getItem('perfil_slug')
+    const perfil_slug  = localStorage.getItem('perfil_slug')
     const podeAlternar = PERFIS_COM_ALTERNANCIA.includes(perfil_slug)
     document.querySelectorAll('#trocarPerfilBtn').forEach(btn => {
       btn.style.display = podeAlternar ? 'flex' : 'none'
     })
+    // Atualiza label do modal conforme tipo de liderança
+    const label = document.getElementById('tpLiderLabel')
+    if (label) {
+      label.textContent =
+        perfil_slug === 'lider_ministerio' ? 'Líder de Ministério' :
+        perfil_slug === 'lider_departamento' ? 'Líder de Departamento' :
+        'Líder'
+    }
   }
 
   // ── Modal: abrir / fechar ─────────────────────────────────────────────────
@@ -151,7 +159,7 @@
     // Calcula e persiste perfil_efetivo imediatamente
     const perfil_slug = localStorage.getItem('perfil_slug') || ''
     const perfilEfetivo = (
-      ['lider_departamento', 'lider_ministerio'].includes(perfil_slug) &&
+      ['lider', 'lider_departamento', 'lider_ministerio'].includes(perfil_slug) &&
       perfilEscolhido === 'voluntario'
     ) ? 'voluntario' : perfil_slug
     localStorage.setItem('perfil_efetivo', perfilEfetivo)

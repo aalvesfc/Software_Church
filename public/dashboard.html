@@ -25,7 +25,7 @@
       --ink-muted:       #6e6e73;
       --ink-subtle:      #aeaeb2;
       --canvas:          #ffffff;
-      --canvas-page:     #ECE9E7;
+      --canvas-page: #EEEEEE;
       --canvas-input:    #f2f2f7;
       --hairline:        #e0e0e0;
       --on-dark:         #ffffff;
@@ -56,7 +56,8 @@
     .sidebar {
       width: var(--sidebar-w);
       min-height: unset;
-      background: #1c1c1c;
+      background: #ffffff;
+      border-right: 1px solid #EEEEEE;
       display: flex;
       flex-direction: column;
       flex-shrink: 0;
@@ -72,7 +73,7 @@
       align-items: center;
       gap: 12px;
       padding: 24px 20px 28px;
-      border-bottom: 1px solid rgba(255,255,255,0.08);
+      border-bottom: 1px solid #EEEEEE;
       transition: padding 0.22s, gap 0.22s;
     }
 
@@ -90,7 +91,7 @@
       font-family: sans-serif;
       font-size: 15px;
       font-weight: 700;
-      color: var(--on-dark);
+      color: #1A1A1A;
       letter-spacing: 0.6px;
       line-height: 1;
       white-space: nowrap;
@@ -98,7 +99,7 @@
       opacity: 1;
       transition: opacity 0.15s, width 0.22s;
     }
-    .logo-text span { color: var(--primary-light); }
+    .logo-text span { color: #8054FF; }
 
     .sidebar-nav {
       flex: 1;
@@ -115,7 +116,7 @@
       padding: 11px 20px;
       font-size: 14px;
       font-weight: 400;
-      color: var(--on-dark-muted);
+      color: #8A8A8A;
       text-decoration: none;
       letter-spacing: -0.224px;
       border-radius: 0;
@@ -123,14 +124,14 @@
       cursor: pointer;
       white-space: nowrap;
     }
-    .nav-item:hover { color: var(--on-dark); background: rgba(255,255,255,0.07); }
+    .nav-item:hover { color: #1A1A1A; background: rgba(128,84,255,0.06); }
     .nav-item.active {
-      color: var(--on-dark);
-      background: rgba(255,255,255,0.13);
+      color: #8054FF;
+      background: rgba(128,84,255,0.08);
       font-weight: 600;
     }
-    .nav-item svg { width: 18px; height: 18px; flex-shrink: 0; opacity: 0.85; }
-    .nav-item.active svg { opacity: 1; }
+    .nav-item svg { width: 18px; height: 18px; flex-shrink: 0; color: #8054FF; }
+    .nav-item.active svg { color: #8054FF; }
     .nav-item span { overflow: hidden; opacity: 1; transition: opacity 0.15s; }
 
     /* ── Estado colapsado ── */
@@ -206,7 +207,7 @@
       position: sticky;
       top: 0;
       z-index: 50;
-      background: linear-gradient(135deg, #ECE9E700 0%, #ECE9E7 100%);
+      background: #EEEEEE;
       backdrop-filter: blur(1px);
       -webkit-backdrop-filter: blur(1px);
     }
@@ -326,6 +327,8 @@
     }
     .icon-btn:hover { background: var(--canvas-input); color: var(--ink); }
     .icon-btn svg { width: 20px; height: 20px; }
+    .sidebar .icon-btn { color: #8054FF; }
+    .sidebar .icon-btn:hover { background: rgba(128,84,255,0.08); color: #8054FF; }
 
     .avatar {
       width: 40px; height: 40px;
@@ -452,6 +455,601 @@
       font-style: italic;
     }
 
+    /* ─────────────────── VOL DONUT ─────────────────── */
+    .vol-donut-card {
+      background: #FFFFFF;
+      border: 1px solid #EEEEEE;
+      border-radius: 40px;
+      padding: 14px 18px 14px;
+      width: 280px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      box-sizing: border-box;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+    .vol-donut-title {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.09em;
+      color: #8A8A8A;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+    .vol-donut-wrap {
+      position: relative;
+      width: 104px;
+      height: 104px;
+      margin: 0 auto 10px;
+    }
+    .vol-donut-center {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      pointer-events: none;
+    }
+    .vol-donut-pct {
+      font-size: 22px;
+      font-weight: 700;
+      color: #1A1A1A;
+      line-height: 1;
+      letter-spacing: -0.5px;
+    }
+    .vol-donut-sublabel {
+      font-size: 11px;
+      color: #8A8A8A;
+      margin-top: 3px;
+    }
+    .vol-donut-legend {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    .vol-legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: #555;
+    }
+    .vol-legend-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .vol-legend-count {
+      margin-left: auto;
+      font-weight: 600;
+      color: #1A1A1A;
+      font-size: 12px;
+    }
+
+    /* ─────────────────── VOL OWNER ROW ─────────────────── */
+    #volOwnerRow {
+      display: flex;
+      gap: 14px;
+      align-items: stretch;
+      margin-bottom: 20px;
+      height: 35vh;
+    }
+    #volDonutSection {
+      display: none;
+      margin-bottom: 0;
+      flex-shrink: 0;
+    }
+    #volDonutSection.visible {
+      display: flex;
+      flex-direction: column;
+    }
+    #volChartSection {
+      display: none;
+      flex: 1;
+      min-width: 0;
+    }
+    #volChartSection.visible {
+      display: flex;
+      flex-direction: column;
+    }
+    .vol-chart-card {
+      background: #FFFFFF;
+      border: 1px solid #EEEEEE;
+      border-radius: 40px;
+      padding: 14px 18px 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      height: 100%;
+    }
+    .vol-chart-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+      flex-shrink: 0;
+    }
+    .vol-chart-total {
+      font-size: 22px;
+      font-weight: 700;
+      color: #d8ff6e;
+      letter-spacing: -0.8px;
+      line-height: 1;
+    }
+    .vol-chart-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.09em;
+      color: #8A8A8A;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .vol-chart-sub {
+      font-size: 12px;
+      color: #8A8A8A;
+      margin-top: 3px;
+    }
+    .vol-chart-svg-wrap {
+      flex: 1;
+      min-height: 0;
+      position: relative;
+      width: 100%;
+    }
+    .vol-chart-svg-wrap svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+      overflow: visible;
+    }
+    .vol-chart-tooltip {
+      position: fixed;
+      background: #1A1A1A;
+      color: #fff;
+      border-radius: 10px;
+      padding: 8px 13px;
+      font-size: 12px;
+      font-weight: 500;
+      pointer-events: none;
+      z-index: 9999;
+      white-space: nowrap;
+      display: none;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.22);
+      transform: translate(-50%, -120%);
+    }
+    .vol-chart-tooltip-val {
+      font-size: 15px;
+      font-weight: 700;
+      color: #d8ff6e;
+    }
+    /* ─────────────────── DEPT RANKING CARD ─────────────────── */
+    #volDeptSection {
+      display: none;
+      flex-shrink: 0;
+      width: 290px;
+    }
+    #volDeptSection.visible {
+      display: flex;
+      flex-direction: column;
+    }
+    .vol-dept-card {
+      background: #FFFFFF;
+      border: 1px solid #EEEEEE;
+      border-radius: 40px;
+      padding: 14px 16px 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      box-sizing: border-box;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+    .vol-dept-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+      flex-shrink: 0;
+    }
+    .vol-dept-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.09em;
+      color: #8A8A8A;
+      text-transform: uppercase;
+    }
+    .vol-dept-total {
+      font-size: 12px;
+      font-weight: 700;
+      color: #1A1A1A;
+      background: rgba(128,84,255,0.08);
+      color: #8054FF;
+      padding: 3px 9px;
+      border-radius: 999px;
+    }
+    .vol-dept-list {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      gap: 0;
+      overflow-y: auto;
+      min-height: 0;
+    }
+    .vol-dept-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 7px 0;
+      border-bottom: 1px solid #F5F5F5;
+    }
+    .vol-dept-item:last-child { border-bottom: none; }
+    .vol-dept-rank {
+      font-size: 11px;
+      font-weight: 600;
+      color: #CCCCCC;
+      width: 14px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+    .vol-dept-info {
+      flex: 1;
+      min-width: 0;
+    }
+    .vol-dept-name {
+      font-size: 12px;
+      font-weight: 600;
+      color: #1A1A1A;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .vol-dept-sub {
+      font-size: 10px;
+      color: #AAAAAA;
+      margin-top: 1px;
+    }
+    .vol-dept-bar-wrap {
+      height: 4px;
+      background: #F0F0F0;
+      border-radius: 999px;
+      margin-top: 5px;
+      overflow: hidden;
+    }
+    .vol-dept-bar {
+      height: 100%;
+      border-radius: 999px;
+      transition: width 0.6s cubic-bezier(.4,0,.2,1);
+    }
+    .vol-dept-count {
+      font-size: 15px;
+      font-weight: 700;
+      color: #1A1A1A;
+      flex-shrink: 0;
+      min-width: 24px;
+      text-align: right;
+    }
+
+    /* ─────────────────── OWNER EVENTS + ESCALA ─────────────────── */
+    #ownerBottomRow { display: none; gap: 14px; align-items: stretch; margin-bottom: 24px; }
+    #ownerEventsSection { flex: 1; min-width: 0; }
+    #ownerEscalaSection { width: 340px; flex-shrink: 0; display: flex; flex-direction: column; }
+
+    /* Escala card */
+    .owner-escala-card {
+      background: #8054FF;
+      border-radius: 40px;
+      padding: 20px 20px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      flex: 1;
+    }
+    .owner-escala-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .owner-escala-sub {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.65);
+      margin-top: 2px;
+    }
+    .owner-escala-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #FFFFFF;
+    }
+    .owner-escala-edit {
+      font-size: 13px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.8);
+      text-decoration: none;
+    }
+    .owner-escala-pct-row {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+    .owner-escala-pct {
+      font-size: 32px;
+      font-weight: 700;
+      color: #FFFFFF;
+      letter-spacing: -1px;
+      line-height: 1;
+    }
+    .owner-escala-pct-label {
+      font-size: 13px;
+      color: rgba(255,255,255,0.75);
+    }
+    .owner-escala-bar-total {
+      height: 6px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 999px;
+      margin-bottom: 16px;
+      overflow: hidden;
+    }
+    .owner-escala-bar-total-fill {
+      height: 100%;
+      border-radius: 999px;
+      background: #d8ff6e;
+      transition: width 0.5s ease;
+    }
+    .owner-escala-dept-list {
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+      margin-bottom: 4px;
+    }
+    .owner-escala-dept-row {
+      display: grid;
+      grid-template-columns: 90px 1fr 36px;
+      align-items: center;
+      gap: 10px;
+    }
+    .owner-escala-dept-name {
+      font-size: 12px;
+      color: #FFFFFF;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .owner-escala-dept-bar-wrap {
+      height: 6px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .owner-escala-dept-bar {
+      height: 100%;
+      border-radius: 999px;
+      transition: width 0.5s ease;
+    }
+    .owner-escala-dept-pct {
+      font-size: 11px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.85);
+      text-align: right;
+    }
+    .owner-escala-publish-btn {
+      display: block;
+      width: 100%;
+      padding: 12px;
+      background: #8054FF;
+      color: #FFFFFF;
+      font-size: 14px;
+      font-weight: 700;
+      text-align: center;
+      border-radius: 999px;
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.15s;
+    }
+    .owner-escala-publish-btn:hover { background: #6e3fe0; }
+
+    /* ── Resumo Escalas card ── */
+    #ownerResumoSection { width: 420px; flex-shrink: 0; display: flex; flex-direction: column; gap: 14px; }
+    .owner-resumo-card {
+      background: #FFFFFF;
+      border: 1px solid #EEEEEE;
+      border-radius: 40px;
+      padding: 18px 18px 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+
+    /* ── Atividade Recente card ── */
+    .owner-atividade-card {
+      background: #FFFFFF;
+      border: 1px solid #EEEEEE;
+      border-radius: 40px;
+      padding: 20px 20px 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+    .owner-atv-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+      flex-shrink: 0;
+    }
+    .owner-atv-label { font-size: 10px; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: #8A8A8A; }
+    .owner-atv-list { display: flex; flex-direction: column; gap: 12px; overflow-y: auto; flex: 1; min-height: 0; }
+    .owner-atv-item { display: flex; align-items: flex-start; gap: 10px; }
+    .owner-atv-avatar {
+      width: 34px; height: 34px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 700; color: #fff;
+      flex-shrink: 0;
+    }
+    .owner-atv-body { flex: 1; min-width: 0; }
+    .owner-atv-text { font-size: 12px; color: #1A1A1A; line-height: 1.4; }
+    .owner-atv-text strong { font-weight: 700; }
+    .owner-atv-badge {
+      display: inline-block; font-size: 10px; font-weight: 600;
+      padding: 1px 8px; border-radius: 999px; margin-left: 4px;
+      vertical-align: middle;
+    }
+    .owner-atv-time { font-size: 10px; color: #AAAAAA; margin-top: 2px; }
+    .owner-resumo-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+    .owner-resumo-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      color: #8A8A8A;
+    }
+    .owner-resumo-mes {
+      font-size: 11px;
+      font-weight: 600;
+      color: #8054FF;
+      background: rgba(128,84,255,0.08);
+      padding: 3px 10px;
+      border-radius: 999px;
+    }
+    .owner-resumo-kpis {
+      display: grid;
+      grid-template-columns: repeat(3,1fr);
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .owner-resumo-kpi {
+      background: #F7F7F7;
+      border-radius: 12px;
+      padding: 10px 10px 8px;
+    }
+    .owner-resumo-kpi-icon { font-size: 16px; margin-bottom: 4px; }
+    .owner-resumo-kpi-val {
+      font-size: 22px;
+      font-weight: 700;
+      line-height: 1;
+      margin-bottom: 2px;
+    }
+    .owner-resumo-kpi-val.green  { color: #8054FF; }
+    .owner-resumo-kpi-val.amber  { color: #d4a8ff; }
+    .owner-resumo-kpi-val.red    { color: #CCCCCC; }
+    .owner-resumo-kpi-name { font-size: 11px; color: #8A8A8A; }
+    .owner-resumo-total-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+    .owner-resumo-total-label { font-size: 12px; color: #8A8A8A; }
+    .owner-resumo-total-val   { font-size: 12px; font-weight: 700; color: #1A1A1A; }
+    .owner-resumo-seg {
+      height: 7px;
+      border-radius: 999px;
+      overflow: hidden;
+      display: flex;
+      margin-bottom: 8px;
+    }
+    .owner-resumo-seg-green { background: #8054FF; }
+    .owner-resumo-seg-amber { background: #d4a8ff; }
+    .owner-resumo-seg-red   { background: #CCCCCC; }
+    .owner-resumo-legend {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+    .owner-resumo-legend-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      color: #555;
+    }
+    .owner-resumo-legend-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .owner-resumo-footer {
+      border-top: 1px solid #F0F0F0;
+      padding-top: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .owner-resumo-footer-label { font-size: 11px; color: #8A8A8A; }
+    .owner-resumo-vagas {
+      font-size: 12px;
+      font-weight: 700;
+      color: #E85D6A;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .owner-ev-card {
+      background: #FFFFFF;
+      border: 1px solid #EEEEEE;
+      border-radius: 40px;
+      padding: 20px 20px 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    .owner-ev-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+    .owner-ev-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #1A1A1A;
+    }
+    .owner-ev-month {
+      font-size: 12px;
+      font-weight: 600;
+      color: #8054FF;
+      background: rgba(128,84,255,0.08);
+      padding: 3px 12px;
+      border-radius: 999px;
+    }
+    .owner-ev-list { display: flex; flex-direction: column; gap: 7px; }
+    .owner-ev-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 11px 14px;
+      border-radius: 12px;
+      background: #F7F7F7;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.15s;
+    }
+    .owner-ev-item:hover:not(.highlight) { background: #EFEFEF; }
+    .owner-ev-item.highlight { background: #8054FF; }
+    .owner-ev-date { display: flex; flex-direction: column; align-items: center; min-width: 34px; }
+    .owner-ev-day { font-size: 19px; font-weight: 700; color: #1A1A1A; line-height: 1; }
+    .owner-ev-mon { font-size: 10px; font-weight: 600; text-transform: uppercase; color: #8A8A8A; letter-spacing: 0.05em; }
+    .owner-ev-item.highlight .owner-ev-day,
+    .owner-ev-item.highlight .owner-ev-mon { color: #FFFFFF; }
+    .owner-ev-item.highlight .owner-ev-mon { opacity: 0.75; }
+    .owner-ev-info { flex: 1; min-width: 0; }
+    .owner-ev-name { font-size: 14px; font-weight: 700; color: #1A1A1A; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .owner-ev-desc { font-size: 12px; color: #8A8A8A; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
+    .owner-ev-item.highlight .owner-ev-name { color: #FFFFFF; }
+    .owner-ev-item.highlight .owner-ev-desc { color: rgba(255,255,255,0.72); }
+    .owner-ev-time { font-size: 13px; font-weight: 600; color: #8054FF; flex-shrink: 0; }
+    .owner-ev-item.highlight .owner-ev-time { color: #FFFFFF; }
+
     /* ─────────────────── STATS ROW ─────────────────── */
     .stats-row {
       display: grid;
@@ -463,7 +1061,7 @@
     .stat-card {
       background: #FFFFFF;
       border: 1px solid #EEEEEE;
-      border-radius: 20px;
+      border-radius: 40px;
       padding: 24px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.04);
       display: flex;
@@ -604,7 +1202,7 @@
     .event-card {
       background: #FFFFFF;
       border: 1px solid #EEEEEE;
-      border-radius: 20px;
+      border-radius: 40px;
       padding: 18px;
       display: flex;
       flex-direction: column;
@@ -729,7 +1327,7 @@
 
     .right-panel {
       background: #FFFFFF;
-      border-radius: 20px;
+      border-radius: 40px;
       padding: 16px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.04);
     }
@@ -862,7 +1460,7 @@
       display: flex; align-items: center; gap: 16px;
       background: #FFFFFF;
       border: 1px solid #EEEEEE;
-      border-radius: 20px;
+      border-radius: 40px;
       padding: 14px 18px;
       text-decoration: none; cursor: pointer;
       box-shadow: 0 2px 8px rgba(0,0,0,0.04);
@@ -926,7 +1524,7 @@
       height: 26px;
       padding: 4px 12px;
       background: #1A1A1A;
-      border-radius: 20px;
+      border-radius: 40px;
       font-size: 11px;
       font-weight: 600;
       color: #FFFFFF;
@@ -971,7 +1569,7 @@
     /* ── Estrutura base ── */
     .sidebar {
       width: 60px !important;
-      background: #1c1c1c !important;
+      background: #ffffff !important;
       border-radius: 24px !important;
       top: 16px !important;
       bottom: 16px !important;
@@ -981,7 +1579,7 @@
       padding: 16px 8px !important;
       align-items: center !important;
       overflow: visible !important;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.18) !important;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.10) !important;
       border-right: none !important;
     }
 
@@ -1002,7 +1600,7 @@
       min-height: 44px !important;
       padding: 10px !important;
       border-radius: 14px !important;
-      color: rgba(255,255,255,0.5) !important;
+      color: #8A8A8A !important;
       justify-content: center !important;
       gap: 0 !important;
       background: none !important;
@@ -1014,14 +1612,15 @@
       opacity: 1 !important; flex-shrink: 0 !important;
     }
     .nav-item:hover {
-      background: rgba(255,255,255,0.1) !important;
-      color: rgba(255,255,255,0.9) !important;
-    }
-    .nav-item.active {
-      background: #FFFFFF !important;
+      background: rgba(128,84,255,0.06) !important;
       color: #1A1A1A !important;
     }
-    .nav-item.active svg { opacity: 1 !important; }
+    .nav-item.active {
+      background: rgba(128,84,255,0.08) !important;
+      color: #8054FF !important;
+    }
+    .nav-item svg { color: #8054FF !important; }
+    .nav-item.active svg { color: #8054FF !important; }
 
     /* ── Transição suave ── */
     .sidebar { transition: transform 0.25s cubic-bezier(.4,0,.2,1), opacity 0.25s !important; }
@@ -1050,16 +1649,16 @@
       top: 20px; left: 16px;
       width: 40px; height: 40px;
       border-radius: 50%;
-      background: #1c1c1c;
-      color: #fff;
-      border: none;
+      background: #ffffff;
+      color: #8054FF;
+      border: 1px solid #EEEEEE;
       cursor: pointer;
       align-items: center; justify-content: center;
       z-index: 200;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.10);
       transition: background 0.15s;
     }
-    .sidebar-restore-btn:hover { background: #333; }
+    .sidebar-restore-btn:hover { background: #F5F3FF; }
     .sidebar-restore-btn svg { width: 18px; height: 18px; }
     body.sidebar-collapsed .sidebar-restore-btn { display: flex; }
 
@@ -1082,14 +1681,14 @@
     .sidebar .icon-btn {
       width: 40px !important; height: 40px !important;
       border-radius: 50% !important;
-      color: rgba(255,255,255,0.7) !important;
-      background: rgba(255,255,255,0.08) !important;
+      color: #8054FF !important;
+      background: rgba(128,84,255,0.06) !important;
       border: none !important;
       flex-shrink: 0 !important;
     }
     .sidebar .icon-btn:hover {
-      background: rgba(255,255,255,0.16) !important;
-      color: #FFFFFF !important;
+      background: rgba(128,84,255,0.12) !important;
+      color: #8054FF !important;
     }
     /* ══════════════════════════════════════════════════════ */
 
@@ -1207,9 +1806,7 @@
         <!-- Search pill + botão -->
         <div class="search-wrap">
           <input type="text" placeholder="Search..." id="topSearch" />
-          <button class="search-btn" title="Buscar">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          </button>
+          
         </div>
 
         <!-- Notificações -->
@@ -1277,44 +1874,158 @@
 
         <!-- Welcome card (only for voluntário) -->
 
-        <!-- Stats -->
-        <div class="stats-row" id="statsRow">
-          <a class="stat-card" href="/ministerios" style="text-decoration:none;cursor:pointer">
-            <div class="stat-icon teal">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4"/><path d="M10 4h4"/><path d="M3 11l9-7 9 7"/><rect x="5" y="11" width="14" height="10" rx="1"/><path d="M10 21v-5h4v5"/></svg>
+        <!-- Donut + Gráfico de crescimento (dono/admin) -->
+        <div id="volOwnerRow">
+
+          <!-- Top Departamentos -->
+          <div id="volDeptSection">
+            <div class="vol-dept-card">
+              <div class="vol-dept-header">
+                <span class="vol-dept-label">Por Departamento</span>
+                <span class="vol-dept-total" id="volDeptTotal">—</span>
+              </div>
+              <div class="vol-dept-list" id="volDeptList">
+                <!-- preenchido via JS -->
+              </div>
             </div>
-            <div class="stat-info">
-              <div class="stat-value" id="statMinisterios">—</div>
-              <div class="stat-label">Ministérios Ativos</div>
+          </div>
+
+          <div id="volDonutSection">
+            <div class="vol-donut-card">
+              <div class="vol-donut-title">Voluntários</div>
+              <div class="vol-donut-wrap">
+                <svg viewBox="0 0 100 100" width="104" height="104" fill="none" aria-hidden="true">
+                  <g transform="rotate(-90 50 50)">
+                    <circle cx="50" cy="50" r="36" stroke="#F3F4F6" stroke-width="13"/>
+                    <circle id="donutAtivos"     cx="50" cy="50" r="36" stroke="#d8ff6e" stroke-width="13" stroke-dasharray="0 226.19" stroke-linecap="butt"/>
+                    <circle id="donutAguardando" cx="50" cy="50" r="36" stroke="#8054FF" stroke-width="13" stroke-dasharray="0 226.19" stroke-linecap="butt"/>
+                    <circle id="donutSemFuncao"  cx="50" cy="50" r="36" stroke="#d4a8ff" stroke-width="13" stroke-dasharray="0 226.19" stroke-linecap="butt"/>
+                  </g>
+                </svg>
+                <div class="vol-donut-center">
+                  <div class="vol-donut-pct" id="donutPct">—</div>
+                  <div class="vol-donut-sublabel">ativos</div>
+                </div>
+              </div>
+              <div class="vol-donut-legend">
+                <div class="vol-legend-item">
+                  <span class="vol-legend-dot" style="background:#d8ff6e"></span>
+                  <span>Ativo</span>
+                  <span class="vol-legend-count" id="donutCountAtivos">—</span>
+                </div>
+                <div class="vol-legend-item">
+                  <span class="vol-legend-dot" style="background:#8054FF"></span>
+                  <span>Aguardando aprovação</span>
+                  <span class="vol-legend-count" id="donutCountAguardando">—</span>
+                </div>
+                <div class="vol-legend-item">
+                  <span class="vol-legend-dot" style="background:#d4a8ff"></span>
+                  <span>Sem função</span>
+                  <span class="vol-legend-count" id="donutCountSemFuncao">—</span>
+                </div>
+              </div>
             </div>
-          </a>
-          <a class="stat-card" href="/departamentos" style="text-decoration:none;cursor:pointer">
-            <div class="stat-icon cyan">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><path d="M2 12h20"/></svg>
+          </div>
+
+          <div id="volChartSection">
+            <div class="vol-chart-card">
+              <div class="vol-chart-header">
+                <div>
+                  <div class="vol-chart-label">Crescimento Anual</div>
+                  <div class="vol-chart-total" id="volChartTotal">—</div>
+                  <div class="vol-chart-sub">voluntários ativos + sem função</div>
+                </div>
+              </div>
+              <div class="vol-chart-svg-wrap" id="volChartWrap">
+                <svg id="volChartSvg" viewBox="0 0 500 120" preserveAspectRatio="none"></svg>
+              </div>
             </div>
-            <div class="stat-info">
-              <div class="stat-value" id="statDepartamentos">—</div>
-              <div class="stat-label">Departamentos Ativos</div>
+            <div class="vol-chart-tooltip" id="volChartTooltip">
+              <div id="volChartTooltipMonth"></div>
+              <div class="vol-chart-tooltip-val" id="volChartTooltipVal"></div>
             </div>
-          </a>
-          <a class="stat-card" href="/voluntarios" style="text-decoration:none;cursor:pointer">
-            <div class="stat-icon green">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </div>
+
+        </div>
+
+        <!-- Owner Events + Escala row -->
+        <div id="ownerBottomRow">
+
+          <div id="ownerEventsSection">
+            <div class="owner-ev-card">
+              <div class="owner-ev-header">
+                <span class="owner-ev-title">Próximos Eventos</span>
+                <span class="owner-ev-month" id="ownerEvMonth">—</span>
+              </div>
+              <div class="owner-ev-list" id="ownerEvList"></div>
             </div>
-            <div class="stat-info">
-              <div class="stat-value" id="statVoluntarios">—</div>
-              <div class="stat-label">Voluntários Ativos</div>
+          </div>
+
+          <div id="ownerEscalaSection">
+            <div class="owner-escala-card">
+              <div class="owner-escala-header">
+                <div>
+                  <span class="owner-escala-title" id="ownerEscalaTitle">Escala</span>
+                  <div class="owner-escala-sub">Próximo Evento</div>
+                </div>
+              </div>
+              <div class="owner-escala-pct-row">
+                <span class="owner-escala-pct" id="ownerEscalaPct">—%</span>
+                <span class="owner-escala-pct-label">preenchido</span>
+              </div>
+              <div class="owner-escala-bar-total">
+                <div class="owner-escala-bar-total-fill" id="ownerEscalaTotalBar" style="width:0%"></div>
+              </div>
+              <div class="owner-escala-dept-list" id="ownerEscalaDeptList"></div>
             </div>
-          </a>
-          <a class="stat-card" href="/templates" style="text-decoration:none;cursor:pointer">
-            <div class="stat-icon dark">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+          </div>
+
+          <div id="ownerResumoSection" style="display:none">
+            <div class="owner-resumo-card">
+              <div class="owner-resumo-header">
+                <span class="owner-resumo-label">Resumo de Escalas</span>
+                <span class="owner-resumo-mes" id="ownerResumoMes">—</span>
+              </div>
+              <div class="owner-resumo-kpis">
+                <div class="owner-resumo-kpi">
+                  <div class="owner-resumo-kpi-val green" id="ownerResumoConf">—</div>
+                  <div class="owner-resumo-kpi-name">Publicado</div>
+                </div>
+                <div class="owner-resumo-kpi">
+                  <div class="owner-resumo-kpi-val amber" id="ownerResumoPend">—</div>
+                  <div class="owner-resumo-kpi-name">Em andamento</div>
+                </div>
+                <div class="owner-resumo-kpi">
+                  <div class="owner-resumo-kpi-val red" id="ownerResumoRec">—</div>
+                  <div class="owner-resumo-kpi-name">A fazer</div>
+                </div>
+              </div>
+              <div class="owner-resumo-total-row">
+                <span class="owner-resumo-total-label">Total escalado no mês</span>
+                <span class="owner-resumo-total-val" id="ownerResumoTotal">— voluntários</span>
+              </div>
+              <div class="owner-resumo-seg" id="ownerResumoSeg">
+                <div class="owner-resumo-seg-green" id="ownerSegGreen" style="width:0%"></div>
+                <div class="owner-resumo-seg-amber" id="ownerSegAmber" style="width:0%"></div>
+                <div class="owner-resumo-seg-red"   id="ownerSegRed"   style="width:0%"></div>
+              </div>
+              <div class="owner-resumo-legend">
+                <div class="owner-resumo-legend-item"><span class="owner-resumo-legend-dot" style="background:#8054FF"></span><span id="ownerLegConf">—% publicado</span></div>
+                <div class="owner-resumo-legend-item"><span class="owner-resumo-legend-dot" style="background:#d4a8ff"></span><span id="ownerLegPend">—% em andamento</span></div>
+                <div class="owner-resumo-legend-item"><span class="owner-resumo-legend-dot" style="background:#CCCCCC"></span><span id="ownerLegRec">—% a fazer</span></div>
+              </div>
             </div>
-            <div class="stat-info">
-              <div class="stat-value" id="statTemplates">—</div>
-              <div class="stat-label">Templates Ativos</div>
+
+            <div class="owner-atividade-card">
+              <div class="owner-atv-header">
+                <span class="owner-atv-label">Atividade Recente</span>
+              </div>
+              <div class="owner-atv-list" id="ownerAtvList">
+                <div style="font-size:12px;color:#AAAAAA;text-align:center;padding:20px 0">Nenhuma atividade ainda</div>
+              </div>
             </div>
-          </a>
+          </div>
+
         </div>
 
         <!-- Events -->
@@ -1584,7 +2295,7 @@
 
       <!-- Right panel -->
       <!-- Coluna direita: dois cards separados -->
-      <div class="right-col">
+      <div class="right-col" id="rightCol">
 
         <!-- Card 1: Calendário -->
         <div class="right-panel">
@@ -1689,68 +2400,288 @@
     });
   </script>
   <script src="/js/auth-fetch.js"></script>
+  <script src="/js/topbar-date.js"></script>
   <script src="/js/sidebar-permissions.js"></script>
   <script src="/js/trocar-perfil.js"></script>
     <script src="/js/sidebar-ui.js"></script>
   <script>
-    async function carregarMinisterios() {
-      const cached = CacheManager.get('ministerios')
-      if (cached) {
-        const el = document.getElementById('statMinisterios')
-        if (el) el.textContent = cached.filter(m => m.is_active !== false).length
-        return
-      }
-      const res = await authFetch('/api/ministry')
-      if (!res.ok) return
-      const { ministries } = await res.json()
-      CacheManager.set('ministerios', ministries)
-      const el = document.getElementById('statMinisterios')
-      if (el && ministries) el.textContent = ministries.filter(m => m.is_active !== false).length
-    }
+    function renderVolDonut(comFuncao, aguardando, semFuncao) {
+      const total = comFuncao + aguardando + semFuncao
+      const circ  = 2 * Math.PI * 36  // ≈ 226.195
 
-    async function carregarDepartamentos() {
-      const cached = CacheManager.get('departamentos')
-      if (cached) {
-        const el = document.getElementById('statDepartamentos')
-        if (el) el.textContent = cached.filter(d => d.is_active !== false).length
+      const sec = document.getElementById('volDonutSection')
+      if (sec) sec.classList.add('visible')
+
+      if (total === 0) {
+        document.getElementById('donutPct').textContent = '0%'
+        ;['donutCountAtivos','donutCountAguardando','donutCountSemFuncao'].forEach(id => {
+          document.getElementById(id).textContent = '0'
+        })
         return
       }
-      const res = await authFetch('/api/department')
-      if (!res.ok) return
-      const { departments } = await res.json()
-      CacheManager.set('departamentos', departments)
-      const el = document.getElementById('statDepartamentos')
-      if (el && departments) el.textContent = departments.filter(d => d.is_active !== false).length
+
+      const sAtivos = (comFuncao   / total) * circ
+      const sAguard = (aguardando  / total) * circ
+      const sSemF   = (semFuncao   / total) * circ
+      const gap = total > 1 ? 1.8 : 0
+
+      function seg(id, len, offset) {
+        const el = document.getElementById(id)
+        if (!el) return
+        const l = Math.max(0, len - gap)
+        el.setAttribute('stroke-dasharray', `${l} ${circ - l}`)
+        el.setAttribute('stroke-dashoffset', -offset)
+      }
+
+      seg('donutAtivos',     sAtivos, 0)
+      seg('donutAguardando', sAguard, sAtivos)
+      seg('donutSemFuncao',  sSemF,   sAtivos + sAguard)
+
+      document.getElementById('donutPct').textContent = `${Math.round((comFuncao / total) * 100)}%`
+      document.getElementById('donutCountAtivos').textContent     = comFuncao
+      document.getElementById('donutCountAguardando').textContent = aguardando
+      document.getElementById('donutCountSemFuncao').textContent  = semFuncao
     }
 
     async function carregarVoluntarios() {
-      const cached = CacheManager.get('voluntarios')
-      if (cached) {
-        const el = document.getElementById('statVoluntarios')
-        if (el) el.textContent = cached.filter(v => v.is_active !== false).length
-        return
+      let voluntarios = CacheManager.get('voluntarios')
+      if (!voluntarios) {
+        const res = await authFetch('/api/voluntario')
+        if (!res.ok) return
+        const data = await res.json()
+        voluntarios = data.voluntarios
+        CacheManager.set('voluntarios', voluntarios)
       }
-      const res = await authFetch('/api/voluntario')
-      if (!res.ok) return
-      const { voluntarios } = await res.json()
-      CacheManager.set('voluntarios', voluntarios)
-      const el = document.getElementById('statVoluntarios')
-      if (el && voluntarios) el.textContent = voluntarios.filter(v => v.is_active !== false).length
+
+      // Busca pendentes + funções em paralelo
+      let pendentes = CacheManager.get('vol_pendentes')
+      let funcoesPorDept = CacheManager.get('funcoes_por_dept')
+
+      const fetches = []
+      if (!pendentes) {
+        fetches.push(
+          authFetch('/api/voluntario/pendentes')
+            .then(r => r.ok ? r.json() : { pendentes: [] })
+            .then(d => { pendentes = d.pendentes || []; CacheManager.set('vol_pendentes', pendentes) })
+            .catch(() => { pendentes = [] })
+        )
+      }
+      if (!funcoesPorDept) {
+        fetches.push(
+          authFetch('/api/funcao')
+            .then(r => r.ok ? r.json() : { funcoes: [] })
+            .then(d => {
+              funcoesPorDept = {}
+              ;(d.funcoes || []).filter(f => f.is_active !== false).forEach(f => {
+                funcoesPorDept[f.department_id] = (funcoesPorDept[f.department_id] || 0) + 1
+              })
+              CacheManager.set('funcoes_por_dept', funcoesPorDept)
+            })
+            .catch(() => { funcoesPorDept = {} })
+        )
+      }
+      if (fetches.length) await Promise.all(fetches)
+
+      const ativos     = (voluntarios || []).filter(v => v.is_active !== false)
+      const comFuncao  = ativos.filter(v => v.db_member_dept?.some(d => d.department_id && d.funcao_id)).length
+      const semFuncao  = ativos.length - comFuncao
+      const aguardando = (pendentes || []).length
+
+      renderVolDonut(comFuncao, aguardando, semFuncao)
+      renderVolChart(voluntarios || [], comFuncao, semFuncao)
+      renderVolDeptRanking(voluntarios || [], comFuncao, funcoesPorDept || {})
     }
 
-    async function carregarTemplates() {
-      const cached = CacheManager.get('templates')
-      if (cached) {
-        const el = document.getElementById('statTemplates')
-        if (el) el.textContent = cached.filter(t => t.is_active !== false).length
+    // ── Gráfico de crescimento de voluntários ──
+    let _volChartData = []
+
+    function renderVolChart(voluntarios, ativos, semFuncao) {
+      const sec = document.getElementById('volChartSection')
+      if (!sec) return
+      sec.classList.add('visible')
+
+      document.getElementById('volChartTotal').textContent = ativos + semFuncao
+
+      _volChartData = voluntarios
+      _drawVolChart()
+    }
+
+    function _drawVolChart() {
+      const MESES_PT = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez']
+      const agora    = new Date()
+      const labels   = []
+      const counts   = []
+
+      // Sempre todos os 12 meses do ano atual (Jan-Dez)
+      const anoAtual = agora.getFullYear()
+
+      for (let m = 0; m <= 11; m++) {
+        labels.push(MESES_PT[m])
+        counts.push(_volChartData.filter(v => {
+          // joined_at pertence a db_member_dept, não a db_member
+          // created_at é gerado automaticamente pelo Supabase no cadastro do voluntário
+          const dateStr = v.created_at || v.joined_at
+          if (!dateStr) return false
+          const s = dateStr.substring(0, 10).split('-')
+          return parseInt(s[0]) === anoAtual && parseInt(s[1]) - 1 === m
+        }).length)
+      }
+
+      const W = 500, H = 120, PAD_X = 10, PAD_Y = 12, LABEL_H = 20
+      const chartH = H - PAD_Y - LABEL_H
+      const maxVal = Math.max(...counts, 1)
+      const n      = counts.length
+
+      function px(i) { return n < 2 ? W / 2 : PAD_X + i * ((W - PAD_X * 2) / (n - 1)) }
+      function py(v) { return PAD_Y + chartH - (v / maxVal) * chartH }
+
+      const pts = counts.map((v, i) => ({ x: px(i), y: py(v) }))
+
+      function smoothPath(p) {
+        if (p.length < 2) return `M ${p[0].x},${p[0].y}`
+        let d = `M ${p[0].x},${p[0].y}`
+        for (let i = 0; i < p.length - 1; i++) {
+          const p0 = p[Math.max(0, i - 1)]
+          const p1 = p[i], p2 = p[i + 1]
+          const p3 = p[Math.min(p.length - 1, i + 2)]
+          const cp1x = p1.x + (p2.x - p0.x) / 6
+          const cp1y = p1.y + (p2.y - p0.y) / 6
+          const cp2x = p2.x - (p3.x - p1.x) / 6
+          const cp2y = p2.y - (p3.y - p1.y) / 6
+          d += ` C ${cp1x},${cp1y} ${cp2x},${cp2y} ${p2.x},${p2.y}`
+        }
+        return d
+      }
+
+      const linePath = smoothPath(pts)
+      const areaPath = linePath + ` L ${pts[n-1].x},${H - LABEL_H} L ${pts[0].x},${H - LABEL_H} Z`
+
+      const gridLines = [0.25, 0.5, 0.75].map(f => {
+        const y = PAD_Y + chartH * (1 - f)
+        return `<line x1="${PAD_X}" y1="${y}" x2="${W - PAD_X}" y2="${y}" stroke="#F0F0F0" stroke-width="1"/>`
+      }).join('')
+
+      const step    = n <= 7 ? 1 : 2
+      const xLabels = labels.map((l, i) => {
+        if (i % step !== 0 && i !== n - 1) return ''
+        return `<text x="${px(i)}" y="${H - 4}" text-anchor="middle" font-size="10" fill="#AAAAAA" font-family="Plus Jakarta Sans,sans-serif">${l}</text>`
+      }).join('')
+
+      const segW      = n < 2 ? W : (W - PAD_X * 2) / (n - 1)
+      const hoverRects = counts.map((v, i) => {
+        const cx = px(i)
+        const x  = i === 0 ? PAD_X : cx - segW / 2
+        const w  = n < 2 ? W - PAD_X * 2 : (i === 0 || i === n - 1 ? segW / 2 : segW)
+        // guarda px/py como atributos para uso no hover sem recalcular
+        return `<rect x="${x}" y="${PAD_Y}" width="${w}" height="${chartH}" fill="transparent"
+          data-px="${px(i).toFixed(2)}" data-py="${py(v).toFixed(2)}" data-v="${v}" data-l="${labels[i]} ${anoAtual}"
+          onmouseenter="volChartHover(event,this)" onmouseleave="volChartHide()" style="cursor:crosshair"/>`
+      }).join('')
+
+      const maxIdx = counts.indexOf(Math.max(...counts))
+      const dotX   = px(maxIdx), dotY = py(counts[maxIdx])
+
+      const svg = document.getElementById('volChartSvg')
+      if (!svg) return
+      svg.innerHTML = `
+        <defs>
+          <linearGradient id="volGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%"   stop-color="#8054FF" stop-opacity="0.22"/>
+            <stop offset="100%" stop-color="#8054FF" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+        ${gridLines}
+        <path d="${areaPath}" fill="url(#volGrad)"/>
+        <path d="${linePath}" fill="none" stroke="#8054FF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle id="volChartDot" cx="${dotX}" cy="${dotY}" r="5" fill="#d8ff6e" stroke="#fff" stroke-width="2"/>
+        ${xLabels}
+        ${hoverRects}
+      `
+    }
+
+    function volChartHover(e, rect) {
+      const dot = document.getElementById('volChartDot')
+      const svg = document.getElementById('volChartSvg')
+      const tip = document.getElementById('volChartTooltip')
+      if (!dot || !svg || !tip) return
+
+      const dotPx = parseFloat(rect.dataset.px)
+      const dotPy = parseFloat(rect.dataset.py)
+      dot.setAttribute('cx', dotPx)
+      dot.setAttribute('cy', dotPy)
+
+      document.getElementById('volChartTooltipMonth').textContent = rect.dataset.l
+      document.getElementById('volChartTooltipVal').textContent   = `${rect.dataset.v} entradas`
+
+      const svgRect = svg.getBoundingClientRect()
+      const scaleX  = svgRect.width  / 500
+      const scaleY  = svgRect.height / 120
+      tip.style.left    = `${svgRect.left + dotPx * scaleX}px`
+      tip.style.top     = `${svgRect.top  + dotPy * scaleY}px`
+      tip.style.display = 'block'
+    }
+
+    function volChartHide() {
+      const tip = document.getElementById('volChartTooltip')
+      if (tip) tip.style.display = 'none'
+    }
+
+    // ── Ranking de departamentos ─────────────────────────────────────────────
+    const DEPT_BAR_COLORS = ['#8054FF','#d8ff6e','#d4a8ff','#b48aff','#CCCCCC']
+
+    function renderVolDeptRanking(voluntarios, totalAtivos, funcoesPorDept) {
+      const sec   = document.getElementById('volDeptSection')
+      const list  = document.getElementById('volDeptList')
+      const badge = document.getElementById('volDeptTotal')
+      if (!sec || !list) return
+
+      // Agrupa db_member_dept por departamento (só vínculos status='ativo')
+      const depts = {}
+      voluntarios
+        .filter(v => v.is_active !== false)
+        .forEach(v => {
+          ;(v.db_member_dept || [])
+            .filter(d => d.status === 'ativo' && d.department_id)
+            .forEach(d => {
+              if (!depts[d.department_id]) {
+                depts[d.department_id] = {
+                  deptId:  d.department_id,
+                  name:    d.db_department?.name || '—',
+                  membros: new Set(),
+                }
+              }
+              depts[d.department_id].membros.add(v.id)
+            })
+        })
+
+      const ranking = Object.values(depts)
+        .map(d => ({ name: d.name, total: d.membros.size, funcoes: (funcoesPorDept || {})[d.deptId] || 0, deptId: d.deptId }))
+        .sort((a, b) => b.total - a.total)
+
+      if (!ranking.length) {
+        list.innerHTML = '<div style="font-size:12px;color:#AAAAAA;padding:16px 0;text-align:center">Nenhum departamento com voluntários</div>'
+        sec.classList.add('visible')
         return
       }
-      const res = await authFetch('/api/template')
-      if (!res.ok) return
-      const { templates } = await res.json()
-      CacheManager.set('templates', templates)
-      const el = document.getElementById('statTemplates')
-      if (el && templates) el.textContent = templates.filter(t => t.is_active !== false).length
+
+      const max = ranking[0].total
+      if (badge) badge.textContent = totalAtivos
+
+      list.innerHTML = ranking.map((d, i) => `
+        <div class="vol-dept-item">
+          <span class="vol-dept-rank">${i + 1}</span>
+          <div class="vol-dept-info">
+            <div class="vol-dept-name" title="${d.name}">${d.name}</div>
+            <div class="vol-dept-sub">${d.funcoes} ${d.funcoes === 1 ? 'função' : 'funções'}</div>
+            <div class="vol-dept-bar-wrap">
+              <div class="vol-dept-bar" style="width:${Math.round((d.total / max) * 100)}%;background:${DEPT_BAR_COLORS[i]}"></div>
+            </div>
+          </div>
+          <span class="vol-dept-count">${d.total}</span>
+        </div>
+      `).join('')
+
+      sec.classList.add('visible')
     }
 
     // ── Estado do checkin por evento ──
@@ -2095,16 +3026,209 @@
       }
     }
 
-    function aplicarModoPerfil(perfil_slug) {
+    async function carregarOwnerEventos() {
+      const bottomRow = document.getElementById('ownerBottomRow')
+      const list      = document.getElementById('ownerEvList')
+      const monthEl   = document.getElementById('ownerEvMonth')
+      if (!bottomRow || !list) return
+
+      const MESES_PT   = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez']
+      const MESES_FULL = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro']
+
+      try {
+        const res = await authFetch('/api/evento?status=agendado')
+        if (!res.ok) return
+        const { eventos } = await res.json()
+
+        const agora = new Date()
+        const futuros = (eventos || [])
+          .filter(e => {
+            const fim = new Date(`${e.end_date || e.start_date}T${e.end_time || '23:59:59'}`)
+            return fim > agora
+          })
+          .sort((a, b) => new Date(`${a.start_date}T${a.start_time||'00:00'}`) - new Date(`${b.start_date}T${b.start_time||'00:00'}`))
+
+        if (futuros.length) {
+          const [yr0, mo0] = futuros[0].start_date.split('-')
+          monthEl.textContent = MESES_FULL[parseInt(mo0) - 1]
+
+          list.innerHTML = futuros.slice(0, 6).map((e, i) => {
+            const [yr, mo, da] = e.start_date.split('-')
+            const hora = e.start_time ? e.start_time.substring(0, 5) : ''
+            const desc = e.description || ''
+            const cls  = i === 0 ? ' highlight' : ''
+            return `<a href="/evento-detalhe?id=${e.id}" class="owner-ev-item${cls}">
+              <div class="owner-ev-date">
+                <span class="owner-ev-day">${parseInt(da)}</span>
+                <span class="owner-ev-mon">${MESES_PT[parseInt(mo)-1]}</span>
+              </div>
+              <div class="owner-ev-info">
+                <div class="owner-ev-name">${e.name}</div>
+                ${desc ? `<div class="owner-ev-desc">${desc}</div>` : ''}
+              </div>
+              ${hora ? `<span class="owner-ev-time">${hora}</span>` : ''}
+            </a>`
+          }).join('')
+
+          // Carrega escala do próximo evento
+          _renderOwnerEscala(futuros[0])
+        } else {
+          list.innerHTML = '<p style="font-size:13px;color:#AAAAAA;padding:8px 0">Nenhum evento agendado.</p>'
+        }
+
+        bottomRow.style.display = 'flex'
+      } catch (err) {
+        console.error('[ownerEventos]', err)
+      }
+    }
+
+    async function _renderOwnerEscala(evento) {
+      const titleEl   = document.getElementById('ownerEscalaTitle')
+      const editEl    = document.getElementById('ownerEscalaEdit')
+      const pctEl     = document.getElementById('ownerEscalaPct')
+      const barEl     = document.getElementById('ownerEscalaTotalBar')
+      const deptList  = document.getElementById('ownerEscalaDeptList')
+      if (!titleEl || !deptList) return
+
+      titleEl.textContent = evento.name
+
+      try {
+        const res = await authFetch(`/api/escala/${evento.id}`)
+        if (!res.ok) return
+        const { templateDepts } = await res.json()
+        if (!templateDepts?.length) return
+
+        // Calcula percentual por departamento (itens preenchidos / total de vagas)
+        const rows = templateDepts.map(d => {
+          const vagas = (d.funcoes || []).reduce((s, f) => s + (f.vagas || 1), 0)
+          const itens = (d.itens || []).length
+          const pct = vagas > 0 ? Math.round((itens / vagas) * 100) : 0
+          const cor = pct >= 70 ? '#d8ff6e' : pct >= 40 ? '#C4A882' : '#E85D6A'
+          return { name: d.department_name, pct, cor }
+        })
+
+        // % geral = média simples de todos os departamentos
+        const globalPct = rows.length > 0 ? Math.round(rows.reduce((s, r) => s + r.pct, 0) / rows.length) : 0
+        if (pctEl) pctEl.textContent = `${globalPct}%`
+        if (barEl) barEl.style.width = `${globalPct}%`
+
+        deptList.innerHTML = rows.map(r => `
+          <div class="owner-escala-dept-row">
+            <span class="owner-escala-dept-name" title="${r.name}">${r.name}</span>
+            <div class="owner-escala-dept-bar-wrap">
+              <div class="owner-escala-dept-bar" style="width:${r.pct}%;background:${r.cor}"></div>
+            </div>
+            <span class="owner-escala-dept-pct">${r.pct}%</span>
+          </div>`).join('')
+      } catch (err) {
+        console.error('[ownerEscala]', err)
+      }
+    }
+
+    async function carregarResumoEscalas() {
+      try {
+        const res = await authFetch('/api/dashboard/resumo-escalas')
+        if (!res.ok) return
+        const d = await res.json()
+
+        const total = d.confirmados + d.pendentes + d.recusas || 1
+        const pConf = Math.round((d.confirmados / total) * 100)
+        const pPend = Math.round((d.pendentes  / total) * 100)
+        const pRec  = 100 - pConf - pPend
+
+        document.getElementById('ownerResumoMes').textContent  = d.mes || '—'
+        document.getElementById('ownerResumoConf').textContent = d.confirmados
+        document.getElementById('ownerResumoPend').textContent = d.pendentes
+        document.getElementById('ownerResumoRec').textContent  = d.recusas
+        document.getElementById('ownerResumoTotal').textContent = `${d.total} voluntários`
+        document.getElementById('ownerSegGreen').style.width = `${pConf}%`
+        document.getElementById('ownerSegAmber').style.width = `${pPend}%`
+        document.getElementById('ownerSegRed').style.width   = `${Math.max(0, pRec)}%`
+        document.getElementById('ownerLegConf').textContent = `${pConf}% publicado`
+        document.getElementById('ownerLegPend').textContent = `${pPend}% em andamento`
+        document.getElementById('ownerLegRec').textContent  = `${Math.max(0,pRec)}% a fazer`
+
+        const vagasEl = document.getElementById('ownerResumoVagas')
+        if (vagasEl) vagasEl.textContent = `${d.vagasEmAberto} vaga${d.vagasEmAberto !== 1 ? 's' : ''} em aberto ⚠️`
+
+        document.getElementById('ownerResumoSection').style.display = 'flex'
+      } catch (err) {
+        console.error('[resumoEscalas]', err)
+      }
+    }
+
+    const ATV_AVATAR_COLORS = ['#8054FF','#b48aff','#6D4FCC','#9B6FE8','#7B3FBF']
+    function _atvInitials(name) {
+      if (!name) return '?'
+      const parts = name.trim().split(/\s+/)
+      return (parts[0][0] + (parts[1]?.[0] || '')).toUpperCase()
+    }
+    function _atvColor(name) {
+      if (!name) return ATV_AVATAR_COLORS[0]
+      let h = 0
+      for (let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) & 0xffff
+      return ATV_AVATAR_COLORS[h % ATV_AVATAR_COLORS.length]
+    }
+    function _atvRelTime(iso) {
+      const diff = Math.floor((Date.now() - new Date(iso)) / 1000)
+      if (diff < 60)   return 'agora mesmo'
+      if (diff < 3600) return `há ${Math.floor(diff/60)} min`
+      if (diff < 86400) return `há ${Math.floor(diff/3600)}h`
+      return `há ${Math.floor(diff/86400)}d`
+    }
+
+    const ATV_BADGE_MAP = {
+      published: { label: 'publicado',  color: '#8054FF' },
+      approved:  { label: 'aprovado',   color: '#d8ff6e' },
+      rejected:  { label: 'recusado',   color: '#E85D6A' },
+      created:   { label: 'criado',     color: '#d4a8ff' },
+      deleted:   { label: 'excluído',   color: '#CCCCCC' },
+      updated:   { label: 'atualizado', color: '#b48aff' },
+    }
+
+    async function carregarAtividades() {
+      try {
+        const res = await authFetch('/api/dashboard/atividades')
+        if (!res.ok) return
+        const { atividades } = await res.json()
+        const list = document.getElementById('ownerAtvList')
+        if (!list) return
+        if (!atividades.length) return
+        list.innerHTML = atividades.map(a => {
+          const actorName = a.actor?.nickname || a.actor?.full_name || null
+          const initials  = _atvInitials(actorName)
+          const bgColor   = _atvColor(actorName)
+          const bdg       = ATV_BADGE_MAP[a.action]
+          const badgeHtml = bdg
+            ? `<span class="owner-atv-badge" style="background:${bdg.color}20;color:${bdg.color === '#d8ff6e' ? '#5a7a00' : bdg.color}">${bdg.label}</span>`
+            : ''
+          const desc = a.description || `${actorName || '—'} ${a.action} ${a.entity}`
+          const escapedDesc = esc(desc)
+          const escapedName = actorName ? esc(actorName) : null
+          const displayDesc = escapedName && escapedDesc.startsWith(escapedName)
+            ? `<strong>${escapedName}</strong>${escapedDesc.slice(escapedName.length)}`
+            : escapedDesc
+          return `<div class="owner-atv-item">
+            <div class="owner-atv-avatar" style="background:${bgColor}">${initials}</div>
+            <div class="owner-atv-body">
+              <div class="owner-atv-text">${displayDesc}${badgeHtml}</div>
+              <div class="owner-atv-time">${_atvRelTime(a.created_at)}</div>
+            </div>
+          </div>`
+        }).join('')
+      } catch (err) {
+        console.error('[carregarAtividades]', err)
+      }
+    }
+
+    async function aplicarModoPerfil(perfil_slug) {
       if (perfil_slug === 'voluntario') {
-        document.getElementById('statsRow').style.display = 'none'
         document.getElementById('eventsSection').style.display = 'none'
         document.getElementById('heroBtnEventos').style.display = 'none'
         document.getElementById('heroDesc').textContent = 'Acompanhe seus eventos, confirme suas escalas e gerencie sua disponibilidade em um só lugar.'
         document.getElementById('volunteerEscalasSection').style.display = 'block'
-        carregarEscalasVoluntario()
+        await carregarEscalasVoluntario().catch(() => {})
       } else if (perfil_slug === 'lider_departamento') {
-        document.getElementById('statsRow').style.display = 'none'
         document.getElementById('eventsSection').style.display = 'none'
         document.getElementById('heroDesc').textContent = 'Acompanhe seu departamento, escalas e voluntários.'
         const heroBtnEl = document.getElementById('heroBtnEventos')
@@ -2112,14 +3236,18 @@
         heroBtnEl.textContent = 'Ver Escalação'
         document.getElementById('liderDeptSection').style.display = 'block'
         document.body.classList.add('lider-glass-mode')
-        carregarDashboardLiderDept()
+        await carregarDashboardLiderDept().catch(() => {})
       } else {
-        Promise.all([
-          carregarMinisterios(),
-          carregarDepartamentos(),
+        document.getElementById('eventsSection').style.display = 'none'
+        document.getElementById('rightCol').style.display = 'none'
+        const wrap = document.querySelector('.content-wrap')
+        if (wrap) wrap.style.gridTemplateColumns = '1fr'
+        await Promise.allSettled([
           carregarVoluntarios(),
-          carregarTemplates(),
-        ]).catch(() => {})
+          carregarOwnerEventos(),
+          carregarResumoEscalas(),
+          carregarAtividades()
+        ])
       }
     }
 
@@ -2155,7 +3283,7 @@
         const perfilEfetivo = localStorage.getItem('perfil_efetivo') ||
           (typeof window.calcularPerfilEfetivo === 'function' ? window.calcularPerfilEfetivo() : perfil_slug)
         localStorage.setItem('perfil_efetivo', perfilEfetivo)
-        aplicarModoPerfil(perfilEfetivo)
+        await aplicarModoPerfil(perfilEfetivo)
       } finally {
         window.hideLoader()
       }

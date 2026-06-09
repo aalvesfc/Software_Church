@@ -39,7 +39,7 @@ async function authMiddleware(req, res, next) {
   if (!req.churchId) {
     const { data: dbUser } = await supabaseAdmin
       .from('db_user')
-      .select('id, church_id, db_perfil:perfil_id(slug)')
+      .select('id, church_id, full_name, nickname, db_perfil:perfil_id(slug)')
       .eq('user_id', user.id)
       .limit(1)
       .maybeSingle()

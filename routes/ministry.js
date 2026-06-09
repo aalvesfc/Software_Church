@@ -4,6 +4,7 @@ const { supabaseAdmin } = require('../lib/supabase')
 const authMiddleware = require('../middleware/auth')
 const checkPermissao = require('../middleware/checkPermissao')
 const { dbError, serverError } = require('../lib/apiError') // SEC-006
+const { registrarLog } = require('../lib/logger')
 
 
 // GET /api/ministry/:id — busca ministério único
@@ -66,6 +67,7 @@ router.post('/', authMiddleware, checkPermissao('ministerio', 'criar'), async (r
     return dbError(res, error, 'ministry')
   }
 
+  registrarLog({ churchId, userId: req.dbUser?.id, action: 'created', entity: 'ministerio', entityId: data.id, description: `${req.dbUser?.full_name || 'Usuário'} criou ministério ${data.name}`, ipAddress: req.ip })
   res.status(201).json({ ministry: data })
 })
 
@@ -109,6 +111,8 @@ router.put('/:id', authMiddleware, checkPermissao('ministerio', 'editar'), async
     if (deptError) console.error('[ministry PUT — archive depts]', deptError)
   }
 
+  const action = data[0].is_active === false ? 'deleted' : 'updated'
+  registrarLog({ churchId, userId: req.dbUser?.id, action, entity: 'ministerio', entityId: req.params.id, description: `${req.dbUser?.full_name || 'Usuário'} ${action === 'deleted' ? 'arquivou' : 'atualizou'} ministério ${data[0].name}`, ipAddress: req.ip })
   res.json({ ministry: data[0] })
 })
 
@@ -136,6 +140,8 @@ router.delete('/:id', authMiddleware, checkPermissao('ministerio', 'arquivar'), 
     })
   }
 
+  const { data: target } = await supabaseAdmin.from('db_ministry').select('name').eq('id', req.params.id).eq('church_id', churchId).maybeSingle()
+
   const { error } = await supabaseAdmin
     .from('db_ministry')
     .delete()
@@ -147,6 +153,7 @@ router.delete('/:id', authMiddleware, checkPermissao('ministerio', 'arquivar'), 
     return dbError(res, error, 'ministry')
   }
 
+  registrarLog({ churchId, userId: req.dbUser?.id, action: 'deleted', entity: 'ministerio', entityId: req.params.id, description: `${req.dbUser?.full_name || 'Usuário'} excluiu ministério ${target?.name || req.params.id}`, ipAddress: req.ip })
   res.json({ ok: true })
 })
 

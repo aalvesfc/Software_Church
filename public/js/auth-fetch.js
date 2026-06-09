@@ -44,6 +44,9 @@ async function authFetch(url, options = {}) {
 
   // ── 401 → tenta renovar token e repete a requisição ──────────────────────
   if (res.status === 401) {
+    // Captura o token usado na tentativa original para detectar renovação concorrente
+    const tokenUsado = localStorage.getItem('access_token')
+
     if (!_refreshing) {
       _refreshing = (async () => {
         const refreshToken = localStorage.getItem('refresh_token')
@@ -58,6 +61,9 @@ async function authFetch(url, options = {}) {
           body:    JSON.stringify({ refresh_token: refreshToken }),
         })
         if (!refreshRes.ok) {
+          // checkAuth() pode ter renovado o token em paralelo — só limpa se não mudou
+          const tokenAtual = localStorage.getItem('access_token')
+          if (tokenAtual && tokenAtual !== tokenUsado) return true
           localStorage.clear()
           window.location.href = '/'
           return false

@@ -4,6 +4,7 @@ const { supabaseAdmin } = require('../lib/supabase')
 const authMiddleware = require('../middleware/auth')
 const checkPermissao = require('../middleware/checkPermissao')
 const { dbError, serverError } = require('../lib/apiError') // SEC-006
+const { registrarLog } = require('../lib/logger')
 
 function generateRecurDates(startDate, recurrenceType, recurrenceConfig) {
   const count = parseInt(recurrenceConfig?.count) || 0
@@ -179,6 +180,7 @@ router.post('/', authMiddleware, checkPermissao('evento', 'criar'), async (req, 
 
   if (error) { console.error('[evento POST]', error); return dbError(res, error, 'evento') }
   console.log('[evento POST] criado id=%s name=%s template_id=%s start_date=%s', data?.id, data?.name, data?.template_id, data?.start_date)
+  if (!parent_event_id) registrarLog({ churchId, userId: req.dbUser?.id, action: 'created', entity: 'evento', entityId: data?.id, description: `${req.dbUser?.full_name || 'Usuário'} criou o evento ${data?.name || ''}`.trim(), ipAddress: req.ip })
 
   // Cria eventos filhos para recorrência
   if (!parent_event_id && recurrence_type) {
@@ -263,6 +265,7 @@ router.put('/:id', authMiddleware, checkPermissao('evento', 'editar'), async (re
 
   if (error) { console.error('[evento PUT]', error); return dbError(res, error, 'evento') }
   if (!data?.length) return res.status(404).json({ error: 'Evento não encontrado' })
+  registrarLog({ churchId, userId: req.dbUser?.id, action: 'updated', entity: 'evento', entityId: req.params.id, description: `${req.dbUser?.full_name || 'Usuário'} atualizou o evento ${data[0].name}`, ipAddress: req.ip })
   res.json({ evento: data[0] })
 })
 
@@ -271,6 +274,8 @@ router.delete('/:id', authMiddleware, checkPermissao('evento', 'cancelar'), asyn
   const churchId = req.churchId
   if (!churchId) return res.status(404).json({ error: 'Igreja não encontrada' })
 
+  const { data: target } = await supabaseAdmin.from('db_event').select('name').eq('id', req.params.id).eq('church_id', churchId).maybeSingle()
+
   const { error } = await supabaseAdmin
     .from('db_event')
     .delete()
@@ -278,6 +283,7 @@ router.delete('/:id', authMiddleware, checkPermissao('evento', 'cancelar'), asyn
     .eq('church_id', churchId)
 
   if (error) { console.error('[evento DELETE]', error); return dbError(res, error, 'evento') }
+  registrarLog({ churchId, userId: req.dbUser?.id, action: 'deleted', entity: 'evento', entityId: req.params.id, description: `${req.dbUser?.full_name || 'Usuário'} excluiu o evento ${target?.name || req.params.id}`, ipAddress: req.ip })
   res.json({ ok: true })
 })
 

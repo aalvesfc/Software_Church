@@ -23,7 +23,7 @@
       --ink-muted:     #6e6e73;
       --ink-subtle:    #aeaeb2;
       --canvas:        #ffffff;
-      --canvas-page:   #ECE9E7;
+      --canvas-page: #EEEEEE;
       --canvas-input:  #f2f2f7;
       --hairline:      #e0e0e0;
       --radius-sm:     8px;
@@ -44,8 +44,9 @@
     body { min-height: 100vh; background: var(--canvas-page); display: flex; -webkit-font-smoothing: antialiased; }
 
     /* ── SIDEBAR ── */
-    .sys-sidebar { width: 220px; flex-shrink: 0; background: #1c1c1c; display: flex; flex-direction: column; position: fixed; top: 0; left: 0; bottom: 0; z-index: 100; }
-    .sys-sidebar-brand { display: flex; align-items: center; gap: 10px; padding: 22px 18px 18px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+    .sys-sidebar { width: 220px; flex-shrink: 0; background: #ffffff;
+      border-right: 1px solid #EEEEEE; display: flex; flex-direction: column; position: fixed; top: 0; left: 0; bottom: 0; z-index: 100; }
+    .sys-sidebar-brand { display: flex; align-items: center; gap: 10px; padding: 22px 18px 18px; border-bottom: 1px solid #EEEEEE; }
     .sys-brand-logo { width: 32px; height: 32px; border-radius: 8px; background: var(--primary); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
     .sys-brand-logo svg { width: 16px; height: 16px; color: #fff; }
     .sys-brand-name { font-size: 13px; font-weight: 700; color: #fff; letter-spacing: -0.2px; }
@@ -72,7 +73,7 @@
 
     /* ── MAIN ── */
     .sys-main { margin-left: 220px; flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
-    .topbar { position: sticky; top: 0; z-index: 50; background: rgba(236,233,231,0.85); backdrop-filter: blur(12px); border-bottom: 1px solid var(--hairline); display: flex; align-items: center; justify-content: space-between; padding: 0 32px; height: 64px; }
+    .topbar { position: sticky; top: 0; z-index: 50; background: #EEEEEE; backdrop-filter: blur(12px); border-bottom: 1px solid var(--hairline); display: flex; align-items: center; justify-content: space-between; padding: 0 32px; height: 64px; }
     .topbar-title { font-size: 16px; font-weight: 700; color: var(--ink); letter-spacing: -0.3px; }
     .topbar-user  { font-size: 13px; color: var(--ink-muted); }
     .page { max-width: 1100px; margin: 0 auto; padding: 36px 32px 64px; width: 100%; }
